@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Kyc Approval List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        .loading, .error {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 20px;
+        }
+        .error {
+            color: #d9534f;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            max-width: 800px;
+            height: 70%;
+            max-height: 600px;
+            overflow: hidden;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>User KYC Approval List</h1>
+
+    {% comment %} <div id="message" class="loading">Loading user data, please wait...</div> {% endcomment %}
+
+    <!-- Table to display user data -->
+    <table id="userTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>KYC Status</th>
+                <th>KYC Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- User data will be injected here by JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Modal for viewing the KYC image -->
+    <div id="kycModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="userName"></span> | <span id="userEmail"></span> | <span id="kycStatus"></span>
+            </div>
+            <span class="close-btn">&times;</span>
+            <img id="kycImage" class="modal-image" src="" alt="KYC Image">
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Function to refresh the table by fetching data via AJAX
+            function refreshTable() {
+                $('#userTable tbody').empty(); // Clear existing table rows
+        
+                $.ajax({
+                    url: '{% url "user-kycwaitinglist" %}',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.length > 0) {
+                            $('#userTable').show();
+                            response.forEach(user => {
+                                let kycImageHTML = '';
+                                if (user.kyc_image_url) {
+                                    kycImageHTML = `<a href="#" class="view-kyc-image" data-image-url="${user.kyc_image_url}" data-username="${user.user.username}" data-email="${user.user.email}" data-kycstatus="${user.kyc_status}">View KYC</a>`;
+                                } else {
+                                    kycImageHTML = 'KYC not submitted';
+                                }
+        
+                                const kycOptions = `
+                                    <select class="kyc-status-select" data-user-id="${user.user.id}">
+                                        <option value="waiting" ${user.kyc_status === 'waiting' ? 'selected' : ''}>Waiting</option>
+                                        <option value="verified" ${user.kyc_status === 'verified' ? 'selected' : ''}>Verified</option>
+                                        <option value="rejected" ${user.kyc_status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                    </select>
+                                `;
+        
+                                $('#userTable tbody').append(`
+                                    <tr>
+                                        <td>${user.user.id}</td>
+                                        <td>${user.user.username}</td>
+                                        <td>${user.user.email}</td>
+                                        <td>${kycOptions}</td>
+                                        <td>${kycImageHTML}</td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            $('#message').text('No users found.').show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#message').addClass('error').text("Error fetching user data: " + error).show();
+                    }
+                });
+            }
+        
+            // Initial data load
+            refreshTable();
+        
+            // Change KYC status via AJAX on blur event (focus out)
+            $(document).on('blur', '.kyc-status-select', function() {
+                const userId = $(this).data('user-id');
+                const newStatus = $(this).val();
+        
+                $.ajax({
+                    url: '{% url "user-kyc-status-update" %}',
+                    type: 'POST',
+                    data: JSON.stringify({ user_id: userId, kyc_status: newStatus }),
+                    contentType: 'application/json',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        alert(`KYC status updated to ${newStatus}`);
+                        refreshTable(); // Refresh table data after status update
+                    },
+                    error: function(xhr, status, error) {
+                        alert(`Failed to update KYC status: ${error}`);
+                    }
+                });
+            });
+        
+            // Modal behavior for viewing the KYC image
+            $(document).on('click', '.view-kyc-image', function(event) {
+                event.preventDefault();
+                var imageUrl = $(this).data('image-url');
+                var userName = $(this).data('username');
+                var userEmail = $(this).data('email');
+                var kycStatus = $(this).data('kycstatus');
+        
+                $('#userName').text(userName);
+                $('#userEmail').text(userEmail);
+                $('#kycStatus').text(kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1));
+                $('#kycImage').attr('src', imageUrl);
+        
+                $('#kycModal').show();
+            });
+        
+            $('.close-btn').on('click', function() {
+                $('#kycModal').hide();
+            });
+        
+            $(window).on('click', function(event) {
+                if ($(event.target).is('#kycModal')) {
+                    $('#kycModal').hide();
+                }
+            });
+        });
+        
+    </script>
+</body>
+</html>
+
