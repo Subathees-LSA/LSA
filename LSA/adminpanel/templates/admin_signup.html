@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Signup</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Styling */
+        .admin_signup_container { max-width: 400px; margin: 0 auto; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-radius: 8px; background-color: #f9f9f9; }
+        .admin_signup_title { text-align: center; }
+        .admin_signup_form { display: flex; flex-direction: column; }
+        .admin_signup_username_input[type="text"], .admin_signup_email_id_input[type="email"], .admin_signup_password_input[type="password"], .admin_signup_submit_button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .admin_signup_submit_button { background-color: #4CAF50; color: white; font-weight: bold; }
+        .admin_signup_submit_button:hover { background-color: #45a049; }
+        .admin_signup_toggle_password { position: absolute; right: 10px; top: 17px; cursor: pointer; font-size: 1em; }
+        .admin_signup_input_container { position: relative; display: flex; align-items: center; }
+        .admin_signup_error { color: red; font-size: 0.9em; }
+        .admin_signup_valid { color: green; font-size: 0.9em; }
+        .admin_signup_error_message { color: red; font-size: 0.9em; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="admin_signup_container">
+    <h2 class="admin_signup_title">Admin Signup</h2>
+    <form id="admin_signup_form" class="admin_signup_form">
+        <input type="text" id="admin_signup_username_id" class="admin_signup_username_input" placeholder="Admin Username" required><br>
+        <span id="admin_signup_username_error" class="admin_signup_error"></span><br>
+        <input type="email" id="admin_signup_email_id" class="admin_signup_email_id_input" placeholder="Admin Email" required><br>
+        <span id="admin_signup_email_error" class="admin_signup_error"></span><br>
+        <div class="admin_signup_input_container">
+            <input type="password" id="admin_signup_password_id" class="admin_signup_password_input" placeholder="Password (min 8 characters)" required>
+            <span id="admin_signup_toggle_password" class="admin_signup_toggle_password">🙈</span>
+        </div>
+        <span id="admin_signup_password_error" class="admin_signup_error"></span><br>
+        <button type="submit" class="admin_signup_submit_button">Register Admin</button>
+        <p>Already have an account? <a href="{% url 'custom_admin_login' %}">Login here</a></p>
+        <div id="admin_signup_form_error_message" class="admin_signup_error_message"></div>
+    </form>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+$.ajaxSetup({
+    headers: { 'X-CSRFToken': csrftoken }
+});
+
+$('#admin_signup_username_id').on('blur', function() {
+    const admin_username = $(this).val();
+    if (!validateUsername(admin_username)) return;
+
+    $.ajax({
+        type: 'POST',
+        url: '{% url "api_admin_signup" %}',
+        data: JSON.stringify({ 'admin_username': admin_username }),
+        contentType: 'application/json',
+        success: function(response) {
+            $('#admin_signup_username_error').text('');
+        },
+        error: function(response) {
+            const error = response.responseJSON.admin_username;
+            $('#admin_signup_username_error').text(error ? error[0] : '');
+        }
+    });
+});
+
+$('#admin_signup_email_id').on('blur', function() {
+    const admin_email = $(this).val();
+    if (!validateEmail(admin_email)) return;
+
+    $.ajax({
+        type: 'POST',
+        url: '{% url "api_admin_signup" %}',
+        data: JSON.stringify({ 'admin_email': admin_email }),
+        contentType: 'application/json',
+        success: function(response) {
+            $('#admin_signup_email_error').text('');
+        },
+        error: function(response) {
+            const error = response.responseJSON.admin_email;
+            $('#admin_signup_email_error').text(error ? error[0] : '');
+        }
+    });
+});
+
+function validateUsername(username) {
+    if (username.length < 4) {
+        $('#admin_signup_username_error').text('Username must be at least 4 characters.');
+        return false;
+    }
+    $('#admin_signup_username_error').text('');
+    return true;
+}
+
+function validateEmail(email) {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailPattern.test(email)) {
+        $('#admin_signup_email_error').text('Please enter a valid email address.');
+        return false;
+    }
+    $('#admin_signup_email_error').text('');
+    return true;
+}
+
+function validatePassword(password) {
+    const specialCharacterPattern = /[!@#$%^&*(),.?":{}|<>]/;
+    const numberPattern = /\d/g;
+    const letterPattern = /[A-Za-z]/;
+    const digitCount = (password.match(numberPattern) || []).length;
+
+    if (password.length < 8) {
+        $('#admin_signup_password_error').text('Your password must contain at least 8 characters.');
+        return false;
+    } else if (!letterPattern.test(password)) {
+        $('#admin_signup_password_error').text('Your password must contain at least one letter.');
+        return false;
+    } else if (!specialCharacterPattern.test(password)) {
+        $('#admin_signup_password_error').text('Your password must contain at least one special character.');
+        return false;
+    } else if (digitCount < 4) {
+        $('#admin_signup_password_error').text('Your password must contain at least four numbers.');
+        return false;
+    }
+    $('#admin_signup_password_error').text('Valid password').removeClass('admin_signup_error').addClass('admin_signup_valid');
+    return true;
+}
+
+$('#admin_signup_username_id').on('input', function() {
+    validateUsername($(this).val());
+});
+
+$('#admin_signup_email_id').on('input', function() {
+    validateEmail($(this).val());
+});
+
+$('#admin_signup_password_id').on('input', function() {
+    validatePassword($(this).val());
+});
+
+$('#admin_signup_toggle_password').on('click', function() {
+    const passwordField = $('#admin_signup_password_id');
+    const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+    passwordField.attr('type', type);
+    $(this).text(type === 'password' ? '🙈' : '👁️');
+});
+
+$('#admin_signup_form').submit(function(e) {
+    e.preventDefault();
+    const username = $('#admin_signup_username_id').val();
+    const email = $('#admin_signup_email_id').val();
+    const password = $('#admin_signup_password_id').val();
+
+    if (validateUsername(username) && validateEmail(email) && validatePassword(password)) {
+        $.ajax({
+            type: 'POST',
+            url: '{% url "api_admin_signup" %}',
+            data: JSON.stringify({ admin_username: username, admin_email: email, admin_password: password }),
+            contentType: 'application/json',
+            success: function(response) {
+                //alert(response.message + ' (Admin ID: ' + response.admin_id + ')');
+                window.location.href = '{% url "custom_admin_login" %}';
+            },
+            error: function(response) {
+                $('#admin_signup_username_error').text('');
+                $('#admin_signup_email_error').text('');
+                $('#admin_signup_password_error').text('');
+                
+                const errors = response.responseJSON;
+                if (errors.admin_username) {
+                    $('#admin_signup_username_error').text(errors.admin_username[0]);
+                }
+                if (errors.admin_email) {
+                    $('#admin_signup_email_error').text(errors.admin_email[0]);
+                }
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>
