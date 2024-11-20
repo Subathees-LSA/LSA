@@ -97,10 +97,17 @@ class api_admin_login(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class api_get_lottery_events(APIView):
-    permission_classes = [IsAdminUser]
+    
 
     def get(self, request):
         try:
+            user_agent = request.headers.get('User-Agent', '')
+            if not user_agent or 'Mozilla' not in user_agent:
+                return Response(
+                    {"detail": "Access denied. This endpoint is restricted to browsers only."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+                
             # Fetch all lottery events from the database
             lottery_events = LotteryEvent.objects.all()
             

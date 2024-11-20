@@ -1,4 +1,4 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,60 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Admin Login</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        /* Container styling */
-        .custom_admin_login_container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        .custom_admin_login_title {
-            text-align: center;
-        }
-        .custom_admin_login_form {
-            display: flex;
-            flex-direction: column;
-        }
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script>
+        const api_admin_login_url = "{% url 'api_admin_login' %}";
+        const custom_admin_dashboard_url = "{% url 'custom_admin_dashboard' %}";
+    </script>
 
-        .custom_admin_login_email[type="email"],
-        .custom_admin_login_password[type="password"],
-        .custom_admin_login_button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .custom_admin_login_button {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-        .custom_admin_login_button:hover {
-            background-color: #45a049;
-        }
-        /* Toggle button styling */
-        .custom_admin_login_show_password {
-            position: absolute;
-            right: 10px;
-            top: 13px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        .custom_admin_login_input_container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-    </style>
 </head>
 <body>
     <div class="custom_admin_login_container">
         <h2 class="custom_admin_login_title">Admin Login</h2>
-        <form id="custom_admin_login_form" class="custom_admin_login_form">
+        <form id="custom_admin_login_form" class="custom_admin_login_form_class">
             <input type="email" id="custom_admin_login_email_id" class="custom_admin_login_email" name="admin_email" required placeholder="Email">
             <span id="custom_admin_login_email_error" style="color: red;"></span><br>
 
@@ -77,115 +35,6 @@
         </form>
     </div>
 
-    <script>
-        // Function to get CSRF token from cookie
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        const csrftoken = getCookie('csrftoken');
-
-        // Set up AJAX with CSRF token
-        $.ajaxSetup({
-            headers: {
-                'X-CSRFToken': csrftoken
-            }
-        });
-
-        // Email validation function
-        function validateEmail() {
-            const email = $('#custom_admin_login_email_id').val();
-            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-            if (!emailPattern.test(email)) {
-                $('#custom_admin_login_email_error').text('Please enter a valid email address.');
-                return false;
-            }
-            $('#custom_admin_login_email_error').text('');
-            return true;
-        }
-
-        // Password validation function
-        function validatePassword() {
-            const password_value = $('#custom_admin_login_password_id').val();
-            const specialCharacterPattern = /[!@#$%^&*(),.?":{}|<>]/;
-            const numberPattern = /\d/g;
-            const letterPattern = /[A-Za-z]/;
-            const digitCount = (password_value.match(numberPattern) || []).length;
-
-            let errorMessage = "";
-
-            if (password_value.length < 8) {
-                errorMessage = "Your password must contain at least 8 characters.";
-            } else if (!letterPattern.test(password_value)) {
-                errorMessage = "Your password must contain at least one letter.";
-            } else if (!specialCharacterPattern.test(password_value)) {
-                errorMessage = "Your password must contain at least one special character.";
-            } else if (digitCount < 4) {
-                errorMessage = "Your password must contain at least four numbers.";
-            }
-
-            if (errorMessage) {
-                $('#custom_admin_login_password_error').text(errorMessage).addClass('error').removeClass('valid');
-                return false;
-            } else {
-                $('#custom_admin_login_password_error').text("Valid password").addClass('valid').removeClass('error');
-                return true;
-            }
-        }
-
-        // Toggle password visibility
-        $('#custom_admin_login_toggle_password').on('click', function() {
-            const passwordField = $('#custom_admin_login_password_id');
-            const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-            passwordField.attr('type', type);
-            $(this).text(type === 'password' ? '🙈' : '👁️');
-        });
-
-        $(document).ready(function() {
-            $('#custom_admin_login_email_id').on('input', validateEmail);
-            $('#custom_admin_login_password_id').on('input', validatePassword);
-
-            // Form submission with AJAX
-            $('#custom_admin_login_form').submit(function(e) {
-                e.preventDefault();
-                if (validateEmail() && validatePassword()) {
-                    const admin_email = $('#custom_admin_login_email_id').val();
-                    const admin_password = $('#custom_admin_login_password_id').val();
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '{% url "api_admin_login" %}',
-                        data: JSON.stringify({ admin_email, admin_password }),
-                        contentType: 'application/json',
-                        success: function(response) {
-                            if (response.success) {
-                                $('#custom_admin_login_errorMessage').text('');
-                                //alert('Login successful');
-                                window.location.href = '{% url "custom_admin_dashboard" %}';
-                            } else {
-                                $('#custom_admin_login_errorMessage').text(response.message);
-                            }
-                        },
-                        error: function(xhr) {
-                            const response = xhr.responseJSON;
-                            $('#custom_admin_login_errorMessage').text(response && response.message ? response.message : 'Incorrect email or password.');
-                        }
-                    });
-                }
-            });
-        });
-    </script>
+   
 </body>
 </html>

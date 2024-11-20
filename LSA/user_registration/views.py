@@ -31,8 +31,7 @@ class RegisterView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         try:
-            print("Request Headers:", request.headers)
-            print("Request Data:", request.data)
+            
             
             # Check if the request comes from a browser
             user_agent = request.headers.get('User-Agent', '')
