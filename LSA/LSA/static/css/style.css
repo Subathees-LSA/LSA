@@ -52,6 +52,7 @@
     align-items: center;
 }
 
+
 /* static/css/styles.css */
 body.user_welcome_page_body {
     font-family: Arial, sans-serif;
@@ -168,6 +169,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     transform: scale(1.05);
 }
 
+
 .user_list_body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -256,6 +258,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     max-height: 100%;
     object-fit: contain;
 }
+
 
 #user_kyc_waiting_list-body {
     font-family: Arial, sans-serif;
@@ -348,6 +351,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     max-height: 100%;
     object-fit: contain;
 }
+
 
 /* Signup container styling */
 .signup-container {
@@ -455,6 +459,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 .admin_signup_valid { color: green; font-size: 0.9em; }
 .admin_signup_error_message { color: red; font-size: 0.9em; text-align: center; margin-top: 10px; }
 
+
 /* custom_admin_login.html styling */
 .custom_admin_login_container {
     max-width: 400px;
@@ -503,11 +508,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     align-items: center;
 }
 
-
-
 /* lottery_events_add.html Styling */
-
-
 /* Grid and Card Styling */
 .lottery-events-grid {
     display: grid;
@@ -582,13 +583,6 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     margin-bottom: 5px;
     text-align: left;
 }
-
-
-
-
-
-
-
 
 
 /* lottery_events.html  Styling */
@@ -676,8 +670,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 }
 
 
-
-/* Container styling */
+/* Reset Form Styling */
 .password-reset-container {
     max-width: 400px;
     margin: 0 auto;
@@ -688,19 +681,22 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     font-family: Arial, sans-serif;
 }
 
+
 .password-reset-heading {
     text-align: center;
     color: #333;
 }
 
-.password-reset-label {
+
+.reset-label {
     display: block;
     margin-top: 10px;
     font-size: 14px;
     color: #555;
 }
 
-.password-reset-input {
+
+.reset-input {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
@@ -709,7 +705,8 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     box-sizing: border-box;
 }
 
-.password-reset-button {
+
+.reset-button {
     width: 100%;
     padding: 10px;
     margin-top: 15px;
@@ -721,17 +718,63 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     cursor: pointer;
 }
 
-.password-reset-button:hover {
+
+.reset-button:hover {
     background-color: #45a049;
 }
 
-.password-reset-message {
+
+.reset-message {
     margin-top: 15px;
     text-align: center;
     font-size: 14px;
 }
 
+
+/* Email Sent Message Styling */
+.email-sent-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+
+.email-sent-heading {
+    color: #333;
+}
+
+
+.email-sent-message {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+
+.email-sent-button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
+.email-sent-button:hover {
+    background-color: #45a049;
+}
+
+
 /*      password confirm         */
+
 
 .confirm-container {
     max-width: 400px;

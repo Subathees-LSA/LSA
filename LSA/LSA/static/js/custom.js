@@ -23,37 +23,28 @@ $.ajaxSetup({
     }
 });
 //login.html
-$(document).ready(function () {
-    // Email validation
-    $('#login-email').on('input', function () {
-        const email = $(this).val();
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
-            $('#login-email-error').text('Please enter a valid email address.');
-        } else {
-            $('#login-email-error').text('');
-        }
-    });
+$('#login-email').on('input', function () {
+    const email = $(this).val();
+    validateEmail(email,'login-email-error')
+});
 
-    // Password validation
-    $('#login-password').on('input', function () {
-        const password = $(this).val();
-        const passwordPattern = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
-        if (!passwordPattern.test(password)) {
-            $('#login-password-error').text('Password must be at least 8 characters, contain a number, and a special character.');
-        } else {
-            $('#login-password-error').text('');
-        }
-    });
 
-    // Toggle password visibility
-    $('#login-toggle-password').on('click', function () {
-        const passwordField = $('#login-password');
+// Password validation
+$('#login-password').on('input', function () {
+    const password = $(this).val();
+    validatePassword(password,'login-password-error');
+});
+
+
+function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
+    $(toggleButtonId).on('click', function () {
+        const passwordField = $(passwordFieldId);
         const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
         passwordField.attr('type', type);
-        // Toggle icon text
         $(this).text(type === 'password' ? '🙈' : '👁️');
     });
+}
+togglePasswordVisibility('#login-toggle-password', '#login-password');
 
     // Form submission
     $('#login-form').submit(function (e) {
@@ -82,232 +73,188 @@ $(document).ready(function () {
             }
         });
     });
+
+
+// Setup CSRF token
+$.ajaxSetup({
+    headers: { 'X-CSRFToken': csrftoken }
 });
 
 //signup.html
-$.ajaxSetup({ headers: { 'X-CSRFToken': csrftoken } });
-
 // Toggle password visibility
-$('#signup-toggle-password').on('click', function() {
-    const passwordField = $('#signup-password');
-    const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-    passwordField.attr('type', type);
-    $(this).text(type === 'password' ? '🙈' : '👁️');
-});
-
-// Username validation
-$('#signup-username').on('input', function() {
-const username = $(this).val();
-const usernamePattern = /^[a-zA-Z0-9@.+-_]{1,20}$/;
-const noSpacesPattern = /^\S+$/; // Pattern to disallow spaces
-
-if (!usernamePattern.test(username)) {
-$('#signup-username-error')
-    .text("Username must be 20 characters or fewer and contain only letters, digits, @/./+/-/_")
-    .addClass('signup-error')
-    .removeClass('signup-valid');
-} else if (!noSpacesPattern.test(username)) {
-$('#signup-username-error')
-    .text("Username must not contain spaces")
-    .addClass('signup-error')
-    .removeClass('signup-valid');
-} else {
-$('#signup-username-error')
-    .text("") // Clear the error message
-    .removeClass('signup-error')
-    .addClass('signup-valid');
-}
-});
+togglePasswordVisibility('#signup-toggle-password', '#signup-password');
 
 
-// AJAX call for username availability
-$('#signup-username').on('focusout', function() {
-    const username = $(this).val();
+// Username validation and availability check
+$('#signup-username').on('input', function () {
+    const username = $(this).val().trim();
+    const errorElement = $('#signup-username-error');
+    const suggestionElement = $('#signup-username-suggestion');
+
+
+    if (!validateUsername(username)) {
+        errorElement.text("Invalid username. Only letters, digits, @/./+/-/_ are allowed (max 20 characters).")
+            .addClass('signup-error')
+            .removeClass('signup-valid');
+        suggestionElement.hide();
+        return;
+    }
+
+
+    // Check username availability
     $.ajax({
         type: 'GET',
-        url:checkusernameUrl ,
-        data: { username: username },
-        success: function(response) {
+        url: checkusernameUrl,
+        data: { username },
+        success: function (response) {
             if (response.exists) {
-                $('#signup-username-error')
-                    .text("Username already exists")
+                errorElement.text("Username already exists.")
                     .addClass('signup-error')
                     .removeClass('signup-valid');
                 if (response.suggestion) {
-                    $('#signup-username-suggestion')
-                        .text("Suggested username: " + response.suggestion)
-                        .addClass('signup-suggestion')
-                        .show();
+                    suggestionElement.text("Suggested username: " + response.suggestion).show();
                 }
             } else {
-                $('#signup-username-error')
-                    .text("Username available.")
+                errorElement.text("Username available.")
                     .addClass('signup-valid')
                     .removeClass('signup-error');
-                $('#signup-username-suggestion').hide();
+                suggestionElement.hide();
             }
         },
-        error: function() {
-            $('#signup-username-error')
-                .text("Please enter a valid username.")
+        error: function () {
+            errorElement.text("Error checking username availability. Please try again.")
                 .addClass('signup-error')
                 .removeClass('signup-valid');
-            $('#signup-username-suggestion').hide();
         }
     });
 });
 
+let isEmailValid = false; // Track email validity
+// Email validation and availability check
+$('#signup-email').on('input', function () {
+    const email = $(this).val().trim();
+    const errorElement = $('#signup-email-error');
 
-$('#signup-email').on('focusout', function() {
-    const email = $(this).val().trim(); // Trim whitespace
-    const emailError = $('#signup-email-error'); // Reference error display element
 
-    // Validate if the email field is empty
-    if (email === '') {
-        emailError
-            .text("Email field cannot be empty.")
+    if (!validateEmail(email)) {
+        errorElement.text("Invalid email address.")
             .addClass('signup-error')
             .removeClass('signup-valid');
-        return; // Stop further execution
+        return;
     }
 
-    // Validate if the email is a valid Gmail address
-    if (!email.endsWith('@gmail.com') || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        emailError
-            .text("Enter a valid Gmail (e.g., example@gmail.com).")
-            .addClass('signup-error')
-            .removeClass('signup-valid');
-        return; // Stop further execution
-    }
 
-    // Proceed to AJAX validation if input passes initial checks
     $.ajax({
         type: 'GET',
-        url: checkemailUrl, // Replace with your actual URL
-        data: { email: email },
-        success: function(response) {
+        url: checkemailUrl,
+        data: { email },
+        success: function (response) {
             if (response.exists) {
-                emailError
-                    .text("Email already exists, choose another one.")
+                errorElement
+                    .text("Email already exists. Choose another one.")
                     .addClass('signup-error')
                     .removeClass('signup-valid');
+                isEmailValid = false; // Mark email as invalid
             } else {
-                emailError
+                errorElement
                     .text("Email available.")
                     .addClass('signup-valid')
                     .removeClass('signup-error');
+                isEmailValid = true; // Mark email as valid
             }
         },
-        error: function() {
-            emailError
-                .text("Error checking email, please try again.")
+        error: function () {
+            errorElement
+                .text("Error checking email. Please try again.")
                 .addClass('signup-error')
                 .removeClass('signup-valid');
+            isEmailValid = false; // Treat as invalid on error
         }
     });
 });
 
 
-// Password validation function
-function signupvalidatePassword(password) {
-const specialCharacterPattern = /[!@#$%^&*(),.?":{}|<>]/;
-const numberPattern = /\d/g;
-const letterPattern = /[A-Za-z]/;
-const digitCount = (password.match(numberPattern) || []).length;
+// Password validation
+$('#signup-password').on('input', function () {
+    const password = $(this).val();
+    const errorElement = $('#signup-password-error');
 
-let errorMessage = "";
 
-if (password.length < 8) {
-errorMessage = "Your password must contain at least 8 characters.";
-} else if (!letterPattern.test(password)) {
-errorMessage = "Your password must contain at least one letter.";
-} else if (!specialCharacterPattern.test(password)) {
-errorMessage = "Your password must contain at least one special character.";
-} else if (digitCount < 4) {
-errorMessage = "Your password must contain at least four numbers.";
-}
+    if (!validatePassword(password)) {
+        errorElement.text("Password must be at least 8 characters, include letters, numbers, and a special character.")
+            .addClass('signup-error')
+            .removeClass('signup-valid');
+    } else {
+        errorElement.text("Valid password.")
+            .addClass('signup-valid')
+            .removeClass('signup-error');
+    }
+});
 
-return errorMessage;
-}
 
-// Handling password input
-$('#signup-password').on('input', function() {
-const password = $(this).val();
-const errorMessage = signupvalidatePassword(password);
-
-if (errorMessage) {
-$('#signup-password-error')
-    .text(errorMessage)
-    .addClass('signup-error')
-    .removeClass('signup-valid');
-} else {
-$('#signup-password-error')
-    .text("Valid password")
-    .addClass('signup-valid')
-    .removeClass('signup-error');
-}
+// Clear error message when correcting input
+$('#signup-username, #signup-email, #signup-password').on('input', function() {
+    $('#signup-form-error-message').text('').removeClass('signup-error'); 
 });
 
 
 // Form submission
-$('#signup').on('submit', function(e) {
+$('#signup').on('submit', function (e) {
     e.preventDefault();
-    const username = $('#signup-username').val();
-const usernamePattern = /^[a-zA-Z0-9@.+-_]{1,20}$/;
-const noSpacesPattern = /^\S+$/; // Pattern to disallow spaces
 
-// Basic validation check for spaces in username before submitting
-if (!usernamePattern.test(username) || !noSpacesPattern.test(username)) {
-e.preventDefault(); // Prevent form submission
-$('#signup-username-error')
-    .text("Username must be 20 characters or fewer and contain only letters, digits, @/./+/-/_ and no spaces.")
-    .addClass('signup-error')
-    .removeClass('signup-valid');
-return false;
+
+    // Validate before submitting the form
+    const username = $('#signup-username').val().trim();
+    const email = $('#signup-email').val().trim();
+    const password = $('#signup-password').val();
+   // Check if any field is invalid
+   if (!validateUsername(username) || !validateEmail(email) || !validatePassword(password)) {
+    $('#signup-form-error-message')
+        .text('Please fix the errors before submitting.')
+        .addClass('signup-error')
+        .removeClass('signup-valid');
+    return; // Prevent form submission if validation fails
 }
-
-    // Basic final validation
-    if ($('.signup-error').length > 0) {
-        $('#signup-form-error-message').text("Please fix the errors before submitting.");
-        return;
+if (!isEmailValid) {
+        $('#signup-form-error-message')
+            .text("Please fix the email validation errors before submitting.")
+            .addClass('signup-error');
+        return; // Stop form submission if email is invalid
     }
 
-    $('#signup-form-error-message').text("");
 
-    const formData = {
-        username: $('#signup-username').val(),
-        email: $('#signup-email').val(),
-        password: $('#signup-password').val(),
-        profile: {
-            newsletter: $('#signup-newsletter').is(':checked')
-        }
-    };
+const formData = {
+    username,
+    email,
+    password,
+    profile: {
+        newsletter: $('#signup-newsletter').is(':checked')
+    }
+};
 
-    $.ajax({
-        type: "POST",
-        url: registerUrl,
-        data: JSON.stringify(formData),
-        contentType: "application/json",
-        success: function(response) {
-            alert(response.message + " Your user ID is " + response.user_id);
-            
-            window.location.href = userloginUrl;
-        },
-        error: function(response) {
-            if (response.responseJSON) {
-                alert('Error: ' + response.responseJSON.detail);
-            } else {
-                alert('An error occurred. Please try again.');
-            }
-        }
-    });
+
+$.ajax({
+    type: "POST",
+    url: registerUrl,
+    data: JSON.stringify(formData),
+    contentType: "application/json",
+    success: function () {
+        window.location.href = userloginUrl;
+    },
+    error: function (response) {
+        const errorMessage = response.responseJSON?.detail || "An unexpected error occurred. Please try again later.";
+        $('#signup-form-error-message')
+            .text(errorMessage)
+            .addClass('signup-error')
+            .removeClass('signup-valid');
+    }
+});
 });
 
+//user_welcome_page.html
 
-// user_welcome_page.html.
 document.addEventListener("DOMContentLoaded", function() {
-//     checkKYCStatus();
-// });
+
 if (typeof kycStatusUrl !== "undefined") {
     checkKYCStatus();
 }
@@ -315,7 +262,7 @@ if (typeof kycStatusUrl !== "undefined") {
 
 function checkKYCStatus() {
     if (typeof kycStatusUrl === "undefined") {
-        //console.warn("kycStatusUrl is not defined.");
+
         return;
     }
     fetch(kycStatusUrl, {
@@ -359,7 +306,7 @@ function closeKYCModal() {
     document.getElementById("kycModal").style.display = "none";
 }
 
-function validateFileSize() {
+function kycimage_validateFileSize() {
     const errorMessageElement = document.getElementById("error-message");
     const imageFile = document.getElementById("kycImage").files[0];
 
@@ -413,7 +360,7 @@ const kycUploadForm = document.getElementById("kycUploadForm");
     }
 });
 
-// user_list_details.html.
+//admin -user_list_details.html
 $(document).ready(function() {
     if (typeof userlistUrl !== 'undefined' && userlistUrl) {
     // AJAX call to fetch user data
@@ -453,7 +400,7 @@ $(document).ready(function() {
         }
     });
 } else {
-       
+        
     }
 
     // Modal behavior for viewing the KYC image
@@ -486,11 +433,12 @@ $(document).ready(function() {
     });
 });
 
-// user_kyc_waiting_list_details.html.
+//admin -user_kyc_waiting_list_details.html
+
 $(document).ready(function() {
     function refreshTable() {
         if (typeof userkycwaitinglistUrl === 'undefined') {
-            
+            //console.warn("userkycwaitinglistUrl is not defined.");
             return; // Exit the function if the URL is not defined
         }
         $('#user_kyc_waiting_list-tbody').empty(); // Clear existing table rows
@@ -540,7 +488,7 @@ $(document).ready(function() {
      if (typeof userkycwaitinglistUrl !== 'undefined') {
         refreshTable();
     } else {
-        
+        //console.warn("userkycwaitinglistUrl is not defined.");
     }
 
     $(document).on('blur', '.user_kyc_waiting_list-kyc-status-select', function() {
@@ -589,17 +537,136 @@ $(document).ready(function() {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("password-reset-form");
+    if (form) {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
 
+            const email = document.getElementById("reset-email").value;
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+            fetch("/api/password-reset/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: JSON.stringify({ email: email }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    const messageDiv = document.getElementById("reset-feedback");
+                    if (data.message) {
+                        // Hide form and show success message
+                        document.getElementById("password-reset-form-container").style.display = "none";
+                        const emailSentContainer = document.getElementById("email-container");
+                        emailSentContainer.style.display = "block";
+                        document.getElementById("reset-user-email").textContent = email;
+                    } else if (data.email) {
+                        messageDiv.textContent = data.email[0]; // Display validation error
+                        messageDiv.style.color = "red";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    alert("An error occurred. Please try again.");
+                });
+        });
+    }
+});
+
+$(document).ready(function () {
+    togglePasswordVisibility('#toggle-password1', '#password1');
+    togglePasswordVisibility('#toggle-password2', '#password2');
+});
+  
+
+   
+    $(document).ready(function () {
+        // Attach event listeners for live password validation
+        $('#password1, #password2').on('input', function () {
+            const password1 = $('#password1').val();
+            const password2 = $('#password2').val();
+    
+            // Validate password1 and show message
+            const isValid = validatePassword(password1, 'password1-validation');
+           
+    
+            // Check if password2 matches password1
+            if (password2 && password1 !== password2) {
+                $('#password2-validation').text("Passwords do not match.");
+            } else {
+                $('#password2-validation').text("");
+            }
+        });
+    
+        // Handle form submission for resetting password
+        $('#reset-password-form').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+    
+            const password1 = $('#password1').val();
+            const password2 = $('#password2').val();
+    
+            // Clear previous messages
+            $('#error-message').text('');
+            $('#password1-validation').text('');
+            $('#password2-validation').text('');
+    
+            // Validate password1
+            const isValidPassword = validatePassword(password1, 'password1-validation');
+          
+            // Check if password1 and password2 match
+            if (!isValidPassword || password1 !== password2) {
+                if (password1 !== password2) {
+                    $('#password2-validation').text('Passwords do not match.');
+                }
+                return; // Stop form submission if validation fails
+            }
+    
+            // Send AJAX request
+            $.ajax({
+                url: `/api/password-reset-confirm/${uidb64}/${token}/`, // Use variables passed from the backend
+                method: 'POST',
+                contentType: 'application/json',
+                headers: { 'X-CSRFToken': csrfToken },
+                data: JSON.stringify({ new_password1: password1, new_password2: password2 }),
+                success: function (data) {
+                    console.log('Password reset successful:', data);
+                    // Hide the form and display the success message
+                    $('#form-container').hide();
+                    $('#success-message').fadeIn(); // Smoothly show success message
+                },
+                error: function (xhr) {
+                    console.error('Password reset error:', xhr);
+                    // Show error message from backend response
+                    const errorData = xhr.responseJSON;
+                    $('#error-message').text(
+                        errorData?.message || 'An error occurred. Please try again.'
+                    );
+                },
+            });
+        });
+    });
+    
+
+
+
+// common function's
 function validatePassword(password, errorElementId) {
     const specialCharacterPattern = /[!@#$%^&*(),.?":{}|<>]/;
     const numberPattern = /\d/g;
     const letterPattern = /[A-Za-z]/;
+    const spacePattern = /\s/; // Pattern to detect spaces
     const digitCount = (password.match(numberPattern) || []).length;
 
     const errorElement = $('#' + errorElementId);
 
     if (password.length < 8) {
         errorElement.text('Your password must contain at least 8 characters.');
+        return false;
+    } else if (spacePattern.test(password)) {
+        errorElement.text('Your password must not contain spaces.');
         return false;
     } else if (!letterPattern.test(password)) {
         errorElement.text('Your password must contain at least one letter.');
@@ -611,7 +678,7 @@ function validatePassword(password, errorElementId) {
         errorElement.text('Your password must contain at least four numbers.');
         return false;
     }
-    errorElement.text('Valid password').removeClass('admin_signup_error').addClass('admin_signup_valid');
+    errorElement.text('Valid password');
     return true;
 }
 
@@ -636,6 +703,16 @@ function validateEmail(email, errorElementId) {
     errorElement.text('');
     return true;
 }
+
+function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
+    $(toggleButtonId).on('click', function () {
+        const passwordField = $(passwordFieldId);
+        const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+        passwordField.attr('type', type);
+        $(this).text(type === 'password' ? '🙈' : '👁️');
+    });
+}
+
 
 // admin_signup.html
 $(document).ready(function() {
@@ -714,13 +791,7 @@ $('#admin_signup_email_id').on('blur', function() {
     
 
 
-
-$('#admin_signup_toggle_password').on('click', function() {
-    const passwordField = $('#admin_signup_password_id');
-    const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-    passwordField.attr('type', type);
-    $(this).text(type === 'password' ? '🙈' : '👁️');
-});
+togglePasswordVisibility('#admin_signup_toggle_password', '#admin_signup_password_id');
 
 $('#admin_signup_form').submit(function(e) {
     e.preventDefault();
@@ -785,12 +856,9 @@ $(document).ready(function() {
     
     
     // Toggle password visibility
-    $('#custom_admin_login_toggle_password').on('click', function() {
-        const passwordField = $('#custom_admin_login_password_id');
-        const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-        passwordField.attr('type', type);
-        $(this).text(type === 'password' ? '🙈' : '👁️');
-    });
+   
+    togglePasswordVisibility('#custom_admin_login_toggle_password', '#custom_admin_login_password_id');
+
     
     $(document).ready(function() {
         $('#custom_admin_login_email_id').on('input', function() {
@@ -880,9 +948,9 @@ $(document).ready(function() {
                         </p>
                         ${event.image ? `<img src="${event.image}" alt="${event.title}" class="lottery_events_add_current_image"/>` : ''}
                         <input type="file" class="lottery_events_add_edit_image" accept="image/*">
-                        <button class="lottery_events_add_edit_button" onclick="enableEditMode(this)">Edit</button>
-                        <button class="lottery_events_add_save_button" onclick="saveChanges(this)">Save</button>
-                        <button class="lottery_events_add_cancel_button" onclick="cancelEdit(this)">Cancel</button>
+                        <button class="lottery_events_add_edit_button" onclick="lottery_events_enableEditMode(this)">Edit</button>
+                        <button class="lottery_events_add_save_button" onclick="lottery_events_edit_saveChanges(this)">Save</button>
+                        <button class="lottery_events_add_cancel_button" onclick="lottery_events_cancelEdit(this)">Cancel</button>
                         <button class="lottery_events_add_delete_button" onclick="deleteLotteryEvent(${event.id})">Delete</button>
                     `;
 
@@ -893,20 +961,20 @@ $(document).ready(function() {
     }
 
     // Enable edit mode for a specific lottery event card
-    function enableEditMode(button) {
+    function lottery_events_enableEditMode(button) {
         const card = button.closest('.lottery-event-card');
         card.classList.add('lottery_events_add_edit_mode');
     }
 
     // Clear all error messages
-    function clearErrorMessages(card) {
+    function lottery_events_edit_clearErrorMessages(card) {
         card.querySelectorAll('.lottery_events_add_error_message').forEach(error => {
             error.style.display = 'none';
         });
     }
 
     // Reset fields to their original values on cancel
-    function resetFields(card) {
+    function lottery_events_edit_resetFields(card) {
         card.querySelectorAll('.lottery_events_add_edit_title[type="text"], .lottery_events_add_edit_price[type="number"],.lottery_events_add_edit_total_tickets[type="number"], .lottery_events_add_edit_draw_date[type="datetime-local"], textarea').forEach(input => {
             input.value = input.getAttribute('data-original-value');
         });
@@ -918,15 +986,15 @@ $(document).ready(function() {
     }
 
     // Cancel edit mode and revert to initial state
-    function cancelEdit(button) {
+    function lottery_events_cancelEdit(button) {
         const card = button.closest('.lottery-event-card');
-        resetFields(card); // Reset fields to original values
-        clearErrorMessages(card); // Clear error messages when canceling
+        lottery_events_edit_resetFields(card); // Reset fields to original values
+        lottery_events_edit_clearErrorMessages(card); // Clear error messages when canceling
         card.classList.remove('lottery_events_add_edit_mode'); // Exit edit mode
     }
 
     // Validate required fields and show error messages below each field
-    function validateFields(card) {
+    function lottery_events_edit_validateFields(card) {
         let isValid = true;
 
         const title = card.querySelector('.lottery_events_add_edit_title').value.trim();
@@ -985,11 +1053,11 @@ $(document).ready(function() {
     }
 
     // Save changes made to a lottery event
-    function saveChanges(button) {
+    function lottery_events_edit_saveChanges(button) {
         const card = button.closest('.lottery-event-card');
 
         // Validate required fields
-        if (!validateFields(card)) {
+        if (!lottery_events_edit_validateFields(card)) {
             return;
         }
 
@@ -1045,7 +1113,7 @@ $(document).ready(function() {
 
                 // Exit edit mode
                 card.classList.remove('lottery_events_add_edit_mode');
-                clearErrorMessages(card); // Clear errors after saving
+                lottery_events_edit_clearErrorMessages(card); // Clear errors after saving
                 alert('Lottery Event Updated Successfully');
             } else {
                 alert('Error updating event');
@@ -1085,7 +1153,7 @@ $(document).ready(function() {
     // Add new lottery event
 function submitAddLotteryEvent() {
     // Clear any previous validation errors
-    clearValidationErrors();
+    clear_lottery_events_add_inputs_errors();
 
     let form = document.getElementById('addLotteryEventForm');
     let formData = new FormData(form);
@@ -1105,14 +1173,14 @@ function submitAddLotteryEvent() {
             form.reset();  // Clear the form
         } else {
             // Display validation errors
-            showValidationErrors(data);
+            validate_lottery_events_add_inputs(data);
         }
     })
     .catch(error => console.error('Error:', error));
 }
 
 // Function to clear previous validation error messages
-function clearValidationErrors() {
+function clear_lottery_events_add_inputs_errors() {
     document.getElementById('lottery_events_add_title_validation').textContent = '';
     document.getElementById('lottery_events_add_description_validation').textContent = '';
     document.getElementById('lottery_events_add_price_validation').textContent = '';
@@ -1123,7 +1191,7 @@ function clearValidationErrors() {
 }
 
 // Function to show validation errors near each field
-function showValidationErrors(errors) {
+function validate_lottery_events_add_inputs(errors) {
     if (errors.title) document.getElementById('lottery_events_add_title_validation').textContent = errors.title.join(', ');
     if (errors.description) document.getElementById('lottery_events_add_description_validation').textContent = errors.description.join(', ');
     if (errors.price) document.getElementById('lottery_events_add_price_validation').textContent = errors.price.join(', ');
@@ -1136,13 +1204,16 @@ function showValidationErrors(errors) {
 
 //lottery_events.html
 
+
 // Function to fetch lottery events data from the API
 
-function lottery_events_fetchLotteryEvents() {
+
+function lottery_events_fetch() {
     try {
         if (!api_get_lottery_events_url) {
             return; // Exit the function
         }
+
 
         fetch(api_get_lottery_events_url)
             .then(response => response.json())
@@ -1157,10 +1228,45 @@ function lottery_events_fetchLotteryEvents() {
 }
 
 
+
+// Function to display the lottery events
+// Function to format the draw date
+function lottery_events_formatDrawDate(drawDate) {
+    const now = new Date();
+    const drawDay = new Date(drawDate);
+
+
+    // Calculate difference in days
+    const diffTime = drawDay - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+
+    // If the draw date is within the next 7 days
+    if (diffDays >= 0 && diffDays <= 6) {
+        if (drawDay.toDateString() === now.toDateString()) {
+            return `Draw today at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        } else if (drawDay.toDateString() === new Date(now.getTime() + 86400000).toDateString()) {
+            return `Draw tomorrow at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        } else {
+            const dayOfWeek = daysOfWeek[drawDay.getDay()];
+            return `Draw ${dayOfWeek} at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+    }
+
+
+    // For dates beyond the next 7 days, show the exact date
+    return `Draw on ${drawDay.toLocaleDateString()} at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+
 // Function to display the lottery events
 function displayLotteryEvents(events) {
     const container = document.getElementById('lottery_events_container');
-    container.innerHTML = '';  // Clear the container before rendering
+    container.innerHTML = ''; // Clear the container before rendering
+
 
     // Check if events data is available
     if (events.length === 0) {
@@ -1168,21 +1274,20 @@ function displayLotteryEvents(events) {
         return;
     }
 
+
     // Loop through the events and display them
     events.forEach(event => {
         const eventElement = document.createElement('div');
         eventElement.classList.add('lottery_events_event');
 
-        
-       
+
         let drawDateString = '';
         if (event.is_active) {
-            const drawDate = new Date(event.draw_date);
-            const drawTimeString = drawDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            drawDateString = `Draw ${drawDate.toLocaleDateString()} ${drawTimeString}`;
+            drawDateString = lottery_events_formatDrawDate(event.draw_date); // Use the new function to format the draw date
         } else {
-            drawDateString = "Inactive";  // Show "Inactive" if the event is not active
+            drawDateString = "Inactive"; // Show "Inactive" if the event is not active
         }
+
 
         eventElement.innerHTML = `
             <div class="lottery_events_event_header">${drawDateString}</div>
@@ -1197,137 +1302,16 @@ function displayLotteryEvents(events) {
             <a href="#" class="lottery_events_enter_button">Enter now</a>
         `;
 
+
         container.appendChild(eventElement);
     });
 }
 
+
 // Call the function to fetch and display lottery events when the page loads
 window.onload = function() {
-    lottery_events_fetchLotteryEvents();
+    lottery_events_fetch();
 };
 
+
 //finish
-
-
-// password_rest.html.
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("password-reset-request-form");
-    if (form) {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const email = document.getElementById("password-reset-email").value;
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-
-            fetch("/api/password-reset/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken,
-                },
-                body: JSON.stringify({ email: email }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    const messageDiv = document.getElementById("password-reset-feedback-message");
-                    if (data.message) {
-                        messageDiv.textContent = data.message;
-                        messageDiv.style.color = "green";
-                    } else if (data.email) {
-                        messageDiv.textContent = data.email[0];
-                        messageDiv.style.color = "red";
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error:", error);
-                    alert("An error occurred. Please try again.");
-                });
-        });
-    }
-});
-
-// password_rest_confirm.html.
-// Password reset logic and UI interactions
-$(document).ready(function () {
-    // Toggle password visibility
-    $('.confirm-toggle-icon').on('click', function () {
-        const targetId = $(this).data('target');
-        const passwordField = $('#' + targetId);
-        const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-
-        passwordField.attr('type', type);
-        $(this).text(type === 'password' ? '🙈' : '👁️');
-    });
-
-    // Password validation function
-    function validatePassword(password) {
-        const specialCharacterPattern = /[!@#$%^&*(),.?":{}|<>]/;
-        const numberPattern = /\d/g;
-        const minLength = 8;
-
-        if (password.length < minLength) return "Password must be at least 8 characters.";
-        if (!specialCharacterPattern.test(password)) return "Password must contain a special character.";
-        const numbers = password.match(numberPattern);
-        if (!numbers || numbers.length < 4) return "Password must contain at least four numbers.";
-        return ""; // Valid password
-    }
-
-    // Password validation messages
-    $('#password1, #password2').on('input', function () {
-        const password1 = $('#password1').val();
-        const password2 = $('#password2').val();
-
-        const validationMessage = validatePassword(password1);
-        $('#password1-validation').text(validationMessage);
-
-        if (password2 && password1 !== password2) {
-            $('#password2-validation').text("Passwords do not match.");
-        } else {
-            $('#password2-validation').text("");
-        }
-    });
-
-    // Handle form submission for resetting password
-    $('#reset-password-form').on('submit', function (e) {
-        e.preventDefault(); // Prevent default form submission
-
-        const password1 = $('#password1').val();
-        const password2 = $('#password2').val();
-
-        // Clear previous messages
-        $('#error-message').text('');
-        $('#password1-validation').text('');
-        $('#password2-validation').text('');
-
-        // Validate passwords
-        if (password1.length < 8) {
-            $('#password1-validation').text('Password must be at least 8 characters long.');
-            return;
-        }
-        if (password1 !== password2) {
-            $('#password2-validation').text('Passwords do not match.');
-            return;
-        }
-
-        // Send AJAX request
-        $.ajax({
-            url: `/api/password-reset-confirm/${uidb64}/${token}/`, // Use variables passed from the backend
-            method: 'POST',
-            contentType: 'application/json',
-            headers: { 'X-CSRFToken': csrfToken },
-            data: JSON.stringify({ new_password1: password1, new_password2: password2 }),
-            success: function (data) {
-                // Hide the form and display the success message
-                $('#form-container').hide();
-                $('#success-message').fadeIn(); // Smoothly show success message
-            },
-            error: function (xhr) {
-                // Show error message from backend response
-                const errorData = xhr.responseJSON;
-                $('#error-message').text(
-                    errorData?.message || 'An error occurred. Please try again.'
-                );
-            },
-        });
-    });
-});
