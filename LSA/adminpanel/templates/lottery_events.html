@@ -1,171 +1,25 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Events</title>
-   
-        <style>
-            .lottery_events_title {
-                text-align: center;
-                color: #333;
-            }
     
-            .lottery_events_container {
-                display: flex;
-                justify-content: center;
-                gap: 20px;
-                flex-wrap: wrap;
-                padding: 20px;
-                max-width: 1200px;
-                margin: 0 auto;
-            }
-    
-            .lottery_events_event {
-                background-color: #fff;
-                width: 300px;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-                text-align: center;
-                margin-bottom: 20px;
-            }
-    
-            .lottery_events_event img {
-                width: 100%;
-                height: auto;
-            }
-    
-            .lottery_events_event_header {
-                background-color: #2b8a3e;
-                color: #fff;
-                padding: 10px;
-                font-weight: bold;
-            }
-    
-            .lottery_events_event h3 {
-                font-size: 1.2em;
-                color: #333;
-                margin: 10px 0;
-            }
-    
-            .lottery_events_event p {
-                margin: 5px 0;
-                color: #666;
-            }
-    
-            .lottery_events_price {
-                font-size: 1.5em;
-                color: #007bff;
-                font-weight: bold;
-                margin-top: 5px;
-            }
-    
-            .lottery_events_sold_percentage {
-                background-color: #eee;
-                border-radius: 5px;
-                overflow: hidden;
-                margin: 10px 20px;
-            }
-    
-            .lottery_events_sold_bar {
-                height: 8px;
-                background-color: #007bff;
-                width: 0%;
-                transition: width 0.3s ease;
-            }
-    
-            .lottery_events_enter_button {
-                display: inline-block;
-                background-color: #007bff;
-                color: #fff;
-                text-decoration: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                margin: 15px 0;
-            }
-    
-            .lottery_events_enter_button:hover {
-                background-color: #0056b3;
-            }
-        </style>
-   
-    
-    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script>
+        const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
+        window.onload = function() {
+          lottery_events_fetch();
+          };
+      </script>
+    <script src="{% static 'js/custom.js' %}"></script>
 </head>
 <body>
-
     <h1 class="lottery_events_title">Lottery Events</h1>
-    
-    <div class="lottery_events_container" id="lottery_events_container">
+    <div class="lottery_events_displayed_container" id="lottery_events_container">
         <!-- Lottery events will be displayed here -->
     </div>
-
-    <script>
-        // Function to fetch lottery events data from the API
-        function fetchLotteryEvents() {
-            fetch('{% url "api_get_lottery_events" %}')  // Your API endpoint here
-                .then(response => response.json())
-                .then(data => {
-                    displayLotteryEvents(data);  // Function to render the data on the page
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                });
-        }
-
-        // Function to display the lottery events
-        function displayLotteryEvents(events) {
-            const container = document.getElementById('lottery_events_container');
-            container.innerHTML = '';  // Clear the container before rendering
-
-            // Check if events data is available
-            if (events.length === 0) {
-                container.innerHTML = '<p>No lottery events available.</p>';
-                return;
-            }
-
-            // Loop through the events and display them
-            events.forEach(event => {
-                const eventElement = document.createElement('div');
-                eventElement.classList.add('lottery_events_event');
-
-                // Format draw date to show the time (e.g., "Draw Today 9pm")
-                const drawDate = new Date(event.draw_date);
-                const drawTimeString = drawDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const isActive = event.is_active && drawDate > new Date();
-                let drawDateString = '';
-                if (event.is_active) {
-                    const drawDate = new Date(event.draw_date);
-                    const drawTimeString = drawDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    drawDateString = `Draw ${drawDate.toLocaleDateString()} ${drawTimeString}`;
-                } else {
-                    drawDateString = "Inactive";  // Show "Inactive" if the event is not active
-                }
-
-                eventElement.innerHTML = `
-                    <div class="lottery_events_event_header">${drawDateString}</div>
-                    ${event.image ? `<img src="${event.image}" alt="${event.title}" />` : ''}
-                    <h3>${event.title}</h3>
-                    <p><strong>Description:</strong> ${event.description}</p>
-                    <div class="lottery_events_price">£${event.price}</div>
-                    <div class="lottery_events_sold_percentage">
-                        <div class="lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
-                    </div>
-                    <p>SOLD: ${event.sold_percentage}%</p>
-                    <a href="#" class="lottery_events_enter_button">Enter now</a>
-                `;
-
-                container.appendChild(eventElement);
-            });
-        }
-
-        // Call the function to fetch and display lottery events when the page loads
-        window.onload = function() {
-            fetchLotteryEvents();
-        };
-    </script>
-
+    
 </body>
 </html>

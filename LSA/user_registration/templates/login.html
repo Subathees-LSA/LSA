@@ -1,64 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        /* Container styling */
-        .login-container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        .login-header {
-            text-align: center;
-        }
-        .login-form {
-            display: flex;
-            flex-direction: column;
-        }
-        .login-input-email,
-        .login-input-password,
-        .login-button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .login-button {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-        .login-button:hover {
-            background-color: #45a049;
-        }
-        /* Toggle button styling */
-        .login-toggle-password {
-            position: absolute;
-            right: 10px;
-            top: 13px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        .login-input-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-    </style>
+    <script src="{% static 'js/custom.js' %}" defer></script>
+    
 </head>
 <body>
 
 <div class="login-container">
     <h2 class="login-header">Login</h2>
-    <form id="login-form" class="login-form">
+    <form id="login-form" class="login-form" data-url="{% url 'login' %}" data-redirect-url="{% url 'user_welcome_page' %}" >
         <input type="email" id="login-email" class="login-input-email" placeholder="Email" required><br>
         <span id="login-email-error" style="color: red;"></span><br>
 
@@ -68,95 +24,11 @@
         </div>
         <span id="login-password-error" style="color: red;"></span><br>
         <span id="login-error" style="color: red;"></span><br>
-        <a href="{% url 'password_reset_page' %}">forgot password?</a>
+        <a href="{% url 'password_reset_page' %}">Forgot password?</a>
         <button type="submit" class="login-button">Login</button>
     </form>
 </div>
 
-<script>
-    // Function to get CSRF token from cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    const csrftoken = getCookie('csrftoken');
-
-    // Set up AJAX with CSRF token
-    $.ajaxSetup({
-        headers: {
-            'X-CSRFToken': csrftoken
-        }
-    });
-
-    $(document).ready(function() {
-        // Email validation
-        $('#login-email').on('input', function() {
-            const email = $(this).val();
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                $('#login-email-error').text('Please enter a valid email address.');
-            } else {
-                $('#login-email-error').text('');
-            }
-        });
-
-        // Password validation
-        $('#login-password').on('input', function() {
-            const password = $(this).val();
-            const passwordPattern = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
-            if (!passwordPattern.test(password)) {
-                $('#login-password-error').text('Password must be at least 8 characters, contain a number, and a special character.');
-            } else {
-                $('#login-password-error').text('');
-            }
-        });
-
-        // Toggle password visibility
-        $('#login-toggle-password').on('click', function() {
-            const passwordField = $('#login-password');
-            const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-            passwordField.attr('type', type);
-            // Toggle icon text
-            $(this).text(type === 'password' ? '🙈' : '👁️');
-        });
-
-        // Form submission
-        $('#login-form').submit(function(e) {
-            e.preventDefault();
-            // Clear previous login error message
-            $('#login-error').text('');
-
-            $.ajax({
-                type: 'POST',
-                url: '{% url "login" %}',
-                data: JSON.stringify({
-                    email: $('#login-email').val(),
-                    password: $('#login-password').val()
-                }),
-                contentType: 'application/json',
-                success: function(response) {
-                    alert(response.message + ' (User ID: ' + response.user_id + ')');
-                    window.location.href = '{% url "user_welcome_page" %}';
-                },
-                error: function(response) {
-                    // Displaying invalid email or password message
-                    $('#login-error').text('Invalid email or password.');
-                }
-            });
-        });
-    });
-</script>
-
 </body>
 </html>
+

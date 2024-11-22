@@ -140,6 +140,10 @@ import os
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 
+# Include the static directory inside your project folder
+STATICFILES_DIRS = [
+    BASE_DIR / "LSA" / "static",
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
