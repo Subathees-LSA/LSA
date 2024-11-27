@@ -25,17 +25,21 @@ class adminProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role or 'No Role Assigned'}"
-
 class LotteryEvent(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Per Ticket Price
     draw_date = models.DateTimeField()
     image = models.ImageField(upload_to='lottery_images/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     sold_percentage = models.PositiveIntegerField(default=0)
-    total_tickets = models.PositiveIntegerField(default=0)  # New field for total tickets
-    sold_tickets = models.PositiveIntegerField(default=0)   # Field for sold tickets
+    total_tickets = models.PositiveIntegerField(default=0)
+    sold_tickets = models.PositiveIntegerField(default=0)
+    total_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    revenue_type = models.CharField(max_length=50, choices=[('fixed', 'Fixed'), ('percentage', 'Percentage')], default='fixed')
+    revenue_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    per_ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # New Field
 
     def save(self, *args, **kwargs):
         # Calculate the sold percentage based on total tickets if total tickets > 0
