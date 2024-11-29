@@ -1,4 +1,78 @@
-// Function to get CSRF token from cookie
+//lottery_events_add.html
+document.addEventListener('DOMContentLoaded', function () {
+    const totalBudgetInput = document.getElementById('lottery_events_add_totalBudget');
+    const revenueTypeSelect = document.getElementById('lottery_events_add_revenueType');
+    const fixedRevenueInput = document.getElementById('lottery_events_add_fixedRevenue');
+    const percentageRevenueSelect = document.getElementById('lottery_events_add_percentageRevenue');
+    const totalAmountInput = document.getElementById('lottery_events_add_totalAmount');
+    const perTicketPriceInput = document.getElementById('lottery_events_add_perTicketPrice');
+    const totalTicketsInput = document.getElementById('lottery_events_add_totalTickets');
+
+    const fixedAmountDiv = document.getElementById('lottery_events_add_fixedAmountInput');
+    const percentageDiv = document.getElementById('lottery_events_add_percentageInput');
+    const lottery_events_add_total_amount_container = document.getElementById('lottery_events_add_total_amount_container');
+    const lottery_events_add_total_tickets_container = document.getElementById('lottery_events_add_total_tickets_container');
+
+    // Toggle Revenue Input Fields Based on Selected Revenue Type
+    revenueTypeSelect.addEventListener('change', () => {
+        const selectedType = revenueTypeSelect.value;
+        if (selectedType === 'fixed') {
+            fixedAmountDiv.style.display = 'block';
+            percentageDiv.style.display = 'none';
+        } else if (selectedType === 'percentage') {
+            fixedAmountDiv.style.display = 'none';
+            percentageDiv.style.display = 'block';
+            lottery_events_add_total_amount_container.style.display = 'block'; // Always show for percentage
+        }
+        updateTotalAmount();
+    });
+
+    // Update Total Amount
+    const updateTotalAmount = () => {
+        const totalBudget = parseFloat(totalBudgetInput.value) || 0;
+        let totalAmount = totalBudget;
+
+        if (revenueTypeSelect.value === 'fixed') {
+            const fixedRevenue = parseFloat(fixedRevenueInput.value) || 0;
+            if (fixedRevenue > 0) {
+                totalAmount += fixedRevenue;
+                lottery_events_add_total_amount_container.style.display = 'block'; // Show Total Amount only when fixed revenue is entered
+            } else {
+                lottery_events_add_total_amount_container.style.display = 'none'; // Hide Total Amount if no fixed revenue
+            }
+        } else if (revenueTypeSelect.value === 'percentage') {
+            const percentageRevenue = parseFloat(percentageRevenueSelect.value) || 0;
+            totalAmount += (totalBudget * percentageRevenue) / 100;
+            lottery_events_add_total_amount_container.style.display = 'block'; // Always show for percentage
+        }
+
+        totalAmountInput.value = totalAmount.toFixed(2);
+        updateTotalTickets();
+    };
+
+    // Update Total Tickets
+    const updateTotalTickets = () => {
+        const totalAmount = parseFloat(totalAmountInput.value) || 0;
+        const perTicketPrice = parseFloat(perTicketPriceInput.value) || 0;
+
+        if (perTicketPrice > 0) {
+            const totalTickets = totalAmount / perTicketPrice;
+            totalTicketsInput.value = Math.ceil(totalTickets); // Round up to the nearest whole number
+            lottery_events_add_total_tickets_container.style.display = 'block'; // Show Total Tickets when Per Ticket Price is entered
+        } else {
+            lottery_events_add_total_tickets_container.style.display = 'none'; // Hide Total Tickets if no Per Ticket Price
+        }
+    };
+
+    // Add Event Listeners for Inputs
+    totalBudgetInput.addEventListener('input', updateTotalAmount);
+    fixedRevenueInput.addEventListener('input', updateTotalAmount);
+    percentageRevenueSelect.addEventListener('change', updateTotalAmount);
+    perTicketPriceInput.addEventListener('input', updateTotalTickets);
+});
+
+
+ // Function to get CSRF token from cookie
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -902,6 +976,7 @@ $(document).ready(function() {
 
 
 //lottery_events_add.html
+//lottery_events_add.html
 
     // Fetch and render lottery events
     function fetchLotteryEvents() {
@@ -915,6 +990,8 @@ $(document).ready(function() {
                     const eventDiv = document.createElement('div');
                     eventDiv.classList.add('lottery-event-card');
                     eventDiv.dataset.id = event.id;
+  
+
 
                     eventDiv.innerHTML = `
                         <h3>
@@ -943,11 +1020,52 @@ $(document).ready(function() {
                         </p>
                         <p>
                             Total Tickets: <span class="lottery_events_add_total_tickets">${event.total_tickets}</span>
-                            <input type="number" class="lottery_events_add_edit_total_tickets" value="${event.total_tickets}" data-original-value="${event.total_tickets}" required>
+                            <input type="number" class="lottery_events_add_edit_total_tickets" value="${event.total_tickets}" data-original-value="${event.total_tickets}" required readonly>
                             <div class="lottery_events_add_error_message lottery_edit_total_tickets_error">Total Tickets are required</div>
                         </p>
                         ${event.image ? `<img src="${event.image}" alt="${event.title}" class="lottery_events_add_current_image"/>` : ''}
                         <input type="file" class="lottery_events_add_edit_image" accept="image/*">
+                        <p>
+        Total Budget: <span class="lottery_events_add_total_budget">${event.total_budget}</span>
+        <input type="number" class="lottery_events_add_edit_total_budget" value="${event.total_budget}" data-original-value="${event.total_budget}" required>
+        <div class="lottery_events_add_error_message lottery_edit_total_budget_error">Total Budget is required</div>
+
+        </p>
+    <p>
+    Revenue Type:
+    <span class="lottery_events_add_revenue_type">${event.revenue_type}</span>
+    <select class="lottery_events_add_edit_revenue_type" style=" display: none;"; data-original-value="${event.revenue_type}">
+        <option value="fixed" ${event.revenue_type === 'fixed' ? 'selected' : ''}>Fixed</option>
+        <option value="percentage" ${event.revenue_type === 'percentage' ? 'selected' : ''}>Percentage</option>
+    </select>
+</p>
+<div class="lottery_events_add_revenue_fields">
+    <p class="lottery_events_add_fixed_revenue" style="display: ${event.revenue_type === 'fixed' ? 'block' : 'none'};">
+        Fixed Revenue Amount:
+        <span>${event.revenue_value}</span>
+        <input type="number" class="lottery_events_add_edit_fixed_revenue" value="${event.revenue_value}" data-original-value="${event.revenue_value}">
+    </p>
+    <p class="lottery_events_add_percentage_revenue" style="display: ${event.revenue_type === 'percentage' ? 'block' : 'none'};">
+        Percentage Revenue:
+        <span>${event.revenue_value}</span>
+        <input type="number" class="lottery_events_add_edit_percentage_revenue" value="${event.revenue_value}" data-original-value="${event.revenue_value}">
+    <div class="lottery_events_add_error_message lottery_edit_revenue_error">Revenue Value is required</div>
+
+        </p>
+</div>
+
+    
+    <p>
+        Total Amount: <span class="lottery_events_add_total_amount">${event.total_amount}</span>
+        <input type="number" class="lottery_events_add_edit_total_amount" value="${event.total_amount}" data-original-value="${event.total_amount}" required readonly>
+    </p>
+    <p>
+        Per Ticket Price: <span class="lottery_events_add_per_ticket_price">${event.per_ticket_price}</span>
+        <input type="number" class="lottery_events_add_edit_per_ticket_price" value="${event.per_ticket_price}" data-original-value="${event.per_ticket_price}" required>
+    <div class="lottery_events_add_error_message lottery_edit_per_ticket_price_error">Per Ticket Price is required</div>
+
+        </p>
+
                         <button class="lottery_events_add_edit_button" onclick="lottery_events_enableEditMode(this)">Edit</button>
                         <button class="lottery_events_add_save_button" onclick="lottery_events_edit_saveChanges(this)">Save</button>
                         <button class="lottery_events_add_cancel_button" onclick="lottery_events_cancelEdit(this)">Cancel</button>
@@ -961,10 +1079,90 @@ $(document).ready(function() {
     }
 
     // Enable edit mode for a specific lottery event card
-    function lottery_events_enableEditMode(button) {
-        const card = button.closest('.lottery-event-card');
-        card.classList.add('lottery_events_add_edit_mode');
+   // Calculate and update dynamic fields
+   function updateDynamicFields(card) {
+    const totalBudgetInput = card.querySelector('.lottery_events_add_edit_total_budget');
+    const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+    const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
+    const percentageRevenueInput = card.querySelector('.lottery_events_add_edit_percentage_revenue');
+    const perTicketPriceInput = card.querySelector('.lottery_events_add_edit_per_ticket_price');
+    const totalAmountInput = card.querySelector('.lottery_events_add_edit_total_amount');
+    const totalTicketsInput = card.querySelector('.lottery_events_add_edit_total_tickets');
+
+    let totalBudget = parseFloat(totalBudgetInput.value) || 0;
+    let perTicketPrice = parseFloat(perTicketPriceInput.value) || 0;
+    let revenueValue = 0;
+
+    // Calculate revenue value based on selected type
+    if (revenueTypeSelect.value === 'fixed') {
+        revenueValue = parseFloat(fixedRevenueInput.value) || 0;
+    } else if (revenueTypeSelect.value === 'percentage') {
+        revenueValue = (totalBudget * (parseFloat(percentageRevenueInput.value) || 0)) / 100;
     }
+
+    // Calculate total amount
+    const totalAmount = totalBudget + revenueValue;
+
+    // Calculate total tickets
+    const totalTickets = perTicketPrice > 0 ? Math.floor(totalAmount / perTicketPrice) : 0;
+
+    // Update input fields dynamically
+    totalAmountInput.value = totalAmount.toFixed(2);
+    totalTicketsInput.value = totalTickets;
+}
+
+// Attach dynamic calculation logic to input fields
+function attachDynamicFieldListeners(card) {
+    const totalBudgetInput = card.querySelector('.lottery_events_add_edit_total_budget');
+    const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+    const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
+    const percentageRevenueInput = card.querySelector('.lottery_events_add_edit_percentage_revenue');
+    const perTicketPriceInput = card.querySelector('.lottery_events_add_edit_per_ticket_price');
+
+    // Add event listeners to update calculations
+    totalBudgetInput.addEventListener('input', () => updateDynamicFields(card));
+    revenueTypeSelect.addEventListener('change', () => updateDynamicFields(card));
+    fixedRevenueInput.addEventListener('input', () => updateDynamicFields(card));
+    percentageRevenueInput.addEventListener('input', () => updateDynamicFields(card));
+    perTicketPriceInput.addEventListener('input', () => updateDynamicFields(card));
+}
+function lottery_events_enableEditMode(button) {
+    const card = button.closest('.lottery-event-card');
+    card.classList.add('lottery_events_add_edit_mode');
+
+    // Show the select dropdown and hide the static text
+    const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+    const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
+    revenueTypeSelect.style.display = 'block';
+    revenueTypeSpan.style.display = 'none';
+
+    // Attach dynamic field logic
+    attachDynamicFieldListeners(card);
+
+    // Add change listener to the revenue type dropdown for showing/hiding fields
+    revenueTypeSelect.addEventListener('change', () => {
+        const selectedType = revenueTypeSelect.value;
+        const fixedField = card.querySelector('.lottery_events_add_fixed_revenue');
+        const percentageField = card.querySelector('.lottery_events_add_percentage_revenue');
+
+        if (selectedType === 'fixed') {
+            fixedField.style.display = 'block';
+            percentageField.style.display = 'none';
+        } else if (selectedType === 'percentage') {
+            fixedField.style.display = 'none';
+            percentageField.style.display = 'block';
+        }
+
+        updateDynamicFields(card); // Recalculate fields on revenue type change
+    });
+}
+
+// Attach listeners when the page loads
+window.onload = function () {
+    fetchLotteryEvents();
+};
+
+    
 
     // Clear all error messages
     function lottery_events_edit_clearErrorMessages(card) {
@@ -975,82 +1173,149 @@ $(document).ready(function() {
 
     // Reset fields to their original values on cancel
     function lottery_events_edit_resetFields(card) {
-        card.querySelectorAll('.lottery_events_add_edit_title[type="text"], .lottery_events_add_edit_price[type="number"],.lottery_events_add_edit_total_tickets[type="number"], .lottery_events_add_edit_draw_date[type="datetime-local"], textarea').forEach(input => {
+        // Reset all input fields to their original values
+        card.querySelectorAll('.lottery_events_add_edit_title[type="text"], .lottery_events_add_edit_price[type="number"], .lottery_events_add_edit_total_tickets[type="number"], .lottery_events_add_edit_total_budget[type="number"], .lottery_events_add_edit_total_amount[type="number"], .lottery_events_add_edit_per_ticket_price[type="number"], .lottery_events_add_edit_draw_date[type="datetime-local"], textarea').forEach(input => {
             input.value = input.getAttribute('data-original-value');
         });
+    
         // Reset checkbox to its original state
         const checkbox = card.querySelector('.lottery_events_add_edit_is_active');
         if (checkbox) {
             checkbox.checked = checkbox.getAttribute('data-original-checked') === 'true';
         }
+    
+        // Reset revenue type and its associated fields
+        const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+        const fixedRevenueField = card.querySelector('.lottery_events_add_fixed_revenue');
+        const percentageRevenueField = card.querySelector('.lottery_events_add_percentage_revenue');
+        const originalRevenueType = revenueTypeSelect.getAttribute('data-original-value');
+    
+        // Reset the revenue type dropdown to its original value
+        revenueTypeSelect.value = originalRevenueType;
+    
+        // Show/hide fields based on the original revenue type
+        if (originalRevenueType === 'fixed') {
+            fixedRevenueField.style.display = 'block';
+            percentageRevenueField.style.display = 'none';
+        } else if (originalRevenueType === 'percentage') {
+            fixedRevenueField.style.display = 'none';
+            percentageRevenueField.style.display = 'block';
+        }
+    
+        // Reset the value of Fixed Revenue or Percentage Revenue to the original value
+        const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
+        const percentageRevenueInput = card.querySelector('.lottery_events_add_edit_percentage_revenue');
+    
+        fixedRevenueInput.value = fixedRevenueInput.getAttribute('data-original-value');
+        percentageRevenueInput.value = percentageRevenueInput.getAttribute('data-original-value');
     }
+    
 
     // Cancel edit mode and revert to initial state
     function lottery_events_cancelEdit(button) {
         const card = button.closest('.lottery-event-card');
         lottery_events_edit_resetFields(card); // Reset fields to original values
         lottery_events_edit_clearErrorMessages(card); // Clear error messages when canceling
+    
+        // Hide the select dropdown and show the static text
+        const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+        const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
+        revenueTypeSelect.style.display = 'none';
+        revenueTypeSpan.style.display = 'block';
+    
         card.classList.remove('lottery_events_add_edit_mode'); // Exit edit mode
     }
+    
+    
 
     // Validate required fields and show error messages below each field
-    function lottery_events_edit_validateFields(card) {
-        let isValid = true;
+    // Validate required fields and show error messages below each field
+function lottery_events_edit_validateFields(card) {
+    let isValid = true;
 
-        const title = card.querySelector('.lottery_events_add_edit_title').value.trim();
-        const description = card.querySelector('.lottery_events_add_edit_description').value.trim();
-        const price = card.querySelector('.lottery_events_add_edit_price').value.trim();
-        const drawDate = card.querySelector('.lottery_events_add_edit_draw_date').value.trim();
-        const totalTickets = card.querySelector('.lottery_events_add_edit_total_tickets').value.trim();
+    const title = card.querySelector('.lottery_events_add_edit_title').value.trim();
+    const description = card.querySelector('.lottery_events_add_edit_description').value.trim();
+    const price = card.querySelector('.lottery_events_add_edit_price').value.trim();
+    const drawDate = card.querySelector('.lottery_events_add_edit_draw_date').value.trim();
+    const totalTickets = card.querySelector('.lottery_events_add_edit_total_tickets').value.trim();
+    const totalBudget = card.querySelector('.lottery_events_add_edit_total_budget').value.trim();
+    const perTicketPrice = card.querySelector('.lottery_events_add_edit_per_ticket_price').value.trim();
+    const revenueType = card.querySelector('.lottery_events_add_edit_revenue_type').value.trim();
+    let revenueValue = null;
 
-        // Display specific error messages if fields are empty
-        if (!title) {
-            card.querySelector('.lottery_edit_title_error').style.display = 'block';
-            isValid = false;
-             // Scroll to the error message
-             card.querySelector('.lottery_edit_title_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_title_error').style.display = 'none';
-        }
-
-        if (!description) {
-            card.querySelector('.lottery_edit_description_error').style.display = 'block';
-            isValid = false;
-            // Scroll to the error message
-            card.querySelector('.lottery_edit_description_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_description_error').style.display = 'none';
-        }
-
-        if (!price) {
-            card.querySelector('.lottery_edit_price_error').style.display = 'block';
-            isValid = false;
-             // Scroll to the error message
-             card.querySelector('.lottery_edit_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_price_error').style.display = 'none';
-        }
-
-        if (!drawDate) {
-            card.querySelector('.lottery_edit_draw_date_error').style.display = 'block';
-            isValid = false;
-             // Scroll to the error message
-             card.querySelector('.lottery_edit_draw_date_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_draw_date_error').style.display = 'none';
-        }
-
-        if (!totalTickets) {
-            card.querySelector('.lottery_edit_total_tickets_error').style.display = 'block';
-            isValid = false;
-             // Scroll to the error message
-             card.querySelector('.lottery_edit_total_tickets_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_total_tickets_error').style.display = 'none';
-        }
-
-        return isValid;
+    if (revenueType === 'fixed') {
+        revenueValue = card.querySelector('.lottery_events_add_edit_fixed_revenue').value.trim();
+    } else if (revenueType === 'percentage') {
+        revenueValue = card.querySelector('.lottery_events_add_edit_percentage_revenue').value.trim();
     }
+
+    // Display specific error messages if fields are empty
+    if (!title) {
+        card.querySelector('.lottery_edit_title_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_title_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_title_error').style.display = 'none';
+    }
+
+    if (!description) {
+        card.querySelector('.lottery_edit_description_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_description_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_description_error').style.display = 'none';
+    }
+
+    if (!price || isNaN(price) || price <= 0) {
+        card.querySelector('.lottery_edit_price_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_price_error').style.display = 'none';
+    }
+
+    if (!drawDate) {
+        card.querySelector('.lottery_edit_draw_date_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_draw_date_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_draw_date_error').style.display = 'none';
+    }
+
+    if (!totalTickets || isNaN(totalTickets) || totalTickets <= 0) {
+        card.querySelector('.lottery_edit_total_tickets_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_total_tickets_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_total_tickets_error').style.display = 'none';
+    }
+
+    if (!totalBudget || isNaN(totalBudget) || totalBudget <= 0) {
+        card.querySelector('.lottery_edit_total_budget_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_total_budget_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_total_budget_error').style.display = 'none';
+    }
+
+    if (!revenueValue || isNaN(revenueValue) || revenueValue < 0) {
+        card.querySelector(`.lottery_edit_revenue_error`).style.display = 'block';
+        isValid = false;
+        card.querySelector(`.lottery_edit_revenue_error`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector(`.lottery_edit_revenue_error`).style.display = 'none';
+    }
+
+    if (!perTicketPrice || isNaN(perTicketPrice) || perTicketPrice <= 0) {
+        card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_per_ticket_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'none';
+    }
+
+    return isValid;
+}
 
     // Save changes made to a lottery event
     function lottery_events_edit_saveChanges(button) {
@@ -1071,6 +1336,29 @@ $(document).ready(function() {
         const imageFile = card.querySelector('.lottery_events_add_edit_image').files[0];
 
         const formData = new FormData();
+        const totalBudget = card.querySelector('.lottery_events_add_edit_total_budget').value;
+const totalAmount = card.querySelector('.lottery_events_add_edit_total_amount').value;
+const perTicketPrice = card.querySelector('.lottery_events_add_edit_per_ticket_price').value;
+const revenueType = card.querySelector('.lottery_events_add_edit_revenue_type').value;
+let revenueValue = 0;
+
+if (revenueType === 'fixed') {
+    revenueValue = card.querySelector('.lottery_events_add_edit_fixed_revenue').value;
+} else if (revenueType === 'percentage') {
+    revenueValue = card.querySelector('.lottery_events_add_edit_percentage_revenue').value;
+}
+
+    const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+    const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
+    
+
+
+formData.append('total_budget', totalBudget);
+formData.append('revenue_type', revenueType);
+formData.append('revenue_value', revenueValue);
+formData.append('total_amount', totalAmount);
+formData.append('per_ticket_price', perTicketPrice);
+
         formData.append('title', title);
         formData.append('description', description);
         formData.append('price', price);
@@ -1101,6 +1389,18 @@ $(document).ready(function() {
                 card.querySelector('.lottery_events_add_is_active').textContent = isActive ? 'Active' : 'Inactive';
                 card.querySelector('.lottery_events_add_total_tickets').textContent = totalTickets;
 
+// Update the new fields dynamically
+card.querySelector('.lottery_events_add_total_budget').textContent = totalBudget;
+card.querySelector('.lottery_events_add_revenue_type').textContent = revenueType;
+card.querySelector('.lottery_events_add_total_amount').textContent = totalAmount;
+card.querySelector('.lottery_events_add_per_ticket_price').textContent = perTicketPrice;
+if (revenueTypeSelect.value === 'fixed') {
+    card.querySelector('.lottery_events_add_fixed_revenue span').textContent = revenueValue;
+} else if (revenueTypeSelect.value === 'percentage') {
+    card.querySelector('.lottery_events_add_percentage_revenue span').textContent = revenueValue;
+}
+
+
                 // Update image preview if a new one was uploaded
                 if (data.image && card.querySelector('.lottery_events_add_current_image')) {
                     card.querySelector('.lottery_events_add_current_image').src = data.image;
@@ -1110,7 +1410,9 @@ $(document).ready(function() {
                     imgElement.className = 'lottery_events_add_current_image';
                     card.insertBefore(imgElement, card.querySelector('.lottery_events_add_edit_image'));
                 }
-
+                revenueTypeSpan.textContent = revenueTypeSelect.value;
+                revenueTypeSelect.style.display = 'none';
+                revenueTypeSpan.style.display = 'block';
                 // Exit edit mode
                 card.classList.remove('lottery_events_add_edit_mode');
                 lottery_events_edit_clearErrorMessages(card); // Clear errors after saving
@@ -1151,33 +1453,123 @@ $(document).ready(function() {
         fetchLotteryEvents();
     };
     // Add new lottery event
-function submitAddLotteryEvent() {
-    // Clear any previous validation errors
-    clear_lottery_events_add_inputs_errors();
 
-    let form = document.getElementById('addLotteryEventForm');
-    let formData = new FormData(form);
-
-    fetch(api_lottery_events_add_url, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': lottery_events_add_csrftoken,
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.id) {
-            alert('Lottery Event Added Successfully');
-            fetchLotteryEvents();  // Reload the events after adding
-            form.reset();  // Clear the form
+    function submitAddLotteryEvent() {
+        // Clear previous error messages
+        clear_lottery_events_add_inputs_errors();
+    
+        let form = document.getElementById('addLotteryEventForm');
+        let formData = new FormData(form);
+    
+        // Validation flags
+        let isValid = true;
+    
+        // Get form field values
+        var totalBudget = document.getElementById('lottery_events_add_totalBudget').value;
+        var totalBudgetValidationMessage = document.getElementById('lottery_events_add_budget_validation');
+        var title = document.getElementsByName('title')[0].value;
+        var description = document.getElementsByName('description')[0].value;
+        var price = document.getElementsByName('price')[0].value;
+        var drawDate = document.getElementsByName('draw_date')[0].value;
+        var image = document.getElementsByName('image')[0].files[0];
+        var isActive = document.getElementsByName('is_active')[0].checked;
+        var perTicketPrice = document.getElementById('lottery_events_add_perTicketPrice').value;
+    
+        // Validation for Total Budget
+        if (totalBudget === '' || totalBudget === '0') {
+            totalBudgetValidationMessage.textContent = 'Total Budget cannot be empty or zero.';
+            isValid = false;
         } else {
-            // Display validation errors
-            validate_lottery_events_add_inputs(data);
+            totalBudgetValidationMessage.textContent = ''; // Clear any previous error
         }
-    })
-    .catch(error => console.error('Error:', error));
-}
+    
+        // Validate other required fields
+        if (title === '') {
+            document.getElementById('lottery_events_add_title_validation').textContent = 'Title is required.';
+            isValid = false;
+        }
+        if (description === '') {
+            document.getElementById('lottery_events_add_description_validation').textContent = 'Description is required.';
+            isValid = false;
+        }
+        if (price === '' || price <= 0) {
+            document.getElementById('lottery_events_add_price_validation').textContent = 'Price must be greater than zero.';
+            isValid = false;
+        }
+        if (drawDate === '') {
+            document.getElementById('lottery_events_add_drawdate_validation').textContent = 'Draw Date is required.';
+            isValid = false;
+        }
+        if (!image) {
+            document.getElementById('lottery_events_add_image_validation').textContent = 'Image is required.';
+            isValid = false;
+        }
+        if (perTicketPrice === '' || perTicketPrice <= 0) {
+            document.getElementById('lottery_events_add_per_ticket_validation').textContent = 'Per Ticket Price must be greater than zero.';
+            isValid = false;
+        }
+    
+        // Validate Revenue Type
+        const revenueType = document.getElementById('lottery_events_add_revenueType').value;
+        const fixedRevenue = document.getElementById('lottery_events_add_fixedRevenue').value;
+        const percentageRevenue = document.getElementById('lottery_events_add_percentageRevenue').value;
+    
+        // Validate Fixed Revenue (if Fixed Revenue Type is selected)
+        if (revenueType === 'fixed') {
+            if (fixedRevenue === '' || fixedRevenue <= 0) {
+                document.getElementById('lottery_events_add_fixed_revenue_validation').textContent = 'Fixed Revenue Amount must be greater than zero.';
+                isValid = false;
+            } else {
+                document.getElementById('lottery_events_add_fixed_revenue_validation').textContent = ''; // Clear any previous error
+            }
+        }
+        
+        // Validate Percentage Revenue (if Percentage Revenue Type is selected)
+        if (revenueType === 'percentage') {
+            if (percentageRevenue === '0') {
+                document.getElementById('lottery_events_add_percentage_revenue_validation').textContent = 'Please select a percentage for revenue.';
+                isValid = false;
+            } else {
+                document.getElementById('lottery_events_add_percentage_revenue_validation').textContent = ''; // Clear any previous error
+            }
+        }
+    
+        // If all fields are valid, proceed with form submission
+        if (isValid) {
+            // Dynamically add calculated fields to formData
+            const totalAmount = document.getElementById('lottery_events_add_totalAmount').value;
+            const totalTickets = document.getElementById('lottery_events_add_totalTickets').value;
+            const revenueValue = revenueType === 'fixed' ? fixedRevenue : percentageRevenue;
+    
+            formData.append('total_amount', totalAmount);
+            formData.append('total_tickets', totalTickets);
+            formData.append('revenue_value', revenueValue);
+    
+            fetch(api_lottery_events_add_url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': lottery_events_add_csrftoken,
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    alert('Lottery Event Added Successfully');
+                    fetchLotteryEvents();  // Reload the events after adding
+                    form.reset();  // Clear the form
+                } else {
+                    // Display validation errors
+                    validate_lottery_events_add_inputs(data);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+    
+   
+    
+    
 
 // Function to clear previous validation error messages
 function clear_lottery_events_add_inputs_errors() {
@@ -1187,8 +1579,12 @@ function clear_lottery_events_add_inputs_errors() {
     document.getElementById('lottery_events_add_drawdate_validation').textContent = '';
     document.getElementById('lottery_events_add_image_validation').textContent = '';
     document.getElementById('lottery_events_add_isactive_validation').textContent = '';
-    document.getElementById('lottery_events_add_totaltickets_validation').textContent = '';
+    document.getElementById('lottery_events_add_budget_validation').textContent = '';
+    document.getElementById('lottery_events_add_per_ticket_validation').textContent = '';
+
 }
+
+
 
 // Function to show validation errors near each field
 function validate_lottery_events_add_inputs(errors) {
@@ -1198,22 +1594,25 @@ function validate_lottery_events_add_inputs(errors) {
     if (errors.draw_date) document.getElementById('lottery_events_add_drawdate_validation').textContent = errors.draw_date.join(', ');
     if (errors.image) document.getElementById('lottery_events_add_image_validation').textContent = errors.image.join(', ');
     if (errors.is_active) document.getElementById('lottery_events_add_isactive_validation').textContent = errors.is_active.join(', ');
-    if (errors.total_tickets) document.getElementById('lottery_events_add_totaltickets_validation').textContent = errors.total_tickets.join(', ');
+
 }
+
+
 
 
 //lottery_events.html
 
 
 // Function to fetch lottery events data from the API
-
-
 function lottery_events_fetch() {
     try {
-        if (!api_get_lottery_events_url) {
-            return; // Exit the function
+        // if (!api_get_lottery_events_url) {
+        //     return; // Exit the function
+        // }
+        if (typeof api_get_lottery_events_url === 'undefined' || !api_get_lottery_events_url) {
+            
+            return; // Exit the function if the variable is not defined
         }
-
 
         fetch(api_get_lottery_events_url)
             .then(response => response.json())
@@ -1224,27 +1623,20 @@ function lottery_events_fetch() {
                 console.error('Error fetching data:', error);
             });
     } catch (error) {
+        console.error('Unexpected error:', error);
     }
 }
 
-
-
-// Function to display the lottery events
 // Function to format the draw date
 function lottery_events_formatDrawDate(drawDate) {
     const now = new Date();
     const drawDay = new Date(drawDate);
 
-
-    // Calculate difference in days
     const diffTime = drawDay - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-
-    // If the draw date is within the next 7 days
     if (diffDays >= 0 && diffDays <= 6) {
         if (drawDay.toDateString() === now.toDateString()) {
             return `Draw today at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
@@ -1256,62 +1648,414 @@ function lottery_events_formatDrawDate(drawDate) {
         }
     }
 
-
-    // For dates beyond the next 7 days, show the exact date
     return `Draw on ${drawDay.toLocaleDateString()} at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 }
-
 
 // Function to display the lottery events
 function displayLotteryEvents(events) {
     const container = document.getElementById('lottery_events_container');
     container.innerHTML = ''; // Clear the container before rendering
 
-
-    // Check if events data is available
     if (events.length === 0) {
         container.innerHTML = '<p>No lottery events available.</p>';
         return;
     }
 
-
-    // Loop through the events and display them
     events.forEach(event => {
         const eventElement = document.createElement('div');
         eventElement.classList.add('lottery_events_event');
 
+        let drawDateString = event.is_active
+            ? lottery_events_formatDrawDate(event.draw_date)
+            : 'Inactive';
 
-        let drawDateString = '';
-        if (event.is_active) {
-            drawDateString = lottery_events_formatDrawDate(event.draw_date); // Use the new function to format the draw date
-        } else {
-            drawDateString = "Inactive"; // Show "Inactive" if the event is not active
-        }
-
-
+        const enterNowButton = `<a href="/lottery_detail/${event.slug}/" class="lottery_events_enter_button">Enter now</a>`;
+        
         eventElement.innerHTML = `
             <div class="lottery_events_event_header">${drawDateString}</div>
             ${event.image ? `<img src="${event.image}" alt="${event.title}" />` : ''}
             <h3>${event.title}</h3>
             <p><strong>Description:</strong> ${event.description}</p>
-            <div class="lottery_events_price">£${event.price}</div>
+            <div class="lottery_events_price">Prize:£${event.price}</div>
+            <div class="lottery_events_per_ticket_price">per ticket price:£${event.per_ticket_price}</div>
             <div class="lottery_events_sold_percentage">
                 <div class="lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
             </div>
             <p>SOLD: ${event.sold_percentage}%</p>
-            <a href="#" class="lottery_events_enter_button">Enter now</a>
+            ${enterNowButton}
+            
         `;
 
-
         container.appendChild(eventElement);
+    });
+
+    attachAddToCartListeners(); // Attach event listeners for "Add to Cart" buttons
+}
+
+//cart.html
+
+function addToCart(event) {
+    event.preventDefault();
+    const eventSlug = event.target.getAttribute('data-event-slug');
+    const ticketCount = document.getElementById('ticket-count').value;
+
+    fetch(add_to_carturl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ 
+            event_slug: eventSlug,
+            quantity: ticketCount,
+        }),
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.json().then(error => {
+                throw new Error(error.message);
+            });
+        }
+    })
+    .then(data => {
+        if (data.success) {
+            showModal(data.message); // Show success modal
+        }
+    })
+    .catch(error => {
+        showModal(error.message); // Show error modal
+        console.error('Error adding to cart:', error);
+    });
+}
+
+// Show modal function
+function showModal(message) {
+    const modal = document.getElementById('cart-modal');
+    const modalMessage = document.getElementById('cart-modal-message');
+    
+    modalMessage.textContent = message;
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    
+    // Close modal when clicking the close button (X)
+    const closeButton = document.querySelector('.cart-modal-close');
+    closeButton.addEventListener('click', () => {
+        closeModal(modal);
+    });
+
+    // Close modal when clicking outside the modal content
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal(modal);
+        }
+    });
+
+    // Keep Shopping Button
+    const keepShoppingButton = document.getElementById('cart-keep-shopping');
+    keepShoppingButton.addEventListener('click', () => {
+        closeModal(modal);
+    });
+
+    // View Cart Button
+    const viewCartButton = document.getElementById('cart-view-cart');
+    viewCartButton.addEventListener('click', () => {
+        window.location.href = cartUrl;
+    });
+}
+
+// Close modal function
+function closeModal(modal) {
+    modal.style.display = 'none';
+}
+
+// Utility function to get CSRF token
+function getCSRFToken() {
+    return document.cookie.split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+}
+
+// Function to attach "Add to Cart" event listeners dynamically
+function attachAddToCartListeners() {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-button');
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', addToCart);
+    });
+}
+
+// Call functions on page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lottery_events_fetch === 'function') {
+        lottery_events_fetch(); // Fetch and display lottery events if applicable
+    }
+    attachAddToCartListeners(); // Attach listeners to "Add to Cart" buttons
+});
+
+//finish
+
+// Function to fetch cart items
+function fetchCartItems() {
+    fetch(api_get_cart_url)
+        .then(response => response.json())
+        .then(data => {
+            displayCartItems(data);
+        })
+        .catch(error => {
+            console.error('Error fetching cart items:', error);
+        });
+}
+
+
+function displayCartItems(cart) {
+    const container = document.getElementById('cart_items_container');
+    const totalElement = document.getElementById('cart_total');
+    container.innerHTML = ''; // Clear existing items
+    let total = 0;
+
+    if (Object.keys(cart).length === 0) {
+        container.innerHTML = '<p>Your cart is empty.</p>';
+        totalElement.textContent = '0.00';
+        return;
+    }
+
+    for (const [eventSlug, item] of Object.entries(cart)) {
+        const itemTotal = parseFloat(item.per_ticket_price) * item.quantity;
+        total += itemTotal;
+
+        const cartItem = document.createElement('div');
+        cartItem.classList.add('cart_item');
+
+        cartItem.innerHTML = `
+            ${item.image ? `<img src="${item.image}" alt="${item.title}" style="width: 100px; height: auto;" />` : ''}
+            <h3>${item.title}</h3>
+            <p>Price: £${item.per_ticket_price}</p>
+            <p>Quantity: 
+                <button class="quantity-decrease" data-event-slug="${eventSlug}">-</button>
+                <input type="number" min="1" max="${item.max_limit}" value="${item.quantity}" class="quantity-input" data-event-slug="${eventSlug}" />
+                <button class="quantity-increase" data-event-slug="${eventSlug}">+</button>
+            </p>
+            <span class="max-limit-message"></span> <!-- Message span -->
+            <p>Total: £${itemTotal.toFixed(2)}</p>
+            <button class="remove_from_cart_button" data-event-slug="${eventSlug}">Remove</button>
+        `;
+
+        container.appendChild(cartItem);
+    }
+
+    totalElement.textContent = total.toFixed(2);
+    const removeButtons = document.querySelectorAll('.remove_from_cart_button');
+   removeButtons.forEach(button => {
+       button.addEventListener('click', removeFromCart);
+ });
+    
+    attachCartEventListeners(cart); // Attach listeners for quantity changes and remove buttons
+
+    // Add focus-out event listener for quantity inputs
+    const quantityInputs = container.querySelectorAll('.quantity-input');
+    quantityInputs.forEach(input => {
+        input.addEventListener('blur', event => {
+            const eventSlug = event.target.getAttribute('data-event-slug');
+            const newQuantity = parseInt(event.target.value);
+            const maxLimit = parseInt(event.target.getAttribute('max'));
+
+            const parentElement = event.target.closest('.cart_item');
+            const messageSpan = parentElement.querySelector('.max-limit-message');
+
+            if (newQuantity > maxLimit) {
+                event.target.value = '';
+                messageSpan.textContent = `Exceeds max limit of ${maxLimit}. Please enter a valid quantity.`;
+                //event.target.value = maxLimit; // Reset to max limit
+                //messageSpan.textContent = `Max limit of ${maxLimit} reached.`;
+                messageSpan.style.color = 'red';
+                messageSpan.style.fontSize = '12px';
+            } else if (newQuantity < 1) {
+                event.target.value = 1; // Reset to minimum limit
+            } else {
+                messageSpan.textContent = ''; // Clear message
+                updateCartQuantity(event, cart, newQuantity - cart[eventSlug].quantity);
+            }
+        });
+    });
+    
+}
+
+function attachCartEventListeners(cart) {
+    const increaseButtons = document.querySelectorAll('.quantity-increase');
+    const decreaseButtons = document.querySelectorAll('.quantity-decrease');
+
+    increaseButtons.forEach(button => {
+        button.addEventListener('click', event => updateCartQuantity(event, cart, 1));
+    });
+
+    decreaseButtons.forEach(button => {
+        button.addEventListener('click', event => updateCartQuantity(event, cart, -1));
     });
 }
 
 
-// Call the function to fetch and display lottery events when the page loads
-window.onload = function() {
-    lottery_events_fetch();
-};
+function updateCartQuantity(event, cart, delta) {
+    const eventSlug = event.target.getAttribute('data-event-slug');
+    const currentQuantity = parseInt(cart[eventSlug].quantity);
+    const maxLimit = parseInt(cart[eventSlug].max_limit);
+    const newQuantity = currentQuantity + delta;
+
+    // Get the parent element of the button
+    const parentElement = event.target.closest('.cart_item');
+    const messageSpan = parentElement.querySelector('.max-limit-message');
+
+    if (newQuantity > maxLimit) {
+        // Show max limit message
+        if (messageSpan) {
+            messageSpan.textContent = `Max limit of ${maxLimit} reached.`;
+            messageSpan.style.color = "red"; // Highlight in red
+            messageSpan.style.fontSize = "12px"; // Adjust font size
+        }
+        return;
+    } else if (messageSpan) {
+        // Clear message if within limit
+        messageSpan.textContent = '';
+    }
+
+    if (newQuantity >= 1) {
+        cart[eventSlug].quantity = newQuantity;
+
+        // Update cart cookie
+        fetch('/api/update-cart/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({ event_slug: eventSlug, quantity: newQuantity }),
+        }).then(() => fetchCartItems());
+    }
+}
+
+// Function to handle item removal from cart
+function removeFromCart(event) {
+    const eventSlug = event.target.getAttribute('data-event-slug');
+
+    fetch('/api/remove-from-cart/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ event_slug: eventSlug }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Item removed from cart!');
+                fetchCartItems(); // Refresh cart items
+            } else {
+                alert('Failed to remove item. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error removing item:', error);
+        });
+}
+
+// Dummy function for checkout (implement backend logic as needed)
+function proceedToCheckout() {
+    alert('Proceeding to checkout...');
+}
 
 
-//finish
+//lottery_detail.html
+fetch(`/api/lottery_detail/${eventSlug}/`)
+    .then((response) => response.json())
+    .then((data) => {
+        const ticketSlider = document.getElementById('ticket-slider');
+        const ticketInput = document.getElementById('ticket-count');
+
+        //per_ticket_price
+        // Populate lottery details
+        document.getElementById('lot-detail-event-title').textContent = data.title;
+        document.getElementById('lot-detail-event-description').textContent = data.description;
+        document.getElementById('lot-detail-event-price').textContent = `Prize: £${data.price}`;
+        document.getElementById('lot-detail-event-per-ticket-price').textContent = `per ticket price: £${data.per_ticket_price}`;
+        document.getElementById('event-sold-percentage').textContent = `Sold: ${data.sold_percentage}%`;
+        // document.getElementById('lot-detail-event-draw-datetime').textContent = data.draw_date;
+        // document.getElementById('lot-detail-event-image').src = data.image || '';
+        document.getElementById('free-postal-description').textContent = data.free_postal_description;
+
+
+          // Use the formatDrawDate function
+          const formattedDrawDate = lottery_events_formatDrawDate(data.draw_date);
+          document.getElementById('lot-detail-event-draw-datetime').textContent = formattedDrawDate;
+        // Update the sold bar and ticket info
+         const totalTickets = data.total_tickets || 0;
+         const soldTickets = data.sold_tickets || 0;
+       const soldPercentage = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0;
+
+
+        document.getElementById('lot-detail-ticket-info').textContent = ` ${soldTickets}/${totalTickets}`;
+        const soldBarFill = document.getElementById('lot-detail-sold-bar-fill');
+        soldBarFill.style.width = `${soldPercentage}%`;
+       soldBarFill.textContent = `${soldPercentage}%`;
+
+    // Update the event image
+    if (data.image) {
+        document.getElementById('lot-detail-event-image').src = data.image;
+    }
+    
+        // Ticket limits and slider
+        const miniLimit = data.mini_limit; // backend mini limit
+        const maxLimit = data.max_limit;
+
+
+        document.getElementById('ticket-max-limit').textContent = maxLimit;
+
+
+        ticketSlider.min = 1; // frontend minimum is 1
+        ticketSlider.max = maxLimit;
+        ticketSlider.value = miniLimit; // set the slider value to backend mini limit
+        ticketInput.value = miniLimit; // set the input value to backend mini limit
+
+
+        // Update slider and ticket input
+        ticketSlider.addEventListener("input", () => {
+            ticketInput.value = ticketSlider.value;
+        });
+
+
+        // Increment ticket count
+        document.getElementById('increment-ticket').addEventListener("click", () => {
+            const currentValue = parseInt(ticketInput.value);
+            if (currentValue < maxLimit) {
+                ticketInput.value = currentValue + 1;
+                ticketSlider.value = currentValue + 1;
+            }
+        });
+
+
+        // Decrement ticket count
+        document.getElementById('decrement-ticket').addEventListener("click", () => {
+            const currentValue = parseInt(ticketInput.value);
+            if (currentValue > 1) {
+                ticketInput.value = currentValue - 1;
+                ticketSlider.value = currentValue - 1;
+            }
+        });
+    })
+    .catch((error) => {
+        console.error('Error fetching lottery event details:', error);
+        alert('Failed to load lottery event details.');
+    });
+    $(document).ready(function () {
+        $('.tab-btn').on('click', function () {
+            const tabId = $(this).data('tab');
+    
+            // Highlight active tab button
+            $('.tab-btn').removeClass('active');
+            $(this).addClass('active');
+    
+            // Show active tab content
+            $('.tab-pane').removeClass('active');
+            $(`#${tabId}`).addClass('active');
+        });
+    });

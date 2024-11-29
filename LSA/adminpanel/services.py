@@ -7,6 +7,9 @@ from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseForbidden
 from django.http import HttpResponseForbidden, HttpResponseServerError
+from .models import LotteryEvent
+from django.shortcuts import render,get_object_or_404
+
 
 def admin_signup(request):
     try:
@@ -49,3 +52,12 @@ def lottery_events_add(request):
             return HttpResponseForbidden("You do not have permission to access this page.")
     except Exception as e:
         return HttpResponseServerError(f"Error rendering lottery events add page")
+
+
+def cart(request):
+    return render(request, 'cart.html')
+
+
+def lottery_detail_view(request, slug):
+    event = get_object_or_404(LotteryEvent, slug=slug)
+    return render(request, 'lottery_detail.html', {'event': event})

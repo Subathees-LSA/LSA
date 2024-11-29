@@ -8,10 +8,18 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import login
 from rest_framework import status
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAdminUser
-
+from rest_framework.response import Response
+from rest_framework import status
+from .models import LotteryEvent
+from .serializers import LotteryEventSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.contrib.sessions.models import Session
+import json
+from django.http import JsonResponse
 
 
 class api_admin_signup(generics.CreateAPIView):
@@ -37,6 +45,7 @@ class api_admin_signup(generics.CreateAPIView):
         except Exception as e:
             # Catch any unexpected exception
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class api_admin_login(APIView):
     serializer_class = api_admin_signup_Serializer
@@ -96,6 +105,7 @@ class api_admin_login(APIView):
             # Catch any unexpected exceptions and return an internal server error
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class api_get_lottery_events(APIView):
     
 
@@ -134,6 +144,7 @@ class api_lottery_events_add(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
   
 class api_edit_delete_lottery_events(APIView):
     serializer_class = LotteryEventSerializer
@@ -182,3 +193,126 @@ class api_edit_delete_lottery_events(APIView):
             return Response({"message": "Lottery event deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def add_to_cart(request):
+    print(request.data);
+    event_slug = request.data.get('event_slug')
+    quantity = int(request.data.get('quantity', 1))  # Default to 1 if not provided
+
+    if not event_slug:
+        return Response({"success": False, "message": "Event ID is required."}, status=400)
+
+    try:
+        event = LotteryEvent.objects.get(slug=event_slug)
+        max_limit = event.max_limit
+        event_title = event.title
+
+        # Get the existing cart from cookies
+        cart = json.loads(request.COOKIES.get('cart', '{}'))
+
+        # Get current quantity in cart for this event
+        current_quantity = int(cart.get(event_slug, {}).get('quantity', 0))
+        new_total_quantity = current_quantity + quantity
+
+        # Check if the total quantity exceeds the max limit
+        if new_total_quantity > max_limit:
+            remaining_quantity = max_limit - current_quantity
+            return Response({
+                "success": False,
+                "message": (
+                    f"Cannot add {quantity} tickets for '{event_title}'. Only {remaining_quantity} more tickets "
+                    f"can be added. Current quantity in cart: {current_quantity}. Max limit is {max_limit}."
+                ),
+                "event_title": event_title,
+                "current_quantity": current_quantity,
+                "remaining_quantity": remaining_quantity,
+                "max_limit": max_limit
+            }, status=400)
+
+        # Update the cart
+        cart[event_slug] = {
+            "title": event_title,
+            "per_ticket_price": str(event.per_ticket_price),
+            "quantity": new_total_quantity,  # Update total quantity
+            "image": event.image.url if event.image else None,
+            "max_limit": max_limit
+        }
+
+        # Save the updated cart in cookies
+        response = JsonResponse({
+            "success": True,
+            "message": (
+                f"'{event_title}' added to cart. {quantity} tickets successfully added. "
+                f"Current quantity in cart: {new_total_quantity}."
+            ),
+            "event_title": event_title,
+            "tickets_added": quantity,
+            "current_quantity": new_total_quantity
+        })
+        response.set_cookie('cart', json.dumps(cart), max_age=60 * 60 * 24 * 30)  # Store for 30 days
+        return response
+
+    except LotteryEvent.DoesNotExist:
+        return Response({"success": False, "message": "Event not found."}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_cart(request):
+    cart = json.loads(request.COOKIES.get('cart', '{}'))
+    return Response(cart)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def remove_from_cart(request):
+    print(request.data);
+    event_slug = request.data.get('event_slug')
+
+    if not event_slug:
+        return Response({"success": False, "message": "Event ID is required."}, status=400)
+
+    cart = json.loads(request.COOKIES.get('cart', '{}'))
+    if event_slug in cart:
+        del cart[event_slug]
+
+        # Update cart cookie
+        response = JsonResponse({"success": True, "message": "Item removed from cart."})
+        response.set_cookie('cart', json.dumps(cart), max_age=60*60*24*30)  # Store for 30 days
+        return response
+
+    return Response({"success": False, "message": "Item not found in cart."}, status=404)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def update_cart(request):
+    print(request.data);
+    event_slug = request.data.get('event_slug')
+    quantity = int(request.data.get('quantity', 1))
+
+    cart = json.loads(request.COOKIES.get('cart', '{}'))
+
+    if event_slug in cart:
+        max_limit = cart[event_slug].get('max_limit', 1)
+        if quantity <= max_limit:
+            cart[event_slug]['quantity'] = quantity
+
+            response = JsonResponse({"success": True, "message": "Cart updated."})
+            response.set_cookie('cart', json.dumps(cart), max_age=60*60*24*30)  # Store for 30 days
+            return response
+
+    return Response({"success": False, "message": "Failed to update cart."}, status=400)
+
+
+class LotteryDetail(APIView):
+    serializer_class = LotteryEventSerializer   
+    def get(self, request, slug, format=None):
+        event = get_object_or_404(LotteryEvent, slug=slug)
+        serializer = LotteryEventSerializer(event)
+        return Response(serializer.data)
+        
+         

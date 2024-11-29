@@ -57,8 +57,8 @@ class api_admin_login_Serializer(serializers.Serializer):
 class LotteryEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = LotteryEvent
-        fields = ['id', 'title', 'description', 'price', 'draw_date', 'image', 'is_active', 'sold_percentage','total_tickets']
-    
+        #fields = ['id','slug','title', 'description', 'price', 'draw_date', 'image', 'is_active', 'sold_percentage','total_tickets','mini_limit','max_limit','free_postal_description']
+        fields = '__all__'
     def validate_image(self, value):
         # If image is not provided in request data
         if not value:

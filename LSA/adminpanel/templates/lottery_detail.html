@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottery Event Detail</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const eventId = "{{ pk }}";
+        const eventSlug = "{{ event.slug }}";
+        const add_to_carturl = "{% url 'add_to_cart' %}";
+        const cartUrl = "{% url 'cart' %}"; 
+    </script>
+    <script src="{% static 'js/custom.js' %}"></script>
+    
+</head>
+<body>
+    <div class="lot-detail-container">
+        <div class="lot-detail-image">
+            <img id="lot-detail-event-image" src="" alt="Event Image">
+        </div>
+        <div class="lot-detail-info">
+            <p id="lot-detail-event-draw-datetime"></p>
+            <h1 id="lot-detail-event-title">Loading...</h1>
+            <p id="lot-detail-event-description"></p>
+            <p class="lot-detail-price" id="lot-detail-event-price"></p>
+            <p class="lot-detail-event-per-ticket-price" id="lot-detail-event-per-ticket-price"></p>
+            <p id="event-sold-percentage" class="event-sold-percentage"></p>
+            <div class="lot-detail-sold-bar-container">
+                <div class="lot-detail-sold-bar">
+                    <div id="lot-detail-sold-bar-fill" class="lot-detail-sold-bar-fill-class" style="width: 0%;"></div>
+                </div>
+                <p id="lot-detail-ticket-info">Sold: 0/0</p>
+            </div>
+
+
+            <!-- Tabbed Interface -->
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="online-entry">Online Entry</button>
+                    <button class="tab-btn" data-tab="free-postal-entry">Free Postal Entry</button>
+                </div>
+                <div class="tab-content-container">
+                    <div class="tab-content">
+                        <!-- Online Entry Tab -->
+                        <div class="tab-pane active" id="online-entry">
+                            <div class="ticket-control-container">
+                                <div class="ticket-selection">
+                                    <h3>How many tickets?</h3>
+                                    <div class="ticket-control-buttons">
+                                        <button id="decrement-ticket" class="control-btn">-</button>
+                                        <input type="text" id="ticket-count" class="ticket-input" value="1" readonly />
+                                        <button id="increment-ticket" class="control-btn">+</button>
+                                    </div>
+                                    <div class="ticket-slider-container">
+                                        <input 
+                                            type="range" 
+                                            id="ticket-slider" 
+                                            class="ticket-slider" 
+                                            value="" 
+                                            step="1"
+                                        />
+                                    </div>
+                                    <p class="ticket-limit-info">
+                                        Minimum: 1, Maximum: <span id="ticket-max-limit"></span>
+                                    </p>
+                                </div>
+                                
+                                <button id="add-to-cart-button" class="add-to-cart-button" data-event-slug="{{ event.slug }}" data-max-limit="{{ max_limit }}" >
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                
+                        <!-- Free Postal Entry Tab -->
+                        <div class="tab-pane" id="free-postal-entry">
+                            <p id="free-postal-description">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Trustpilot Widget -->
+                <div class="trustpilot-widget">
+                    <a href="https://www.trustpilot.com/review/yourwebsite.com" class="trustpilot-widget" data-businessunit-id="your-business-unit-id" data-style-height="30px" data-style-width="100%" data-theme="light" data-stars="5">
+                        Trustpilot
+                    </a>
+                    <script type="text/javascript" src="https://widget.trustpilot.com/bootstrap/v5/tp.widget.js" async></script>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cart-modal" class="cart-modal hidden">
+        <div class="cart-modal-content">
+            <span class="cart-modal-close">&times;</span>
+            <p id="cart-modal-message"></p>
+            <div class="cart-modal-buttons">
+                <button id="cart-keep-shopping" class="cart-button">Keep Shopping</button>
+                <button id="cart-view-cart" class="cart-button">View Cart</button>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

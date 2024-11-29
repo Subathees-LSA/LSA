@@ -21,7 +21,14 @@ urlpatterns = [
     path('api/edit-delete-lottery-events/<int:pk>/', api_edit_delete_lottery_events.as_view(), name='api_edit_delete_lottery_events'),
     path('lottery-events/add/', lottery_events_add, name='lottery_events_add'),
     path('api/lottery-events/add/', api_lottery_events_add.as_view(), name='api_lottery_events_add'),
-
+    path('cart/', cart, name='cart'),
+    path('api/add-to-cart/', add_to_cart, name='add_to_cart'),
+    path('api/get-cart/', get_cart, name='api_get_cart'),
+    path('api/remove-from-cart/', remove_from_cart, name='api_remove_from_cart'),
+    path('api/update-cart/', update_cart, name='api_update_cart'),
+    path('api/lottery_detail/<slug:slug>/', LotteryDetail.as_view(), name='api_get_lottery_event_detail'),
+    path('lottery_detail/<slug:slug>/', lottery_detail_view, name='lottery_detail'),
+    
 ]
 
 if settings.DEBUG:
