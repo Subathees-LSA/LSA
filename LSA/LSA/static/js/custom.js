@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add Event Listeners for Inputs
     totalBudgetInput.addEventListener('input', updateTotalAmount);
     fixedRevenueInput.addEventListener('input', updateTotalAmount);
-    percentageRevenueSelect.addEventListener('change', updateTotalAmount);
+    percentageRevenueSelect.addEventListener('input', updateTotalAmount);
     perTicketPriceInput.addEventListener('input', updateTotalTickets);
 });
 
@@ -1525,15 +1525,16 @@ if (revenueTypeSelect.value === 'fixed') {
         }
         
         // Validate Percentage Revenue (if Percentage Revenue Type is selected)
+       
         if (revenueType === 'percentage') {
-            if (percentageRevenue === '0') {
-                document.getElementById('lottery_events_add_percentage_revenue_validation').textContent = 'Please select a percentage for revenue.';
+            if (percentageRevenue === '' || percentageRevenue <= 0) {
+                document.getElementById('lottery_events_add_percentage_revenue_validation').textContent = 'percentage Amount must be greater than zero.';
                 isValid = false;
             } else {
                 document.getElementById('lottery_events_add_percentage_revenue_validation').textContent = ''; // Clear any previous error
             }
+        
         }
-    
         // If all fields are valid, proceed with form submission
         if (isValid) {
             // Dynamically add calculated fields to formData
