@@ -1698,7 +1698,7 @@ function displayLotteryEvents(events) {
 function addToCart(event) {
     event.preventDefault();
     const eventSlug = event.target.getAttribute('data-event-slug');
-    const ticketCount = document.getElementById('ticket-count').value;
+    const ticketCount = document.getElementById('lot-detail-ticket-count').value;
 
     fetch(add_to_carturl, {
         method: 'POST',
@@ -1737,7 +1737,7 @@ function showModal(message) {
     const modalMessage = document.getElementById('cart-modal-message');
     
     modalMessage.textContent = message;
-    modal.classList.remove('hidden');
+    modal.classList.remove('hiddencart');
     modal.style.display = 'flex';
     
     // Close modal when clicking the close button (X)
@@ -1967,96 +1967,299 @@ function proceedToCheckout() {
 
 
 //lottery_detail.html
+// fetch(`/api/lottery_detail/${eventSlug}/`)
+//     .then((response) => response.json())
+//     .then((data) => {
+//         const ticketSlider = document.getElementById('ticket-slider');
+//         const ticketInput = document.getElementById('ticket-count');
+
+//         //per_ticket_price
+//         // Populate lottery details
+//         document.getElementById('lot-detail-event-title').textContent = data.title;
+//         document.getElementById('lot-detail-event-description').textContent = data.description;
+//         document.getElementById('lot-detail-event-price').textContent = `Prize: £${data.price}`;
+//         document.getElementById('lot-detail-event-per-ticket-price').textContent = `per ticket price: £${data.per_ticket_price}`;
+//         document.getElementById('event-sold-percentage').textContent = `Sold: ${data.sold_percentage}%`;
+//         // document.getElementById('lot-detail-event-draw-datetime').textContent = data.draw_date;
+//         // document.getElementById('lot-detail-event-image').src = data.image || '';
+//         document.getElementById('free-postal-description').textContent = data.free_postal_description;
+
+
+//           // Use the formatDrawDate function
+//           const formattedDrawDate = lottery_events_formatDrawDate(data.draw_date);
+//           document.getElementById('lot-detail-event-draw-datetime').textContent = formattedDrawDate;
+//         // Update the sold bar and ticket info
+//          const totalTickets = data.total_tickets || 0;
+//          const soldTickets = data.sold_tickets || 0;
+//        const soldPercentage = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0;
+
+
+//         document.getElementById('lot-detail-ticket-info').textContent = ` ${soldTickets}/${totalTickets}`;
+//         const soldBarFill = document.getElementById('lot-detail-sold-bar-fill');
+//         soldBarFill.style.width = `${soldPercentage}%`;
+//        soldBarFill.textContent = `${soldPercentage}%`;
+
+//     // Update the event image
+//     if (data.image) {
+//         document.getElementById('lot-detail-event-image').src = data.image;
+//     }
+    
+//         // Ticket limits and slider
+//         const miniLimit = data.mini_limit; // backend mini limit
+//         const maxLimit = data.max_limit;
+
+
+//         document.getElementById('ticket-max-limit').textContent = maxLimit;
+
+
+//         ticketSlider.min = 1; // frontend minimum is 1
+//         ticketSlider.max = maxLimit;
+//         ticketSlider.value = miniLimit; // set the slider value to backend mini limit
+//         ticketInput.value = miniLimit; // set the input value to backend mini limit
+
+
+//         // Update slider and ticket input
+//         ticketSlider.addEventListener("input", () => {
+//             ticketInput.value = ticketSlider.value;
+//         });
+
+
+//         // Increment ticket count
+//         document.getElementById('increment-ticket').addEventListener("click", () => {
+//             const currentValue = parseInt(ticketInput.value);
+//             if (currentValue < maxLimit) {
+//                 ticketInput.value = currentValue + 1;
+//                 ticketSlider.value = currentValue + 1;
+//             }
+//         });
+
+
+//         // Decrement ticket count
+//         document.getElementById('decrement-ticket').addEventListener("click", () => {
+//             const currentValue = parseInt(ticketInput.value);
+//             if (currentValue > 1) {
+//                 ticketInput.value = currentValue - 1;
+//                 ticketSlider.value = currentValue - 1;
+//             }
+//         });
+//     })
+//     .catch((error) => {
+//         console.error('Error fetching lottery event details:', error);
+//         alert('Failed to load lottery event details.');
+//     });
+//     $(document).ready(function () {
+//         $('.tab-btn').on('click', function () {
+//             const tabId = $(this).data('tab');
+    
+//             // Highlight active tab button
+//             $('.tab-btn').removeClass('active');
+//             $(this).addClass('active');
+    
+//             // Show active tab content
+//             $('.tab-pane').removeClass('active');
+//             $(`#${tabId}`).addClass('active');
+//         });
+//     });
+
+/*-------------------lottery_details-----------------------------------*/
 fetch(`/api/lottery_detail/${eventSlug}/`)
-    .then((response) => response.json())
-    .then((data) => {
-        const ticketSlider = document.getElementById('ticket-slider');
-        const ticketInput = document.getElementById('ticket-count');
+.then((response) => response.json())
+.then((data) => {
+    // DOM elements for event details
+    const additionalImagesContainer = document.getElementById("additional-images-container");
+    const popup = document.getElementById("lot-detail-image-popup");
+    const popupImage = document.getElementById("lot-detail-popup-image");
+    const closePopup = document.getElementById("lot-detail-close-popup");
+    const prevImageBtn = document.getElementById("lot-detail-prev-image");
+    const nextImageBtn = document.getElementById("lot-detail-next-image");
+    const currentIndexSpan = document.getElementById("lot-detail-current-image-index");
+    const totalImagesSpan = document.getElementById("lot-detail-total-images");
+    const eventImage = document.getElementById("lot-detail-event-image");
+    const competitionDetailsList = document.getElementById("lot-detail-competition-list");
+    const faqList = document.getElementById("lot-detail-faq-list");
+    const ticketSlider = document.getElementById('lot-detail-ticket-slider');
+    const ticketInput = document.getElementById('lot-detail-ticket-count');
 
-        //per_ticket_price
-        // Populate lottery details
-        document.getElementById('lot-detail-event-title').textContent = data.title;
-        document.getElementById('lot-detail-event-description').textContent = data.description;
-        document.getElementById('lot-detail-event-price').textContent = `Prize: £${data.price}`;
-        document.getElementById('lot-detail-event-per-ticket-price').textContent = `per ticket price: £${data.per_ticket_price}`;
-        document.getElementById('event-sold-percentage').textContent = `Sold: ${data.sold_percentage}%`;
-        // document.getElementById('lot-detail-event-draw-datetime').textContent = data.draw_date;
-        // document.getElementById('lot-detail-event-image').src = data.image || '';
-        document.getElementById('free-postal-description').textContent = data.free_postal_description;
+    let currentIndex = 0;
 
+    /*------- Populate lottery event details----------*/
+    document.getElementById('lot-detail-event-title').textContent = data.title;
+    document.getElementById('lot-detail-event-description').textContent = data.description;
+    document.getElementById('lot-detail-event-price').textContent = `Prize:£${data.price}`;
+    document.getElementById('lot-detail-event-per-ticket-price').textContent = `per ticket price: £${data.per_ticket_price}`;
+    document.getElementById('event-sold-percentage').textContent = `Sold: ${data.sold_percentage}%`;
+    document.getElementById('lot-detail-free-postal-description').textContent = data.free_postal_description;
+   
+    document.getElementById('lot-detail-ticket-info').textContent = `${data.sold_tickets}/${data.total_tickets}`;
+    document.getElementById('lot-detail-sold-bar-fill').style.width = `${data.sold_Percentage}%`;
+   
+    const formattedDrawDate = lottery_events_formatDrawDate(data.draw_date);
+    document.getElementById('lot-detail-event-draw-datetime').textContent = formattedDrawDate;
 
-          // Use the formatDrawDate function
-          const formattedDrawDate = lottery_events_formatDrawDate(data.draw_date);
-          document.getElementById('lot-detail-event-draw-datetime').textContent = formattedDrawDate;
-        // Update the sold bar and ticket info
-         const totalTickets = data.total_tickets || 0;
-         const soldTickets = data.sold_tickets || 0;
-       const soldPercentage = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0;
+    /*-----------Update the primary event image-------------*/
+    eventImage.src = data.image;
 
+    
 
-        document.getElementById('lot-detail-ticket-info').textContent = ` ${soldTickets}/${totalTickets}`;
-        const soldBarFill = document.getElementById('lot-detail-sold-bar-fill');
-        soldBarFill.style.width = `${soldPercentage}%`;
-       soldBarFill.textContent = `${soldPercentage}%`;
+/*----------------- Populate additional images-----------------*/
+if (data.additional_images && data.additional_images.length > 0) {
+    data.additional_images.forEach((img) => {
+        const imgElement = document.createElement("img");
+        imgElement.src = img.image;
+        imgElement.alt = "Additional Image";
+        imgElement.classList.add("lot-detail-additional-image");
+        additionalImagesContainer.appendChild(imgElement);
+    });
 
-    // Update the event image
-    if (data.image) {
-        document.getElementById('lot-detail-event-image').src = data.image;
+    const additionalImages = document.querySelectorAll(".lot-detail-additional-image");
+
+    /*------------Show popup with the clicked image---------*/
+    const showPopup = (index) => {
+        currentIndex = index;
+        popupImage.src = additionalImages[currentIndex].src;
+        currentIndexSpan.textContent = currentIndex + 1;
+        totalImagesSpan.textContent = additionalImages.length;
+        popup.classList.remove("hidden");
+    };
+
+    additionalImages.forEach((image, index) => {
+        image.addEventListener("click", () => showPopup(index));
+    });
+
+    closePopup.addEventListener("click", () => {
+        popup.classList.add("hidden");
+    });
+
+    nextImageBtn.addEventListener("click", () => {
+        currentIndex = (currentIndex + 1) % additionalImages.length;
+        showPopup(currentIndex);
+    });
+
+    prevImageBtn.addEventListener("click", () => {
+        currentIndex = (currentIndex - 1 + additionalImages.length) % additionalImages.length;
+        showPopup(currentIndex);
+    });
+
+    popup.addEventListener("click", (e) => {
+        if (e.target === popup) {
+            popup.classList.add("hidden");
+        }
+    });
+} else {
+    console.warn("No additional images found for this event.");
+}
+
+   
+    /*--------------------Populate competition details--------------*/
+    if (data.competition_details && data.competition_details.length > 0) {
+        data.competition_details.forEach((detail) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = detail;
+            competitionDetailsList.appendChild(listItem);
+        });
+    } else {
+        competitionDetailsList.textContent = "No competition details available.";
     }
     
-        // Ticket limits and slider
-        const miniLimit = data.mini_limit; // backend mini limit
-        const maxLimit = data.max_limit;
-
-
-        document.getElementById('ticket-max-limit').textContent = maxLimit;
-
-
-        ticketSlider.min = 1; // frontend minimum is 1
-        ticketSlider.max = maxLimit;
-        ticketSlider.value = miniLimit; // set the slider value to backend mini limit
-        ticketInput.value = miniLimit; // set the input value to backend mini limit
-
-
-        // Update slider and ticket input
-        ticketSlider.addEventListener("input", () => {
-            ticketInput.value = ticketSlider.value;
+    /*------ Populate FAQs------------------*/
+    if (data.faq && data.faq.length > 0) {
+        data.faq.forEach((faq) => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `<strong>Q: ${faq.question} </strong><br> <strong>A:</strong> ${faq.answer}`;
+            faqList.appendChild(listItem);
         });
-
-
-        // Increment ticket count
-        document.getElementById('increment-ticket').addEventListener("click", () => {
-            const currentValue = parseInt(ticketInput.value);
-            if (currentValue < maxLimit) {
-                ticketInput.value = currentValue + 1;
-                ticketSlider.value = currentValue + 1;
-            }
-        });
-
-
-        // Decrement ticket count
-        document.getElementById('decrement-ticket').addEventListener("click", () => {
-            const currentValue = parseInt(ticketInput.value);
-            if (currentValue > 1) {
-                ticketInput.value = currentValue - 1;
-                ticketSlider.value = currentValue - 1;
-            }
-        });
-    })
-    .catch((error) => {
-        console.error('Error fetching lottery event details:', error);
-        alert('Failed to load lottery event details.');
-    });
+    } else {
+        faqList.textContent = "No FAQs available.";
+    }
+    
     $(document).ready(function () {
-        $('.tab-btn').on('click', function () {
+        // Handle tab navigation
+        $('.lot-detail-tab-btn').on('click', function () {
             const tabId = $(this).data('tab');
     
-            // Highlight active tab button
-            $('.tab-btn').removeClass('active');
+            // Highlight the active tab button
+            $('.lot-detail-tab-btn').removeClass('active');
             $(this).addClass('active');
     
-            // Show active tab content
-            $('.tab-pane').removeClass('active');
+            // Show the active tab content
+            $('.lot-detail-tab-pane').removeClass('active');
             $(`#${tabId}`).addClass('active');
         });
-    });
+        const miniLimit = data.mini_limit; // backend mini limit
+                 const maxLimit = data.max_limit;
+        
+        
+                document.getElementById('lot-detail-ticket-max-limit').textContent = maxLimit;
+        
+        
+                ticketSlider.min = 1; // frontend minimum is 1
+                ticketSlider.max = maxLimit;
+                ticketSlider.value = miniLimit; // set the slider value to backend mini limit
+                ticketInput.value = miniLimit; // set the input value to backend mini limit
+        
+        
+                // Update slider and ticket input
+                ticketSlider.addEventListener("input", () => {
+                    ticketInput.value = ticketSlider.value;
+                });
+        
+        
+                // Increment ticket count
+                document.getElementById('lot-detail-increment-ticket').addEventListener("click", () => {
+                    const currentValue = parseInt(ticketInput.value);
+                    if (currentValue < maxLimit) {
+                        ticketInput.value = currentValue + 1;
+                        ticketSlider.value = currentValue + 1;
+                    }
+                });
+        
+        
+                // Decrement ticket count
+                document.getElementById('lot-detail-decrement-ticket').addEventListener("click", () => {
+                    const currentValue = parseInt(ticketInput.value);
+                    if (currentValue > 1) {
+                        ticketInput.value = currentValue - 1;
+                        ticketSlider.value = currentValue - 1;
+                    }
+                });
+            })
+        });
+
+//         /* Set ticket slider and input limits */
+//         const miniLimit = data.mini_limit;
+//         const maxLimit = data.max_limit;
+    
+//         document.getElementById('lot-detail-ticket-max-limit').textContent = maxLimit;
+    
+      
+//         ticketSlider.min = 1;
+//         ticketSlider.max = maxLimit;
+//         ticketSlider.value = miniLimit;
+//         ticketInput.textContent = miniLimit;
+    
+//         // Sync slider value to input text when slider changes
+//         ticketSlider.addEventListener("input", () => {
+//             ticketInput.textContent = ticketSlider.value;
+//         });
+    
+//         // Increment button handler
+//         document.getElementById('lot-detail-increment-ticket').addEventListener("click", () => {
+//             const currentValue = parseInt(ticketInput.textContent);
+//             if (currentValue < maxLimit) {
+//                 const newValue = currentValue + 1;
+//                 ticketInput.textContent = newValue;
+//                 ticketSlider.value = newValue;
+//             }
+//         });
+    
+//         // Decrement button handler
+//         document.getElementById('lot-detail-decrement-ticket').addEventListener("click", () => {
+//             const currentValue = parseInt(ticketInput.textContent);
+//             if (currentValue > 1) {
+//                 const newValue = currentValue - 1;
+//                 ticketInput.textContent = newValue;
+//                 ticketSlider.value = newValue;
+//             }
+//         });
+//     });
+// });

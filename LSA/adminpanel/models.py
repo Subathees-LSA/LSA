@@ -45,7 +45,9 @@ class LotteryEvent(models.Model):
     mini_limit = models.PositiveIntegerField(default=1)  # Minimum number of tickets
     max_limit = models.PositiveIntegerField(default=10)  # Maximum number of tickets
     free_postal_description = models.TextField(default="Enter the description for free postal entry.")
-    
+    competition_details = models.JSONField(default=list)  # Dynamic competition details
+    faq = models.JSONField(default=list)  # Dynamic FAQ section
+
     
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -73,4 +75,11 @@ class LotteryEvent(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.sold_percentage}% sold"
-    
+
+class LotteryEventImages(models.Model):
+    lottery_event = models.ForeignKey(LotteryEvent, related_name="additional_images", on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='lottery_event_additional_images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def _str_(self):
+        return f"Image for {self.lottery_event.title}"    

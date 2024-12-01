@@ -936,12 +936,11 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
 
 /*----------lottery_details--------------*/
-body {
+.lottery-detail-page {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
 }
-
 
 .lot-detail-container {
     display: flex;
@@ -951,7 +950,6 @@ body {
     padding: 20px;
 }
 
-
 .lot-detail-image {
     flex: 1;
     display: flex;
@@ -960,10 +958,9 @@ body {
     padding: 20px;
 }
 
-
 .lot-detail-image img {
-    max-width: 100%;
-    border-radius: 8px;
+    width: 300px;   /* Set a fixed width */
+    height: auto;   /* Maintain aspect ratio */
 }
 
 
@@ -972,18 +969,17 @@ body {
     padding: 20px;
 }
 
-
 .lot-detail-info h1 {
     font-size: 1.8em;
     margin-bottom: 10px;
+    
 }
-
 
 .lot-detail-info p {
     font-size: 1.1em;
     margin: 5px 0;
+    
 }
-
 
 .lot-detail-price {
     font-size: 1.5em;
@@ -991,16 +987,14 @@ body {
     margin: 10px 0;
 }
 
-
 .lot-detail-sold-bar-container {
     margin-top: 20px;
 }
 
-
 .lot-detail-sold-bar-container p {
     margin: 5px 0;
-}
 
+}
 
 .lot-detail-sold-bar {
     background-color: #f0f0f0;
@@ -1011,7 +1005,6 @@ body {
     width: 100%;
 }
 
-
 .lot-detail-sold-bar-fill-class {
     background-color: #007bff;
     height: 100%;
@@ -1021,36 +1014,26 @@ body {
     font-size: 0.9em;
 }
 
-
 @media (max-width: 768px) {
     .lot-detail-container {
         flex-direction: column;
     }
 
-
     .lot-detail-image {
         margin-bottom: 20px;
     }
 }
-
-
-.ticket-control-container {
-    margin-top: 20px; /* Adds spacing between the sold bar and ticket control */
-}
-
-
-.tab-container {
+/* General Tab Container Styles */
+.lot-detail-tab-container {
     margin-top: 20px;
 }
 
-
-.tab-buttons {
+.lot-detail-tab-buttons {
     display: flex;
     border-bottom: 2px solid #ddd;
 }
 
-
-.tab-btn {
+.lot-detail-tab-btn {
     padding: 10px 20px;
     cursor: pointer;
     border: none;
@@ -1059,34 +1042,149 @@ body {
     margin-right: 5px;
 }
 
-
-.tab-btn.active {
+.lot-detail-tab-btn.active {
     background-color: #007bff;
     color: #fff;
 }
-.tab-content-container {
-    max-height: 400px; /* Set the maximum height for the content container */
-    overflow-y: auto; /* Enable vertical scrolling */
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    border: 1px solid #ccc; /* Optional: add a border for a cleaner look */
-    padding: 10px; /* Optional: add padding for better spacing */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: add a shadow effect */
+
+.lot-detail-tab-content-container {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-
-.tab-content {
-    margin: 0;
-    padding: 0;
-}
-
-
-.tab-pane {
+.lot-detail-tab-pane {
     display: none;
 }
 
-
-.tab-pane.active {
+.lot-detail-tab-pane.active {
     display: block;
+}
+
+/* Ticket Control Styles */
+.lot-detail-ticket-control-container {
+    margin-top: 20px;
+}
+
+.lot-detail-ticket-control-buttons {
+    display: flex;
+    align-items: center;
+}
+
+.lot-detail-control-btn {
+    margin: 0 10px;
+}
+
+.lot-detail-ticket-slider-container {
+    margin: 10px 0;
+}
+
+.lot-detail-ticket-limit-info {
+    font-size: 14px;
+    color: #555;
+}
+
+.lot-detail-competition, .lot-detail-faq {
+    margin: 20px 0;
+}
+
+.lot-detail-faq-item {
+    margin-bottom: 10px;
+}
+
+.lot-detail-faq-question {
+    font-weight: bold;
+}
+
+.lot-detail-faq-answer {
+    margin-left: 20px;
+}
+
+/* Additional Images Styling */
+#additional-images-container img {
+    width: 100px;
+    height: auto; 
+    max-width: 100%; 
+    margin: 10px; 
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow */
+    cursor: pointer; /* Indicate clickable images */
+    object-fit: cover; /* Ensure consistent scaling */
+}
+/* Popup Container */
+#lot-detail-image-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Show the Popup */
+#lot-detail-image-popup:not(.hidden) {
+    display: flex;
+}
+
+/* Popup Content */
+.lot-detail-popup-content {
+    position: relative;
+    text-align: center;
+}
+
+/* Popup Image */
+#lot-detail-popup-image {
+    max-width: 90%;
+    max-height: 80vh;
+}
+
+/* Navigation Buttons */
+.lot-detail-popup-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+}
+
+.lot-detail-prev-btn {
+    left: 10px;
+}
+
+.lot-detail-next-btn {
+    right: 10px;
+}
+
+/* Close Button */
+.lot-detail-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+}
+
+/* Image Counter */
+.lot-detail-image-counter {
+    margin-top: 10px;
+    color: white;
+    font-size: 16px;
+}
+.hidden {
+    display: none;
 }
 
         /* Close button styling */
@@ -1153,7 +1251,7 @@ body {
     cursor: pointer;
 }
 
-.hidden {
+.hiddencart {
     display: none;
 }
 /* Button styles for modal */
