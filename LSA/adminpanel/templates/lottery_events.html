@@ -7,17 +7,20 @@
     <title>Lottery Events</title>
     
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
-    <script>
+    <script> 
+        const add_to_carturl = "{% url 'add_to_cart' %}";  
+        const cartUrl = "{% url 'cart' %}";  
         const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
         window.onload = function() {
           lottery_events_fetch();
           };
+
       </script>
     <script src="{% static 'js/custom.js' %}"></script>
 </head>
 <body>
     <h1 class="lottery_events_title">Lottery Events</h1>
-    <div class="lottery_events_displayed_container" id="lottery_events_container">
+    <div class="lottery_events_displayed_container" id="lottery_events_container">       
         <!-- Lottery events will be displayed here -->
     </div>
     

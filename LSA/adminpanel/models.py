@@ -1,7 +1,6 @@
-# Create your models here.
 from django.contrib.auth.models import User
 from django.db import models
-
+from django.utils.text import slugify
 
 class adminProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -28,6 +27,7 @@ class adminProfile(models.Model):
 
 class LotteryEvent(models.Model):
     title = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, blank=True)  # Slug field
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     draw_date = models.DateTimeField()
@@ -36,14 +36,50 @@ class LotteryEvent(models.Model):
     sold_percentage = models.PositiveIntegerField(default=0)
     total_tickets = models.PositiveIntegerField(default=0)  # New field for total tickets
     sold_tickets = models.PositiveIntegerField(default=0)   # Field for sold tickets
+    total_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    revenue_type = models.CharField(max_length=50, choices=[('fixed', 'Fixed'), ('percentage', 'Percentage')], default='fixed')
+    revenue_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    per_ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # New Field
 
+    mini_limit = models.PositiveIntegerField(default=1)  # Minimum number of tickets
+    max_limit = models.PositiveIntegerField(default=10)  # Maximum number of tickets
+    free_postal_description = models.TextField(default="Enter the description for free postal entry.")
+    competition_details = models.JSONField(default=list)  # Dynamic competition details
+    faq = models.JSONField(default=list)  # Dynamic FAQ section
+
+    
     def save(self, *args, **kwargs):
-        # Calculate the sold percentage based on total tickets if total tickets > 0
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+
+
+            # Ensure slug is unique
+            while LotteryEvent.objects.filter(slug=slug).exclude(id=self.id).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+        
+            self.slug = slug
+
+
+        # Calculate the sold percentage
         if self.total_tickets > 0:
             self.sold_percentage = (self.sold_tickets / self.total_tickets) * 100
         else:
             self.sold_percentage = 0
+
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} - {self.sold_percentage}% sold"
+
+class LotteryEventImages(models.Model):
+    lottery_event = models.ForeignKey(LotteryEvent, related_name="additional_images", on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='lottery_event_additional_images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def _str_(self):
+        return f"Image for {self.lottery_event.title}"    

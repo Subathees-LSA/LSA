@@ -45,8 +45,53 @@
     <input type="checkbox" name="is_active" checked> Active<br>
     <span class="lottery_events_add_isactive_error" id="lottery_events_add_isactive_validation"></span><br>
 
-    <input type="number" name="total_tickets" placeholder="Total Tickets" min="1" step="1" value="1"><br>
-    <span class="lottery_events_add_totaltickets_error" id="lottery_events_add_totaltickets_validation"></span><br>
+  
+<!-- Total Budget Amount -->
+<label for="totalBudget">Total Budget Amount:</label>
+<input type="number" id="lottery_events_add_totalBudget" name="total_budget" placeholder="Enter Total Budget" min="0" required><br>
+<span class="lottery_events_add_budget_error" id="lottery_events_add_budget_validation"></span><br>
+<!-- Revenue Type -->
+<label for="revenueType">Revenue Type:</label>
+<select id="lottery_events_add_revenueType" name="revenue_type">
+    <option value="fixed">Fixed Amount</option>
+    <option value="percentage">Percentage</option>
+</select><br>
+<span class="lottery_events_add_revenue_type_error" id="lottery_events_add_revenue_type_validation"></span><br>
+
+<!-- Revenue Input -->
+<div id="lottery_events_add_fixedAmountInput">
+    <label for="fixedRevenue">Fixed Revenue Amount:</label>
+    <input type="number" id="lottery_events_add_fixedRevenue" name="fixed_revenue" placeholder="Enter Fixed Revenue" min="0"><br>
+    <span class="lottery_events_add_fixed_revenue_error" id="lottery_events_add_fixed_revenue_validation"></span><br>
+</div>
+
+<div id="lottery_events_add_percentageInput" style="display: none;">
+    <label for="percentageRevenue">Percentage Revenue:</label>
+   
+    <input type="number" id="lottery_events_add_percentageRevenue" name="percentage_revenue" placeholder="Enter percentage" min="0"  max="100"  oninput="this.value = Math.min(Math.max(this.value, 0), 100)" required><br>
+
+
+    <span class="lottery_events_add_percentage_revenue_error" id="lottery_events_add_percentage_revenue_validation"></span><br>
+</div>
+
+<!-- Display Total Amount -->
+<div id="lottery_events_add_total_amount_container" style="display: none;">
+    <label for="totalAmount">Total Amount:</label>
+    <input type="number" id="lottery_events_add_totalAmount" name="total_amount" readonly><br>
+    <span class="lottery_events_add_total_amount_error" id="lottery_events_add_total_amount_validation"></span><br>
+</div>
+
+<!-- Per Ticket Price -->
+<label for="perTicketPrice">Per Ticket Price:</label>
+<input type="number" id="lottery_events_add_perTicketPrice" name="per_ticket_price" placeholder="Enter Per Ticket Price" min="0" required><br>
+<span class="lottery_events_add_per_ticket_error" id="lottery_events_add_per_ticket_validation"></span><br>
+<!-- Display Total Tickets -->
+<div id="lottery_events_add_total_tickets_container" style="display: none;">
+    <label for="totalTickets">Total Tickets:</label>
+    <input type="number" id="lottery_events_add_totalTickets" name="calculated_total_tickets" readonly><br>
+    <span class="lottery_events_add_total_tickets_error" id="lottery_events_add_total_tickets_validation"></span><br>
+</div>
+
 
     <button type="button" onclick="submitAddLotteryEvent()">Add Event</button>
 </form>
@@ -55,6 +100,5 @@
 <div id="lottery-events-container" class="lottery-events-grid">
     <!-- Lottery event cards will be dynamically injected here -->
 </div>
-
 </body>
 </html>
