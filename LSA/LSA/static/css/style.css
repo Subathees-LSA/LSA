@@ -1284,3 +1284,163 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     cursor: pointer; /* Pointer cursor on hover */
     transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
 }
+
+#lot-detail-ticket-count {
+    border: none;
+    background: none;
+    font-size: 16px; 
+    color: #000; 
+    text-align: left; 
+    padding-left: 10px; 
+    pointer-events: none; 
+    width: 40px; 
+}
+.ticket-count-label {
+    margin: 0 10px;
+    font-size: 16px;
+    color: #000; 
+    font-weight: bold; 
+    pointer-events: none;
+}
+
+
+.lottery_events_favorite i {
+    color: gray;
+    cursor: pointer;
+}
+
+
+.lottery_events_favorite i.favorited {
+    color: red;
+}
+
+
+/*custom_admin_dashboard.html*/
+/* General Reset */
+.custom_admin_dashboard_container {
+    display: flex;
+}
+/* Sidebar Styles */
+.custom_admin_dashboard_sidebar {
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    height: 100vh;
+}
+.custom_admin_dashboard_sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.custom_admin_dashboard_sidebar nav ul  {
+    list-style: none;
+    padding: 0;
+}
+.custom_admin_dashboard_sidebar nav ul li {
+    margin: 10px 0;
+}
+.custom_admin_dashboard_sidebar nav ul li a ,.custom_admin_dashboard_logout{
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+.custom_admin_dashboard_sidebar nav ul li a:hover {
+    background-color: #444;
+}
+/* Main Content Styles */
+.custom_admin_dashboard_main {
+    flex: 1;
+    padding: 20px;
+}
+.custom_admin_dashboard_topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.custom_admin_dashboard_search-bar {
+    width: 300px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.custom_admin_dashboard_account-info .custom_admin_dashboard_icon {
+    margin-left: 15px;
+    cursor: pointer;
+}
+.custom_admin_dashboard_dashboard {
+    margin-top: 20px;
+}
+.custom_admin_dashboard_overview_count {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.custom_admin_dashboard_card {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.custom_admin_dashboard_conversion-table {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.custom_admin_dashboard_conversion-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.custom_admin_dashboard_conversion-table th, .custom_admin_dashboard_conversion-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+.custom_admin_dashboard_conversion-table th {
+    background-color: #f2f2f2;
+}
+.custom_admin_dashboard_overview_count {
+    display: flex;
+    flex-wrap: wrap; /* Allows wrapping if there isn't enough space */
+    gap: 1rem; /* Adds spacing between cards */
+    justify-content: flex-start; /* Aligns items to the left */
+}
+
+.custom_admin_dashboard_card {
+    flex: 1 1 calc(25% - 1rem); /* Cards take up 25% of the width minus spacing */
+    box-sizing: border-box; /* Ensures padding is included in width calculation */
+    min-width: 200px; /* Minimum width for cards */
+    max-width: 300px; /* Optional: to prevent overly wide cards */
+}    
+.custom_admin_dashboard_custom_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.custom_admin_dashboard_custom_table th, .custom_admin_dashboard_custom_table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.custom_admin_dashboard_custom_table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+.custom_admin_dashboard_table_title {
+    font-size: 1.5em;
+    margin: 20px 0 10px;
+    color: #333;
+    text-align: left;
+}
+

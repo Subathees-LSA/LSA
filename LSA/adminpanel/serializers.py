@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import *
-
+from rest_framework import serializers
+from .models import LotteryEventImages
 
 
 class api_admin_signup_Serializer(serializers.ModelSerializer):
@@ -50,26 +51,21 @@ class api_admin_signup_Serializer(serializers.ModelSerializer):
         return user
 
 
+class admin_navbar_accessSerializer(serializers.ModelSerializer):
+    resolved_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = admin_navbar_access
+        fields = ['name', 'url_name', 'resolved_url']
+
+    def get_resolved_url(self, obj):
+        return obj.get_url()
+
+   
 class api_admin_login_Serializer(serializers.Serializer):
     admin_email = serializers.EmailField(required=True)
     admin_password = serializers.CharField(required=True)
 
-# class LotteryEventSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = LotteryEvent
-#         #fields = ['id','slug','title', 'description', 'price', 'draw_date', 'image', 'is_active', 'sold_percentage','total_tickets','mini_limit','max_limit','free_postal_description']
-#         fields = '__all__'
-#     def validate_image(self, value):
-#         # If image is not provided in request data
-#         if not value:
-#             # Check if an instance is already available (for PUT requests)
-#             instance = getattr(self, 'instance', None)
-#             # If instance exists and has an image, pass validation
-#             if instance and instance.image:
-#                 return instance.image
-#             # Otherwise, raise validation error
-#             raise serializers.ValidationError("An image is required for the lottery event.")
-#         return value
 
 class LotteryEventSerializer(serializers.ModelSerializer):
     additional_images = serializers.SerializerMethodField()
@@ -78,7 +74,6 @@ class LotteryEventSerializer(serializers.ModelSerializer):
         model = LotteryEvent
         fields = '__all__'
    
-        
 
     def get_additional_images(self, obj):
         # Retrieve all additional images related to this LotteryEvent
@@ -97,9 +92,13 @@ class LotteryEventSerializer(serializers.ModelSerializer):
             # Otherwise, raise validation error
             raise serializers.ValidationError("An image is required for the lottery event.")
         return value
+    
+    def validate_competition_details(self, value):
+       
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Competition details must be a list.")
+        return value
 
-from rest_framework import serializers
-from .models import LotteryEventImages
 
 class LotteryEventImagesSerializer(serializers.ModelSerializer):
     class Meta:

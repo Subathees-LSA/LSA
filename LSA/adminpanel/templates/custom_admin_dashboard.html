@@ -1,102 +1,60 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-        .dashboard-container {
-            display: flex;
-            flex-direction: column;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .welcome {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .cards {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .card {
-            flex: 1 1 calc(33.33% - 20px);
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-        .card h3 {
-            color: #4CAF50;
-            font-size: 1.5em;
-        }
-        .nav-links {
-            margin-top: 30px;
-            text-align: center;
-        }
-        .nav-links a {
-            margin: 0 15px;
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script>
+        const api_navbar_access_tabsView_url =  "{% url 'api_navbar_access_tabsView' %}";
+        const api_dashboard_preview_admin_view_url =  "{% url 'api_dashboard_preview_admin_view' %}";
+    </script>
+    <script src="{% static 'js/custom.js' %}"></script>
+   
 </head>
 <body>
+    <div class="custom_admin_dashboard_container">
+        <!-- Sidebar -->
+        <aside class="custom_admin_dashboard_sidebar">
+            <h2>LSA</h2>
+            <nav>
+                <ul>
+                    <!-- Tabs will be dynamically appended here -->
+                </ul>
+                <!-- Static logout link -->
+              <a class="custom_admin_dashboard_logout" href="{% url 'admin_logout_view' %}">Logout</a>
+                
+            </nav>
+        </aside>
+        <!-- Main Content -->
+        <main class="custom_admin_dashboard_main">
+            <header class="custom_admin_dashboard_topbar">
+                <input type="text" placeholder="Search card" class="custom_admin_dashboard_search-bar">
+                <div class="custom_admin_dashboard_account-info">
+                    <span class="custom_admin_dashboard_icon">🔔</span>
+                    <span class="custom_admin_dashboard_icon">👤</span>
+                </div>
+            </header>
+            <section class="custom_admin_dashboard_dashboard">
+                <h1>Admin Management: System Overview</h1>
+                <div class="custom_admin_dashboard_overview_count">
+                </div> 
+                <div class="custom_admin_dashboard_conversion_rate">
+                    <!-- Dynamic table will be rendered here -->
+                </div>
 
-    <header>
-        <h1>Admin Dashboard</h1>
-    </header>
-    <div class="dashboard-container">
-        <p class="welcome">Welcome, Admin! Here’s an overview of the system:</p>
-
-        <div class="cards">
-            <div class="card">
-                <h3>Total Sales</h3>
-                <p>$10,000</p>
-            </div>
-            <div class="card">
-                <h3>Total Users</h3>
-                <p>150</p>
-            </div>
-            <div class="card">
-                <h3>Active Lotteries</h3>
-                <p>5</p>
-            </div>
-            <div class="card">
-                <h3>Upcoming Draws</h3>
-                <p>3</p>
-            </div>
-            <div class="card">
-                <h3>Recent Purchases</h3>
-                <p>30</p>
-            </div>
-            <div class="card">
-                <h3>Claims Processed</h3>
-                <p>8</p>
-            </div>
-        </div>
-
-       
+                <div class="custom_admin_dashboard_table">
+                    <!-- Dynamic table will be rendered here -->
+                </div>
+               
+            </section>
+        </main>
     </div>
 </body>
+
+
 </html>

@@ -28,7 +28,12 @@ urlpatterns = [
     path('api/update-cart/', update_cart, name='api_update_cart'),
     path('api/lottery_detail/<slug:slug>/', LotteryDetail.as_view(), name='api_get_lottery_event_detail'),
     path('lottery_detail/<slug:slug>/', lottery_detail_view, name='lottery_detail'),
-    
+    path('api/add_to_favorites/', add_to_favorites, name='add_to_favorites'),
+    path('favorites/', favorites_page, name='favorites'),
+    path('api/get_favorites/', get_favorites, name='get_favorites'),
+    path('api/navbar_access_tabsView/', api_navbar_access_tabsView.as_view(), name='api_navbar_access_tabsView'),
+    path('api/dashboard_preview_admin_view/', api_dashboard_preview_admin_view.as_view(), name='api_dashboard_preview_admin_view'),
+    path('admin_logout_view/', admin_logout_view, name='admin_logout_view'),      
 ]
 
 if settings.DEBUG:

@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import LotteryEvent, LotteryEventImages, adminProfile
+from .models import *
 
-# Inline for adding multiple images
+
 class LotteryEventImagesInline(admin.TabularInline):  # Use StackedInline for a vertical layout
     model = LotteryEventImages
     extra = 3  # Number of empty image fields displayed by default
@@ -21,4 +21,26 @@ class LotteryEventImagesAdmin(admin.ModelAdmin):
     list_filter = ('uploaded_at',)
     search_fields = ('lottery_event__title',)
 
-admin.site.register(adminProfile)
+
+admin.site.register(TicketTransaction)
+
+@admin.register(admin_dashboard_preview)
+class admindashboardpreviewAdmin(admin.ModelAdmin):
+    list_display = ['name','identifier']
+    #readonly_fields = ['type']
+    #exclude = ['type']
+
+@admin.register(admin_navbar_access)
+class admin_navbar_accessAdmin(admin.ModelAdmin):
+    list_display = ('name', 'url_name')
+
+    def resolved_url(self, obj):
+        return obj.get_url()
+    resolved_url.short_description = "Resolved URL"
+    
+@admin.register(adminProfile)
+class AdminProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role')
+    filter_horizontal = ('navbar_access','dashboard_preview',)
+
+admin.site.register(ConversionRate)
