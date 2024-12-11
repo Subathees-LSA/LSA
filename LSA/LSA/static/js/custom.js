@@ -1,3 +1,115 @@
+
+// custom_admin_dashboard.html
+
+document.addEventListener('DOMContentLoaded', function () {
+    fetch(api_navbar_access_tabsView_url, {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+            
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            const sidebar = document.querySelector(".custom_admin_dashboard_sidebar nav ul");
+            sidebar.innerHTML = ""; // Clear existing tabs
+            data.forEach(tab => {
+                const li = document.createElement("li");
+                li.innerHTML = `<a href="${tab.resolved_url}">${tab.name}</a>`;
+                sidebar.appendChild(li);
+            });
+        })
+        .catch(error => console.error("Error fetching tabs:", error));
+
+fetch(api_dashboard_preview_admin_view_url)
+    .then(response => response.json())
+    .then(({ data, tabs, table_data }) => {
+        const dashboard = document.querySelector('.custom_admin_dashboard_overview_count');
+        const tableContainer = document.querySelector('.custom_admin_dashboard_table');
+        
+        const custom_admin_dashboard_conversion_rate_Container = document.querySelector('.custom_admin_dashboard_conversion_rate');
+
+
+        // Iterate through tabs to render either cards or tables based on type
+        tabs.forEach(tab => {
+            if (tab.type === 'count') {
+                // Render card
+                const container = document.createElement('div');
+                container.className = 'custom_admin_dashboard_card';
+                container.innerHTML = `
+                    <h2>${tab.name}</h2>
+                    <p id="${tab.identifier}">${data[tab.identifier] || 0}</p>
+                `;
+                dashboard.appendChild(container);
+            } else if (tab.type === 'table') {
+                // Render table with title
+                const title = document.createElement('h2');
+                title.className = 'custom_admin_dashboard_table_title';
+                title.textContent = tab.name; // Add the tab name as the table title
+                tableContainer.appendChild(title);
+
+                // Create a table dynamically
+                const table = document.createElement('table');
+                table.className = 'custom_admin_dashboard_custom_table';
+
+                // Add table header dynamically
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Account status</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${table_data[tab.identifier]?.map(row => `
+                            <tr>
+                                <td>${row.kyc_status}</td>
+                                <td>${row.user__username}</td>
+                                <td>${row.user__email}</td>
+                            </tr>
+                        `).join('') || ''}
+                    </tbody>
+                `;
+                tableContainer.appendChild(table);
+            }else if (tab.type === 'rate') {
+                // Render table with title
+                const title = document.createElement('h2');
+                title.className = 'custom_admin_dashboard_table_title';
+                title.textContent = tab.name; // Add the tab name as the table title
+                custom_admin_dashboard_conversion_rate_Container.appendChild(title);
+
+                // Create a table dynamically
+                const table = document.createElement('table');
+                table.className = 'custom_admin_dashboard_custom_table';
+
+                // Add table header dynamically
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Card Type</th>
+                            <th>Region</th>
+                            <th>Type</th>
+                            <th>Rate (₦)</th>
+                        </tr>
+                    </thead>
+                  
+                    <tbody>
+                        ${table_data[tab.identifier]?.map(row => `
+                            <tr>
+                                <td>${row.card_type}</td>
+                                <td>${row.region}</td>
+                                 <td>${row.is_physical ? 'Physical' : 'E-Code'}</td>
+                                <td>${row.rate}</td>
+                            </tr>
+                        `).join('') || ''}
+                    </tbody>
+                `;
+                custom_admin_dashboard_conversion_rate_Container.appendChild(table);
+            }
+        });
+    })
+    .catch(error => console.error('Error fetching dashboard data:', error));
+});
 //lottery_events_add.html
 document.addEventListener('DOMContentLoaded', function () {
     const totalBudgetInput = document.getElementById('lottery_events_add_totalBudget');
@@ -24,11 +136,11 @@ document.addEventListener('DOMContentLoaded', function () {
             percentageDiv.style.display = 'block';
             lottery_events_add_total_amount_container.style.display = 'block'; // Always show for percentage
         }
-        updateTotalAmount();
+        lottery_events_updateTotalAmount();
     });
 
     // Update Total Amount
-    const updateTotalAmount = () => {
+    const lottery_events_updateTotalAmount = () => {
         const totalBudget = parseFloat(totalBudgetInput.value) || 0;
         let totalAmount = totalBudget;
 
@@ -47,11 +159,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         totalAmountInput.value = totalAmount.toFixed(2);
-        updateTotalTickets();
+        lottery_events_updateTotalTickets();
     };
 
     // Update Total Tickets
-    const updateTotalTickets = () => {
+    const lottery_events_updateTotalTickets = () => {
         const totalAmount = parseFloat(totalAmountInput.value) || 0;
         const perTicketPrice = parseFloat(perTicketPriceInput.value) || 0;
 
@@ -65,10 +177,10 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Add Event Listeners for Inputs
-    totalBudgetInput.addEventListener('input', updateTotalAmount);
-    fixedRevenueInput.addEventListener('input', updateTotalAmount);
-    percentageRevenueSelect.addEventListener('input', updateTotalAmount);
-    perTicketPriceInput.addEventListener('input', updateTotalTickets);
+    totalBudgetInput.addEventListener('input', lottery_events_updateTotalAmount);
+    fixedRevenueInput.addEventListener('input', lottery_events_updateTotalAmount);
+    percentageRevenueSelect.addEventListener('input', lottery_events_updateTotalAmount);
+    perTicketPriceInput.addEventListener('input', lottery_events_updateTotalTickets);
 });
 
 
@@ -1080,7 +1192,7 @@ $(document).ready(function() {
 
     // Enable edit mode for a specific lottery event card
    // Calculate and update dynamic fields
-   function updateDynamicFields(card) {
+   function lottery_events_updateDynamicFields(card) {
     const totalBudgetInput = card.querySelector('.lottery_events_add_edit_total_budget');
     const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
     const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
@@ -1112,7 +1224,7 @@ $(document).ready(function() {
 }
 
 // Attach dynamic calculation logic to input fields
-function attachDynamicFieldListeners(card) {
+function lottery_events_attachDynamicFieldListeners(card) {
     const totalBudgetInput = card.querySelector('.lottery_events_add_edit_total_budget');
     const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
     const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
@@ -1120,11 +1232,11 @@ function attachDynamicFieldListeners(card) {
     const perTicketPriceInput = card.querySelector('.lottery_events_add_edit_per_ticket_price');
 
     // Add event listeners to update calculations
-    totalBudgetInput.addEventListener('input', () => updateDynamicFields(card));
-    revenueTypeSelect.addEventListener('change', () => updateDynamicFields(card));
-    fixedRevenueInput.addEventListener('input', () => updateDynamicFields(card));
-    percentageRevenueInput.addEventListener('input', () => updateDynamicFields(card));
-    perTicketPriceInput.addEventListener('input', () => updateDynamicFields(card));
+    totalBudgetInput.addEventListener('input', () => lottery_events_updateDynamicFields(card));
+    revenueTypeSelect.addEventListener('change', () => lottery_events_updateDynamicFields(card));
+    fixedRevenueInput.addEventListener('input', () => lottery_events_updateDynamicFields(card));
+    percentageRevenueInput.addEventListener('input', () => lottery_events_updateDynamicFields(card));
+    perTicketPriceInput.addEventListener('input', () => lottery_events_updateDynamicFields(card));
 }
 function lottery_events_enableEditMode(button) {
     const card = button.closest('.lottery-event-card');
@@ -1137,7 +1249,7 @@ function lottery_events_enableEditMode(button) {
     revenueTypeSpan.style.display = 'none';
 
     // Attach dynamic field logic
-    attachDynamicFieldListeners(card);
+    lottery_events_attachDynamicFieldListeners(card);
 
     // Add change listener to the revenue type dropdown for showing/hiding fields
     revenueTypeSelect.addEventListener('change', () => {
@@ -1153,7 +1265,7 @@ function lottery_events_enableEditMode(button) {
             percentageField.style.display = 'block';
         }
 
-        updateDynamicFields(card); // Recalculate fields on revenue type change
+        lottery_events_updateDynamicFields(card); // Recalculate fields on revenue type change
     });
 }
 
@@ -1599,17 +1711,13 @@ function validate_lottery_events_add_inputs(errors) {
 }
 
 
-
-
 //lottery_events.html
 
 
 // Function to fetch lottery events data from the API
 function lottery_events_fetch() {
     try {
-        // if (!api_get_lottery_events_url) {
-        //     return; // Exit the function
-        // }
+        
         if (typeof api_get_lottery_events_url === 'undefined' || !api_get_lottery_events_url) {
             
             return; // Exit the function if the variable is not defined
@@ -1661,7 +1769,7 @@ function displayLotteryEvents(events) {
         container.innerHTML = '<p>No lottery events available.</p>';
         return;
     }
-
+    events = events.filter(event => event.is_active);
     events.forEach(event => {
         const eventElement = document.createElement('div');
         eventElement.classList.add('lottery_events_event');
@@ -1669,10 +1777,16 @@ function displayLotteryEvents(events) {
         let drawDateString = event.is_active
             ? lottery_events_formatDrawDate(event.draw_date)
             : 'Inactive';
+        const favoriteClass = event.is_favorite ? 'favorited' : '';
+        const favoriteIcon = `
+            <div class="lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
+                <i class="fas fa-heart ${favoriteClass}"></i> 
+            </div>`;   
 
         const enterNowButton = `<a href="/lottery_detail/${event.slug}/" class="lottery_events_enter_button">Enter now</a>`;
         
         eventElement.innerHTML = `
+            ${favoriteIcon}
             <div class="lottery_events_event_header">${drawDateString}</div>
             ${event.image ? `<img src="${event.image}" alt="${event.title}" />` : ''}
             <h3>${event.title}</h3>
@@ -1967,99 +2081,6 @@ function proceedToCheckout() {
 
 
 //lottery_detail.html
-// fetch(`/api/lottery_detail/${eventSlug}/`)
-//     .then((response) => response.json())
-//     .then((data) => {
-//         const ticketSlider = document.getElementById('ticket-slider');
-//         const ticketInput = document.getElementById('ticket-count');
-
-//         //per_ticket_price
-//         // Populate lottery details
-//         document.getElementById('lot-detail-event-title').textContent = data.title;
-//         document.getElementById('lot-detail-event-description').textContent = data.description;
-//         document.getElementById('lot-detail-event-price').textContent = `Prize: £${data.price}`;
-//         document.getElementById('lot-detail-event-per-ticket-price').textContent = `per ticket price: £${data.per_ticket_price}`;
-//         document.getElementById('event-sold-percentage').textContent = `Sold: ${data.sold_percentage}%`;
-//         // document.getElementById('lot-detail-event-draw-datetime').textContent = data.draw_date;
-//         // document.getElementById('lot-detail-event-image').src = data.image || '';
-//         document.getElementById('free-postal-description').textContent = data.free_postal_description;
-
-
-//           // Use the formatDrawDate function
-//           const formattedDrawDate = lottery_events_formatDrawDate(data.draw_date);
-//           document.getElementById('lot-detail-event-draw-datetime').textContent = formattedDrawDate;
-//         // Update the sold bar and ticket info
-//          const totalTickets = data.total_tickets || 0;
-//          const soldTickets = data.sold_tickets || 0;
-//        const soldPercentage = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0;
-
-
-//         document.getElementById('lot-detail-ticket-info').textContent = ` ${soldTickets}/${totalTickets}`;
-//         const soldBarFill = document.getElementById('lot-detail-sold-bar-fill');
-//         soldBarFill.style.width = `${soldPercentage}%`;
-//        soldBarFill.textContent = `${soldPercentage}%`;
-
-//     // Update the event image
-//     if (data.image) {
-//         document.getElementById('lot-detail-event-image').src = data.image;
-//     }
-    
-//         // Ticket limits and slider
-//         const miniLimit = data.mini_limit; // backend mini limit
-//         const maxLimit = data.max_limit;
-
-
-//         document.getElementById('ticket-max-limit').textContent = maxLimit;
-
-
-//         ticketSlider.min = 1; // frontend minimum is 1
-//         ticketSlider.max = maxLimit;
-//         ticketSlider.value = miniLimit; // set the slider value to backend mini limit
-//         ticketInput.value = miniLimit; // set the input value to backend mini limit
-
-
-//         // Update slider and ticket input
-//         ticketSlider.addEventListener("input", () => {
-//             ticketInput.value = ticketSlider.value;
-//         });
-
-
-//         // Increment ticket count
-//         document.getElementById('increment-ticket').addEventListener("click", () => {
-//             const currentValue = parseInt(ticketInput.value);
-//             if (currentValue < maxLimit) {
-//                 ticketInput.value = currentValue + 1;
-//                 ticketSlider.value = currentValue + 1;
-//             }
-//         });
-
-
-//         // Decrement ticket count
-//         document.getElementById('decrement-ticket').addEventListener("click", () => {
-//             const currentValue = parseInt(ticketInput.value);
-//             if (currentValue > 1) {
-//                 ticketInput.value = currentValue - 1;
-//                 ticketSlider.value = currentValue - 1;
-//             }
-//         });
-//     })
-//     .catch((error) => {
-//         console.error('Error fetching lottery event details:', error);
-//         alert('Failed to load lottery event details.');
-//     });
-//     $(document).ready(function () {
-//         $('.tab-btn').on('click', function () {
-//             const tabId = $(this).data('tab');
-    
-//             // Highlight active tab button
-//             $('.tab-btn').removeClass('active');
-//             $(this).addClass('active');
-    
-//             // Show active tab content
-//             $('.tab-pane').removeClass('active');
-//             $(`#${tabId}`).addClass('active');
-//         });
-//     });
 
 /*-------------------lottery_details-----------------------------------*/
 fetch(`/api/lottery_detail/${eventSlug}/`)
@@ -2225,41 +2246,88 @@ if (data.additional_images && data.additional_images.length > 0) {
             })
         });
 
-//         /* Set ticket slider and input limits */
-//         const miniLimit = data.mini_limit;
-//         const maxLimit = data.max_limit;
+//favorite.html
+
+// Function to fetch the list of favorite events from the server
+function fetchFavorites() {
+    fetch('/api/get_favorites/')
+        .then(response => response.json())
+        .then(data => {
+            displayFavorites(data.favorites);
+        })
+        .catch(error => console.error('Error fetching favorites:', error));
+}
+
+
+// Function to display the favorites
+function displayFavorites(favorites) {
+    const container = document.getElementById('favorites_container');
+    container.innerHTML = ''; // Clear the container before rendering
+
+    if (favorites.length === 0) {
+        container.innerHTML = '<p>No favorites added yet.</p>';
+        return;
+    }
+
+    favorites.forEach(event => {
+        const favoriteElement = document.createElement('div');
+        favoriteElement.classList.add('favorite_event');
+        // Format the draw date using the lottery_events_formatDrawDate function
+        const formattedDrawDate = lottery_events_formatDrawDate(event.draw_date);
+        const favoriteClass = event.is_favorite ? 'favorited' : '';
+        const favoriteIcon = `
+            <div class="lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
+                <i class="fas fa-heart ${favoriteClass}"></i> 
+            </div>`;
     
-//         document.getElementById('lot-detail-ticket-max-limit').textContent = maxLimit;
-    
-      
-//         ticketSlider.min = 1;
-//         ticketSlider.max = maxLimit;
-//         ticketSlider.value = miniLimit;
-//         ticketInput.textContent = miniLimit;
-    
-//         // Sync slider value to input text when slider changes
-//         ticketSlider.addEventListener("input", () => {
-//             ticketInput.textContent = ticketSlider.value;
-//         });
-    
-//         // Increment button handler
-//         document.getElementById('lot-detail-increment-ticket').addEventListener("click", () => {
-//             const currentValue = parseInt(ticketInput.textContent);
-//             if (currentValue < maxLimit) {
-//                 const newValue = currentValue + 1;
-//                 ticketInput.textContent = newValue;
-//                 ticketSlider.value = newValue;
-//             }
-//         });
-    
-//         // Decrement button handler
-//         document.getElementById('lot-detail-decrement-ticket').addEventListener("click", () => {
-//             const currentValue = parseInt(ticketInput.textContent);
-//             if (currentValue > 1) {
-//                 const newValue = currentValue - 1;
-//                 ticketInput.textContent = newValue;
-//                 ticketSlider.value = newValue;
-//             }
-//         });
-//     });
-// });
+        // Create the content for each favorite event
+        const favoriteContent = `
+            ${favoriteIcon}
+            <p>${formattedDrawDate}</p>
+            <h3>${event.title}</h3>
+            <p><strong>Description:</strong> ${event.description}</p>
+            <div class="lottery_events_price">Prize: £${event.price}</div>
+            <div class="lottery_events_per_ticket_price">Per ticket price: £${event.per_ticket_price}</div>
+            <div class="lottery_events_sold_percentage">
+                <div class="lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
+            </div>
+            <p>SOLD: ${event.sold_percentage}%</p>
+            
+            ${event.image ? `<img src="${event.image}" alt="${event.title}" style="width: 150px; height: 100px; object-fit: cover;" />` : ''}
+            <a href="${event.enter_now_button}" class="lottery_events_enter_button">Enter now</a>
+            
+        `;
+
+        // Set the inner HTML for the favorite element
+        favoriteElement.innerHTML = favoriteContent;
+
+        // Append the favorite element to the container
+        container.appendChild(favoriteElement);
+    });
+}
+
+function toggleFavorite(eventSlug) {
+    const favoriteIcon = document.querySelector(`#favorite-icon-${eventSlug}`);
+    fetch('/api/add_to_favorites/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": add_csrftoken
+        },
+        body: JSON.stringify({ event_slug: eventSlug }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        fetchFavorites(); // Refresh the favorites list
+        lottery_events_fetch();
+        // Toggle the class on the icon based on the response
+        if (data.success) {
+            favoriteIcon.classList.toggle('favorited'); // Add or remove 'favorited' class
+        }
+    })
+    .catch(error => console.error('Error toggling favorite:', error));
+}
+
+
+

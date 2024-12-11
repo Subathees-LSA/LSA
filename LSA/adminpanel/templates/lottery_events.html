@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Events</title>
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
-    <script> 
+    <script>
+        const add_csrftoken="{{ csrf_token}}"; 
         const add_to_carturl = "{% url 'add_to_cart' %}";  
         const cartUrl = "{% url 'cart' %}";  
         const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
