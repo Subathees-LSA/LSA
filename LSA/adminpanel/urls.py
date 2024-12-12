@@ -9,7 +9,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-
 urlpatterns = [
     path('custom/admin/signup/',admin_signup, name='admin_signup'),
     path('api/admin/signup/', api_admin_signup.as_view(), name='api_admin_signup'),
@@ -33,7 +32,9 @@ urlpatterns = [
     path('api/get_favorites/', get_favorites, name='get_favorites'),
     path('api/navbar_access_tabsView/', api_navbar_access_tabsView.as_view(), name='api_navbar_access_tabsView'),
     path('api/dashboard_preview_admin_view/', api_dashboard_preview_admin_view.as_view(), name='api_dashboard_preview_admin_view'),
-    path('admin_logout_view/', admin_logout_view, name='admin_logout_view'),      
+    path('admin_logout_view/', admin_logout_view, name='admin_logout_view'),  
+    path('lottery-events/<int:event_id>/additional-images/<int:image_id>/delete/',DeleteLotteryEventImageView.as_view(), 
+         name='delete_lottery_event_image')    
 ]
 
 if settings.DEBUG:

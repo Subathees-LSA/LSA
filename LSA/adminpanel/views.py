@@ -215,16 +215,26 @@ class api_lottery_events_add(APIView):
 
     def post(self, request):
         try:
-            serializer = LotteryEventSerializer(data=request.data)
+            # Deserialize and validate main LotteryEvent data
+            serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                serializer.save()
+                # Save the main LotteryEvent instance
+                lottery_event = serializer.save()
+
+                # Handle additional images (if provided)
+                additional_images = request.FILES.getlist('additional_images')
+                for image in additional_images:
+                    LotteryEventImages.objects.create(lottery_event=lottery_event, image=image)
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            # Return validation errors for main serializer
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
  
-  
 class api_edit_delete_lottery_events(APIView):
     serializer_class = LotteryEventSerializer
     permission_classes = [IsAdminUser]
@@ -236,28 +246,36 @@ class api_edit_delete_lottery_events(APIView):
             return Response({"error": "Lottery event not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+        # Include additional images if applicable
+        additional_images = event.additional_images.all()  # Assuming a related name 'additional_images'
+        images = [{"id": img.id, "url": img.image.url} for img in additional_images]
+
         serializer = LotteryEventSerializer(event)
-        return Response(serializer.data)
+        data = serializer.data
+        data['additional_images'] = images  # Append additional images to the response
+        return Response(data)
 
     def put(self, request, pk):
         try:
             event = LotteryEvent.objects.get(pk=pk)
         except LotteryEvent.DoesNotExist:
             return Response({"error": "Lottery event not found"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Handling update logic
-        try:
-            serializer = LotteryEventSerializer(event, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Update the main event fields
+        event_serializer = LotteryEventSerializer(event, data=request.data)
+        if event_serializer.is_valid():
+            event_serializer.save()
+
+            # Handle additional images
+            additional_images = request.FILES.getlist('additional_images[]')
+            if additional_images:
+                for image in additional_images:
+                    LotteryEventImages.objects.create(lottery_event=event, image=image)
+
+            return Response(event_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(event_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         try:
@@ -272,6 +290,29 @@ class api_edit_delete_lottery_events(APIView):
             return Response({"message": "Lottery event deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  
+class DeleteLotteryEventImageView(APIView):
+    def delete(self, request, event_id, image_id):
+        # Get the event
+        lottery_event = get_object_or_404(LotteryEvent, id=event_id)
+        
+        # Get the specific image to delete
+        lottery_event_image = get_object_or_404(LotteryEventImages, id=image_id, lottery_event=lottery_event)
+
+        try:
+            # Delete the image from the database and the file system
+            lottery_event_image.delete()
+
+            return Response(
+                {"message": "Additional image deleted successfully."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 
 @api_view(['POST'])

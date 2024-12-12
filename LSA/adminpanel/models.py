@@ -101,11 +101,11 @@ class LotteryEvent(models.Model):
     revenue_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     per_ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # New Field
+
     mini_limit = models.PositiveIntegerField(default=1)  # Minimum number of tickets
     max_limit = models.PositiveIntegerField(default=10)  # Maximum number of tickets
     free_postal_description = models.TextField(default="Enter the description for free postal entry.")
-    competition_details = models.JSONField(default=list)  # Dynamic competition details
-    faq = models.JSONField(default=list)  # Dynamic FAQ section
+    competition_details = models.TextField(default="")   
 
     
     def save(self, *args, **kwargs):

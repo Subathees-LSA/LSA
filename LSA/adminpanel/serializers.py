@@ -74,6 +74,22 @@ class LotteryEventSerializer(serializers.ModelSerializer):
         model = LotteryEvent
         fields = '__all__'
    
+        
+    
+    def validate_competition_details(self, value):
+       
+        if not isinstance(value,str):
+            raise serializers.ValidationError("Competition details must be a string.")
+        return value
+
+   
+    def validate_slug(self, value):
+        if not value:  # Allow slug to be auto-generated if not provided
+            return value
+        if LotteryEvent.objects.filter(slug=value).exists():
+            raise serializers.ValidationError("Slug must be unique.")
+        return value
+
 
     def get_additional_images(self, obj):
         # Retrieve all additional images related to this LotteryEvent
@@ -92,15 +108,8 @@ class LotteryEventSerializer(serializers.ModelSerializer):
             # Otherwise, raise validation error
             raise serializers.ValidationError("An image is required for the lottery event.")
         return value
-    
-    def validate_competition_details(self, value):
-       
-        if not isinstance(value, list):
-            raise serializers.ValidationError("Competition details must be a list.")
-        return value
-
 
 class LotteryEventImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = LotteryEventImages
-        fields = ['id', 'image', 'uploaded_at']
+        fields = '__all__'

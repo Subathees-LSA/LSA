@@ -18,7 +18,6 @@
         fetchLotteryEvents();
     };
     </script>
-
 </head>
 <body>
 
@@ -29,6 +28,10 @@
     {% csrf_token %}
     <input type="text" name="title" placeholder="Title" required><br>
     <span class="lottery_events_add_title_error" id="lottery_events_add_title_validation"></span><br>
+
+    <input type="text" name="slug" placeholder="Slug (leave blank to auto-generate)" optional><br>
+    <span class="lottery_events_add_slug_error" id="lottery_events_add_slug_validation"></span><br>
+
 
     <textarea name="description" placeholder="Description" required></textarea><br>
     <span class="lottery_events_add_description_error" id="lottery_events_add_description_validation"></span><br>
@@ -91,9 +94,24 @@
     <input type="number" id="lottery_events_add_totalTickets" name="calculated_total_tickets" readonly><br>
     <span class="lottery_events_add_total_tickets_error" id="lottery_events_add_total_tickets_validation"></span><br>
 </div>
+<input type="number" name="mini_limit" placeholder="Minimum Tickets" min="1" required><br>
+<span class="lottery_events_add_minilimit_error" id="lottery_events_add_minilimit_validation"></span><br>
 
+<input type="number" name="max_limit" placeholder="Maximum Tickets" min="0" required><br>
+<span class="lottery_events_add_maxlimit_error" id="lottery_events_add_maxlimit_validation"></span><br>
 
-    <button type="button" onclick="submitAddLotteryEvent()">Add Event</button>
+<textarea name="free_postal_description" placeholder="Free Postal Description" required></textarea><br>
+<span class="lottery_events_add_freepostal_error" id="lottery_events_add_freepostal_validation"></span><br>
+
+<textarea name="competition_details" placeholder="Competition Details" required></textarea><br>
+<span class="lottery_events_add_competitiondetails_error" id="lottery_events_add_competitiondetails_validation"></span><br>
+
+<h3>Additional Images</h3>
+<div id="additional-images-container">
+</div>
+<button type="button" id="add-image-button">Add Another Image</button>
+<br><br>
+<button type="button" onclick="submitAddLotteryEvent()">Add Event</button>
 </form>
 
 <hr>

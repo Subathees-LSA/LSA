@@ -1087,24 +1087,14 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     color: #555;
 }
 
-.lot-detail-competition, .lot-detail-faq {
+.lot-detail-competition {
     margin: 20px 0;
 }
 
-.lot-detail-faq-item {
-    margin-bottom: 10px;
-}
 
-.lot-detail-faq-question {
-    font-weight: bold;
-}
-
-.lot-detail-faq-answer {
-    margin-left: 20px;
-}
 
 /* Additional Images Styling */
-#additional-images-container img {
+#additional-images-containerpopup img {
     width: 100px;
     height: auto; 
     max-width: 100%; 
@@ -1444,3 +1434,28 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     text-align: left;
 }
 
+.additional-image-field {
+    margin-bottom: 10px;
+}
+
+.additional-image-field button {
+    margin-left: 10px;
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.additional-image-field button:hover {
+    background-color: darkred;
+}
+
+.image-preview {
+    width: 100px; 
+    height: 100px;
+    object-fit: cover; 
+    margin-top: 10px; 
+    border: 1px solid #ccc;
+    border-radius: 5px; 
+}
