@@ -1408,7 +1408,7 @@ function lottery_events_enableEditMode(button) {
     revenueTypeSpan.style.display = 'none';
 
     // Attach dynamic field logic
-    attachDynamicFieldListeners(card);
+    lottery_events_attachDynamicFieldListeners(card);
 
     // Add change listener to the revenue type dropdown for showing/hiding fields
     revenueTypeSelect.addEventListener('change', () => {
@@ -1424,7 +1424,7 @@ function lottery_events_enableEditMode(button) {
             percentageField.style.display = 'block';
         }
 
-        updateDynamicFields(card); // Recalculate fields on revenue type change
+        lottery_events_updateDynamicFields(card); // Recalculate fields on revenue type change
     });
 }
 
@@ -1647,8 +1647,7 @@ window.onload = function () {
                 return;
             }
     
-            const id = card.dataset.id;
-            console.log(id); 
+            const id = card.dataset.id; 
             const title = card.querySelector('.lottery_events_add_edit_title').value;
             const description = card.querySelector('.lottery_events_add_edit_description').value;
             const price = card.querySelector('.lottery_events_add_edit_price').value;
