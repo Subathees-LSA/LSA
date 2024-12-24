@@ -8,6 +8,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls import handler404
+
 
 urlpatterns = [
     path('custom/admin/signup/',admin_signup, name='admin_signup'),
@@ -34,9 +36,23 @@ urlpatterns = [
     path('api/dashboard_preview_admin_view/', api_dashboard_preview_admin_view.as_view(), name='api_dashboard_preview_admin_view'),
     path('admin_logout_view/', admin_logout_view, name='admin_logout_view'),  
     path('lottery-events/<int:event_id>/additional-images/<int:image_id>/delete/',DeleteLotteryEventImageView.as_view(), 
-         name='delete_lottery_event_image')    
+         name='delete_lottery_event_image'),   
+    path('faq/', faq_page, name='faq_page'), 
+    path('terms/', terms_page, name='terms_page'), 
+    path('api/contact/', ContactCreateView.as_view(), name='contact-create'),
+    path('contact/', contact_page, name='contact-page'), 
+    path('about-us/', about_us, name='about_us'),  
+
+    path('api/admin/messages/', ContactListView.as_view(), name='contact-list'),
+    path('api/admin/reply/', AdminReplyView.as_view(), name='admin-reply'),
+    path('contact-reply/', admin_contact_reply_page, name='admin-contact-reply'),
+    path('api/delete_user/<int:user_id>/', UserProfileDeleteAPIView.as_view(), name='delete_user'),
+    path('api/lottery/categories/', get_lottery_categories, name='api_get_lottery_categories'),
+    path('api/categories/', GetLotteryCategories.as_view(), name='get-lottery-categories'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler404 = 'adminpanel.urls.custom_404'
 

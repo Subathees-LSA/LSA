@@ -23,14 +23,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
-        user = User(**validated_data)
-        user.set_password(validated_data['password'])  # Hash the password
-        user.save()
-        
-        profile = UserProfile.objects.create(user=user, **profile_data)
+        user = User.objects.create_user(**validated_data)  # Use `create_user` to handle password hashing
+        ip_address = profile_data.pop('ip_address', None)  # Extract IP address
+
+        # Create the profile with the extracted IP address
+        UserProfile.objects.create(user=user, ip_address=ip_address, **profile_data)
         return user
-    
- 
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -79,24 +77,21 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             return f"/view_kyc_image/{obj.id}/"
         return None
  
-       
 class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
     user = UserList()  # Nest the UserSerializer to include user details
     kyc_image_url = serializers.SerializerMethodField()
 
+
     class Meta:
         model = UserProfile
-        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url']
+        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url','ip_address']
+
 
     def get_kyc_image_url(self, obj):
         # Return the URL for the image view based on the profile ID
         if obj.kyc_image:
             return f"/view_kyc_image/{obj.id}/"
         return None
-
-
-
-
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()

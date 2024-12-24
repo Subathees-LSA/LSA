@@ -41,7 +41,8 @@
      <div id="signup-form-error-message" class="signup-form-error-msg"></div>
             <button type="submit">Sign Up</button>
             <p>Already have an account? <a href="{% url 'user_login' %}">Login here</a></p>
-    
+            <a href="{% url 'social:begin' 'google-oauth2' %}">Signin with Google</a>
+
            
         </form>
     </div>

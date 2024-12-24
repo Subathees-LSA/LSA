@@ -1,0 +1,64 @@
+from .models import UserProfile
+
+def save_user_profile(backend, user, response, *args, **kwargs):
+    """
+    Custom pipeline step to save user data in the UserProfile model.
+    """
+    if backend.name == 'google-oauth2':
+        # Get additional data from Google's response
+        email = response.get('email', '')
+        first_name = response.get('given_name', '')
+        last_name = response.get('family_name', '')
+        is_verified = response.get('email_verified', False)
+
+        # Update User model
+        user.email = email
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+
+        # Ensure a UserProfile instance exists
+        UserProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                'is_verified': is_verified,
+                'newsletter': True,  # Default value
+            },
+        )
+
+
+
+
+
+---------------
+from django.contrib.auth import login
+
+class LoginView(APIView):
+    def post(self, request):
+        user_agent = request.headers.get('User-Agent', '')
+        if not user_agent or 'Mozilla' not in user_agent:
+            return Response(
+                {"detail": "Access denied. This endpoint is restricted to browsers only."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+            try:
+                user = User.objects.get(email=email)
+                if user.check_password(password):
+                    # Specify the backend as a string
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+                    return Response({
+                        "message": "Login successful.",
+                        "user_id": user.id
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+            except User.DoesNotExist:
+                return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+-------------------------------------------------

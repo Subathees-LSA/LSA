@@ -13,7 +13,7 @@ class UserProfile(models.Model):
     )
     kyc_image = models.BinaryField(null=True, blank=True)
     kyc_window_shown = models.BooleanField(default=False)
-
+    ip_address = models.GenericIPAddressField(null=True, blank=True) 
     def __str__(self):
         return self.user.username
-    #exceptions
+

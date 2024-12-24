@@ -44,3 +44,23 @@ class AdminProfileAdmin(admin.ModelAdmin):
     filter_horizontal = ('navbar_access','dashboard_preview',)
 
 admin.site.register(ConversionRate)
+
+
+
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'email', 'description', 'created_at')  # Display message in list view
+    search_fields = ('name', 'email', 'description')  # Search includes message content
+    list_filter = ('created_at',)  # Filter by creation date
+    readonly_fields = ('created_at',)  # Makes created_at read-only
+    ordering = ('-created_at',)  # Orders by newest first
+
+    # Add a custom action to mark messages as "processed"
+    actions = ['mark_as_processed']
+
+    def mark_as_processed(self, request, queryset):
+        queryset.update(description="Processed")
+        self.message_user(request, "Selected messages marked as processed.")
+    mark_as_processed.short_description = "Mark selected messages as processed"
+
+admin.site.register(LotteryCategory)

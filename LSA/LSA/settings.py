@@ -40,8 +40,36 @@ INSTALLED_APPS = [
     'rest_framework',
     'user_registration',
     'user_dashboard',
-    'adminpanel'
+    'adminpanel',
+    'social_django',
 ]
+
+
+# Add the authentication backends
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',  # Google OAuth
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+]
+
+
+# Login and redirect URLs
+LOGIN_REDIRECT_URL = '/user_welcome_page/'  
+LOGOUT_REDIRECT_URL = '/login/' 
+
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'user_registration.pipeline.link_to_existing_user',  
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'user_registration.pipeline.save_user_profile',
+)
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -51,6 +79,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
+
 ]
 
 ROOT_URLCONF = 'LSA.urls'
@@ -72,6 +102,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'LSA.wsgi.application'
+
 
 
 # Database

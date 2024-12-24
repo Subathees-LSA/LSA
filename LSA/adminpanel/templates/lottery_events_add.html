@@ -13,9 +13,11 @@
         const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
         const api_lottery_events_add_url = "{% url 'api_lottery_events_add' %}";
         const apiEditDeleteLotteryEventsUrl = "{% url 'api_edit_delete_lottery_events' 0 %}";
+        const get_lottery_categories_url = "{% url 'get-lottery-categories' %}";
          // Fetch events when the page loads
     window.onload = function() {
         fetchLotteryEvents();
+        fetchLotteryCategories();
     };
     </script>
 </head>
@@ -35,7 +37,12 @@
 
     <textarea name="description" placeholder="Description" required></textarea><br>
     <span class="lottery_events_add_description_error" id="lottery_events_add_description_validation"></span><br>
-
+        <!-- Category Selection -->
+        <label for="category">Category:</label>
+        <select id="lottery_events_add_category" name="category" required>
+            <option value="">Select Category</option>
+        </select>
+        <span class="lottery_events_add_category_error" id="lottery_events_add_category_validation"></span><br>
     <input type="number" name="price" placeholder="Price" min="0" required><br>
     <span class="lottery_events_add_price_error" id="lottery_events_add_price_validation"></span><br>
 

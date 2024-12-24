@@ -26,6 +26,8 @@
         <span id="login-error" style="color: red;"></span><br>
         <a href="{% url 'password_reset_page' %}">Forgot password?</a>
         <button type="submit" class="login-button">Login</button>
+        <a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a>
+
     </form>
 </div>
 

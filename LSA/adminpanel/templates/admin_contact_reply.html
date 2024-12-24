@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Contact Reply</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/custom.js' %}" defer></script>
+</head>
+<body class="reply-body">
+    <div class="reply-container">
+        <h1 class="reply-heading">Contact Messages</h1>
+        <div id="reply-message-list">
+            <!-- Dynamic content loaded via JavaScript -->
+        </div>
+
+        <div id="reply-form-container" style="display: none;">
+            <h2 class="reply-subheading">Reply to User</h2>
+            <p><strong>Original Message:</strong></p>
+            <p id="reply-original-message"></p> <!-- Display the user's original message -->
+        
+            <form id="reply-form" class="reply-form">
+                <input type="email" id="reply-email" name="email" placeholder="User Email" readonly>
+                <textarea id="reply-message" name="message" placeholder="Your reply..."></textarea>
+                <button type="submit">Send Reply</button>
+            </form>
+            <p id="reply-response-message"></p>
+        </div>
+    </div>
+</body>
+</html>

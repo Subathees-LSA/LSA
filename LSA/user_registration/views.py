@@ -24,15 +24,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse  # Import reverse
 from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
-
-
+from django.contrib.auth import login
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
         try:
-            
-            
             # Check if the request comes from a browser
             user_agent = request.headers.get('User-Agent', '')
             if not user_agent or 'Mozilla' not in user_agent:
@@ -41,10 +38,16 @@ class RegisterView(generics.CreateAPIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
 
+            # Get the IP address from the request
+            ip_address = self.get_client_ip(request)
+
             # Deserialize the data and validate
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            
+
+            # Include the IP address in the profile data
+            serializer.validated_data['profile']['ip_address'] = ip_address
+
             # Save the user and return success response
             user = serializer.save()
             return Response({
@@ -60,18 +63,26 @@ class RegisterView(generics.CreateAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-#try,exceptions
+    @staticmethod
+    def get_client_ip(request):
+        """Retrieve the client's IP address from the request."""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+
 class LoginView(APIView):
     def post(self, request):
-        
         user_agent = request.headers.get('User-Agent', '')
         if not user_agent or 'Mozilla' not in user_agent:
             return Response(
                 {"detail": "Access denied. This endpoint is restricted to browsers only."},
                 status=status.HTTP_403_FORBIDDEN
-            ) 
-            
-             
+            )
+
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
@@ -79,7 +90,9 @@ class LoginView(APIView):
             try:
                 user = User.objects.get(email=email)
                 if user.check_password(password):
-                    login(request, user)
+                    # Specify the backend as a string
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
                     return Response({
                         "message": "Login successful.",
                         "user_id": user.id
@@ -89,7 +102,6 @@ class LoginView(APIView):
             except User.DoesNotExist:
                 return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class KYCStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
