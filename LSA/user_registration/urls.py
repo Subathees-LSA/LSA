@@ -18,7 +18,7 @@ urlpatterns = [
     path('view_kyc_image/<int:profile_id>/', view_image, name='view_kyc_image'),
     path('password-reset/', password_reset_request_page, name='password_reset_page'),
     path('password-reset-confirm/<uidb64>/<token>/', password_reset_confirm_page, name='password_reset_confirm_page'),
-    
+      
    #!-------------  api urls ------------!
     path('api/v1/register/', RegisterView.as_view(), name='register'),
     path('api/v1/login/', LoginView.as_view(), name='login'),

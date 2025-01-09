@@ -10,6 +10,9 @@ from django.http import HttpResponseForbidden, HttpResponseServerError
 from .models import LotteryEvent
 from django.shortcuts import render,get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
+from .models import LotteryCategory
+
 
 def admin_signup(request):
     try:
@@ -75,3 +78,47 @@ def lottery_detail_view(request, slug):
 def favorites_page(request):
     return render(request, 'favorites.html')
 
+def faq_page(request):
+    try:
+        return render(request, 'faq.html')
+    except Exception as e:
+        return HttpResponseServerError("Sorry, the FAQ page is currently unavailable. Please try again later.")
+
+def terms_page(request):
+    try:
+        return render(request, 'terms_page.html')
+    except Exception as e:
+        return HttpResponseServerError("Sorry, the Terms and Conditions page is currently unavailable. Please try again later.")
+
+def contact_page(request):
+    try:
+        return render(request, 'contact.html')
+    except Exception as e:
+        return HttpResponseServerError("Sorry, the Contact Us page is currently unavailable. Please try again later.")
+
+def about_us(request):
+    try:
+        return render(request, "about_us.html")
+    except Exception as e:
+        return HttpResponseServerError("Sorry, the about Us page is currently unavailable. Please try again later.")
+
+
+def custom_404(request, exception):
+    try:
+        return render(request, "404.html", status=404)
+    except Exception as e:
+        return HttpResponseServerError("Sorry, the 404 page page is currently unavailable. Please try again later.")
+
+@login_required(login_url='custom_admin_login')
+def admin_contact_reply_page(request):
+    """
+    Renders the admin contact reply page for processing user messages.
+    """
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    return render(request, 'admin_contact_reply.html')
+
+def get_lottery_categories(request):
+    categories = LotteryCategory.objects.all()    # Get all categories
+    category_data = [{"id": category.id, "name": category.name} for category in categories]    
+    return JsonResponse(category_data, safe=False)

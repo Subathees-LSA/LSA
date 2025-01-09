@@ -23,7 +23,28 @@ from datetime import datetime
 from django.utils.timezone import now
 from django.db.models import Sum
 from user_registration.models import *
+from .serializers import ContactSerializer
+from rest_framework.authentication import TokenAuthentication
+from django.core.mail import send_mail
+from .models import Contact
+from .serializers import AdminReplySerializer
+from django.db.models import Max
+from user_registration.serializers import *
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import LotteryCategory
+from .serializers import LotteryCategorySerializer
 
+class UserProfileDeleteAPIView(APIView):
+    def delete(self, request, user_id):
+        try:
+            # Find the user by ID
+            user = User.objects.get(id=user_id)
+            user.delete()  # This will also delete the related UserProfile due to CASCADE
+            return Response({"message": "User and related profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class api_dashboard_preview_admin_view(APIView):
     def get(self, request, *args, **kwargs):
@@ -35,20 +56,24 @@ class api_dashboard_preview_admin_view(APIView):
 
         # Prepare data for cards and tables
         total_users = UserProfile.objects.count()
-        verified_users = UserProfile.objects.filter(is_verified=True).count()
+        verified_users = UserProfile.objects.filter(kyc_status='verified').count()
         pending_kyc = UserProfile.objects.filter(kyc_status='pending').count()
 
-        # Fetching ticket sales and transaction data (similar to your friend's code)
+        # Fetching ticket sales and transaction data
         today = now().date()
         transactions = TicketTransaction.objects.filter(transaction_date__date=today, is_successful=True)
 
         total_tickets_sold = transactions.aggregate(Sum('tickets_sold'))['tickets_sold__sum'] or 0
         total_transaction_amount = transactions.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
+        # Fetch User Profiles and include kyc_image_url
+        user_profiles = UserProfile.objects.all()
+        users_table = []
+        for profile in user_profiles:
+            serializer = UserKycwaitingDetailsSerializer(profile)
+            users_table.append(serializer.data)
 
-        # Example data for the table
-        users_table = UserProfile.objects.values('user__username', 'user__email', 'kyc_status')
-
+        # Prepare additional data
         data = {
             "total_users": total_users,
             "verified_users": verified_users,
@@ -60,10 +85,10 @@ class api_dashboard_preview_admin_view(APIView):
         # Tabs from admin profile with type
         admin_dashboard_preview = role_specific_dashboard_preview.values('name', 'identifier', 'type')
 
-        # Add table data dynamically if type is "table"
-        rates = ConversionRate.objects.values('card_type', 'region', 'rate','is_physical')
+        # Example data for conversion rates
+        rates = ConversionRate.objects.values('card_type', 'region', 'rate', 'is_physical')
         table_data = {
-            "users_table": list(users_table),
+            "users_table": users_table,
             "conversion_rate": list(rates),
         }
 
@@ -72,7 +97,6 @@ class api_dashboard_preview_admin_view(APIView):
             "tabs": list(admin_dashboard_preview),
             "table_data": table_data
         })
-
 
 class api_navbar_access_tabsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -118,6 +142,8 @@ class api_admin_signup(generics.CreateAPIView):
 
 class api_admin_login(APIView):
     serializer_class = api_admin_signup_Serializer
+
+
     @csrf_exempt
     def post(self, request):
         try:
@@ -139,7 +165,7 @@ class api_admin_login(APIView):
                 
                 # Authenticate the user by manually checking the password
                 if user and check_password(admin_password, user.password):
-                    # Check if the user has an associated admin profile and a role
+                    # Check the role of the user
                     admin_profile = getattr(user, 'adminprofile', None)
                     
                     if admin_profile and not admin_profile.role:
@@ -149,11 +175,21 @@ class api_admin_login(APIView):
                             status=status.HTTP_400_BAD_REQUEST
                         )
                     
-                    # If the user has a role, then check if they have the staff status
-                    if user.is_staff:
-                        login(request, user)
+                    # Handle admin and sales roles
+                    if admin_profile.role == 'admin' and user.is_staff:
+                        backend = 'django.contrib.auth.backends.ModelBackend'
+                        user.backend = backend
+                        login(request, user, backend=backend)
                         return Response(
                             {"success": True, "message": "Admin login successful."},
+                            status=status.HTTP_200_OK
+                        )
+                    elif admin_profile.role == 'sales':
+                        backend = 'django.contrib.auth.backends.ModelBackend'
+                        user.backend = backend
+                        login(request, user, backend=backend)
+                        return Response(
+                            {"success": True, "message": "Sales login successful."},
                             status=status.HTTP_200_OK
                         )
                     else:
@@ -174,9 +210,7 @@ class api_admin_login(APIView):
             # Catch any unexpected exceptions and return an internal server error
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-class api_get_lottery_events(APIView):
-    
+class api_get_lottery_events(APIView):  
 
     def get(self, request):
         try:
@@ -194,7 +228,7 @@ class api_get_lottery_events(APIView):
             favorites_slugs = json.loads(request.COOKIES.get('favorites', '[]'))
             
             # Serialize the data
-            serializer = LotteryEventSerializer(lottery_events, many=True)
+            serializer = LotteryEventSerializeradd_get(lottery_events, many=True)
             
             
             events_data = serializer.data
@@ -215,18 +249,28 @@ class api_lottery_events_add(APIView):
 
     def post(self, request):
         try:
-            serializer = LotteryEventSerializer(data=request.data)
+            # Deserialize and validate main LotteryEvent data
+            serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                serializer.save()
+                # Save the main LotteryEvent instance
+                lottery_event = serializer.save()
+
+                # Handle additional images (if provided)
+                additional_images = request.FILES.getlist('additional_images')
+                for image in additional_images:
+                    LotteryEventImages.objects.create(lottery_event=lottery_event, image=image)
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            # Return validation errors for main serializer
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
  
-  
 class api_edit_delete_lottery_events(APIView):
-    serializer_class = LotteryEventSerializer
+    serializer_class = LotteryEventSerializeradd_get
     permission_classes = [IsAdminUser]
 
     def get(self, request, pk):
@@ -236,28 +280,35 @@ class api_edit_delete_lottery_events(APIView):
             return Response({"error": "Lottery event not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        serializer = LotteryEventSerializer(event)
-        return Response(serializer.data)
+
+        # Include additional images if applicable
+        additional_images = event.additional_images.all()  # Assuming a related name 'additional_images'
+        images = [{"id": img.id, "url": img.image.url} for img in additional_images]
+
+        serializer = LotteryEventSerializeradd_get(event)
+        data = serializer.data
+        data['additional_images'] = images  # Append additional images to the response
+        return Response(data)
 
     def put(self, request, pk):
         try:
             event = LotteryEvent.objects.get(pk=pk)
         except LotteryEvent.DoesNotExist:
             return Response({"error": "Lottery event not found"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Update the main event fields
+        event_serializer = LotteryEventSerializer(event, data=request.data,partial=True)
+        if event_serializer.is_valid():
+            event_serializer.save()
 
-        # Handling update logic
-        try:
-            serializer = LotteryEventSerializer(event, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Handle additional images
+            additional_images = request.FILES.getlist('additional_images[]')
+            if additional_images:
+                for image in additional_images:
+                    LotteryEventImages.objects.create(lottery_event=event, image=image)
+
+            return Response(event_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(event_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         try:
@@ -272,6 +323,29 @@ class api_edit_delete_lottery_events(APIView):
             return Response({"message": "Lottery event deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  
+class DeleteLotteryEventImageView(APIView):
+    def delete(self, request, event_id, image_id):
+        # Get the event
+        lottery_event = get_object_or_404(LotteryEvent, id=event_id)
+        
+        # Get the specific image to delete
+        lottery_event_image = get_object_or_404(LotteryEventImages, id=image_id, lottery_event=lottery_event)
+
+        try:
+            # Delete the image from the database and the file system
+            lottery_event_image.delete()
+
+            return Response(
+                {"message": "Additional image deleted successfully."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 
 @api_view(['POST'])
@@ -486,9 +560,107 @@ def add_to_favorites(request):
         favorites.append(event_slug)
         message = "Added to favorites."
     print(f"Updated favorites: {favorites}")  
-
-    
     response = JsonResponse({"success": True, "message": message})
     response.set_cookie('favorites', json.dumps(favorites), max_age=60 * 60 * 24 * 30) 
     return response
-         
+
+class ContactCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ContactSerializer(data=request.data)
+        if serializer.is_valid():
+            # Save the form data
+            contact = serializer.save()
+
+            # Send an auto-response email
+            try:
+                send_mail(
+                    subject="Thank You for Contacting Us",  # Email subject
+                    message=f"Hi {contact.name},\n\n"
+                            f"Thank you for reaching out! We have received your message:\n\n"
+                            f"\"{contact.description}\"\n\n"
+                            "Our team will get back to you shortly.\n\n"
+                            "Best Regards,\n"
+                            "Team Win 4all",  # Email body
+                    from_email='your-email@gmail.com',  # Replace with your email
+                    recipient_list=[contact.email],  # Send to the user's email
+                    fail_silently=False,
+                )
+            except Exception as e:
+                return Response(
+                    {'message': 'Form submitted, but email failed to send.', 'error': str(e)},
+                    status=status.HTTP_201_CREATED
+                )
+
+            return Response(
+                {'message': 'Form submitted successfully!please check you email inbox.', 'data': serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ContactListView(APIView):
+    
+    def get(self, request):
+        contacts = Contact.objects.all()
+        serializer = ContactSerializer(contacts, many=True)
+        return Response(serializer.data)
+
+
+class AdminReplyView(APIView):
+    authentication_classes = [TokenAuthentication]
+    def post(self, request):
+        serializer = AdminReplySerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            message = serializer.validated_data['message']
+
+            try:
+                # Fetch the most recent contact message for the email
+                contact = (
+                    Contact.objects.filter(email=email)
+                    .order_by('-created_at')  
+                    .first()
+                )
+
+                if not contact:
+                    return Response(
+                        {'error': f"No contact message found for email: {email}"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
+                original_message = contact.description
+
+                # Include original message in the reply
+                email_body = (
+                    f"Hi {contact.name},\n\n"
+                    f"We received your message:\n"
+                    f"\"{original_message}\"\n\n"
+                    f"Here is our reply:\n"
+                    f"{message}\n\n"
+                    "Best Regards,\n"
+                    "Admin Team"
+                )
+
+                # Send the email
+                send_mail(
+                    subject="Reply from Admin",
+                    message=email_body,
+                    from_email='your-email@gmail.com',
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+
+                return Response({'message': 'Reply sent successfully!'}, status=status.HTTP_200_OK)
+
+            except Exception as e:
+                return Response(
+                    {'error': f"Failed to send reply: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GetLotteryCategories(APIView):
+    def get(self, request):
+        categories = LotteryCategory.objects.all()
+        serializer = LotteryCategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

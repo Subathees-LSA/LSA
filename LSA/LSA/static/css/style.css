@@ -586,6 +586,18 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
 
 /* lottery_events.html  Styling */
+.category_section {
+    margin-bottom: 40px; /* Add space between categories */
+}
+
+
+.category_section h2 {
+    text-align: 40px;
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
 .lottery_events_title {
     text-align: center;
     color: #333;
@@ -593,14 +605,36 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
 .lottery_events_displayed_container {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 20px;
-    flex-wrap: wrap;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    flex-wrap: nowrap; 
+    overflow-x: auto; 
 }
 
+/* Container for the category list */
+.lottery_events_category_list {
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+
+.lottery_events_category_item {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+.lottery_events_category_item:hover {
+    background-color: #0056b3;
+}
 .lottery_events_event {
     background-color: #fff;
     width: 300px;
@@ -1087,24 +1121,14 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     color: #555;
 }
 
-.lot-detail-competition, .lot-detail-faq {
+.lot-detail-competition {
     margin: 20px 0;
 }
 
-.lot-detail-faq-item {
-    margin-bottom: 10px;
-}
 
-.lot-detail-faq-question {
-    font-weight: bold;
-}
-
-.lot-detail-faq-answer {
-    margin-left: 20px;
-}
 
 /* Additional Images Styling */
-#additional-images-container img {
+#additional-images-containerpopup img {
     width: 100px;
     height: auto; 
     max-width: 100%; 
@@ -1444,3 +1468,477 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     text-align: left;
 }
 
+.additional-image-field {
+    margin-bottom: 10px;
+}
+
+.additional-image-field button {
+    margin-left: 10px;
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.additional-image-field button:hover {
+    background-color: darkred;
+}
+
+.image-preview {
+    width: 100px; 
+    height: 100px;
+    object-fit: cover; 
+    margin-top: 10px; 
+    border: 1px solid #ccc;
+    border-radius: 5px; 
+}
+
+
+/*-----------faq-----------*\
+/* FAQ Container */
+#faq-container {
+    max-width: 750px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* FAQ Item */
+  .faq-item {
+    border-bottom: 1px solid #ddd;
+  }
+  .faq-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* FAQ Header */
+  .faq-header {
+    background: #fefefe;
+    color: #000000;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease;
+  }
+  .faq-header.active {
+    background: orangered;
+  }
+  
+  
+  /* FAQ Icon */
+  .faq-icon {
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  /* FAQ Content */
+  .faq-content {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 15px;
+    background: #f1f1f1;
+    font-size: 17px;
+    color: #333;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  .faq-content.open {
+    max-height: 150px; /* Adjust based on the answer length */
+    padding: 15px;
+  }
+  
+
+/*-----------terms------*\
+/* General Styles */
+body.termsbody {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Container */
+#term-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    max-height: 80vh;
+    overflow-y: auto; /* Add Scrollbar */
+}
+
+/* Headings */
+.term-heading {
+    color: #444;
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+#term-last-revised {
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* Sections */
+.term-section {
+    margin-bottom: 20px;
+}
+
+.term-title {
+    color: #555;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.term-paragraph {
+    line-height: 1.6;
+    font-size: 1em;
+}
+
+/* Scroll to Top Button */
+#term-scroll-top {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#term-scroll-top:hover {
+    background-color: #333;
+}
+
+/* Footer Buttons */
+#term-footer {
+    display: flex;
+    /* justify-content: absolute; */
+    /* margin-top: 10px; */
+    left: 65%; 
+    bottom: 20px;
+    position: absolute;
+}
+
+.term-button {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.term-cancel {
+    background-color: #ccc;
+    color: #333;
+}
+
+.term-agree {
+    background-color: #333;
+    color: #fff;
+}
+/*-------------------contactus____________*\
+/* General Styles */
+/* .contact-body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+} */
+
+/* Form Container */
+.contact-form {
+    max-width: 500px;
+    margin: auto;
+}
+
+/* Input Fields and Textarea */
+.contact-input, 
+.contact-textarea, 
+.contact-button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+/* Button Styles */
+.contact-button {
+    background-color: orange;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.contact-button:hover {
+    background-color: darkorange;
+}
+
+/* Response Message */
+#contact-response-message {
+    color: green;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/*-------------aboutus---*/
+body.aboutbody {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#about-section {
+    text-align: center;
+    padding: 40px;
+}
+
+.about-card-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.about-card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    width: 200px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.about-card img {
+    max-width: 50px;
+    margin-bottom: 10px;
+}
+
+.about-card-title {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.about-card-text {
+    font-size: 14px;
+    color: #555;
+}
+
+/*------------error---*/
+body.errorbody {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+#lt-error-section {
+    padding: 50px;
+}
+
+#lt-error-code {
+    font-size: 120px;
+    color: #333;
+    margin: 0;
+}
+
+#lt-error-message {
+    font-size: 18px;
+    color: #555;
+}
+
+#lt-back-home-btn {
+    text-decoration: none;
+    color: #fff;
+    background-color: #007BFF;
+    padding: 10px 20px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/*---------------------reply-----------------*/
+
+
+.reply-body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+}
+
+.reply-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reply-heading, .reply-subheading {
+    color: #333;
+}
+
+#reply-message-list {
+    margin-bottom: 20px;
+}
+
+.reply-message-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.reply-message-item:hover {
+    background-color: #f9f9f9;
+}
+
+.reply-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.reply-form input, .reply-form textarea {
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.reply-form button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.reply-form button:hover {
+    background-color: #0056b3;
+}
+
+#reply-response-message {
+    margin-top: 10px;
+    font-size: 14px;
+    color: green;
+}
+/*___________custom admin ds______________*/
+.custom_admin_dashboard_lottery-events-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    /* padding-left: 23%; */
+    display: none;
+}
+/* .lottery_cards_heading{
+    padding-left: 23%; 
+} */
+
+
+
+.custom_admin_dashboard_modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+}
+
+.custom_admin_dashboard_modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%; /* Width of the modal */
+    border-radius: 10px;
+    
+}
+
+.custom_admin_dashboard_close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.custom_admin_dashboard_close-button:hover,
+.custom_admin_dashboard_close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.custom_admin_dashboard_open-form-btn {
+    font-size: 24px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    cursor: pointer;
+    display: none;
+    
+    
+}
+
+.custom_admin_dashboard_open-form-btn:hover {
+    background-color: #0056b3;
+}
+
+
+
+
+ /* When the checkbox is checked, show all the hidden cards */
+ #custom_admin_dashboard_lottery_view-more-toggle:checked ~ #lottery-events-container .lottery-event-card {
+    display: block;
+}
+
+/* Style the lottery event cards */
+.lottery-event-card {
+    display: block;
+    margin-bottom: 15px;
+}
+
+        /* Hide the "View More" button when checkbox is checked */
+        #custom_admin_dashboard_lottery_view-more-toggle:checked ~ .custom_admin_dashboard_lottery_view-more-btn {
+            display: none;
+        }
+        /* Create a hidden checkbox to control visibility */
+        #custom_admin_dashboard_lottery_view-more-toggle {
+            display: none;
+        }
+        /* Add styles for the "View More" button */
+        .custom_admin_dashboard_lottery_view-more-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 20px;
+        }

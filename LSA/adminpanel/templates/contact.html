@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> 
+  <script src="{% static 'js/custom.js' %}"></script>
+</head>
+<body class="contact-body">
+    <h1>Contact Us</h1>
+    <form id="contact-form" class="contact-form">
+        <input type="text" id="contact-name" class="contact-input" placeholder="Your Name" required>
+        <input type="email" id="contact-email" class="contact-input" placeholder="Your Email" required>
+        <textarea id="contact-description" class="contact-textarea" placeholder="Enter your message" required></textarea>
+        <button type="submit" id="contact-submit" class="contact-button">Send Request</button>
+    </form>
+    <p id="contact-response-message"></p>   
+</body>
+</html>
