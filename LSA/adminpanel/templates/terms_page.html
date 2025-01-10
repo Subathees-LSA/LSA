@@ -2,70 +2,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms and Conditions</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}"> 
-    <script src="{% static 'js/custom.js' %}"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms and Conditions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+  <script src="{% static 'js/custom.js' %}"></script>
 </head>
-<body class="termsbody">
-    <!-- Container -->
-    <div id="term-container">
-        <h1 class="term-heading">Terms and Conditions</h1>
-        <p id="term-last-revised"><strong>Last Revised:</strong> December 21,2024</p>
-
-        <!-- Long Content Sections -->
-        <div class="term-section">
-            <h2 class="term-title">1. Your Agreement</h2>
-            <p class="term-paragraph">
-                By using this Site, you agree to comply with these Terms and Conditions. If you do not agree, please do not use this site. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sed lorem eget massa facilisis elementum.
-            </p>
-            <p class="term-paragraph">
-                Integer a nulla a justo fermentum sagittis at eget nibh. Nullam ullamcorper, ipsum ut efficitur dapibus, orci justo facilisis libero, nec vehicula lorem nulla vel nisl.
-            </p>
-        </div>
-
-        <div class="term-section">
-            <h2 class="term-title">2. Privacy Policy</h2>
-            <p class="term-paragraph">
-                Your privacy is very important to us. We follow the best practices to safeguard your information. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            </p>
-            <p class="term-paragraph">
-                Sed facilisis orci nec ligula facilisis, et bibendum orci dapibus. Cras in nulla lacus. Donec eu nisi nec odio mattis gravida eget ac justo.
-            </p>
-        </div>
-
-        <div class="term-section">
-            <h2 class="term-title">3. Linked Sites</h2>
-            <p class="term-paragraph">
-                This Site may contain links to third-party websites. We are not responsible for or endorse their content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            </p>
-            <p class="term-paragraph">
-                Pellentesque fermentum dui ut velit fermentum, eget tristique neque dignissim. Proin malesuada, turpis ac fringilla pharetra, erat turpis egestas augue.
-            </p>
-        </div>
-
-        <!-- Repeated Content for Scroll -->
-        <div class="term-section">
-            <h2 class="term-title">4. Additional Information</h2>
-            <p class="term-paragraph">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eu urna quis est efficitur tristique. Nulla eget erat id lectus posuere vestibulum.
-            </p>
-            <p class="term-paragraph">
-                Fusce eget leo id eros mattis sollicitudin eget non sapien. Sed vel lorem ut mauris interdum malesuada nec et nisl.
-            </p>
-        </div>
-
-        <!-- Scroll to Top Button -->
-        <button id="term-scroll-top" class="term-button">Scroll to Top</button>
-    </div>
-
-    <!-- Footer Buttons -->
-    <div id="term-footer">
-        <button class="term-button term-cancel">Cancel</button>
-        <button class="term-button term-agree">Agree</button>
-    </div>
-
-       
+<body class="terms-body">
+  {% include 'header.html' %}
+  <main class="terms-container">
+    <h1 class="terms-heading">Terms and Conditions</h1>
+    <section>
+      <h2>Your Agreement</h2>
+      <p class="section-last-revised">Last Revised: December 16, 2013</p>
+      <p class="section-paragraph">
+        Welcome to www.lorem-ipsum.info. This site is provided as a service to our visitors and may be used for informational purposes only. Because the Terms and Conditions contain legal obligations, please read them carefully.
+      </p>
+      <h3>1. Your Agreement</h3>
+      <p class="section-paragraph">
+        By using this site, you agree to be bound by, and to comply with, these Terms and Conditions. If you do not agree to these Terms and Conditions, please do not use this site.
+      </p>
+      <h3>2. Privacy</h3>
+      <p class="section-paragraph">
+        Please review our Privacy Policy, which also governs your visit to this site, to understand our practices.
+      </p>
+      <h3>3. Linked Sites</h3>
+      <p class="section-paragraph">
+        This site may contain links to other independent third-party websites ("Linked Sites"). These Linked Sites are provided solely as a convenience to our visitors. Such Linked Sites are not under our control, and we are not responsible for and do not endorse the content of these Linked Sites, including any information or materials contained on these Linked Sites. You will need to make your own independent judgment regarding your interaction with these Linked Sites.
+      </p>
+    </section>
+  </main>
+  <!-- {% include 'footer.html' %} -->
 </body>
 </html>
+
+

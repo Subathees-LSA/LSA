@@ -1,99 +1,603 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Fetch and display contact messages
-    fetch("/api/admin/messages/")
-        .then((response) => response.json())
-        .then((data) => {
-            try {
-                const messageList = document.getElementById("reply-message-list");
-                data.forEach((message) => {
+    const messageList = document.getElementById("user_chats_message_list");
+    const messageInput = document.getElementById("user_chats_message_input");
+    const fileInput = document.getElementById("user_chats_file_input");
+    const sendButton = document.getElementById("user_chats_send_button");
+    const errorMessage = document.getElementById("user_chats_error_message");
+
+    // Fetch and display the user's chats
+    const fetchChats = () => {
+        fetch("/api/user/chat/", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`, // Use your token for authentication
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                messageList.innerHTML = ""; // Clear the chat list
+                data.forEach((chat) => {
                     const messageItem = document.createElement("div");
-                    messageItem.className = "reply-message-item";
-                    messageItem.innerText = `${message.name} (${message.email}): ${message.description} (${message.created_at})`;
-                    messageItem.onclick = () => openReplyForm(message.email, message.description);
+                    messageItem.className = chat.type === "user" ? "user-message" : "admin-message";
+
+                    let content = `<p>${chat.message || "File Attached"}</p>`;
+                    if (chat.file) {
+                        const fileExtension = chat.file.split(".").pop().toLowerCase();
+                        if (["png", "jpg", "jpeg", "gif"].includes(fileExtension)) {
+                            content += `<img src="${chat.file}" alt="Attached Image" style="max-width: 100%; margin-top: 10px;" />`;
+                        } else {
+                            content += `<a href="${chat.file}" target="_blank" style="margin-top: 10px; display: inline-block;">Download File</a>`;
+                        }
+                    }
+
+                    content += `<small>${new Date(chat.created_at).toLocaleString()}</small>`;
+                    messageItem.innerHTML = content;
                     messageList.appendChild(messageItem);
                 });
-            } catch (error) {
-                console.error("Error rendering messages:", error);
-            }
-        })
-        .catch((error) => console.error("Error fetching messages:", error));
-
-    // Open reply form with user's original message
-    const openReplyForm = (email, originalMessage) => {
-        try {
-            document.getElementById("reply-email").value = email;
-            document.getElementById("reply-original-message").innerText = originalMessage;
-            document.getElementById("reply-form-container").style.display = "block";
-        } catch (error) {
-            console.error("Error opening reply form:", error);
-        }
+            })
+            .catch((error) => console.error("Error fetching chats:", error));
     };
 
-    // Handle form submission
-    document.getElementById("reply-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        try {
-            const email = document.getElementById("reply-email").value;
-            const replyMessage = document.getElementById("reply-message").value;
+    // Send a message or file to the admin
+    const sendMessage = () => {
+        const message = messageInput.value.trim();
+        const file = fileInput.files[0];
 
-            const response = await fetch("/api/admin/reply/", {
-                method: "POST",
+        errorMessage.innerText = "";
+
+        if (!message && !file) {
+            // Display error message if both message and file are empty
+            errorMessage.innerText = "Please enter a message or select a file to send.";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("message", message);
+        if (file) {
+            formData.append("file", file);
+        }
+
+        fetch("/api/user/chat/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": user_chats_csrfToken // Include the CSRF token
+            },
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.message) {
+                    messageInput.value = ""; // Clear the input
+                    fileInput.value = ""; // Clear the file input
+                    errorMessage.innerText = "";
+                    fetchChats(); // Refresh the chat
+                } else {
+                    alert("Error sending message.");
+                    errorMessage.innerText = "Error sending message.";
+                }
+            })
+            .catch((error) => {
+                console.error("Error sending message:", error);
+                alert("Error sending message.");
+                errorMessage.innerText = "Error sending message.";
+            });
+    };
+
+    sendButton.addEventListener("click", sendMessage);
+
+    // Fetch chats on page load
+    fetchChats();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const messageList = document.getElementById("admin_contact_reply_message_list");
+    const backButton = document.createElement("button");
+    backButton.id = "admin_contact_reply_back_button";
+    backButton.innerText = "Back";
+    backButton.style.display = "none"; // Initially hidden
+    backButton.onclick = () => showEmailList();
+
+    const basketIcon = document.createElement("span");
+    basketIcon.id = "basket-icon";
+    basketIcon.title = "Delete Selected";
+    basketIcon.innerHTML = "🗑️";
+    basketIcon.style.display = "none"; // Initially hidden
+    basketIcon.style.cursor = "pointer";
+    basketIcon.style.fontSize = "20px";
+    basketIcon.style.marginBottom = "10px";
+    basketIcon.onclick = () => deleteSelectedContacts();
+
+    document.querySelector(".admin_contact_reply_container").prepend(basketIcon, backButton);
+
+    let selectedEmails = [];
+
+    fetch("/api/admin/messages/")
+    .then((response) => response.json())
+    .then((data) => {
+        // Convert the object to an array of emails, sorted by created_at
+        const sortedEmails = Object.entries(data); 
+
+        sortedEmails.forEach(([email, messages]) => {
+            const emailItem = document.createElement("div");
+            emailItem.className = "email-item";
+            emailItem.innerHTML = `
+                <input type="checkbox" class="email-checkbox" data-email="${email}">
+                <span class="email-text">${email}</span>
+                <span class="last-message"></span>
+                <span class="delete-icon" title="Delete Email">🗑️</span>
+            `;
+            const lastMessageElement = emailItem.querySelector(".last-message");
+
+            fetch(`/api/admin/chat/${email}/`)
+            .then((response) => response.json())
+            .then((messages) => {
+                const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
+               
+                const lastMessageContent = lastMessage?.file
+                ? "File Attached" // If a file exists, display "File Attached"
+                : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
+                lastMessageElement.innerText = `${lastMessageContent}`;
+                if (lastMessageContent.length > 5) {
+                    lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
+                }
+             })
+            .catch((error) => console.error("Error fetching messages by email:", error));
+            
+            
+
+            // Attach checkbox selection functionality
+            emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
+
+            // Attach delete functionality
+            emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
+
+            // Open chat on click (excluding the delete icon and checkbox)
+            emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
+
+            // Append the email item to the message list
+            messageList.appendChild(emailItem);
+        });
+    })
+    .catch((error) => console.error("Error fetching messages:", error));
+
+            const editAdminMessage = (id, oldMessage) => {
+            // Open the modal
+            const modal = document.getElementById("admin_contact_reply_editMessageModal");
+            const editMessageInput = document.getElementById("admin_contact_reply_editMessageInput");
+            const editMessageFile = document.getElementById("admin_contact_reply_editMessageFile");
+            const editMessageForm = document.getElementById("admin_contact_reply_editMessageForm");
+        
+            // Populate the existing message
+            editMessageInput.value = oldMessage;
+            editMessageFile.value = ""; // Reset file input
+            modal.style.display = "block";
+        
+            // Handle the form submission
+            editMessageForm.onsubmit = (e) => {
+                e.preventDefault();
+        
+                const newMessage = editMessageInput.value.trim();
+                const newFile = editMessageFile.files[0];
+                if (!newMessage && !newFile) {
+                    alert("Message or file is required.");
+                    return;
+                }
+        
+                const formData = new FormData();
+                formData.append("reply_message", newMessage);
+                if (newFile) {
+                    formData.append("file", newFile);
+                }
+        
+                fetch(`/api/admin/reply/${id}/edit_delete/`, {
+                    method: "PUT",
+                    headers: {
+                        "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+                    },
+                    body: formData,
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.message) {
+                            alert(data.message);
+                            modal.style.display = "none"; // Close the modal
+                            fetchMessagesByEmail(document.getElementById("admin_contact_reply_email").value);
+                        } else {
+                            alert("Error editing message.");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error editing message:", error);
+                        alert("Error editing message.");
+                    });
+            };
+        };
+        
+        // Close the modal when clicking the close button or outside the modal
+        document.getElementById("admin_contact_reply_closeEditModal").onclick = () => {
+            document.getElementById("admin_contact_reply_editMessageModal").style.display = "none";
+        };
+        
+        window.onclick = (event) => {
+            const modal = document.getElementById("admin_contact_reply_editMessageModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+        
+        
+        const deleteAdminMessage = (id) => {
+            if (confirm("Are you sure you want to delete this message?")) {
+                fetch(`/api/admin/reply/${id}/edit_delete/`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+                    },
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.message) {
+                            alert(data.message);
+                            fetchMessagesByEmail(document.getElementById("admin_contact_reply_email").value);
+                        } else {
+                            alert("Error deleting message.");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting message:", error);
+                        alert("Error deleting message.");
+                    });
+            }
+        };
+            
+    const fetchMessagesByEmail = (email) => {
+        fetch(`/api/admin/chat/${email}/`)
+            .then((response) => response.json())
+            .then((messages) => {
+                messageList.innerHTML = "";
+                backButton.style.display = "block";
+                basketIcon.style.display = "none"; // Hide the basket icon in chat view
+                
+            const starContainer = document.createElement("div");
+            starContainer.className = "star-container";
+            starContainer.style.display = "flex";
+            starContainer.style.alignItems = "center";
+            starContainer.style.marginBottom = "10px";
+           
+
+            const starIcon = document.createElement("span");
+            
+            starIcon.className = "star-icon";
+            starIcon.style.cursor = "pointer";
+            starIcon.style.fontSize = "24px";
+            starIcon.style.marginRight = "8px";
+           
+            starIcon.onclick = () => toggleStarChat(email, starIcon);
+
+            const starLabel = document.createElement("span");
+            
+            starLabel.style.fontSize = "16px";
+
+            starContainer.appendChild(starIcon);
+            starContainer.appendChild(starLabel);
+            messageList.appendChild(starContainer);
+
+                messages.forEach((message) => {
+                    
+                    const messageItem = document.createElement("div");
+                    messageItem.className = message.type === "user" ? "chat-user-message" : "chat-admin-message";
+                    if (message.type === "user") {
+                        // Create a star icon element const starIcon = document.createElement("span");
+                        starIcon.innerHTML = message.starred ? "⭐" : "☆"; // Filled or empty star
+                        
+                    }
+                    let content = `<p>${message.message || "File Attached"}</p>`;
+
+                    if (message.file) {
+                        const fileExtension = message.file.split(".").pop().toLowerCase();
+                        if (["png", "jpg", "jpeg", "gif"].includes(fileExtension)) {
+                            content += `<img src="${message.file}" alt="Attached Image" style="max-width: 100%; margin-top: 10px;" />`;
+                        } else {
+                            content += `<a href="${message.file}" target="_blank" style="margin-top: 10px; display: inline-block;">Download File</a>`;
+                        }
+                    }
+                    
+                    content += `<small>${new Date(message.created_at).toLocaleString()}</small>`;
+                   
+                    
+                    messageItem.innerHTML = content;
+                     // Add action icons for admin messages
+                if (message.type === "admin") {
+                    const actions = document.createElement("div");
+                    actions.className = "message-actions";
+
+                    // Edit icon
+                    const editIcon = document.createElement("span");
+                    editIcon.innerHTML = "✏️"; // Edit icon
+                    editIcon.title = "Edit Message";
+                    editIcon.onclick = () => editAdminMessage(message.id, message.message);
+
+                    // Delete icon
+                    const deleteIcon = document.createElement("span");
+                    deleteIcon.innerHTML = "🗑️"; // Delete icon
+                    deleteIcon.title = "Delete Message";
+                    deleteIcon.onclick = () => deleteAdminMessage(message.id);
+
+                    actions.appendChild(editIcon);
+                    actions.appendChild(deleteIcon);
+                    messageItem.appendChild(actions);
+                }
+                    messageList.appendChild(messageItem);
+                    
+                    
+                });
+
+                openReplyForm(email);
+            })
+            .catch((error) => console.error("Error fetching messages by email:", error));
+    };
+    // Function to toggle the star status of a chat
+const toggleStarChat = (email, starIcon) => {
+    const isStarred = starIcon.innerHTML === "⭐";
+    fetch("/api/admin/messages/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json" ,
+            "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+        },
+        body: JSON.stringify({
+            email: email,
+            starred: !isStarred,
+        }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                starIcon.innerHTML = isStarred ? "☆" : "⭐";
+               
+            }
+        })
+        .catch((error) => console.error("Error toggling star status:", error));
+};
+    const deleteContact = (email) => {
+        if (confirm(`Are you sure you want to delete all data for ${email}?`)) {
+            fetch(`/api/admin/delete-contact/${email}/`, {
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, message: replyMessage }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.message) {
+                        alert(data.message);
+                        showEmailList(); // Refresh the email list
+                    } else {
+                        alert("Error deleting contact.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error deleting contact:", error);
+                    alert("Error deleting contact.");
+                });
+        }
+    };
+
+    const handleCheckboxSelection = (e, email) => {
+        if (e.target.checked) {
+            selectedEmails.push(email);
+        } else {
+            selectedEmails = selectedEmails.filter((selectedEmail) => selectedEmail !== email);
+        }
+
+        // Show or hide the basket icon based on selections
+        basketIcon.style.display = selectedEmails.length > 0 ? "inline-block" : "none";
+    };
+
+    const deleteSelectedContacts = () => {
+        if (selectedEmails.length === 0) {
+            alert("No emails selected.");
+            return;
+        }
+
+        if (confirm(`Are you sure you want to delete the selected emails: ${selectedEmails.join(", ")}?`)) {
+            Promise.all(
+                selectedEmails.map((email) =>
+                    fetch(`/api/admin/delete-contact/${email}/`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                )
+            )
+                .then(() => {
+                    alert("Selected emails have been deleted successfully.");
+                    selectedEmails = []; // Clear the selected emails
+                    showEmailList(); // Refresh the email list
+                })
+                .catch((error) => {
+                    console.error("Error deleting selected contacts:", error);
+                    alert("Error deleting selected contacts.");
+                });
+        }
+    };
+
+    const showEmailList = () => {
+        messageList.innerHTML = "";
+        backButton.style.display = "none";
+        basketIcon.style.display = "none"; // Hide the basket icon when returning to the list
+        const replyForm = document.getElementById("admin_contact_reply_form_container");
+        replyForm.style.display = "none";
+
+        fetch("/api/admin/messages/")
+    .then((response) => response.json())
+    .then((data) => {
+        // Convert the object to an array of emails, sorted by created_at
+        const sortedEmails = Object.entries(data); 
+
+        sortedEmails.forEach(([email, messages]) => {
+            const emailItem = document.createElement("div");
+            emailItem.className = "email-item";
+            emailItem.innerHTML = `
+                <input type="checkbox" class="email-checkbox" data-email="${email}">
+                <span class="email-text">${email}</span>
+                <span class="last-message"></span>
+                <span class="delete-icon" title="Delete Email">🗑️</span>
+            `;
+            const lastMessageElement = emailItem.querySelector(".last-message");
+
+            fetch(`/api/admin/chat/${email}/`)
+            .then((response) => response.json())
+            .then((messages) => {
+                const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
+               
+                const lastMessageContent = lastMessage?.file
+                ? "File Attached" // If a file exists, display "File Attached"
+                : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
+                lastMessageElement.innerText = `${lastMessageContent}`;
+                if (lastMessageContent.length > 5) {
+                    lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
+                }
+             })
+            .catch((error) => console.error("Error fetching messages by email:", error));
+            
+            
+
+            // Attach checkbox selection functionality
+            emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
+
+            // Attach delete functionality
+            emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
+
+            // Open chat on click (excluding the delete icon and checkbox)
+            emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
+
+            // Append the email item to the message list
+            messageList.appendChild(emailItem);
+        });
+    })
+    .catch((error) => console.error("Error fetching messages:", error));
+
+    };
+
+    const openReplyForm = (email) => {
+        const replyForm = document.getElementById("admin_contact_reply_form_container");
+        replyForm.style.display = "block";
+        document.getElementById("admin_contact_reply_email").value = email;
+    };
+
+
+
+
+    document.getElementById("admin_contact_reply_form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("admin_contact_reply_email").value;
+        const replyMessage = document.getElementById("admin_contact_reply_message").value.trim();
+        const adminreplyMessage = document.getElementById("admin_contact_reply_message")
+        const fileInput = document.getElementById("admin_contact_reply_file");
+        const responseMessage = document.getElementById("admin_contact_reply_response_message");
+
+        // Frontend validation: Check if the replyMessage is empty
+        if (!replyMessage && !fileInput.files.length) {
+            responseMessage.innerText = "Reply message or file is required.";
+            responseMessage.style.color = "red";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("message", replyMessage);
+
+        if (fileInput.files[0]) {
+            formData.append("file", fileInput.files[0]);
+        }
+
+        try {
+            const response = await fetch("/api/admin/reply/", {
+                method: "POST",
+                body: formData,
             });
 
             const data = await response.json();
-            const responseMessage = document.getElementById("reply-response-message");
 
             if (data.message) {
                 responseMessage.innerText = data.message;
                 responseMessage.style.color = "green";
+                adminreplyMessage.value = ""; // Reset replyMessage input
+                fileInput.value = ""; 
+                fetchMessagesByEmail(email);
             } else {
                 responseMessage.innerText = "Error sending reply.";
                 responseMessage.style.color = "red";
             }
         } catch (error) {
             console.error("Error sending reply:", error);
+            responseMessage.innerText = "Error sending reply.";
+            responseMessage.style.color = "red";
         }
     });
 });
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Select all FAQ header elements
-    const faqHeaders = document.querySelectorAll(".faq-header");
-
-    faqHeaders.forEach((header) => {
-        header.addEventListener("click", function () {
-            try {
-                const content = header.nextElementSibling; // Get the content div
-                const isOpen = content.style.maxHeight;
-
-                // Close all other FAQs
-                document.querySelectorAll(".faq-content").forEach((item) => {
-                    item.style.maxHeight = null; // Collapse other items
-                });
-                document.querySelectorAll(".faq-header").forEach((item) => {
-                    item.classList.remove("active"); // Remove active state
-                    item.querySelector(".faq-icon").textContent = "+"; // Reset icon
-                });
-
-                // Toggle the clicked FAQ
-                if (!isOpen) {
-                    content.style.maxHeight = content.scrollHeight + "px"; // Expand the content
-                    header.classList.add("active"); // Highlight active question
-                    header.querySelector(".faq-icon").textContent = "-"; // Change icon
-                } else {
-                    content.style.maxHeight = null; // Collapse if already open
-                }
-            } catch (error) {
-                console.error("Error toggling FAQ:", error);
-            }
+document.addEventListener("DOMContentLoaded", () => {
+    const faqItems = document.querySelectorAll('.faq-item');
+    const faqTitleMain = document.getElementById('faq-title-main');
+    const faqText = document.getElementById('faq-text');
+  
+    // Define unique content for each FAQ item
+    const faqContent = {
+      "faq1": "Yes, we use advanced SSL encryption and adhere to strict data protection policies to ensure your information is safe.",
+      "faq2": "Absolutely. Our website is mobile-friendly, and we also offer apps for iOS and Android devices for seamless gaming on the go.",
+      "faq3": "Click the 'Forgot Password' link on the login page, enter your registered email, and follow the instructions to reset your password.",
+      "faq4": "You must be at least 18 years old or meet the legal gambling age in your jurisdiction to use our platform.",
+      "faq5": "We do not charge fees for deposits. Withdrawal fees depend on the payment method you choose, which will be clearly stated during the process.",
+      "faq6": "If a game crashes, the outcome of any completed bets will remain valid, and you can resume the game where it left off. Contact support if the issue persists.",
+      "faq7": "If you wish to close your account, contact customer support for assistance. You may also use self-exclusion options in your account settings.",
+      "faq8": "Some details, like your password, can be updated directly in your account settings. For sensitive information like your registered email, contact support.",
+      "faq9": "The minimum deposit amount varies by payment method but is generally [insert amount, e.g., $10].",
+      "faq10": "Log in to your account, navigate to the “Payments” section, and add or update your preferred payment methods."
+    };
+  
+    // Display the first FAQ item by default
+    if (faqItems.length > 0) {
+      const firstFaq = faqItems[0];
+      const targetId = firstFaq.getAttribute('data-target');
+      firstFaq.classList.add('expanded');
+      firstFaq.querySelector('.icon').textContent = '-';
+      faqTitleMain.textContent = firstFaq.querySelector('.faq-title').textContent;
+      faqText.textContent = faqContent[targetId];
+    }
+  
+    // Add click event listeners to each FAQ item
+    faqItems.forEach(item => {
+      item.addEventListener('click', () => {
+        // Collapse all FAQ items
+        faqItems.forEach(faq => {
+          faq.classList.remove('expanded');
+          faq.classList.remove('faded');
+          faq.querySelector('.icon').textContent = '+';
         });
+  
+        // Expand the clicked FAQ item
+        item.classList.add('expanded');
+        item.querySelector('.icon').textContent = '-';
+  
+        // Apply faded class to non-selected FAQ items
+        faqItems.forEach(faq => {
+          if (faq !== item) {
+            faq.classList.add('faded');
+          }
+        });
+  
+        // Update the main content area with unique content
+        const targetId = item.getAttribute('data-target');
+        faqTitleMain.textContent = item.querySelector('.faq-title').textContent;
+        faqText.textContent = faqContent[targetId] || "No detailed content available for this FAQ.";
+      });
     });
-});
-
+  });
+  
 // Wait for the DOM to load
 document.addEventListener("DOMContentLoaded", function () {
     const contactForm = document.getElementById("contact-form");
@@ -109,7 +613,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const response = await fetch("/api/contact/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": contact_csrfToken
+                },
                 body: JSON.stringify({ name, email, description }),
             });
 
@@ -120,7 +628,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 contactForm.reset(); // Clear the form after success
             } else {
                 const errorData = await response.json();
-                responseMessage.innerText = "Error: " + JSON.stringify(errorData);
+                responseMessage.innerText = errorData.email ? errorData.email[0] : "No error message found";
                 responseMessage.style.color = "red";
             }
         } catch (error) {
@@ -130,24 +638,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+/*-----------------navbar-------*/
+
   
-document.addEventListener("DOMContentLoaded", function () {
-        const scrollTopBtn = document.getElementById("term-scroll-top");
+function toggleMenu() {
+    const navbarLinks = document.querySelector('.navbar-links');
+    navbarLinks.classList.toggle('active');
 
-        // Show the button when scrolling down
-        window.onscroll = function() {
-            if (document.documentElement.scrollTop > 200) {
-                scrollTopBtn.style.display = "block";
-            } else {
-                scrollTopBtn.style.display = "none";
-            }
-        };
+    const hamburger = document.querySelector('.hamburger');
+    hamburger.classList.toggle('active');
+}
 
-        // Scroll to the top of the page
-        scrollTopBtn.onclick = function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-    });
 // custom_admin_dashboard.html
 function initializeDashboard() {
     try {
@@ -2479,9 +2980,7 @@ function displayLotteryEvents(events) {
     events.forEach(event => {
         if (event.category && event.category.id) {
             const categoryId = event.category.id;
-            const categoryName = event.category.name || 'Unknown Category';
-
-
+            const categoryName = event.category.name || 'Unknown Category';       
             if (!categoriesMap[categoryId]) {
                 categoriesMap[categoryId] = { id: categoryId, name: categoryName };
             }
@@ -2498,6 +2997,13 @@ function displayLotteryEvents(events) {
         categoryElement.classList.add('category_section');
         categoryElement.innerHTML = `<h2>${category.name}</h2>`;
 
+        const viewAllButton = document.createElement('button');
+        viewAllButton.classList.add('view_all_button');
+        viewAllButton.textContent = 'View All';
+        viewAllButton.onclick = function () {
+            window.location.href = `/category_lottery_events/${category.name}/`;
+        };
+        categoryElement.appendChild(viewAllButton);
 
         const categoryEventsContainer = document.createElement('div');
         categoryEventsContainer.classList.add('lottery_events_displayed_container');
@@ -2506,8 +3012,7 @@ function displayLotteryEvents(events) {
         // Filter events for this category
         const filteredEvents = events.filter(event =>
             event.category && event.category.id === category.id
-        );
-
+        ).slice(0, 4);
 
         filteredEvents.forEach(event => {
             const eventElement = document.createElement('div');
@@ -2555,6 +3060,67 @@ function displayLotteryEvents(events) {
 
 
     attachAddToCartListeners(); // Attach listeners for "Add to Cart" buttons
+}
+
+
+function fetchCategoryLotteryEvents() {
+    fetch(api_get_category_lottery_events_url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            displayCategoryLotteryEvents(data);
+        })
+        .catch(error => console.error('Error fetching category lottery events:', error));
+}
+
+
+function displayCategoryLotteryEvents(events) {
+    console.log(events);
+    const container = document.getElementById('category_lottery_events_container');
+    container.innerHTML = ''; // Clear the container
+    if (events.length === 0) {
+        container.innerHTML = '<p>No lottery events available in this category.</p>';
+        return;
+    }
+
+    events = events.filter(event => event.is_active); // Filter out inactive events
+
+    events.forEach(event => {
+        const eventElement = document.createElement('div');
+        eventElement.classList.add('category_lottery_event');
+
+        const drawDateString = event.is_active
+            ? lottery_events_formatDrawDate(event.draw_date)
+            : 'Inactive';
+        const favoriteClass = event.is_favorite ? 'favorited' : '';
+        const favoriteIcon = `
+            <div class="lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
+                <i class="fas fa-heart ${favoriteClass}"></i>
+            </div>`;
+
+        const enterNowButton = `<a href="/lottery_detail/${event.slug}/" class="category_lottery_enter_button">Enter now</a>`;
+
+        eventElement.innerHTML = `
+            ${favoriteIcon}
+            <div class="category_lottery_event_header">${drawDateString}</div>
+            ${event.image ? `<img src="${event.image}" alt="${event.title}" class="category_lottery_image" />` : ''}
+            <h3 class="category_lottery_title">${event.title}</h3>
+            <p class="category_lottery_description"><strong>Description:</strong> ${event.description}</p>
+            <div class="category_lottery_price">Prize: £${event.price}</div>
+            <div class="category_lottery_ticket_price">Per ticket price: £${event.per_ticket_price}</div>
+            <div class="category_lottery_sold_percentage">
+                <div class="category_lottery_sold_bar" style="width: ${event.sold_percentage}%"></div>
+            </div>
+            <p class="category_lottery_sold_text">SOLD: ${event.sold_percentage}%</p>
+            ${enterNowButton}
+        `;
+
+        container.appendChild(eventElement);
+    });
 }
 
 
@@ -3065,6 +3631,7 @@ function toggleFavorite(eventSlug) {
         alert(data.message);
         fetchFavorites(); // Refresh the favorites list
         lottery_events_fetch();
+        fetchCategoryLotteryEvents();
         // Toggle the class on the icon based on the response
         if (data.success) {
             favoriteIcon.classList.toggle('favorited'); // Add or remove 'favorited' class

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
@@ -8,29 +9,91 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}" defer></script>
-    
+
+
 </head>
+
 <body>
 
-<div class="login-container">
-    <h2 class="login-header">Login</h2>
-    <form id="login-form" class="login-form" data-url="{% url 'login' %}" data-redirect-url="{% url 'user_welcome_page' %}" >
-        <input type="email" id="login-email" class="login-input-email" placeholder="Email" required><br>
-        <span id="login-email-error" style="color: red;"></span><br>
+    <div class="login-container">
+        <div class="login-background-wrapper">
+            <div class="login-background"></div>
+            <div class="login-orange-background">
+                <div class="login-blue-background">
+                    <div class="login-blue-background-overlay"></div>
+                </div>
+            </div>
+            <div class="login-text-section">
+                <div class="login-welcome-text">Welcome to our community</div>
+                <div class="login-description-text">Clarity gives you the blocks & components you need to create a truly
+                    professional website.</div>
+            </div>
+            <div class="login-form-section">
+                <div class="login-header-wrapper">
+                    <div class="login-header">Welcome Back !</div>
+                    <h1 class="login-description">Clarity gives you the blocks and components you need to create a
+                        truly
+                        professional website.</h1>
+                </div>
+                <div class="login-form-wrapper">
+                    <form id="login-form" class="login-form" data-url="{% url 'login' %}"
+                        data-redirect-url="{% url 'user_welcome_page' %}">
+                        <div
+                            style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
+                            E mail or Phone Number</div>
+                        <input type="email" id="login-email" class="login-input-email" placeholder="Email" required>
+                        <span id="login-email-error" class="login-error-text"></span>
+                        <div
+                            style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
+                            Password</div>
+                        <input type="password" id="login-password" class="login-input-password" placeholder="Password"
+                            required>
+                        <span id="login-password-error" class="login-error-text"></span>
+                        <span id="login-error" class="login-error-text"></span>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox"
+                                    style="width: 20px; height: 20px; border-radius: 5px; border: 1px #94A3B8 solid;" />
+                                <div class="remember"
+                                    style="color: #18181B; font-size: 14px; font-family: Rajdhani; font-weight: 500; line-height: 22px; word-wrap: break-word; margin-left: 8px;">
+                                    Remember me
+                                </div>
+                            </div>
 
-        <div class="login-input-container">
-            <input type="password" id="login-password" class="login-input-password" placeholder="Password" required>
-            <span id="login-toggle-password" class="login-toggle-password">🙈</span>
+                            <a href="{% url 'password_reset_page' %}" class="login-forgot-password"
+                                style="font-size: 14px; color: #FF6600;">
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        <button type="submit" class="login-button">Login</button>
+                        <div class="separator-container">
+                            <div class="separator-line"></div>
+                            <div class="separator-text">
+                                or do it via other accounts
+                            </div>
+                            <div class="separator-line"></div>
+                        </div>
+
+                        <div class="google-signin-custom">
+                            <a href="{% url 'social:begin' 'google-oauth2' %}" class="submit-btn-custom1">
+                                <img src="/media/lottery_images/search%201.png" alt="Google Signin"
+                                    class="google-signin-img">
+                                Gmail
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
         </div>
-        <span id="login-password-error" style="color: red;"></span><br>
-        <span id="login-error" style="color: red;"></span><br>
-        <a href="{% url 'password_reset_page' %}">Forgot password?</a>
-        <button type="submit" class="login-button">Login</button>
-        <a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a>
+        <img style="width: 478px; height: 173px; left: 80px; top: 567px; position: absolute"
+            src="/media/lottery_images/image%201209.svg" alt="Lottery Image" />
 
-    </form>
-</div>
+        <img style="width: 221px; height: 64px; left: 62.50px; top: 46px; position: absolute"
+            src="/media/lottery_images/image%2030.svg" alt="Lottery Image" />
 
+    </div>
 </body>
-</html>
 
+</html>

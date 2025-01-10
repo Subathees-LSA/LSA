@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-uc8srq2am+c=1v@9^=ytx67=bm__f^_xuxn%muof_hkp7w+1lt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['thebetzonesdev.pythonanywhere.com']
 
 
 # Application definition
@@ -53,8 +53,8 @@ AUTHENTICATION_BACKENDS = [
 
 
 # Login and redirect URLs
-LOGIN_REDIRECT_URL = '/user_welcome_page/'  
-LOGOUT_REDIRECT_URL = '/login/' 
+LOGIN_REDIRECT_URL = '/user_welcome_page/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 
 SOCIAL_AUTH_PIPELINE = (
@@ -63,7 +63,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
-    'user_registration.pipeline.link_to_existing_user',  
+    'user_registration.pipeline.link_to_existing_user',
     'social_core.pipeline.user.create_user',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
@@ -168,8 +168,18 @@ EMAIL_HOST_PASSWORD = 'bjhghplymboipyyz'
 
 import os
 
+# # Static files (CSS, JavaScript, Images)
+# STATIC_URL = '/static/'
+
+# # Include the static directory inside your project folder
+# STATICFILES_DIRS = [
+#     BASE_DIR / "LSA" / "static",
+# ]
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
+
+# The directory where static files will be collected
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Include the static directory inside your project folder
 STATICFILES_DIRS = [

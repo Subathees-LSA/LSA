@@ -35,6 +35,260 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import LotteryCategory
 from .serializers import LotteryCategorySerializer
+from django.utils import timezone
+from rest_framework.permissions import IsAuthenticated
+from django.utils.timezone import now
+from django.core.mail import EmailMessage
+
+
+class ChatMessagesView(APIView):
+    def get(self, request, email):
+        contact_messages = Contact.objects.filter(email=email).order_by('created_at')
+        admin_replies = AdminReply.objects.filter(contact__email=email).order_by('created_at')
+
+        # Combine user messages and admin replies
+        chat_data = []
+        for contact in contact_messages:
+            chat_data.append({
+                'type': 'user',
+                'message': contact.description,
+                'file':  contact.file.url if contact.file else None,
+                'starred':contact.starred,
+                'created_at': contact.created_at
+            })
+
+        for reply in admin_replies:
+            chat_data.append({
+                'id': reply.id,
+                'type': 'admin',
+                'message': reply.reply_message,
+                'file': reply.file.url if reply.file else None,
+                'created_at': reply.created_at
+            })
+
+        # Sort by creation time
+        chat_data = sorted(chat_data, key=lambda x: x['created_at'])
+
+        return Response(chat_data, status=status.HTTP_200_OK)
+
+   
+class AdminReplyView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        email = request.data.get('email')
+        reply_message = request.data.get('message', '').strip()
+        file = request.FILES.get('file')
+
+        # Backend validation: Check if both reply_message and file are empty
+        if not reply_message and not file:
+            return Response(
+                {'error': 'Reply message or file is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Fetch the most recent contact message for the email
+            contact = (
+                Contact.objects.filter(email=email)
+                .order_by('-created_at')
+                .first()
+            )
+
+            if not contact:
+                return Response(
+                    {'error': f"No contact message found for email: {email}"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Save the reply in the database
+            reply = AdminReply.objects.create(
+                contact=contact,
+                reply_message=reply_message,
+                file=file
+            )
+
+            # Prepare the file URL if a file is uploaded
+            file_url = request.build_absolute_uri(reply.file.url) if reply.file else None
+
+            # Construct the email body (HTML format)
+            email_body = (
+                f"<p>Hi {contact.name},</p>"
+                f"<p>We received your message</p>"
+                f"<blockquote>{contact.description}</blockquote>"
+                f"<p>Here is our reply:</p>"
+                f"<blockquote>{reply_message or ''}</blockquote>"
+            )
+
+            if file_url:
+                email_body += f'<p>Please find the file here: <a href="{file_url}" target="_blank" style="color: #1a73e8; text-decoration: none;">View File</a></p>'
+
+            email_body += "<p>Best Regards,<br>Admin Team</p>"
+
+            # Send the email
+            email_message = EmailMessage(
+                subject="Reply from Admin",
+                body=email_body,
+                from_email='your-email@gmail.com',
+                to=[email]
+            )
+            email_message.content_subtype = "html"  # Set content type to HTML
+            email_message.send(fail_silently=False)
+
+            return Response({'message': 'Reply sent successfully!'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f"Failed to send reply: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+class ContactListView(APIView):
+    def get(self, request):
+        from collections import defaultdict
+
+        grouped_contacts = defaultdict(list)
+        contacts = Contact.objects.all().order_by('-starred', '-created_at')  # Order by starred first, then created_at
+        for contact in contacts:
+            grouped_contacts[contact.email].append({
+                "name": contact.name,
+                "email": contact.email,
+                "description": contact.description,
+                "created_at": contact.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                "starred": contact.starred,
+            })
+        
+        return Response(grouped_contacts)
+    
+    def post(self, request):
+        email = request.data.get('email')
+        starred = request.data.get('starred', False)
+
+        contacts = Contact.objects.filter(email=email)  # Get all records with the same email
+        if contacts.exists():
+            contacts.update(starred=starred)  # Update all matching records
+            return Response({"success": True, "message": "Starred status updated for all records."})
+        
+        return Response({"success": False, "message": "No records found for this email."}, status=404)
+
+class UserChatView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Fetch chats for the logged-in user
+        user_email = request.user.email
+        contacts = Contact.objects.filter(email=user_email).order_by('created_at')
+        admin_replies = AdminReply.objects.filter(contact__email=user_email).order_by('created_at')
+
+        # Combine user messages and admin replies
+        chat_data = []
+        for contact in contacts:
+            chat_data.append({
+                'type': 'user',
+                'message': contact.description,
+                'file': contact.file.url if contact.file else None,
+                'created_at': contact.created_at,
+            })
+
+        for reply in admin_replies:
+            chat_data.append({
+                'type': 'admin',
+                'message': reply.reply_message,
+                'file': reply.file.url if reply.file else None,
+                'created_at': reply.created_at,
+            })
+
+        # Sort by creation time
+        chat_data = sorted(chat_data, key=lambda x: x['created_at'])
+
+        return Response(chat_data, status=status.HTTP_200_OK)
+
+
+    def post(self, request):
+        # Handle user message or file upload
+        user_email = request.user.email
+        message = request.data.get('message', '').strip()
+        file = request.FILES.get('file')  # Get the file
+
+        if not message and not file:
+            return Response(
+                {'error': 'Message or file is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Save the message or file to the database
+        contact = Contact.objects.create(
+            name=request.user.username,
+            email=user_email,
+            description=message,
+            file=file,  # Save the uploaded file
+            created_at=now()
+        )
+
+        return Response({'message': 'Message sent successfully!'}, status=status.HTTP_201_CREATED)
+
+
+class DeleteContactView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def delete(self, request, email):
+        try:
+            # Fetch the contact by email
+            contact = Contact.objects.filter(email=email)
+
+            if not contact.exists():
+                return Response(
+                    {'error': f"No contact found for email: {email}"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Delete associated AdminReply and files
+            admin_replies = AdminReply.objects.filter(contact__email=email)
+            for reply in admin_replies:
+                if reply.file:
+                    reply.file.delete()  # Delete the file from the storage
+                reply.delete()
+
+            # Delete the contact
+            contact.delete()
+
+            return Response(
+                {'message': f"Contact and all associated data for email {email} have been deleted successfully."},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {'error': f"Failed to delete contact: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+class EditdeleteAdminReplyView(APIView):
+    def put(self, request, reply_id):
+        try:
+            admin_reply = AdminReply.objects.get(id=reply_id)
+        except AdminReply.DoesNotExist:
+            return Response({'error': 'Reply not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        reply_message = request.data.get('reply_message', admin_reply.reply_message)
+        file = request.FILES.get('file', admin_reply.file)
+
+        admin_reply.reply_message = reply_message
+        if file:
+            admin_reply.file = file
+        admin_reply.save()
+
+        return Response({'message': 'Reply updated successfully.'}, status=status.HTTP_200_OK)
+    
+    def delete(self, request, reply_id):
+        try:
+            admin_reply = AdminReply.objects.get(id=reply_id)
+        except AdminReply.DoesNotExist:
+            return Response({'error': 'Reply not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        admin_reply.delete()
+        return Response({'message': 'Reply deleted successfully.'}, status=status.HTTP_200_OK) 
+    
+
 
 class UserProfileDeleteAPIView(APIView):
     def delete(self, request, user_id):
@@ -240,6 +494,23 @@ class api_get_lottery_events(APIView):
             return Response(events_data, status=status.HTTP_200_OK)
         except Exception as e:
             # Catch any exceptions and return a 500 Internal Server Error with the exception message
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class APIGetCategoryLotteryEvents(APIView):
+    def get(self, request, category_id):
+        try:
+            category = LotteryCategory.objects.get(id=category_id)
+            events = LotteryEvent.objects.filter(category=category, is_active=True)
+            favorites_slugs = json.loads(request.COOKIES.get('favorites', '[]'))
+            serializer = LotteryEventSerializeradd_get(events, many=True)
+            events_data = serializer.data
+            for event in events_data:
+                event['is_favorite'] = event['slug'] in favorites_slugs
+            return Response(events_data, status=status.HTTP_200_OK)
+        except LotteryCategory.DoesNotExist:
+            return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -596,67 +867,6 @@ class ContactCreateView(APIView):
                 status=status.HTTP_201_CREATED
             )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class ContactListView(APIView):
-    
-    def get(self, request):
-        contacts = Contact.objects.all()
-        serializer = ContactSerializer(contacts, many=True)
-        return Response(serializer.data)
-
-
-class AdminReplyView(APIView):
-    authentication_classes = [TokenAuthentication]
-    def post(self, request):
-        serializer = AdminReplySerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            message = serializer.validated_data['message']
-
-            try:
-                # Fetch the most recent contact message for the email
-                contact = (
-                    Contact.objects.filter(email=email)
-                    .order_by('-created_at')  
-                    .first()
-                )
-
-                if not contact:
-                    return Response(
-                        {'error': f"No contact message found for email: {email}"},
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
-
-                original_message = contact.description
-
-                # Include original message in the reply
-                email_body = (
-                    f"Hi {contact.name},\n\n"
-                    f"We received your message:\n"
-                    f"\"{original_message}\"\n\n"
-                    f"Here is our reply:\n"
-                    f"{message}\n\n"
-                    "Best Regards,\n"
-                    "Admin Team"
-                )
-
-                # Send the email
-                send_mail(
-                    subject="Reply from Admin",
-                    message=email_body,
-                    from_email='your-email@gmail.com',
-                    recipient_list=[email],
-                    fail_silently=False,
-                )
-
-                return Response({'message': 'Reply sent successfully!'}, status=status.HTTP_200_OK)
-
-            except Exception as e:
-                return Response(
-                    {'error': f"Failed to send reply: {str(e)}"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetLotteryCategories(APIView):

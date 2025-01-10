@@ -1,0 +1,405 @@
+<div style="width: 100%; height: 100%; position: relative; background: white">
+    <div style="width: 1500px; height: 1133px; left: 0px; top: 86.55px; position: absolute">
+        <div style="width: 1500px; height: 1133px; left: 0px; top: 0px; position: absolute; background: #FFF9FE"></div>
+        <div style="width: 1067.34px; height: 71.99px; left: 391.02px; top: 56.26px; position: absolute">
+            <div style="width: 202.12px; left: 3.15px; top: 0px; position: absolute; color: #858585; font-size: 12.51px; font-family: Poppins; font-weight: 700; word-wrap: break-word">Admin Management   Statistics</div>
+            <div style="width: 113.66px; height: 23.98px; left: 0px; top: 48.01px; position: absolute; color: #858585; font-size: 16.68px; font-family: Poppins; font-weight: 700; word-wrap: break-word">Statistics</div>
+            <div style="width: 170.89px; height: 19px; left: 896.45px; top: 1.25px; position: absolute">
+                <div style="width: 9.39px; height: 5.62px; left: 161.50px; top: 8.94px; position: absolute; background: #858585"></div>
+                <div style="width: 62.04px; left: 0px; top: 0px; position: absolute; text-align: center; color: #858585; font-size: 12.51px; font-family: Poppins; font-weight: 700; word-wrap: break-word">Accounts</div>
+                <div style="width: 65.04px; left: 90.77px; top: 0px; position: absolute; color: #858585; font-size: 12.51px; font-family: Poppins; font-weight: 700; word-wrap: break-word">COINBASE</div>
+                <div style="width: 3.13px; height: 14.62px; left: 74.08px; top: 2.19px; position: absolute; opacity: 0.42; border: 2.09px #858585 solid"></div>
+            </div>
+        </div>
+    </div>
+    <div style="width: 1564.07px; height: 86.55px; left: -0.26px; top: -0.52px; position: absolute">
+        <div style="width: 1564.07px; height: 86.55px; left: 0px; top: 86.55px; position: absolute; background: white; border: 2.09px #F0F0F0 solid"></div>
+        <div style="width: 440.03px; height: 41.71px; left: 963.47px; top: 21.90px; position: absolute; border-radius: 104.27px; border: 1.04px #FD749B solid"></div>
+        <div style="width: 15.22px; height: 15.75px; left: 1434.58px; top: 35.96px; position: absolute; border: 1.25px white solid"></div>
+        <div style="width: 22.65px; height: 48.78px; left: 1435.82px; top: 32.58px; position: absolute">
+            <div style="width: 12.83px; height: 20.85px; left: 0px; top: 2.09px; position: absolute">
+                <div style="width: 12.83px; height: 13.64px; left: 0px; top: 2.40px; position: absolute; border: 1.04px #858585 solid"></div>
+                <div style="width: 3.21px; height: 3.21px; left: 4.81px; top: 17.64px; position: absolute; border: 1.04px #858585 solid"></div>
+                <div style="width: 3.21px; height: 2.41px; left: 4.81px; top: 0px; position: absolute; border: 1.04px #858585 solid"></div>
+            </div>
+            <div style="width: 15.22px; height: 48.78px; left: 7.43px; top: 0px; position: absolute">
+                <div style="width: 15.22px; height: 15.75px; left: 0px; top: 0px; position: absolute; background: #FF6600"></div>
+                <div style="width: 7.30px; left: 4.17px; top: 38.78px; position: absolute; text-align: center; color: white; font-size: 6.26px; font-family: Poppins; font-weight: 700; word-wrap: break-word">24</div>
+            </div>
+        </div>
+        <div style="width: 101.20px; height: 16.68px; left: 1026.77px; top: 37.28px; position: absolute; opacity: 0.50; color: #858585; font-size: 10.43px; font-family: Poppins; font-weight: 400; line-height: 25.03px; word-wrap: break-word">Search e.g card</div>
+        <div style="width: 14.13px; height: 14.63px; left: 999.51px; top: 39.33px; position: absolute">
+            <div style="width: 12.11px; height: 12.54px; left: 0px; top: 0px; position: absolute; border: 1.04px #858585 solid"></div>
+            <div style="width: 3.36px; height: 3.48px; left: 10.76px; top: 11.14px; position: absolute; border: 1.04px #858585 solid"></div>
+        </div>
+        <div style="width: 108.44px; height: 21.85px; left: 67.77px; top: 36.52px; position: absolute">
+            <div style="width: 73.64px; height: 12.14px; left: 34.80px; top: 8.09px; position: absolute; background: #5C5C5C"></div>
+            <div style="width: 28.32px; height: 21.85px; left: 0px; top: 0px; position: absolute; border: 2.09px #858585 solid"></div>
+            <div style="width: 6.50px; height: 10.85px; left: 10.57px; top: 11.16px; position: absolute; transform: rotate(-19.81deg); transform-origin: 0 0; background: #858585; border: 0.52px #858585 solid"></div>
+        </div>
+    </div>
+    <div style="width: 536px; height: 322px; left: 391.02px; top: 272.52px; position: absolute">
+        <div style="width: 217.68px; height: 16.58px; left: 67.66px; top: 193.72px; position: absolute; justify-content: flex-start; align-items: center; gap: 8px; display: inline-flex">
+            <div style="width: 148px; color: rgba(0, 0, 0, 0.70); font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Out of 43 </div>
+        </div>
+        <div style="width: 536px; height: 152.40px; left: 0px; top: 169.60px; position: absolute">
+            <div style="width: 171.14px; height: 152.40px; left: 0px; top: 0px; position: absolute; background: white; border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+            <div style="width: 171.14px; height: 152.40px; left: 182.67px; top: 0px; position: absolute; background: white; border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+            <div style="width: 171.14px; height: 152.40px; left: 364.86px; top: 0px; position: absolute; background: white; border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+            <div style="width: 141.19px; height: 106.56px; left: 10.68px; top: 23.37px; position: absolute">
+                <div style="width: 55.16px; height: 27.11px; left: 7.22px; top: 35.52px; position: absolute; color: black; font-size: 24px; font-family: Inter; font-weight: 700; word-wrap: break-word">64%</div>
+                <div style="left: 0px; top: -5.08px; position: absolute"></div>
+            </div>
+            <div style="width: 141.19px; height: 106.56px; left: 193.22px; top: 23.37px; position: absolute">
+                <div style="width: 63.11px; height: 27.59px; left: 6.72px; top: 35.46px; position: absolute; color: black; font-size: 24px; font-family: Inter; font-weight: 700; word-wrap: break-word">86%</div>
+                <div style="left: 7px; top: -5.70px; position: absolute; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                    <div style="color: rgba(0, 0, 0, 0.70); font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Current won</div>
+                </div>
+                <div style="width: 137.30px; height: 33.40px; left: 6.79px; top: 74.03px; position: absolute">
+                    <div style="width: 137.30px; height: 30.06px; left: 0px; top: 3.34px; position: absolute; opacity: 0.10; background: linear-gradient(180deg, #FF6600 0%, rgba(255, 255, 255, 0) 100%)"></div>
+                    <div style="width: 137.30px; height: 22.49px; left: 0px; top: 0px; position: absolute; border: 2px #FF6600 solid"></div>
+                </div>
+            </div>
+            <div style="width: 141.19px; height: 106.56px; left: 375.76px; top: 23.37px; position: absolute">
+                <div style="width: 78.64px; height: 27.59px; left: 6.71px; top: 35.46px; position: absolute; color: black; font-size: 24px; font-family: Inter; font-weight: 700; word-wrap: break-word">34%</div>
+                <div style="left: 7px; top: -5.70px; position: absolute; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                    <div style="color: rgba(0, 0, 0, 0.70); font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Lost</div>
+                </div>
+                <div style="width: 137.30px; height: 33.40px; left: 5.77px; top: 74.03px; position: absolute">
+                    <div style="width: 137.30px; height: 30.06px; left: 0px; top: 3.34px; position: absolute; opacity: 0.10; background: linear-gradient(180deg, #FF6600 0%, rgba(255, 255, 255, 0) 100%)"></div>
+                    <div style="width: 137.30px; height: 22.49px; left: 0px; top: 0px; position: absolute; border: 2px #FF6600 solid"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 536px; height: 152.40px; left: 0px; top: 0px; position: absolute">
+            <div style="width: 171.14px; height: 152.40px; left: 0px; top: 0px; position: absolute; background: white; border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+            <div style="width: 171.14px; height: 152.40px; left: 182.67px; top: 0px; position: absolute; background: white; border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+            <div style="width: 171.14px; height: 152.40px; left: 364.86px; top: 0px; position: absolute; background: white; border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+            <div style="width: 141.19px; height: 106.56px; padding-bottom: 42.93px; padding-left: 6.32px; padding-right: 50.87px; left: 10.68px; top: 23.37px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 24.48px; display: inline-flex">
+                <div style="align-self: stretch; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                    <div style="color: rgba(0, 0, 0, 0.70); font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Active Users</div>
+                </div>
+                <div style="width: 83px; height: 27px"><span style="color: black; font-size: 24px; font-family: Inter; font-weight: 700; word-wrap: break-word">27</span><span style="color: rgba(0, 0, 0, 0.50); font-size: 17px; font-family: Inter; font-weight: 600; line-height: 22px; word-wrap: break-word">/80</span></div>
+            </div>
+            <div style="width: 141.19px; height: 106.56px; padding-bottom: 42.34px; padding-left: 6.72px; padding-right: 50px; left: 193.22px; top: 23.37px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 28px; display: inline-flex">
+                <div style="align-self: stretch; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                    <div style="color: rgba(0, 0, 0, 0.70); font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Won Lottery</div>
+                </div>
+                <div style="width: 84.47px; height: 27.59px; color: black; font-size: 24px; font-family: Inter; font-weight: 700; word-wrap: break-word">3,298</div>
+            </div>
+            <div style="width: 141.19px; height: 106.56px; padding-bottom: 42.34px; padding-left: 6.24px; padding-right: 23.80px; left: 375.76px; top: 23.37px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 28px; display: inline-flex">
+                <div style="align-self: stretch; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                    <div style="color: rgba(0, 0, 0, 0.70); font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Lost Lottery</div>
+                </div>
+                <div style="width: 110.68px; height: 27.59px; color: black; font-size: 24px; font-family: Inter; font-weight: 700; word-wrap: break-word">1,534</div>
+            </div>
+        </div>
+        <div style="width: 191.21px; height: 23.21px; left: 17px; top: 187.51px; position: absolute; color: rgba(0, 0, 0, 0.70); font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Won</div>
+    </div>
+    <div style="width: 537px; height: 805px; left: 963px; top: 239px; position: absolute; background: white; border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 307px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Jesse Thomas</div>
+            <div style="color: rgba(0, 0, 0, 0.50); font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points - 98% Correct</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 373px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Thisal Mathiyazhagan</div>
+            <div style="color: rgba(0, 0, 0, 0.50); font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points - 89% Correct </div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px #F1F1F5 solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 439px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Helen Chuang</div>
+            <div style="color: rgba(0, 0, 0, 0.50); font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points - 88% Correct</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 505px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Lura Silverman</div>
+            <div style="color: black; font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 571px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Winifred Groton</div>
+            <div style="color: black; font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 637px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Ken Alba</div>
+            <div style="color: black; font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 703px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Alice LeBeau</div>
+            <div style="color: black; font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 769px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Adrian Lu</div>
+            <div style="color: black; font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 835px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Evelyn Hamilton</div>
+            <div style="color: black; font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 320px; height: 66px; left: 960px; top: 901px; position: absolute">
+        <div style="width: 410px; height: 66px; left: 0px; top: 0px; position: absolute"></div>
+        <div style="left: 78px; top: 15px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+            <div style="color: black; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Rosa Fiddlebrook</div>
+            <div style="color: black; font-size: 12px; font-family: Inter; font-weight: 500; word-wrap: break-word">637 Points</div>
+        </div>
+        <div style="width: 42px; height: 42px; left: 24px; top: 12px; position: absolute; justify-content: center; align-items: center; display: inline-flex">
+            <img style="width: 42px; height: 42px; border: 1px solid" src="https://via.placeholder.com/42x42" />
+        </div>
+    </div>
+    <div style="width: 137px; left: 989px; top: 263px; position: absolute; color: rgba(0, 0, 0, 0.50); font-size: 14px; font-family: Rajdhani; font-weight: 600; line-height: 18px; word-wrap: break-word">User Leaderboard</div>
+    <div style="width: 536px; height: 1px; left: 960px; top: 967px; position: absolute; background: rgba(0, 0, 0, 0.10); border: 1px solid"></div>
+    <div style="width: 166.21px; left: 1146px; top: 993px; position: absolute">
+        <div style="width: 144px; left: 0px; top: 1px; position: absolute; color: #FF6600; font-size: 14px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">View full leaderboard</div>
+        <div style="width: 23px; height: 20px; left: 143.21px; top: 0px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 7.35px; height: 11.12px; background: #FF6600"></div>
+        </div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 330px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #1FE08F"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">1</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 396px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #FF3E13"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">2</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 462px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #1FE08F"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">3</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 528px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #1FE08F"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">4</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 594px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #FF3E13"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">5</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 660px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #1FE08F"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">6</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 726px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #FF3E13"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">7</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 792px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #1FE08F"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">8</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 858px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #FF3E13"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">9</div>
+    </div>
+    <div style="width: 72px; left: 1394px; top: 924px; position: absolute">
+        <div style="width: 12px; height: 11px; left: 60px; top: 4.67px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+            <div style="width: 12px; height: 11px; background: #1FE08F"></div>
+        </div>
+        <div style="width: 48px; height: 18.33px; left: 0px; top: 0px; position: absolute; text-align: right; color: #151E23; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">10</div>
+    </div>
+    <div style="width: 556px; height: 322px; left: 376.84px; top: 635.66px; position: absolute; background: white; box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05); border-radius: 20px; border: 1px #EFF0F6 solid"></div>
+    <div style="width: 23px; height: 27px; left: 428.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">JAN</div>
+    <div style="width: 24px; height: 27px; left: 550.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">APR</div>
+    <div style="width: 24px; height: 27px; left: 673.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">JUL</div>
+    <div style="width: 28px; height: 27px; left: 799.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">OCT</div>
+    <div style="width: 25px; height: 27px; left: 467.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">FEB</div>
+    <div style="width: 25px; height: 27px; left: 591.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">MAY</div>
+    <div style="width: 29px; height: 27px; left: 713.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">AUG</div>
+    <div style="width: 27px; height: 27px; left: 842.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">NOV</div>
+    <div style="width: 29px; height: 15px; left: 505.84px; top: 917.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">MAR</div>
+    <div style="width: 24px; height: 27px; left: 634.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">JUN</div>
+    <div style="width: 25px; height: 27px; left: 757.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">SEP</div>
+    <div style="width: 25px; height: 27px; left: 884.84px; top: 911.66px; position: absolute; text-align: center; color: #838383; font-size: 9px; font-family: Inter; font-weight: 500; word-wrap: break-word">DEC</div>
+    <div style="width: 10px; height: 199px; left: 436.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 60px; left: 436.84px; top: 845.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 478.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 76px; left: 478.84px; top: 829.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 519.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 76px; left: 519.84px; top: 829.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 559.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 122px; left: 559.84px; top: 783.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 600.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 138px; left: 600.84px; top: 767.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 644.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 106px; left: 644.84px; top: 799.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 685.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 122.43px; left: 684.11px; top: 783.23px; position: absolute; transform: rotate(-0.74deg); transform-origin: 0 0; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 725.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 60px; left: 725.84px; top: 845.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 766.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 138px; left: 766.84px; top: 767.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 808.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 166px; left: 808.84px; top: 739.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 848.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 182px; left: 848.84px; top: 723.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 10px; height: 199px; left: 890.84px; top: 705.66px; position: absolute; background: #F2F7FF; border-radius: 100px"></div>
+    <div style="width: 10px; height: 200px; left: 890.84px; top: 705.66px; position: absolute; background: linear-gradient(342deg, rgba(255, 102, 0, 0.80) 0%, rgba(255, 102, 0, 0) 100%); box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.10); border-radius: 100px"></div>
+    <div style="width: 23.14px; left: 396.84px; top: 704.66px; position: absolute; opacity: 0.50">
+        <div style="width: 21.96px; height: 13.31px; left: 1.18px; top: 0px; position: absolute; text-align: right; color: black; font-size: 9.75px; font-family: Inter; font-weight: 600; line-height: 12.61px; word-wrap: break-word">400</div>
+        <div style="width: 21.96px; height: 13.31px; left: 1.18px; top: 45.69px; position: absolute; text-align: right; color: black; font-size: 9.75px; font-family: Inter; font-weight: 600; line-height: 12.61px; word-wrap: break-word">300</div>
+        <div style="width: 21.96px; height: 13.31px; left: 1.18px; top: 91.37px; position: absolute; text-align: right; color: black; font-size: 9.75px; font-family: Inter; font-weight: 600; line-height: 12.61px; word-wrap: break-word">200</div>
+        <div style="width: 21.96px; height: 13.31px; left: 1.18px; top: 137.06px; position: absolute; text-align: right; color: black; font-size: 9.75px; font-family: Inter; font-weight: 600; line-height: 12.61px; word-wrap: break-word">100</div>
+        <div style="width: 21.96px; height: 13.31px; left: 0px; top: 182.74px; position: absolute; text-align: right; color: black; font-size: 9.75px; font-family: Inter; font-weight: 600; line-height: 12.61px; word-wrap: break-word">0</div>
+    </div>
+    <div style="width: 238px; left: 396.84px; top: 650.66px; position: absolute; color: #4D4D4D; font-size: 14px; font-family: Inter; font-weight: 500; word-wrap: break-word">Activity</div>
+    <div style="width: 511px; height: 0px; left: 396.84px; top: 678.66px; position: absolute; border: 0.80px #E4E5E7 solid"></div>
+    <div style="width: 46px; left: 856.84px; top: 654.66px; position: absolute; color: #0F2552; font-size: 12px; font-family: Inter; font-weight: 600; letter-spacing: 0.02px; word-wrap: break-word">Month</div>
+    <div style="width: 16px; height: 16px; left: 894.84px; top: 669.66px; position: absolute; transform: rotate(-90deg); transform-origin: 0 0">
+        <div style="width: 10px; height: 6.18px; left: 10.18px; top: 3px; position: absolute; transform: rotate(90deg); transform-origin: 0 0; background: #848A95"></div>
+    </div>
+    <div style="width: 292.45px; height: 1145.96px; left: -1.47px; top: 10.02px; position: absolute">
+        <img style="width: 221px; height: 64px; left: 36.95px; top: 0px; position: absolute" src="https://via.placeholder.com/221x64" />
+        <div style="width: 290px; height: 94.51px; left: 2.45px; top: 104.26px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 2.45px; top: 198.77px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 292.45px; height: 94.51px; left: 0px; top: 293.27px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 0.75px; top: 387.78px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 2.45px; top: 482.29px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 0.75px; top: 576.80px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 0.75px; top: 671.30px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 1.86px; top: 765.81px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 1.86px; top: 862.44px; position: absolute; background: #FF6600; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 2.45px; top: 956.95px; position: absolute; background: #F0EDED; border-bottom: 1px #979797 solid"></div>
+        <div style="width: 290px; height: 94.51px; left: 2.45px; top: 1051.45px; position: absolute; background: #F0EDED"></div>
+        <div style="width: 74px; height: 54.88px; left: 109.45px; top: 126.16px; position: absolute">
+            <div style="left: 0px; top: 28.88px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Overview</div>
+            <div style="width: 26.62px; height: 25.35px; left: 24.86px; top: 0px; position: absolute">
+                <div style="width: 26.62px; height: 25.35px; left: 0px; top: 0px; position: absolute; border: 1.77px #202224 solid"></div>
+                <div style="width: 8.88px; height: 12.67px; left: 8.88px; top: 3.17px; position: absolute; border: 1.77px #202224 solid"></div>
+            </div>
+        </div>
+        <div style="left: 124.45px; top: 246.16px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Users</div>
+        <div style="width: 21.39px; height: 22.29px; left: 136.75px; top: 219.88px; position: absolute">
+            <div style="width: 10.87px; height: 12.39px; left: 5.35px; top: 0px; position: absolute; background: #202224"></div>
+            <div style="width: 21.39px; height: 10.69px; left: 0px; top: 11.59px; position: absolute; background: #202224"></div>
+            <div style="width: 8.91px; height: 1.80px; left: 6.24px; top: 14.27px; position: absolute; background: #202224"></div>
+        </div>
+        <div style="left: 110.95px; top: 338.11px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Lottereis</div>
+        <div style="left: 110.16px; top: 433.04px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Payment</div>
+        <div style="left: 94.48px; top: 528.34px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Transactions</div>
+        <div style="left: 117.66px; top: 624.05px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Refund</div>
+        <div style="left: 70.66px; top: 722.82px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Price Management</div>
+        <div style="left: 71.86px; top: 815.32px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Customer Support</div>
+        <div style="left: 71.36px; top: 909.60px; position: absolute; color: white; font-size: 20px; font-family: Rajdhani; font-weight: 700; word-wrap: break-word">Report & Analystic</div>
+        <div style="left: 87.95px; top: 1006.95px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">User Feedback</div>
+        <div style="left: 120.07px; top: 1097.71px; position: absolute; color: #202224; font-size: 20px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Logout</div>
+        <div style="width: 23.49px; height: 17.16px; left: 135.71px; top: 316.95px; position: absolute">
+            <div style="width: 19.87px; height: 13.55px; left: 0px; top: 0px; position: absolute; border: 1.43px #202224 solid"></div>
+            <div style="width: 19.87px; height: 12.65px; left: 3.61px; top: 4.52px; position: absolute; border: 1.43px #202224 solid"></div>
+            <div style="width: 19.87px; height: 0px; left: 0px; top: 3.62px; position: absolute; border: 1.43px #202224 solid"></div>
+            <div style="width: 2.71px; height: 0px; left: 3.61px; top: 9.94px; position: absolute; border: 1.43px #202224 solid"></div>
+            <div style="width: 0px; height: 0.90px; left: 13.55px; top: 9.94px; position: absolute; border: 1.43px #202224 solid"></div>
+            <div style="width: 0px; height: 0.90px; left: 16.26px; top: 9.94px; position: absolute; border: 1.43px #202224 solid"></div>
+        </div>
+        <div style="width: 20.90px; height: 15.05px; left: 136.71px; top: 413.99px; position: absolute">
+            <div style="width: 20.07px; height: 15.05px; left: 0px; top: 0px; position: absolute; border: 1.36px #202224 solid"></div>
+            <div style="width: 0px; height: 15.05px; left: 4.18px; top: 0px; position: absolute; border: 1.36px #202224 solid"></div>
+            <div style="width: 10.87px; height: 5.02px; left: 10.03px; top: 5.02px; position: absolute; border: 1.36px #202224 solid"></div>
+            <div style="width: 0.84px; height: 0px; left: 12.54px; top: 7.52px; position: absolute; border: 1.36px #202224 solid"></div>
+        </div>
+        <div style="width: 19.60px; height: 19.60px; left: 136.68px; top: 504.74px; position: absolute">
+            <div style="width: 19.60px; height: 19.35px; left: 0px; top: 0.13px; position: absolute">
+                <div style="width: 8.52px; height: 13.65px; left: 0px; top: 0px; position: absolute; border: 1.22px #202224 solid"></div>
+                <div style="width: 14.55px; height: 4.36px; left: 2.03px; top: 14.98px; position: absolute; border: 1.22px #202224 solid"></div>
+                <div style="width: 9.42px; height: 12.86px; left: 10.18px; top: 0.88px; position: absolute; border: 1.22px #202224 solid"></div>
+            </div>
+        </div>
+        <div style="width: 24px; height: 24px; left: 135.16px; top: 596.05px; position: absolute">
+            <div style="width: 20px; height: 20.50px; left: 2px; top: 1.50px; position: absolute; background: #202224"></div>
+        </div>
+        <div style="width: 24px; height: 24px; left: 135.16px; top: 694.55px; position: absolute">
+            <div style="width: 20px; height: 16px; left: 2px; top: 4px; position: absolute; background: #202224"></div>
+        </div>
+        <div style="width: 24px; height: 24px; left: 134.86px; top: 787.32px; position: absolute">
+            <div style="width: 2px; height: 2px; left: 8px; top: 12px; position: absolute; background: #202224"></div>
+            <div style="width: 2px; height: 2px; left: 14px; top: 12px; position: absolute; background: #202224"></div>
+            <div style="width: 11.99px; height: 6.45px; left: 6.01px; top: 6px; position: absolute; background: #202224"></div>
+            <div style="width: 20px; height: 18px; left: 2px; top: 3px; position: absolute; background: #202224"></div>
+        </div>
+        <div style="width: 24px; height: 24px; left: 134.86px; top: 881.66px; position: absolute">
+            <div style="width: 14px; height: 18px; left: 5px; top: 3px; position: absolute">
+                <div style="width: 14px; height: 18px; left: 0px; top: 0px; position: absolute; border: 2px white solid"></div>
+                <div style="width: 6.50px; height: 5.50px; left: 7.50px; top: 0px; position: absolute; border: 1px white solid"></div>
+                <div style="width: 0px; height: 3px; left: 4px; top: 11px; position: absolute; border: 2px white solid"></div>
+                <div style="width: 0px; height: 4px; left: 7px; top: 10px; position: absolute; border: 2px white solid"></div>
+                <div style="width: 0px; height: 5px; left: 10px; top: 9px; position: absolute; border: 2px white solid"></div>
+            </div>
+        </div>
+        <div style="width: 21.37px; height: 21.37px; left: 136.77px; top: 981.59px; position: absolute">
+            <div style="width: 20.03px; height: 18.69px; left: 0px; top: 1.33px; position: absolute">
+                <div style="width: 14.69px; height: 11.82px; left: 5.34px; top: 0px; position: absolute; background: #202224"></div>
+                <div style="width: 12.02px; height: 14.69px; left: 0px; top: 4.01px; position: absolute; background: #202224"></div>
+            </div>
+        </div>
+        <div style="width: 20px; height: 20px; left: 138.57px; top: 1073.71px; position: absolute">
+            <div style="width: 15px; height: 15px; left: 2.50px; top: 2.50px; position: absolute; background: #202224"></div>
+        </div>
+    </div>
+</div>

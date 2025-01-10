@@ -40,7 +40,7 @@ urlpatterns = [
     path('faq/', faq_page, name='faq_page'), 
     path('terms/', terms_page, name='terms_page'), 
     path('api/contact/', ContactCreateView.as_view(), name='contact-create'),
-    path('contact/', contact_page, name='contact-page'), 
+    
     path('about-us/', about_us, name='about_us'),  
 
     path('api/admin/messages/', ContactListView.as_view(), name='contact-list'),
@@ -49,6 +49,16 @@ urlpatterns = [
     path('api/delete_user/<int:user_id>/', UserProfileDeleteAPIView.as_view(), name='delete_user'),
     path('api/lottery/categories/', get_lottery_categories, name='api_get_lottery_categories'),
     path('api/categories/', GetLotteryCategories.as_view(), name='get-lottery-categories'),
+    path('api/get_category_lottery_events/<int:category_id>/', APIGetCategoryLotteryEvents.as_view(), name='api_get_category_lottery_events'),
+    path('category_lottery_events/<str:category_name>/', category_lottery_events_view, name='category_lottery_events'),
+    path('api/admin/chat/<str:email>/', ChatMessagesView.as_view(), name='chat-messages'),
+    path('api/admin/delete-contact/<str:email>/', DeleteContactView.as_view(), name='delete-contact'),
+    path('api/user/chat/', UserChatView.as_view(), name='api_user_chat'),
+    
+    path('api/admin/reply/<int:reply_id>/edit_delete/', EditdeleteAdminReplyView.as_view(), name='edit_delete-admin-reply'),
+    path('api/admin/messages/', ContactListView.as_view(), name='contact-list'),
+    path('api/admin/reply/', AdminReplyView.as_view(), name='admin-reply'),
+
 ]
 
 if settings.DEBUG:
