@@ -29,4 +29,6 @@ urlpatterns = [
     path('api/user-kyc-status-update/', UpdateKYCStatusView.as_view(), name='user-kyc-status-update'),
     path('api/password-reset/', ApiPasswordResetRequestView.as_view(), name='api_password_reset'),
     path('api/password-reset-confirm/<uidb64>/<token>/', ApiPasswordResetConfirmView.as_view(), name='api_password_reset_confirm'),
+    path('user_chat/', user_chats, name='user_chats'),
+    path('contact/', contact_page, name='contact-page'), 
 ]

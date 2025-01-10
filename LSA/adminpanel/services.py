@@ -90,12 +90,6 @@ def terms_page(request):
     except Exception as e:
         return HttpResponseServerError("Sorry, the Terms and Conditions page is currently unavailable. Please try again later.")
 
-def contact_page(request):
-    try:
-        return render(request, 'contact.html')
-    except Exception as e:
-        return HttpResponseServerError("Sorry, the Contact Us page is currently unavailable. Please try again later.")
-
 def about_us(request):
     try:
         return render(request, "about_us.html")
@@ -122,3 +116,11 @@ def get_lottery_categories(request):
     categories = LotteryCategory.objects.all()    # Get all categories
     category_data = [{"id": category.id, "name": category.name} for category in categories]    
     return JsonResponse(category_data, safe=False)
+
+
+def category_lottery_events_view(request, category_name):
+    try:
+        category = LotteryCategory.objects.get(name=category_name)
+        return render(request, 'category_lottery_events.html', {'category_id': category.id, 'category_name': category.name})
+    except LotteryCategory.DoesNotExist:
+        return render(request, '404.html', status=404)

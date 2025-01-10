@@ -5,31 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}"> 
-  <script src="{% static 'js/custom.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">    
 </head>
-<body class="aboutbody">
-    <section id="about-section">
-        <h1 id="about-heading">Who We Are</h1>
-        <p id="about-description">Lorem Ipsum is simply dummy text of the printing and typesetting industry...</p>
-        <div class="about-card-container">
-            <div id="card-1" class="about-card">
-                <!-- <img id="icon-rocket" src="/static/icons/rocket.png" alt="Rocket Icon"> -->
-                <h3 id="card-title-1" class="about-card-title">Heading 1</h3>
-                <p id="card-text-1" class="about-card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry...</p>
+<body class="about-page">
+    {% include 'header.html' %}
+    <!-- <section id="about-section"> -->
+        <h1 id="about-heading">WHO WE ARE,</h1>
+        <p id="about-description">
+            we are passionately dedicated to redefining the lottery experience, making it accessible, enjoyable, and rewarding for everyone. Our mission is to transform the traditional lottery system by embracing innovation, fostering transparency, and ensuring simplicity in every interaction. Through our cutting-edge platform, we provide a seamless experience that puts participants at the heart of every draw. From purchasing tickets to tracking results, we guarantee fairness, security, and convenience at every step. At Win4All, we believe that every participant deserves an equal chance to win, and we work tirelessly to create an environment where every opportunity is exciting and every experience is meaningful. Join us in creating a lottery experience  more than just a game  a journey toward endless possibilities and shared success.   </p>
+            <div class="about-card-container">
+                <div id="card-1" class="about-card">
+                    <div class="highlight-bar top"></div>
+                    <img id="icon-360" src="{% static 'images/abt.png' %}" alt="360 Icon">
+                    <h3> Rocket-Powered Opportunities</h3>
+                    <p>We propel your chances to new heights by offering diverse and exciting lottery options designed to maximize your winning potential.</p>
+                    <div class="highlight-bar bottom"></div>
+                </div>
+                <div id="card-2" class="about-card">
+                    <div class="highlight-bar top"></div>
+                    <img id="icon-360" src="{% static 'images/abt1.png' %}" alt="360 Icon">
+                    <h3>Bright Ideas, Transparent Results</h3>
+                    <p>With cutting-edge technology and innovative solutions, we ensure every draw is secure, fair, and fully transparent.</p>
+                    <div class="highlight-bar bottom"></div>
+                </div>
+                <div id="card-3" class="about-card">
+                    <div class="highlight-bar top"></div>
+                    <img id="icon-363" src="{% static 'images/abt2.png' %}" alt="360 Icon">
+                    <h3>360A° Experience</h3>
+                    <p>From ticket purchase to results, enjoy a seamless and user-friendly journey that keeps you in control every step of the way.</p>
+                    <div class="highlight-bar bottom"></div>
+                </div>
             </div>
-            <div id="card-2" class="about-card">
-                <!-- <img id="icon-bulb" src="/static/icons/bulb.png" alt="Bulb Icon"> -->
-                <h3 id="card-title-2" class="about-card-title">Heading 2</h3>
-                <p id="card-text-2" class="about-card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry...</p>
-            </div>
-            <div id="card-3" class="about-card">
-                <!-- <img id="icon-360" src="/static/icons/360.png" alt="360 Icon"> -->
-                <h3 id="card-title-3" class="about-card-title">Heading 3</h3>
-                <p id="card-text-3" class="about-card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry...</p>
-            </div>
-        </div>
-    </section>
-   
+            
+    <!-- </section> -->
+    <!-- {% include 'footer.html' %} -->
 </body>
 </html>

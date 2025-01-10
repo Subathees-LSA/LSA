@@ -22,6 +22,21 @@ import random
 
 User = get_user_model()
 
+def user_chats(request):
+    try:
+        if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
+            return redirect('/login/')  # Redirects unauthenticated users or those not in User table
+        return render(request, 'user_chats.html')
+    except Exception as e:
+        return HttpResponseServerError(f"Error rendering user chat page")
+
+def contact_page(request):
+    try:
+        if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
+            return redirect('/login/')  # Redirects unauthenticated users or those not in User table
+        return render(request, 'contact.html')
+    except Exception as e:
+        return HttpResponseServerError("Sorry, the Contact Us page is currently unavailable. Please try again later.")
 
 def user_signup(request):
     return render(request, 'signup.html')

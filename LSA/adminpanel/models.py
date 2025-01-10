@@ -175,11 +175,26 @@ class ConversionRate(models.Model):
         return f"{self.card_type} ({self.region}) - {'Physical' if self.is_physical else 'E-code'}"
 
 
+
 class Contact(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='user_files/', blank=True, null=True)
+    starred = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.name} - {self.email}"        
+        return f"{self.name} - {self.email}"
+
+
+class AdminReply(models.Model):
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name='replies')
+    reply_message = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to='admin_files/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True) 
+
+    def __str__(self):
+        return f"Reply to {self.contact.email} - {self.created_at}"
+      

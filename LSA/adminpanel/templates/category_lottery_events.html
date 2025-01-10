@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {{ category_name }} Lottery Events</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script>
+        const add_csrftoken = "{{ csrf_token }}"; 
+        const category_id = "{{ category_id }}";
+        const api_get_category_lottery_events_url = "{% url 'api_get_category_lottery_events' category_id=category_id %}";
+        window.onload = function() {
+            fetchCategoryLotteryEvents();
+        };
+    </script>
+    <script src="{% static 'js/custom.js' %}"></script>
+</head>
+<body class="category_body">
+    <h1 class="category_lottery_events_title">All Lottery Events in {{ category_name }}</h1>
+    <div class="category_lottery_events_container" id="category_lottery_events_container">
+        <!-- All lotteries of the category will be displayed here -->
+    </div>
+</body>
+</html>
