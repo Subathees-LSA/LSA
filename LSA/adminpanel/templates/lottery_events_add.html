@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Lottery Events</title>
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script>
+        const lottery_events_add_csrftoken="{{ csrf_token}}"; 
+        const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
+        const api_lottery_events_add_url = "{% url 'api_lottery_events_add' %}";
+        const apiEditDeleteLotteryEventsUrl = "{% url 'api_edit_delete_lottery_events' 0 %}";
+        const get_lottery_categories_url = "{% url 'get-lottery-categories' %}";
+         // Fetch events when the page loads
+    window.onload = function() {
+        fetchLotteryEvents();
+        fetchLotteryCategories();
+    };
+    </script>
+</head>
+<body>
+
+<h1>Manage Lottery Events</h1>
+<!-- Form to Add New Lottery Event -->
+<h2>Add New Lottery Event</h2>
+<form id="addLotteryEventForm" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="text" name="title" placeholder="Title" required><br>
+    <span class="lottery_events_add_title_error" id="lottery_events_add_title_validation"></span><br>
+
+    <input type="text" name="slug" placeholder="Slug (leave blank to auto-generate)" optional><br>
+    <span class="lottery_events_add_slug_error" id="lottery_events_add_slug_validation"></span><br>
+
+
+    <textarea name="description" placeholder="Description" required></textarea><br>
+    <span class="lottery_events_add_description_error" id="lottery_events_add_description_validation"></span><br>
+        <!-- Category Selection -->
+        <label for="category">Category:</label>
+        <select id="lottery_events_add_category" name="category" required>
+            <option value="">Select Category</option>
+        </select>
+        <span class="lottery_events_add_category_error" id="lottery_events_add_category_validation"></span><br>
+    <input type="number" name="price" placeholder="Price" min="0" required><br>
+    <span class="lottery_events_add_price_error" id="lottery_events_add_price_validation"></span><br>
+
+    <input type="datetime-local" name="draw_date" required><br>
+    <span class="lottery_events_add_drawdate_error" id="lottery_events_add_drawdate_validation"></span><br>
+
+    <input type="file" name="image" accept="image/*" required><br>
+    <span class="lottery_events_add_image_error" id="lottery_events_add_image_validation"></span><br>
+
+    <input type="checkbox" name="is_active" checked> Active<br>
+    <span class="lottery_events_add_isactive_error" id="lottery_events_add_isactive_validation"></span><br>
+
+  
+<!-- Total Budget Amount -->
+<label for="totalBudget">Total Budget Amount:</label>
+<input type="number" id="lottery_events_add_totalBudget" name="total_budget" placeholder="Enter Total Budget" min="0" required><br>
+<span class="lottery_events_add_budget_error" id="lottery_events_add_budget_validation"></span><br>
+<!-- Revenue Type -->
+<label for="revenueType">Revenue Type:</label>
+<select id="lottery_events_add_revenueType" name="revenue_type">
+    <option value="fixed">Fixed Amount</option>
+    <option value="percentage">Percentage</option>
+</select><br>
+<span class="lottery_events_add_revenue_type_error" id="lottery_events_add_revenue_type_validation"></span><br>
+
+<!-- Revenue Input -->
+<div id="lottery_events_add_fixedAmountInput">
+    <label for="fixedRevenue">Fixed Revenue Amount:</label>
+    <input type="number" id="lottery_events_add_fixedRevenue" name="fixed_revenue" placeholder="Enter Fixed Revenue" min="0"><br>
+    <span class="lottery_events_add_fixed_revenue_error" id="lottery_events_add_fixed_revenue_validation"></span><br>
+</div>
+
+<div id="lottery_events_add_percentageInput" style="display: none;">
+    <label for="percentageRevenue">Percentage Revenue:</label>
+   
+    <input type="number" id="lottery_events_add_percentageRevenue" name="percentage_revenue" placeholder="Enter percentage" min="0"  max="100"  oninput="this.value = Math.min(Math.max(this.value, 0), 100)" required><br>
+
+
+    <span class="lottery_events_add_percentage_revenue_error" id="lottery_events_add_percentage_revenue_validation"></span><br>
+</div>
+
+<!-- Display Total Amount -->
+<div id="lottery_events_add_total_amount_container" style="display: none;">
+    <label for="totalAmount">Total Amount:</label>
+    <input type="number" id="lottery_events_add_totalAmount" name="total_amount" readonly><br>
+    <span class="lottery_events_add_total_amount_error" id="lottery_events_add_total_amount_validation"></span><br>
+</div>
+
+<!-- Per Ticket Price -->
+<label for="perTicketPrice">Per Ticket Price:</label>
+<input type="number" id="lottery_events_add_perTicketPrice" name="per_ticket_price" placeholder="Enter Per Ticket Price" min="0" required><br>
+<span class="lottery_events_add_per_ticket_error" id="lottery_events_add_per_ticket_validation"></span><br>
+<!-- Display Total Tickets -->
+<div id="lottery_events_add_total_tickets_container" style="display: none;">
+    <label for="totalTickets">Total Tickets:</label>
+    <input type="number" id="lottery_events_add_totalTickets" name="calculated_total_tickets" readonly><br>
+    <span class="lottery_events_add_total_tickets_error" id="lottery_events_add_total_tickets_validation"></span><br>
+</div>
+<input type="number" name="mini_limit" placeholder="Minimum Tickets" min="1" required><br>
+<span class="lottery_events_add_minilimit_error" id="lottery_events_add_minilimit_validation"></span><br>
+
+<input type="number" name="max_limit" placeholder="Maximum Tickets" min="0" required><br>
+<span class="lottery_events_add_maxlimit_error" id="lottery_events_add_maxlimit_validation"></span><br>
+
+<textarea name="free_postal_description" placeholder="Free Postal Description" required></textarea><br>
+<span class="lottery_events_add_freepostal_error" id="lottery_events_add_freepostal_validation"></span><br>
+
+<textarea name="competition_details" placeholder="Competition Details" required></textarea><br>
+<span class="lottery_events_add_competitiondetails_error" id="lottery_events_add_competitiondetails_validation"></span><br>
+
+<h3>Additional Images</h3>
+<div id="additional-images-container">
+</div>
+<button type="button" id="add-image-button">Add Another Image</button>
+<br><br>
+<button type="button" onclick="submitAddLotteryEvent()">Add Event</button>
+</form>
+
+<hr>
+<div id="lottery-events-container" class="lottery-events-grid">
+    <!-- Lottery event cards will be dynamically injected here -->
+</div>
+</body>
+</html>

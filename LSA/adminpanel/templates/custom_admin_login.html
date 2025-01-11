@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Admin Login</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script>
+        const api_admin_login_url = "{% url 'api_admin_login' %}";
+        const custom_admin_dashboard_url = "{% url 'custom_admin_dashboard' %}";
+    </script>
+
+</head>
+<body>
+    <div class="custom_admin_login_container">
+        <h2 class="custom_admin_login_title">Admin Login</h2>
+        <form id="custom_admin_login_form" class="custom_admin_login_form_class">
+            <input type="email" id="custom_admin_login_email_id" class="custom_admin_login_email" name="admin_email" required placeholder="Email">
+            <span id="custom_admin_login_email_error" style="color: red;"></span><br>
+
+            <div class="custom_admin_login_input_container">
+                <input type="password" id="custom_admin_login_password_id" class="custom_admin_login_password" name="admin_password" placeholder="Password" required>
+                <span id="custom_admin_login_toggle_password" class="custom_admin_login_show_password">🙈</span>
+            </div>
+            
+            <span id="custom_admin_login_password_error" style="color: red;"></span><br>
+            <span id="custom_admin_login_error" style="color: red;"></span><br>
+
+            <button type="submit" class="custom_admin_login_button" >Login</button>
+            <p>you don't have an account? please signup <a href="{% url 'admin_signup' %}">SignUp here</a></p>
+            <p id="custom_admin_login_errorMessage" style="color:red;"></p>
+        </form>
+    </div>
+
+   
+</body>
+</html>

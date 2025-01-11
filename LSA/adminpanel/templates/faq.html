@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ Page</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+<script src="{% static 'js/custom.js' %}"></script>
+  
+</head>
+<body class="faq-page">
+  {% include 'header.html' %}
+  <div style="text-align: center; color: #FF6600; font-size: 36px; font-family: Rajdhani; font-weight: 600; margin-top: 20px;">FAQ</div>
+  <div class="faq-container">
+    <!-- FAQ List -->
+    <div class="faq-list">
+      <div class="faq-item" data-target="faq1">
+        <div class="icon">+</div>
+        <span class="faq-title">Is my personal and financial information secure?</span>
+      </div>
+      <div class="faq-item" data-target="faq2">
+        <div class="icon">+</div>
+        <span class="faq-title">Can I play games on my mobile device?</span>
+      </div>
+      <div class="faq-item" data-target="faq3">
+        <div class="icon">+</div>
+        <span class="faq-title">What should I do if I forget my password?</span>
+      </div>
+      <div class="faq-item" data-target="faq4">
+        <div class="icon">+</div>
+        <span class="faq-title">What is the minimum age to gamble?</span>
+      </div>
+      <div class="faq-item" data-target="faq5">
+        <div class="icon">+</div>
+        <span class="faq-title">Are there any fees for deposits or withdrawals?</span>
+      </div>
+      <div class="faq-item" data-target="faq6">
+        <div class="icon">+</div>
+        <span class="faq-title"> What happens if a game crashes while Iam playing?</span>
+      </div>
+      <div class="faq-item" data-target="faq7">
+        <div class="icon">+</div>
+        <span class="faq-title">How do I close my account permanently?</span>
+      </div>
+      <div class="faq-item" data-target="faq8">
+        <div class="icon">+</div>
+        <span class="faq-title">Can I change my account details?</span>
+      </div>
+      <div class="faq-item" data-target="faq9">
+        <div class="icon">+</div>
+        <span class="faq-title">What is the minimum deposit amount?</span>
+      </div>
+      <div class="faq-item" data-target="faq10">
+        <div class="icon">+</div>
+        <span class="faq-title">How do I update my payment method?</span>
+      </div>
+    </div>
+
+    <!-- FAQ Details -->
+    <div class="faq-details">
+      <div class="faq-title-main" id="faq-title-main">Is my personal and financial information secure?</div>
+      <div class="faq-text" id="faq-text">
+        Yes, we use advanced SSL encryption and adhere to strict data protection policies to ensure your information is safe.
+      </div>
+    </div>
+  </div>
+  
+  {% include 'footer.html' %}
+</body>
+</html>

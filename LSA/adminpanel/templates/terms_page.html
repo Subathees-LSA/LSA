@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms and Conditions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+  <script src="{% static 'js/custom.js' %}"></script>
+</head>
+<body class="terms-body">
+  {% include 'header.html' %}
+  <main class="terms-container">
+    <h1 class="terms-heading">Terms and Conditions</h1>
+    <section>
+      <h2>Your Agreement</h2>
+      <p class="section-last-revised">Last Revised: December 16, 2013</p>
+      <p class="section-paragraph">
+        Welcome to www.lorem-ipsum.info. This site is provided as a service to our visitors and may be used for informational purposes only. Because the Terms and Conditions contain legal obligations, please read them carefully.
+      </p>
+      <h3>1. Your Agreement</h3>
+      <p class="section-paragraph">
+        By using this site, you agree to be bound by, and to comply with, these Terms and Conditions. If you do not agree to these Terms and Conditions, please do not use this site.
+      </p>
+      <h3>2. Privacy</h3>
+      <p class="section-paragraph">
+        Please review our Privacy Policy, which also governs your visit to this site, to understand our practices.
+      </p>
+      <h3>3. Linked Sites</h3>
+      <p class="section-paragraph">
+        This site may contain links to other independent third-party websites ("Linked Sites"). These Linked Sites are provided solely as a convenience to our visitors. Such Linked Sites are not under our control, and we are not responsible for and do not endorse the content of these Linked Sites, including any information or materials contained on these Linked Sites. You will need to make your own independent judgment regarding your interaction with these Linked Sites.
+      </p>
+    </section>
+  </main>
+  <!-- {% include 'footer.html' %} -->
+</body>
+</html>
+
+

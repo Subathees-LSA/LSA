@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script>
+        const cartUrl = "{% url 'cart' %}";  
+        const api_get_cart_url = "{% url 'api_get_cart' %}";
+        window.onload = function () {
+            fetchCartItems();
+        }; 
+    </script>
+    <script src="{% static 'js/custom.js' %}"></script>
+</head>
+<body>
+    <div id="cart">
+        <h1>My Cart</h1>
+        <div id="cart_items_container">
+            <!-- Cart items will be displayed here -->
+        </div>
+        <div id="cart_summary">
+            <h2>Total: £<span id="cart_total">0.00</span></h2>
+            <button id="checkout_button" onclick="proceedToCheckout()">Proceed to Checkout</button>
+        </div>
+    </div>
+    
+</body>
+</html>
+
+

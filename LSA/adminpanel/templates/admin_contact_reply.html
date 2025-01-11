@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Contact Reply</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/custom.js' %}" defer></script>
+    <script> 
+        const admin_chats_csrfToken = "{{ csrf_token }}";
+        </script>
+</head>
+<body class="admin_contact_reply_body">
+    <div class="admin_contact_reply_container">
+        <button id="admin_contact_reply_back_button" style="display: none;">Back</button>
+        <h1 class="admin_contact_reply_heading">Contact Messages</h1>
+        <div id="admin_contact_reply_message_list" class="admin_contact_reply_chat_container">
+            <!-- Dynamic content loaded via JavaScript -->
+        </div>
+    
+        <div id="admin_contact_reply_form_container" style="display: none;">
+            <h2 class="admin_contact_reply_sub_heading">Reply to User</h2>
+            <form id="admin_contact_reply_form" class="admin_reply_form">
+                <input type="email" id="admin_contact_reply_email" name="email" placeholder="User Email" readonly>
+                <textarea id="admin_contact_reply_message" name="message" placeholder="Your reply..."></textarea>
+                <input type="file" id="admin_contact_reply_file" name="file" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx">
+                <button type="submit">Send Reply</button>
+            </form>
+            <p id="admin_contact_reply_response_message"></p>
+        </div>
+    </div> 
+    <!-- Edit Message Modal -->
+<div id="admin_contact_reply_editMessageModal" class="admin_contact_reply_modal" style="display: none;">
+    <div class="admin_contact_reply_modal_content">
+        <span class="admin_contact_reply_close" id="admin_contact_reply_closeEditModal">&times;</span>
+        <h2>Edit Message</h2>
+        <form id="admin_contact_reply_editMessageForm">
+            <textarea id="admin_contact_reply_editMessageInput" placeholder="Edit your message..." rows="4"></textarea>
+            <input type="file" id="admin_contact_reply_editMessageFile" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx" />
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

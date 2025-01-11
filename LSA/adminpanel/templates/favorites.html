@@ -1,0 +1,24 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorites</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+</head>
+<body>
+    <h1>Your Favorite Lottery Events</h1>
+    <div id="favorites_container">
+        <!-- This will be populated with the list of favorite events -->
+    </div>
+    <script>const add_csrftoken="{{ csrf_token}}"; </script>
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script>
+        // Fetch the favorites when the page loads
+        window.onload = function() {
+            fetchFavorites();
+        };
+    </script>
+</body>
+</html>

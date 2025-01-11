@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin_chats</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/custom.js' %}" defer></script>
+   <script> 
+   const user_chats_csrfToken = "{{ csrf_token }}";
+   </script>
+</head>
+<body>
+    <div id="user_chats">
+        <h1>Admin chat</h1>
+        <div id="user_chats_message_list" class="user_chats_container">
+            <!-- Chat messages will be dynamically loaded here -->
+        </div>
+        <div id="user_chats_message_input_container">
+            <textarea id="user_chats_message_input" placeholder="Type your message..."></textarea>
+            <input type="file" id="user_chats_file_input" accept="image/*,.pdf,.doc,.docx">
+            <div id="user_chats_error_message" style="color: red; margin-bottom: 10px;"></div>
+
+            <button id="user_chats_send_button">Send</button>
+        </div>
+    </div>
+</body>
+</html>

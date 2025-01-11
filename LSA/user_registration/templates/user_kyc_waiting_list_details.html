@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" id="user_kyc_waiting_list-body">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User KYC Approval List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+        const userkycwaitinglistUrl =  "{% url 'user-kycwaitinglist' %}";
+        const adminupdaetkycapprovalUrl =  "{% url 'user-kyc-status-update' %}";
+    </script>
+    <script src="{% static 'js/custom.js' %}" defer></script>
+</head>
+<body id="user_kyc_waiting_list-body">
+    <h1>User KYC Approval List</h1>
+
+    <!-- Table to display user data -->
+    <table id="user_kyc_waiting_list-table" style="display:none;">
+        <thead>
+            <tr>
+                <th id="user_kyc_waiting_list-th">ID</th>
+                <th id="user_kyc_waiting_list-th">Username</th>
+                <th id="user_kyc_waiting_list-th">Email</th>
+                <th id="user_kyc_waiting_list-th">KYC Status</th>
+                <th id="user_kyc_waiting_list-th">KYC Image</th>
+            </tr>
+        </thead>
+        <tbody id="user_kyc_waiting_list-tbody">
+            <!-- User data will be injected here by JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Modal for viewing the KYC image -->
+    <div id="user_kyc_waiting_list-kycModal" class="user_kyc_waiting_list-modal">
+        <div class="user_kyc_waiting_list-modal-content">
+            <div class="user_kyc_waiting_list-modal-header">
+                <span id="user_kyc_waiting_list-userName"></span> | 
+                <span id="user_kyc_waiting_list-userEmail"></span> | 
+                <span id="user_kyc_waiting_list-kycStatus"></span>
+            </div>
+            <span class="user_kyc_waiting_list-close-btn">&times;</span>
+            <img id="user_kyc_waiting_list-kycImage" class="user_kyc_waiting_list-modal-image" src="" alt="KYC Image">
+        </div>
+    </div>
+</body>
+</html>

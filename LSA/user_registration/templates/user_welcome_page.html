@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Lottery</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+        const kycStatusUrl = "{% url 'kyc-status' %}";
+        const kycUploadUrl = "{% url 'kyc-upload' %}";
+    </script>
+    <script src="{% static 'js/custom.js' %}" defer></script>
+
+    
+</head>
+<body class="user_welcome_page_body">
+    <div class="user_welcome_page_container">
+        <a href="{% url 'user_logout' %}" class="user_welcome_page_logout-button">Logout</a>
+        <h1 class="user_welcome_page_h1">Welcome to the Lottery!</h1>
+        <p class="user_welcome_page_p">Try your luck and stand a chance to win exciting prizes!</p>
+    </div>
+
+    <!-- KYC Modal -->
+    <div id="kycModal" class="user_welcome_page_kyc-modal" style="display: none;">
+        <div class="user_welcome_page_kyc-modal-content">
+            <span class="user_welcome_page_close-modal" id="skipButton" onclick="closeKYCModal()">Skip</span>
+            <h2 id="kycModalTitle">KYC Verification</h2>
+            <p id="kycModalMessage">Please upload a valid ID image for verification.</p>
+            <form id="kycUploadForm">
+                <input type="file" id="kycImage" accept="image/*" onchange="kycimage_validateFileSize()" required />
+                <p id="error-message" class="user_welcome_page_errormessage"></p>
+                <button type="submit" class="user_welcome_page_submit-button">Upload KYC</button>
+            </form>
+            <button class="user_welcome_page_ok-button" id="okButton" onclick="closeKYCModal()">OK</button>
+        </div>
+    </div>
+    
+</body>
+</html>
+
+

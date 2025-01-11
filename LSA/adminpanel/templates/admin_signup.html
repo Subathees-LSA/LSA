@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Signup</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script>
+        const adminapiAdminSignupUrl = "{% url 'api_admin_signup' %}";
+        const adminapiAdminloginupUrl = "{% url 'custom_admin_login' %}";
+    </script>
+</head>
+<body>
+
+<div class="admin_signup_container">
+    <h2 class="admin_signup_title">Admin Signup</h2>
+    <form id="admin_signup_form" class="admin_signup_form_class" >
+        <input type="text" id="admin_signup_username_id" class="admin_signup_username_input" placeholder="Admin Username" required><br>
+        <span id="admin_signup_username_error" class="admin_signup_error"></span><br>
+        <input type="email" id="admin_signup_email_id" class="admin_signup_email_id_input" placeholder="Admin Email" required><br>
+        <span id="admin_signup_email_error" class="admin_signup_error"></span><br>
+        <div class="admin_signup_input_container">
+            <input type="password" id="admin_signup_password_id" class="admin_signup_password_input" placeholder="Password (min 8 characters)" required>
+            <span id="admin_signup_toggle_password" class="admin_signup_toggle_password_class">🙈</span>
+        </div>
+        <span id="admin_signup_password_error" class="admin_signup_error"></span><br>
+        <button type="submit" class="admin_signup_submit_button">Register Admin</button>
+        <p>Already have an account? <a href="{% url 'custom_admin_login' %}">Login here</a></p>
+        <div id="admin_signup_form_error_message" class="admin_signup_error_message"></div>
+    </form>
+</div>
+
+</body>
+</html>
