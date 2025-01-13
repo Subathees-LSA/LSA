@@ -40,15 +40,15 @@
                         data-redirect-url="{% url 'user_welcome_page' %}">
                         <div
                             style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
-                            E mail or Phone Number</div>
+                            E-mail</div>
                         <input type="email" id="login-email" class="login-input-email" placeholder="Email" required>
-                        <span id="login-email-error" class="login-error-text"></span>
+                        {% comment %} <span id="login-email-error" class="login-error-text"></span> {% endcomment %}
                         <div
                             style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
                             Password</div>
                         <input type="password" id="login-password" class="login-input-password" placeholder="Password"
                             required>
-                        <span id="login-password-error" class="login-error-text"></span>
+                        {% comment %} <span id="login-password-error" class="login-error-text"></span> {% endcomment %}
                         <span id="login-error" class="login-error-text"></span>
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div style="display: flex; align-items: center;">
