@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
 /* Container styling */
 /* .login-container {
     max-width: 400px;
@@ -486,6 +487,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
         .form-group-custom {
             margin-bottom: 27px;
+            font-family: Rajdhani;
         }
 
         input {
@@ -522,6 +524,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
         .login-link-custom {
             text-align: center;
             margin-top: 10px;
+            font-family: Rajdhani;
         }
 
         .login-link-custom a {
@@ -546,6 +549,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
         .google-signin-custom .submit-btn-custom1 {
     display: inline-block;
+    font-family: Rajdhani;
     text-align: center;
     text-decoration: none;
     color: #0C0C0D;
@@ -567,26 +571,26 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
 .password-label {
     left: 22px;
-    top: 65px;
+    top: 243px;
     position: absolute;
     color: #090914;
     font-size: 16px;
     font-family: Rajdhani, sans-serif;
     font-weight: 500;
-    line-height: 370px;
+    line-height: 30px;
     word-wrap: break-word;
 }
 
 /* Styles for Email Address Label */
 .email-label {
     left: 22px;
-    top: 30px;
+    top: 125px;
     position: absolute;
     color: #090914;
     font-size: 16px;
     font-family: Rajdhani, sans-serif;
     font-weight: 500;
-    line-height: 210px;
+    line-height: 30px;
     word-wrap: break-word;
 }
 
@@ -1002,12 +1006,14 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
         .login-error-text {
             color: red;
+            font-family: Rajdhani;
             display: block;
             margin-top: 0px;
         }
 
         .login-forgot-password {
             display: block;
+            font-family: Rajdhani;
             text-align: right;
             font-size: 14px;
             color: #FF6600;
@@ -1015,6 +1021,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
         .login-button {
             width: 100%;
+            font-family: Rajdhani;
             padding: 12px;
             background-color: #FF6600;
             color: white;
@@ -1689,6 +1696,7 @@ position: relative;
 
 .confirm-container {
     max-width: 400px;
+    font-family: Rajdhani;
     margin: 0 auto;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -1698,10 +1706,11 @@ position: relative;
     font-family: Arial, sans-serif;
 }
 .confirm-heading { color: #333; }
-.confirm-form { display: flex; flex-direction: column; }
+.confirm-form { display: flex; flex-direction: column;font-family: Rajdhani; }
 .confirm-input-group {
     position: relative;
     margin-bottom: 30px;
+    font-family: Rajdhani;
 }
 .confirm-input, .confirm-button {
     width: 100%;
@@ -1728,6 +1737,7 @@ position: relative;
 /* .confirm-button:hover { background-color: #45a049; } */
 .confirm-error {
     font-size: 0.9em;
+    font-family: Rajdhani;
     margin-top: 10px;
     color: red;
 }
@@ -4036,7 +4046,7 @@ a {
 /*-----------terms------*/
 
     .terms-body {
-      font-family: 'Inter', sans-serif;
+      font-family: Rajdhani;
       margin: 0;
       padding: 0;
       background-color: #ffffff;
@@ -4045,6 +4055,7 @@ a {
 
     .terms-container {
       margin: 50px auto;
+      font-family: Rajdhani;
       padding: 20px;
       background: #fff;
       height: 400px; /* Fixed height */
@@ -4083,7 +4094,7 @@ a {
     }
 
     .section-last-revised {
-      font-style: italic;
+     font-family: Rajdhani;
       color: #666;
     }
   

@@ -1758,7 +1758,7 @@ function validatePassword(password, errorElementId) {
         errorElement.text('Your password must contain at least four numbers.');
         return false;
     }
-    errorElement.text('Valid password');
+    errorElement.text(' ');
     return true;
 }
 
