@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import *
+from django.apps import apps
+from django.contrib.admin.sites import AlreadyRegistered
 
 
 class LotteryEventImagesInline(admin.TabularInline):  # Use StackedInline for a vertical layout
@@ -64,3 +66,20 @@ class ContactAdmin(admin.ModelAdmin):
     mark_as_processed.short_description = "Mark selected messages as processed"
 
 admin.site.register(LotteryCategory)
+admin.site.register(Banner)
+admin.site.register(Previous_Winner_img)
+
+
+
+
+# Get all models in the 'adminpanel' app
+app_config = apps.get_app_config('adminpanel')
+app_models = app_config.get_models()
+
+
+for model in app_models:
+    try:
+        admin.site.register(model)
+    except AlreadyRegistered:
+        # Skip if the model is already registered
+        pass

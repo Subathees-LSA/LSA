@@ -7,11 +7,8 @@
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="{% static 'js/custom.js' %}"></script>
-   
     <script>
         const api_navbar_access_tabsView_url =  "{% url 'api_navbar_access_tabsView' %}";
         const api_dashboard_preview_admin_view_url =  "{% url 'api_dashboard_preview_admin_view' %}";
@@ -22,20 +19,21 @@
         const api_lottery_events_add_url = "{% url 'api_lottery_events_add' %}";
         const apiEditDeleteLotteryEventsUrl = "{% url 'api_edit_delete_lottery_events' 0 %}";
         const get_lottery_categories_url = "{% url 'get-lottery-categories' %}";
+        const admin_chats_csrfToken = "{{ csrf_token }}";
     </script>
-       
     <style>
 /* Hide cards after the third one */
 .lottery-event-card:nth-child(n+4) {
     display: none;
 }
+
 </style>
-   
+
 </head>
 <body>
     <div class="custom_admin_dashboard_container">
         <!-- Sidebar -->
-        <aside class="custom_admin_dashboard_sidebar">
+        <aside class="custom_admin_dashboard_sidebar" >
             <h2>LSA</h2>
             <nav>
                 <ul>
@@ -57,25 +55,67 @@
             </header>
             <section class="custom_admin_dashboard_dashboard">
                 <h1>Admin Management: System Overview</h1>
-                <div class="custom_admin_dashboard_overview_count">
+                <div class="custom_admin_dashboard_overview_count" id="custom_admin_dashboard_overview_dynamic_count">
                 </div> 
-                <div class="custom_admin_dashboard_conversion_rate">
+               
+                <div class="custom_admin_dashboard_conversion_rate" id="custom_admin_dashboard_conversion_dynamic_rate_table">
                     <!-- Dynamic table will be rendered here -->
                 </div>
+                <div style=" visibility: hidden;opacity: 0;position: absolute;" id="custom_admin_dashboard_dynamic_lottery_sales_count_and_bar_chart">
+               <div id="lottery_sales_dynamic_count_filter" style="display: none;"> <label for="month">Month:</label>
+    <select id="month">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+    </select>
 
-                <div class="custom_admin_dashboard_table">
+    <label for="year">Year:</label>
+    <select id="year">
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+    </select>
+
+    <button id="filterBtn">Filter</button></div>
+
+                <div class="custom_admin_dashboard_overview_statistics_count" >
+                </div>
+           
+            <div>
+                <div id="custom_admin_dashboard_bar_chart_filter" style="display: none;">
+                <h1>Monthly Sales Chart</h1>
+    
+        <!-- Year Selection Dropdown -->
+        <label for="yearSelect">Select Year:</label>
+        <select id="yearSelect"></select></div>
+    <div style="width: 50%;height: 50%;">
+        <canvas id="salesChart" width="800" height="400"></canvas></div>
+               </div>
+               <h1 id="leaderboard_title"></h1>
+               <div class="leaderboard_class" id="leaderboard" style="display: none;">
+                <!-- Data will be injected here -->
+              </div>
+            </div>
+                <div class="custom_admin_dashboard_user_table" id="custom_admin_dashboard_user_list_table">
                     <!-- Dynamic table will be rendered here -->
                 </div>
-                <div>
+                <div id="lottery_cards_add_and_list">
                     <!-- "+" Icon -->
-                    <div class="lottery_cards_heading">
+                    <div class="lottery_cards_heading" >
                        
                     <h2 id="lottery_card_title"></h2>
                     <button id="custom_admin_dashboard_openFormButton" class="custom_admin_dashboard_open-form-btn">+</button> 
                     </div>
-                    <!-- <div id="lottery-events-container" class="custom_admin_dashboard_lottery-events-grid">
-                       
-                    </div> -->
+                   
                     <div id="lottery-events-wrapper">
                         <input type="checkbox" id="custom_admin_dashboard_lottery_view-more-toggle">
                         <div id="lottery-events-container" class="custom_admin_dashboard_lottery-events-grid">
@@ -84,10 +124,40 @@
                         <label for="custom_admin_dashboard_lottery_view-more-toggle" id="custom_admin_dashboard_view-more-button" class="custom_admin_dashboard_lottery_view-more-btn"  hidden>View More</label>
                     </div>
                 </div>
-            
+
+                <div class="admin_contact_reply_container" id="admin_reply_chat_bot" style=" visibility: hidden;opacity: 0;position: absolute;">
+                    <button id="admin_contact_reply_back_button" style="display: none;">Back</button>
+                    <h1 class="admin_contact_reply_heading">Contact Messages</h1>
+                    <div id="admin_contact_reply_message_list" class="admin_contact_reply_chat_container">
+                        <!-- Dynamic content loaded via JavaScript -->
+                    </div>
+                
+                    <div id="admin_contact_reply_form_container" style="display: none;">
+                        <h2 class="admin_contact_reply_sub_heading">Reply to User</h2>
+                        <form id="admin_contact_reply_form" class="admin_reply_form">
+                            <input type="email" id="admin_contact_reply_email" name="email" placeholder="User Email" readonly>
+                            <textarea id="admin_contact_reply_message" name="message" placeholder="Your reply..."></textarea>
+                            <input type="file" id="admin_contact_reply_file" name="file" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx">
+                            <button type="submit">Send Reply</button>
+                        </form>
+                        <p id="admin_contact_reply_response_message"></p>
+                    </div>
+                </div> 
+                
             </section>
         </main>
     </div>
+    <div id="admin_contact_reply_editMessageModal" class="admin_contact_reply_modal" style="display: none;">
+        <div class="admin_contact_reply_modal_content">
+            <span class="admin_contact_reply_close" id="admin_contact_reply_closeEditModal">&times;</span>
+            <h2>Edit Message</h2>
+            <form id="admin_contact_reply_editMessageForm">
+                <textarea id="admin_contact_reply_editMessageInput" placeholder="Edit your message..." rows="4"></textarea>
+                <input type="file" id="admin_contact_reply_editMessageFile" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx" />
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>    
         <!-- Modal for viewing the KYC image -->
 <div id="custom_admin_user_kyc_waiting_list-kycModal" class="user_kyc_waiting_list-modal">
     <div class="user_kyc_waiting_list-modal-content">
@@ -201,4 +271,7 @@
          </div>
 </div>
 </body>
+<script src="{% static 'js/custom.js' %}"></script>
+<script src="{% static 'plugins/chart.js' %}"></script>
+
 </html>

@@ -7,10 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-    <style>
-
-    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         const checkusernameUrl = "{% url 'check_username' %}";
@@ -21,49 +17,50 @@
     <script src="{% static 'js/custom.js' %}" defer></script>
 </head>
 
-<body>
-    <div class="main-container-custom">
-        <div class="inner-container-custom">
-            <div class="background-custom"></div>
-            <div class="orange-background-custom"></div>
-            <div class="dark-background-custom">
-                <div class="circle1-custom"></div>
-                <div class="circle2-custom"></div>
+<body class="signup-body">
+    <div class="signup-main-container-custom">
+        <div class="signup-inner-container-custom">
+            <div class="signup-background-custom"></div>
+            <div class="signup-orange-background-custom"></div>
+            <div class="signup-dark-background-custom">
+                <div class="signup-circle1-custom"></div>
+                <div class="signup-circle2-custom"></div>
             </div>
         </div>
-        <div class="welcome-message-custom">
-            <div class="welcome-title-custom">Welcome !</div>
-            <div class="welcome-subtitle-custom">
+        <div class="signup-welcome-message-custom">
+            <h1 class="signup-welcome-title-custom">Welcome !</h1>
+            <p class="signup-welcome-subtitle-custom">
                 Clarity gives you the blocks and components you need to create a truly professional website.
-            </div>
+            </p>
         </div>
 
         <!-- Signup Form Container -->
         <div class="signup-container-custom">
             <!-- <h2 class="signup-title-custom">Signup</h2> -->
-            <div class="fullname-label">
+            <h3 class="signup-fullname-label">
                 Full name
-            </div>
+            </h3>
 
 
             <form id="signup" class="signup-form">
-                <div class="form-group-custom">
-                    <input type="text" id="signup-username" placeholder="Username" required>
+                <div class="signup-form-group-custom">
+                    <input class="signup-input" type="text" id="signup-username" placeholder="Username" required>
                     <span id="signup-username-error" class="signup-error-custom"></span><br>
                     <span id="signup-username-suggestion" class="signup-suggestion-custom"></span><br>
                 </div>
-                <div class="email-label">
+                <h3 class="signup-email-label">
                     Email address
-                </div>
-                <div class="form-group-custom">
-                    <input type="email" id="signup-email" placeholder="Email" required>
+                </h3>
+                <div class="signup-form-group-custom">
+                    <input class="signup-input" type="email" id="signup-email" placeholder="Email" required>
                     <span id="signup-email-error" class="signup-error-custom"></span><br>
                 </div>
-                <div class="password-label">
+                <h3 class="signup-password-label">
                     Password
-                </div>
-                <div class="form-group-custom">
-                    <input type="password" id="signup-password" placeholder="Password (min 8 characters)" required>
+                </h3>
+                <div class="signup-form-group-custom">
+                    <input class="signup-input" type="password" id="signup-password" placeholder="Password (min 8 characters)" required>
+                    <span id="signup-toggle-password" class="signup-toggle-password">🙈</span>
                     <span id="signup-password-error" class="signup-error-custom"></span><br>
                 </div>
 
@@ -77,15 +74,15 @@
                 <!-- Error message for form submission -->
                 <div id="signup-form-error-message" class="signup-form-error-msg"></div>
 
-                <div class="form-submit-custom">
-                    <button type="submit" class="submit-btn-custom">Sign Up</button>
+                <div class="signup-form-submit-custom">
+                    <button type="submit" class="signup-submit-btn-custom">Sign Up</button>
                 </div>
-                <div class="separator-container">
-                    <div class="separator-line"></div>
-                    <div class="separator-text">
-                        or do it via other accounts
-                    </div>
-                    <div class="separator-line"></div>
+                <div class="signup-separator-container">
+                    <div class="signup-separator-line"></div>
+                    <p class="signup-separator-text">
+                        or do signup-it via other accounts
+                    </p>
+                    <div class="signup-separator-line"></div>
                 </div>
 
                 <div class="google-signin-custom">
@@ -109,13 +106,13 @@
         <div class="account-option-custom"></div>
     </div>
 
-    <div class="left-text">
-        <div class="welcome-text">
+    <div class="signup-left-text">
+        <h1 class="signup-welcome-text">
             Welcome to our community
-        </div>
-        <div class="description-text">
-            Clsssarity gives you the blocks & components you need to create a truly professional website.
-        </div>
+        </h1>
+        <h3 class="description-text">
+            Clarity gives you the blocks & components you need to create a truly professional website.
+        </h3>
     </div>
     <img class="lottery-image" src="media/lottery_images/image%201209.svg" alt="Lottery Image" />
     <img class="small-lottery-image" src="media/lottery_images/image%2030.svg" alt="Lottery Image" />

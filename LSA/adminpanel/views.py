@@ -30,16 +30,18 @@ from .models import Contact
 from .serializers import AdminReplySerializer
 from django.db.models import Max
 from user_registration.serializers import *
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from .models import LotteryCategory
 from .serializers import LotteryCategorySerializer
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from django.utils.timezone import now
 from django.core.mail import EmailMessage
-
+from rest_framework.exceptions import APIException
+from .models import Previous_Winner_img
+from .serializers import PreviousWinnerimgSerializer
+from datetime import timedelta
+from django.db import DatabaseError
+from rest_framework.serializers import Serializer
 
 class ChatMessagesView(APIView):
     def get(self, request, email):
@@ -345,7 +347,6 @@ class api_dashboard_preview_admin_view(APIView):
             "users_table": users_table,
             "conversion_rate": list(rates),
         }
-
         return Response({
             "data": data,
             "tabs": list(admin_dashboard_preview),
@@ -874,3 +875,127 @@ class GetLotteryCategories(APIView):
         categories = LotteryCategory.objects.all()
         serializer = LotteryCategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BannerView(APIView):
+    def get(self, request):
+        try:
+            banner = Banner.objects.last()  # Fetch the latest banner
+            if banner:
+                serializer = BannerSerializer(banner)
+                return Response(serializer.data)
+            return Response({"error": "No banner available"}, status=status.HTTP_404_NOT_FOUND)
+        except DatabaseError as db_error:
+            return Response({"error": "Database error occurred", "details": str(db_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Serializer.DoesNotExist:
+            return Response({"error": "Serialization error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": "An unexpected error occurred", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PreviousWinnersimgAPIView(APIView):
+    def get(self, request):
+        try:
+            winners = Previous_Winner_img.objects.all()
+            serializer = PreviousWinnerimgSerializer(winners, many=True)
+            return Response({'winners': serializer.data}, status=status.HTTP_200_OK)
+        except Previous_Winner_img.DoesNotExist:
+            return Response({'error': 'No winners found.'}, status=status.HTTP_404_NOT_FOUND)
+        except APIException as api_error:
+            return Response({'error': str(api_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({'error': 'An unexpected error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LotteryStatisticsView(APIView):
+    def get(self, request):
+        month = int(request.query_params.get('month', 0))
+        year = int(request.query_params.get('year', 0))
+
+        total_users = UserProfile.objects.count()
+
+        # Fetch active users based on your logic
+        active_users = UserProfile.objects.filter(
+            user__last_login__year=year,
+            user__last_login__month=month
+        ).count()
+
+        # Fetch lottery statistics for the specified month and year
+        stats = LotteryStatistics.objects.filter(month=month, year=year).first()
+        if stats:
+            stats_data = LotteryStatisticsSerializer(stats).data
+            stats_data['active_users'] = active_users
+            stats_data['total_users'] = total_users
+            return Response(stats_data)
+        else:
+            return Response({
+                'message': 'No data found for the selected month and year.',
+                'active_users': active_users,
+                'total_users': total_users,
+                'won_lottery': 0,
+                'lost_lottery': 0,
+                'won_percentage': 0,
+                'current_won_percentage': 0,
+                'lost_percentage': 0
+            })
+
+
+class lottery_sales_availableYearsView(APIView):
+    def get(self, request):
+        years = lottery_sales_bar_chart.objects.values_list('year', flat=True).distinct().order_by('year')
+        return Response({'years': list(years)})
+
+
+class lottery_sales_bar_chart_View(APIView):
+    def get(self, request):
+        year = int(request.query_params.get('year', 2025))  # Default to 2025 if not provided
+        data = lottery_sales_bar_chart.objects.filter(year=year).order_by('id')
+        response = [
+            {
+                'month': activity.month,
+                'activity_count': activity.activity_count
+            } for activity in data
+        ]
+        return Response(response)
+
+
+class LeaderboardAPIView(APIView):
+    def get(self, request):
+        leaderboard = Leaderboard.objects.order_by('rank')  # Order by rank
+        serializer = LeaderboardSerializer(leaderboard, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+def user_statistics(request):
+    # Calculate total and verified users
+    total_users = UserProfile.objects.count()
+    
+    today = now()
+    start_of_week = today - timedelta(days=today.weekday())
+
+    # Count users linked to UserProfile who logged in this week
+    month = int(1)
+    year = int(2025)
+
+            # Filter for active users
+    active_users = UserProfile.objects.filter(
+                user__last_login__year=year,
+                user__last_login__month=month
+            ).count()
+    logged_in_this_week = UserProfile.objects.filter(
+        user__last_login__gte=start_of_week
+    ).count()
+    print(active_users)
+    logged_in_this_week_profiles = UserProfile.objects.filter(
+        user__last_login__gte=start_of_week
+    )
+    logged_in_this_week_names = [profile.user.username for profile in logged_in_this_week_profiles]
+
+
+    return Response({
+        'total_users': total_users,
+        'active_users':logged_in_this_week,
+        'logged_in_this_week_names': active_users,
+        
+    })    
