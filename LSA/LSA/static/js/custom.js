@@ -650,6 +650,254 @@ function toggleMenu() {
 }
 
 // custom_admin_dashboard.html
+function showSpecificDiv(id) {
+    // Select the section and the specific div by id
+    const section = document.querySelector(".custom_admin_dashboard_dashboard");
+    const specificDiv = document.getElementById(id);
+
+    if (specificDiv) {
+        // Hide all children of the section using opacity and z-index
+        Array.from(section.children).forEach(child => {
+            child.style.visibility = "hidden";
+            child.style.opacity = "0";
+            child.style.position = "absolute";
+        });
+
+        // Show only the specific div
+        specificDiv.style.visibility = "visible";
+        specificDiv.style.opacity = "1";
+        specificDiv.style.position = "relative";
+
+        // Ensure the section itself is visible
+        section.style.visibility = "visible";
+    } else {
+        console.error(`Element with id "${id}" not found.`);
+    }
+}
+let salesChart; // Store chart instance for dynamic updates
+// Function to fetch and display sales data
+function fetchSalesData(year) {
+    $.ajax({
+        url: `/api/lottery_sales_bar_chart/`,
+        method: 'GET',
+        data: { year: year },
+        success: function (data) {
+            const labels = data.map(item => item.month);
+            const activityCounts = data.map(item => item.activity_count);
+
+            // If the chart already exists, update it
+            if (salesChart) {
+                salesChart.data.labels = labels;
+                salesChart.data.datasets[0].data = activityCounts;
+                salesChart.update();
+            } else {
+                // Create the chart for the first time
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                salesChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Sales Count',
+                            data: activityCounts,
+                            backgroundColor: 'rgba(255, 87, 34, 0.8)', // Matching orange color
+                            borderColor: 'rgba(255, 87, 34, 1)',
+                            borderWidth: 0, // No border for clean design
+                            borderRadius: 8, // Rounded bars
+                            barPercentage: 0.6, // Adjust bar width
+                            hoverBackgroundColor: 'rgba(255, 87, 34, 1)' // Slightly darker hover color
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false // Hiding the legend for simplicity
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)', // Dark tooltip
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                padding: 10,
+                                cornerRadius: 4
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Months', // X-axis label
+                                    color: '#555',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    display: false // Hide grid lines on x-axis
+                                },
+                                ticks: {
+                                    color: '#888', // Grey text for months
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'lottery Sales Count', // Y-axis label
+                                    color: '#555',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(200, 200, 200, 0.3)' // Light grid lines
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    color: '#888',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        },
+        error: function (error) {
+            console.error('Error fetching sales data:', error);
+            alert('Failed to fetch sales data.');
+        }
+    });
+}
+
+
+
+// Function to populate the year dropdown dynamically
+function populateYearDropdown() {
+    $.ajax({
+        url: `/api/lottery_sales_available_years/`, // API endpoint for years
+        method: 'GET',
+        success: function (data) {
+            const years = data.years;
+            const yearSelect = $("#yearSelect");
+            const currentYear = new Date().getFullYear(); // Get the current year
+
+            // Clear existing options
+            yearSelect.empty();
+
+            // Populate options
+            years.forEach(year => {
+                yearSelect.append(new Option(year, year));
+            });
+
+            // Set the current year as default if available, otherwise the first year
+            const defaultYear = years.includes(currentYear) ? currentYear : years[0];
+            yearSelect.val(defaultYear);
+
+            // Fetch and display data for the default year
+            fetchSalesData(defaultYear);
+        },
+        error: function (error) {
+            console.error('Error fetching available years:', error);
+            alert('Failed to fetch years.');
+        }
+    });
+}
+
+// Event listener for year selection
+function dynamic_lottery_sales_bar_chart () {
+    // Populate year dropdown on page load
+    populateYearDropdown();
+
+    // Update chart when a new year is selected
+    $("#yearSelect").on("change", function () {
+        const selectedYear = $(this).val();
+        fetchSalesData(selectedYear);
+    });
+}
+
+function fetchStatistics(month, year) {
+    $.ajax({
+        url: `/api/statistics/`, // API endpoint
+        method: 'GET',
+        data: {
+            month: month,
+            year: year
+        },
+        success: function (data) {
+           
+            $("#active_users").text(`${data.active_users} / ${data.total_users}`);
+            $("#won_lottery").text(data.won_lottery);
+            $("#lost_lottery").text(data.lost_lottery);
+            $("#won_percentage").text(data.won_percentage.toFixed(2)+ " %");
+            $("#current_won_percentage").text(data.current_won_percentage.toFixed(2)+ " %");
+            $("#lost_percentage").text(data.lost_percentage.toFixed(2)+ " %");
+        },
+        error: function (error) {
+            console.error('Error fetching data:', error);
+            alert('Failed to fetch data.');
+        }
+    });
+}
+
+
+// Event listener for the filter button
+function lottery_sales_count() {
+    $("#filterBtn").on("click", function () {
+        const month = $("#month").val();
+        const year = $("#year").val();
+        fetchStatistics(month, year);
+    });
+
+    // Fetch initial data for the current month and year
+    const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
+    const currentYear = new Date().getFullYear();
+    $("#month").val(currentMonth);
+    $("#year").val(currentYear);
+    fetchStatistics(currentMonth, currentYear);
+}
+
+// Fetch leaderboard data using AJAX
+    function user_leaderboard () {
+      $.ajax({
+        url: '/api/leaderboard/', // Replace with your Django API endpoint
+        method: 'GET',
+        success: function (data) {
+          const leaderboard = $('#leaderboard');
+          leaderboard.empty(); // Clear existing data
+
+          // Populate leaderboard with fetched data
+          data.forEach((item) => {
+            leaderboard.append(`
+              <div class="leaderboard-item">
+                <div class="user-info">
+                  <img src="${item.image || 'https://via.placeholder.com/50'}" alt="User Image">
+                  <div>
+                    <span class="username">${item.username}</span>
+                    <div class="correct-percentage">${item.correct_percentage.toFixed(2)}% Correct</div>
+                  </div>
+                </div>
+                <div class="points">
+                  <span class="rank">${item.rank} ${item.rank_change > 0 ? '<span class="arrow-up">▲</span>' : '<span class="arrow-down">▼</span>'}</span><br>
+                  <span>${item.points} Points</span>
+                </div>
+              </div>
+            `);
+          });
+        },
+        error: function (xhr, status, error) {
+          console.error('Error fetching leaderboard data:', error);
+        }
+      });
+    }
+        
 function initializeDashboard() {
     try {
         document.addEventListener('DOMContentLoaded', function () {
@@ -670,8 +918,9 @@ function initializeDashboard() {
                             sidebar.innerHTML = ""; // Clear existing tabs
                             data.forEach(tab => {
                                 const li = document.createElement("li");
-                                li.innerHTML = `<a href="${tab.resolved_url}">${tab.name}</a>`;
+                                li.innerHTML = `<a href="${tab.resolved_url}" onclick="showSpecificDiv('${tab.identifier}')">${tab.name}</a>`;
                                 sidebar.appendChild(li);
+                                
                             });
                         } catch (error) {
                             console.error("Error processing sidebar data:", error);
@@ -684,7 +933,8 @@ function initializeDashboard() {
                     .then(({ data, tabs, table_data }) => {
                         try {
                             const dashboard = document.querySelector('.custom_admin_dashboard_overview_count');
-                            const tableContainer = document.querySelector('.custom_admin_dashboard_table');
+                            const Statistics_count_dashboard = document.querySelector('.custom_admin_dashboard_overview_statistics_count');
+                            const tableContainer = document.querySelector('.custom_admin_dashboard_user_table');
                             const custom_admin_dashboard_conversion_rate_Container = document.querySelector('.custom_admin_dashboard_conversion_rate');
 
                             tabs.forEach(tab => {
@@ -697,7 +947,29 @@ function initializeDashboard() {
                                             <p id="${tab.identifier}">${data[tab.identifier] || 0}</p>
                                         `;
                                         dashboard.appendChild(container);
-                                    } else if (tab.type === 'table') {
+                                    }else if (tab.type === 'Statistics_count') {
+                                        const container = document.createElement('div');
+                                        container.className = 'custom_admin_dashboard_card';
+                                        const lottery_sales_dynamic_count_filter= document.getElementById("lottery_sales_dynamic_count_filter");
+                                        lottery_sales_dynamic_count_filter.style.display = "block";
+                                        container.innerHTML = `
+                                            <h2>${tab.name}</h2>
+                                            <p id="${tab.identifier}"></p>
+                                        `;
+                                        Statistics_count_dashboard.appendChild(container);
+                                        lottery_sales_count();
+                                    }else if (tab.type === 'lottery_sales_overview') {
+                                        const custom_admin_dashboard_bar_chart_filter= document.getElementById("custom_admin_dashboard_bar_chart_filter");
+                                        custom_admin_dashboard_bar_chart_filter.style.display = "block";    
+                                        dynamic_lottery_sales_bar_chart();
+                                    }else if (tab.type === 'user_leaderboard') {
+                                        const leaderboard_container= document.getElementById("leaderboard");
+                                        leaderboard_container.style.display = "block";  
+                                        const leaderboard_title =  document.getElementById("leaderboard_title");
+                                        leaderboard_title.className = 'custom_admin_dashboard_leaderboard_title';
+                                        leaderboard_title.textContent = tab.name;    
+                                        user_leaderboard();
+                                    }else if (tab.type === 'table') {
                                         const title = document.createElement('h2');
                                         title.className = 'custom_admin_dashboard_table_title';
                                         title.textContent = tab.name;
@@ -772,7 +1044,6 @@ function initializeDashboard() {
                                         viewMoreButton.style.display = rows.length > rowsPerPage ? 'block' : 'none';
                                         viewMoreButton.addEventListener('click', renderRows);
                                         tableContainer.appendChild(viewMoreButton);
-
                                         renderRows();
                                     } else if (tab.type === 'lotterys') {
                                         const pageTitle = document.getElementById('lottery_card_title');
@@ -2963,6 +3234,107 @@ function lottery_events_formatDrawDate(drawDate) {
 
     return `Draw on ${drawDay.toLocaleDateString()} at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 }
+// function scrollToCenterCategory() {
+//     const categories = document.querySelectorAll('.category_section');
+//     const centerIndex = Math.floor(categories.length / 2); // Calculate center index
+//     const centerCategory = categories[centerIndex];
+
+//     if (centerCategory) {
+//         centerCategory.scrollIntoView({ behavior: 'smooth', block: 'center' });
+//     }
+// }
+// function scrollToFirstCategory() {
+//     const firstCategory = document.querySelector('.category_section'); // Get the first category section
+//     if (firstCategory) {
+//         firstCategory.scrollIntoView({ behavior: 'smooth', block: 'start' });
+//     }
+// }
+
+function updateFavoritesCount() {
+    fetch('/api/get_favorites/')
+        .then(response => response.json())
+        .then(data => {
+
+            const favoritesCount = data.favorites.length;
+            document.getElementById('favorites-count').innerText = favoritesCount;
+        })
+        .catch(error => console.error('Error fetching favorites count:', error));
+}
+function updateCartCount() {
+    fetch('/api/get-cart/') // Fetch the updated cart data from your backend API
+        .then(response => response.json())
+        .then(data => {
+            const cartCount = Object.keys(data).length; // Count the unique items in the cart
+            document.getElementById('cart-item-count').innerText = cartCount; // Update the cart count display
+        })
+        .catch(error => console.error('Error fetching cart count:', error));
+}
+
+function header_navbar_fetchCategories() {
+    fetch(api_get_categories_url)
+        .then(response => response.json())
+        .then(data => {
+            header_navbar_displayCategories(data);
+        })
+        .catch(error => console.error('Error fetching categories:', error));
+}
+
+function header_navbar_displayCategories(categories) {
+    const dropdownMenu = document.getElementById('categories_dropdown_competitions');
+    categories.forEach(category => {
+        const categoryLink = document.createElement('a');
+        categoryLink.href = `/category_lottery_events/${category.name}/`;
+        categoryLink.classList.add('dropdown-item_competitions');
+        categoryLink.textContent = category.name;
+        dropdownMenu.appendChild(categoryLink);
+    });
+}	
+
+function scrollToFirstCategory() {
+    const firstCategory = document.querySelector('.category_section'); // Get the first category section
+    const categoriesTabs = document.querySelector('.categories-tabs'); // Get the categories tabs section
+    const adjustheight=20;
+    if (firstCategory) {
+        // Scroll to position where the first category is just below the categories-tabs
+        window.scrollTo({
+            top: firstCategory.offsetTop - categoriesTabs.offsetHeight-adjustheight,
+            behavior: 'smooth'
+        });
+        console.log('Scrolling to position:', firstCategory.offsetTop - categoriesTabs.offsetHeight-adjustheight);
+    }
+}
+function populateCategoryTabs(categories) {
+    const tabsContainer = document.getElementById('categories_tabs');
+    tabsContainer.innerHTML = ''; // Clear the tabs container
+
+    categories.forEach((category, index) => {
+        const tab = document.createElement('button');
+        tab.classList.add('category-tab');
+        tab.textContent = category.name;
+
+        if (index === 0) {
+            tab.classList.add('active'); // Set the first tab as active by default
+        }
+
+        const indicator = document.createElement('div');
+        indicator.classList.add('tab-indicator');
+        tab.appendChild(indicator);
+
+        tab.onclick = function () {
+            // Remove active class from all tabs
+            document.querySelectorAll('.category-tab').forEach((t) => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Scroll to the category section
+            const categorySection = document.getElementById(`category_${category.id}`);
+            if (categorySection) {
+                categorySection.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        tabsContainer.appendChild(tab);
+    });
+}
 
 // Function to display the lottery events
 function displayLotteryEvents(events) {
@@ -2991,9 +3363,12 @@ function displayLotteryEvents(events) {
     // Convert categories map to an array and sort by ID
     const categories = Object.values(categoriesMap).sort((a, b) => a.id - b.id);
 
+    // Populate the tabs with categories
+    populateCategoryTabs(categories);
 
     categories.forEach(category => {
         const categoryElement = document.createElement('div');
+        categoryElement.id = `category_${category.id}`;
         categoryElement.classList.add('category_section');
         categoryElement.innerHTML = `<h2>${category.name}</h2>`;
 
@@ -3060,6 +3435,151 @@ function displayLotteryEvents(events) {
 
 
     attachAddToCartListeners(); // Attach listeners for "Add to Cart" buttons
+}
+
+
+async function fetchBanner() {
+    try {
+        const response = await fetch(bannerUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const bannerContainer = document.getElementById('banner_container');
+        if (data.image) {
+            bannerContainer.innerHTML = `
+                <div class="custom-banner">
+                    <div class="banner-content">
+                    
+                        ${data.show_title ? `<h2 class="banner-title">${data.title || 'Could you be our next winner?'}</h2>` : ''}
+                        ${data.show_explore_button ? `<button class="explore-button" onclick="scrollToFirstCategory()">Explore Now</button>` : ''}
+                    </div>
+                    <img src="${data.image}" alt="${data.title || 'Lottery Banner'}" class="banner-image">
+                <div class="banner-footer">
+                <div class="banner-footer-item">
+                    <i class="fas fa-trophy"></i>
+                    <span>£1,833,344</span>
+                    <p>Given in Prizes</p>
+                </div>
+                <div class="banner-footer-item">
+                    <i class="fas fa-gift"></i>
+                    <span>£81,567,732</span>
+                    <p>Given in Prizes</p>
+                </div>
+                <div class="banner-footer-item">
+                    <i class="fas fa-star"></i>
+                    <span>Google Reviews</span>
+                    <p><i class="fas fa-star"></i> 4.9</p>
+                </div>
+                <div class="banner-footer-item">
+                    <i class="fas fa-check"></i>
+                    <span>Trustpilot</span>
+                    <p><i class="fas fa-star"></i> 5.0</p>
+                </div>
+            </div>
+                    </div>
+                
+            `;
+        } else {
+            console.error('No banner data available');
+            bannerContainer.innerHTML = `<p class="error-message">Unable to load banner at this time.</p>`;
+        }
+    } catch (error) {
+        console.error('Error fetching banner:', error);
+        const bannerContainer = document.getElementById('banner_container');
+        bannerContainer.innerHTML = `<p class="error-message">Unable to load banner at this time.</p>`;
+    }
+}
+
+
+async function fetchWinners_mainpage() {
+    try {
+        const response = await fetch(winnersUrl_mainpage);
+        if (!response.ok) {
+            throw new Error(`Error fetching winners: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        // Initially display the first 8 images in the order of 2, 3, 3
+        const initialWinners = data.winners.slice(0, 8);
+        renderWinners_mainpage(initialWinners, false, [2, 3, 3]);
+    } catch (error) {
+        console.error("Failed to fetch winners:", error);
+    }
+}
+
+async function toggleWinners_mainpage() {
+    const button = document.getElementById("view_all_button_previous_winner_mainpage");
+    try {
+        const response = await fetch(winnersUrl_mainpage);
+        if (!response.ok) {
+            throw new Error(`Error fetching winners: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (isShowingAll_previous_winner) {
+            // If currently showing all, restore the initial 8 images
+            const initialWinners = data.winners.slice(0, 8);
+            renderWinners_mainpage(initialWinners, false, [2, 3, 3]);
+            button.textContent = "View All Winners"; // Change button text
+        } else {
+            // Show remaining winners
+            const remainingWinners = data.winners.slice(8);
+            renderWinners_mainpage(remainingWinners, true, [3]); // Append in rows of 3
+            button.textContent = "Show Less"; // Change button text
+        }
+        isShowingAll_previous_winner = !isShowingAll_previous_winner; // Toggle state
+    } catch (error) {
+        console.error("Failed to toggle winners:", error);
+    }
+}
+
+
+function renderWinners_mainpage(winners, append, rowLimit) {
+    const container = document.getElementById("previous_winner_section");
+
+    if (!append) {
+        container.innerHTML = ""; // Clear existing content if not appending
+    }
+
+    let rowIndex = 0;
+    let count = 0;
+    let row;
+
+    winners.forEach((winner, index) => {
+        if (count === rowLimit[rowIndex]) {
+            rowIndex = append ? 0 : rowIndex + 1; // Reset to 0 for appending
+            count = 0;
+        }
+
+        if (count === 0) {
+            row = document.createElement("div");
+            row.className = "previous-mainpage-winner-row";
+            container.appendChild(row);
+        }
+
+        const winnerDiv = document.createElement("div");
+        winnerDiv.className = "previous-mainpage-winner";
+        winnerDiv.innerHTML = `
+            <img src="${winner.image}" alt="${winner.name}" class="previous-mainpage-winner-image">
+
+        `;
+        row.appendChild(winnerDiv);
+        count++;
+    });
+
+    // Update the displayedCount only when appending
+    if (!append) {
+        displayedCount_previous_winner = winners.length;
+    } else {
+        displayedCount_previous_winner += winners.length;
+    }
 }
 
 
@@ -3629,6 +4149,7 @@ function toggleFavorite(eventSlug) {
     .then(response => response.json())
     .then(data => {
         alert(data.message);
+        updateFavoritesCount()
         fetchFavorites(); // Refresh the favorites list
         lottery_events_fetch();
         fetchCategoryLotteryEvents();

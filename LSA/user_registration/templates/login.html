@@ -24,40 +24,41 @@
                 </div>
             </div>
             <div class="login-text-section">
-                <div class="login-welcome-text">Welcome to our community</div>
-                <div class="login-description-text">Clarity gives you the blocks & components you need to create a truly
-                    professional website.</div>
+                <h1 class="login-welcome-text">Welcome to our community</h1>
+                <p class="login-description-text">Clarity gives you the blocks & components you need to create a truly
+                    professional website.</p>
             </div>
             <div class="login-form-section">
                 <div class="login-header-wrapper">
-                    <div class="login-header">Welcome Back !</div>
-                    <h1 class="login-description">Clarity gives you the blocks and components you need to create a
+                    <h1 class="login-header">Welcome Back !</h1>
+                    <p class="login-description">Clarity gives you the blocks and components you need to create a
                         truly
-                        professional website.</h1>
+                        professional website.</p>
                 </div>
                 <div class="login-form-wrapper">
                     <form id="login-form" class="login-form" data-url="{% url 'login' %}"
                         data-redirect-url="{% url 'user_welcome_page' %}">
-                        <div
+                        <h3
                             style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
-                            E-mail</div>
+                            E-mail</h3>
                         <input type="email" id="login-email" class="login-input-email" placeholder="Email" required>
                         {% comment %} <span id="login-email-error" class="login-error-text"></span> {% endcomment %}
-                        <div
+                        <h3
                             style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
-                            Password</div>
+                            Password</h3>
                         <input type="password" id="login-password" class="login-input-password" placeholder="Password"
                             required>
+                        <span id="login-toggle-password" class="login-toggle-password">🙈</span>
                         {% comment %} <span id="login-password-error" class="login-error-text"></span> {% endcomment %}
                         <span id="login-error" class="login-error-text"></span>
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div style="display: flex; align-items: center;">
                                 <input type="checkbox"
                                     style="width: 20px; height: 20px; border-radius: 5px; border: 1px #94A3B8 solid;" />
-                                <div class="remember"
+                                <h4 class="remember"
                                     style="color: #18181B; font-size: 14px; font-family: Rajdhani; font-weight: 500; line-height: 22px; word-wrap: break-word; margin-left: 8px;">
                                     Remember me
-                                </div>
+                                </h4>
                             </div>
 
                             <a href="{% url 'password_reset_page' %}" class="login-forgot-password"
@@ -67,12 +68,12 @@
                         </div>
 
                         <button type="submit" class="login-button">Login</button>
-                        <div class="separator-container">
-                            <div class="separator-line"></div>
-                            <div class="separator-text">
+                        <div class="login-separator-container">
+                            <div class="login-separator-line"></div>
+                            <p class="login-separator-text">
                                 or do it via other accounts
-                            </div>
-                            <div class="separator-line"></div>
+                            </p>
+                            <div class="login-separator-line"></div>
                         </div>
 
                         <div class="google-signin-custom">
@@ -86,12 +87,11 @@
                     </form>
                 </div>
             </div>
-        </div>
-        <img style="width: 478px; height: 173px; left: 80px; top: 567px; position: absolute"
-            src="/media/lottery_images/image%201209.svg" alt="Lottery Image" />
+            <img src="/media/lottery_images/image%201209.svg" class="lottery-image" />
 
-        <img style="width: 221px; height: 64px; left: 62.50px; top: 46px; position: absolute"
-            src="/media/lottery_images/image%2030.svg" alt="Lottery Image" />
+            <img src="/media/lottery_images/image%2030.svg" class="small-lottery-image" />
+
+        </div>
 
     </div>
 </body>

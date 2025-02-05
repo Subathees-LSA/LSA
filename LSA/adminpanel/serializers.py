@@ -51,12 +51,24 @@ class api_admin_signup_Serializer(serializers.ModelSerializer):
         return user
 
 
+class LeaderboardSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user_profile.user.username")
+
+    class Meta:
+        model = Leaderboard
+        fields = ['username', 'points', 'correct_percentage', 'rank','image']
+
+class LotteryStatisticsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LotteryStatistics
+        fields = '__all__'
+
 class admin_navbar_accessSerializer(serializers.ModelSerializer):
     resolved_url = serializers.SerializerMethodField()
 
     class Meta:
         model = admin_navbar_access
-        fields = ['name', 'url_name', 'resolved_url']
+        fields = ['name', 'url_name', 'resolved_url', 'identifier'] 
 
     def get_resolved_url(self, obj):
         return obj.get_url()
@@ -172,3 +184,15 @@ class AdminReplySerializer(serializers.Serializer):
     email = serializers.EmailField()
     message = serializers.CharField(max_length=1000)
 
+
+
+class BannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Banner
+        fields = ['title', 'image','show_title', 'show_explore_button']
+
+
+class PreviousWinnerimgSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Previous_Winner_img
+        fields = ['id', 'name', 'image'] 

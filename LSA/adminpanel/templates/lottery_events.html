@@ -12,21 +12,100 @@
         const add_to_carturl = "{% url 'add_to_cart' %}";  
         const cartUrl = "{% url 'cart' %}";  
         const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
+        const bannerUrl = "{% url 'api_banner' %}";
+        let displayedCount_previous_winner = 0; // Tracks the number of winners already displayed
+        let isShowingAll_previous_winner = false; // Tracks whether "View All Winners" is currently expanded
+        const winnersUrl_mainpage = "{% url 'api_get_previous_winners' %}"; 
+        const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
+        
         window.onload = function() {
-          lottery_events_fetch();
+          updateCartCount(); 
+          updateFavoritesCount();
+          header_navbar_fetchCategories();
+          fetchBanner();  
+          fetchWinners_mainpage()   
+          lottery_events_fetch();         
           };
 
       </script>
     <script src="{% static 'js/custom.js' %}"></script>
 </head>
 <body>
-    <h1 class="lottery_events_title">Lottery Events</h1>
+    {% include 'header.html' %}
+     {% comment %} <button class="explore-button" onclick="scrollToCenterCategory()">Explore Now</button> {% endcomment %}
+     
+     {% comment %} <button class="explore-button" onclick="scrollToFirstCategory()">Explore Now</button> {% endcomment %}
+    
+     <div class="banner-container" id="banner_container">
+        <!-- Banner will be dynamically loaded here -->
+    </div>  
+     
+    {% comment %} <h1 class="lottery_events_title">Lottery Events</h1> {% endcomment %}
+
+    <div class="categories-tabs" id="categories_tabs">
+        <!-- Tabs will be dynamically added here -->
+    </div>
     <div class="categories-container" id="categories_container">
         <!-- Categories will be dynamically added here -->
     </div>
     <div class="lottery-events-container" id="lottery_events_container">
         <!-- Events corresponding to the selected category will be displayed here -->
     </div>
+    <div class="how-to-play_why-choose-us_container">
+        <!-- How to Play Section -->
+        <div class="how-to-play">
+            <h2>How to Play</h2>
+            <div class="how-to-playsteps">
+                <div class="how-to-playstep">
+                    <i class="fas fa-hand-pointer"></i>
+                    <p>Choose a competition and how many entries you would like</p>
+                </div>
+                <div class="how-to-playstep">
+                    <i class="fas fa-question-circle"></i>
+                    <p>Answer the qualifying question (be sure to answer correctly!) and complete payment</p>
+                </div>
+                <div class="how-to-playstep">
+                    <i class="fas fa-ticket-alt"></i>
+                    <p>Tickets for all correct answers are entered into the draw, streamed LIVE on Facebook using Google's random number generator</p>
+                </div>
+                <div class="how-to-playstep">
+                    <i class="fas fa-star"></i>
+                    <p>If you win, we may try to contact you whilst live on Facebook, so be prepared!</p>
+                </div>
+            </div>
+        </div>
     
+        <!-- Why Choose Us Section -->
+        <div class="why-choose-us">
+            <h2>Why Choose Us?</h2>
+            <div class="why-choose-us_reasons">
+                <div class="why-choose-us_reason">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h3>Great Odds</h3>
+                    <p>Limited tickets in each draw</p>
+                </div>
+                <div class="why-choose-us_reason">
+                    <i class="fas fa-eye"></i>
+                    <h3>Transparent</h3>
+                    <p>We show the number of entries in every draw</p>
+                </div>
+                <div class="why-choose-us_reason">
+                    <i class="fas fa-trophy"></i>
+                    <h3>Guaranteed</h3>
+                    <p>Guaranteed winner even if we don’t sell out</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+ <h1 class="previous-winners-title">Meet our Previous Winners</h1>
+    <div id="previous_winner_section" class="previous-winners-container">
+        <!-- Winner rows will be dynamically rendered here -->
+    </div>
+    
+    <button id="view_all_button_previous_winner_mainpage" class="view-all-button-previous-winner-mainpage" onclick="toggleWinners_mainpage()">View All Winners</button> 
+  
+    
+     
 </body>
 </html>

@@ -4,92 +4,11 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from django.urls import reverse
 from django.core.exceptions import ValidationError
-
-
-class admin_dashboard_preview(models.Model):
-    name = models.CharField(max_length=100, help_text="Tab name to display")
-    identifier = models.CharField(max_length=50, unique=True, help_text="Unique identifier for this container (used in frontend)")
-    type = models.CharField(
-        max_length=10,
-        choices=[(' ', 'Select type'),('count', 'count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys')],
-        default='',
-        help_text="Type of content"
-    )
-
-    def __str__(self):
-        return self.name
-        
-
-    def clean(self):
-        # Get the identifiers from the "data" dictionary (mock this part for now if necessary)
-        allowed_identifiers = {
-            " ",
-            "total_users",
-            "verified_users",
-            "pending_kyc",
-            "total_tickets_sold",
-            "total_transaction_amount",
-            "users_table",
-            "conversion_rate",
-            "lotterys"
-        
-        }
-
-        if self.identifier not in allowed_identifiers:
-            raise ValidationError(f"The identifier '{self.identifier}' is not valid or doesn't exist in the allowed identifiers.")
-
-    def save(self, *args, **kwargs):
-        # Call the clean method for validation
-        self.clean()
-        super().save(*args, **kwargs)
-
-class admin_navbar_access(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    url_name = models.CharField(max_length=100, unique=True)  # Store the URL pattern name
-
-    def get_url(self):
-        """
-        Dynamically resolve the URL using its name.
-        """
-        try:
-            return reverse(self.url_name)
-        except Exception:
-            return "#"  # Return a placeholder if the URL can't be resolved
-
-    def __str__(self):
-        return self.name
-
- 
-class adminProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role_CHOICES = [
-                ('', 'Select Role'),
-                ('admin', 'Admin'),
-                ('sales', 'Sales'),  # New role added here
-                # Add more roles here if needed
-                    ]
-    role = models.CharField(max_length=12, choices=role_CHOICES, blank=True, default='')
-    navbar_access = models.ManyToManyField(admin_navbar_access, blank=True)
-    dashboard_preview = models.ManyToManyField(admin_dashboard_preview, blank=True)
-
-    def save(self, *args, **kwargs):
-        if self.role == 'admin':
-            self.user.is_staff = True
-            self.user.is_superuser = True
-        else:
-            self.user.is_staff = False
-            self.user.is_superuser = False
-        self.user.save()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.role or 'No Role Assigned'}"
-                        
+from user_registration.models import *
+                       
 class LotteryCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     
-
-
     def __str__(self):
         return self.name  
                             
@@ -197,4 +116,145 @@ class AdminReply(models.Model):
 
     def __str__(self):
         return f"Reply to {self.contact.email} - {self.created_at}"
-      
+
+
+class Banner(models.Model):
+    title = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to='banners/')
+    show_title = models.BooleanField(default=True)
+    show_explore_button = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.title or "Banner"
+    
+
+class Previous_Winner_img(models.Model):
+    name = models.CharField(max_length=100)  # Winner's name
+    image = models.ImageField(upload_to='winners/')  # Image upload location
+    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp for when the winner was added
+
+    def __str__(self):
+        return self.name
+    
+
+class LotteryStatistics(models.Model):
+    month = models.IntegerField() 
+    year = models.IntegerField()
+    won_lottery = models.IntegerField(default=0)
+    lost_lottery = models.IntegerField(default=0)
+    won_percentage = models.FloatField(default=0.0)
+    current_won_percentage = models.FloatField(default=0.0)
+    lost_percentage = models.FloatField(default=0.0)
+
+    def save(self, *args, **kwargs):
+        # Automatically calculate percentages when saving
+        total_lottery = self.won_lottery + self.lost_lottery
+        self.won_percentage = (self.won_lottery / total_lottery) * 100 if total_lottery > 0 else 0
+        self.lost_percentage = (self.lost_lottery / total_lottery) * 100 if total_lottery > 0 else 0
+        super().save(*args, **kwargs)
+
+
+class Leaderboard(models.Model):
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
+    points = models.IntegerField(default=0)
+    correct_percentage = models.FloatField(default=0.0)
+    rank = models.IntegerField(default=0)
+    image = models.ImageField(upload_to='lottery_image/', null=True, blank=True)
+
+
+    def __str__(self):
+        return f"{self.user_profile.user.username} - Rank {self.rank}"
+
+
+class admin_dashboard_preview(models.Model):
+    name = models.CharField(max_length=100, help_text="Tab name to display")
+    identifier = models.CharField(max_length=50, unique=True, help_text="Unique identifier for this container (used in frontend)")
+    type = models.CharField(
+        max_length=30,
+        choices=[(' ', 'Select type'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'), ('lottery_sales_overview', 'lottery_sales_overview'), ('user_leaderboard', 'user_leaderboard')],
+        default='',
+        help_text="Type of content"
+    )
+
+    def __str__(self):
+        return self.name
+        
+
+    def clean(self):
+        # Get the identifiers from the "data" dictionary (mock this part for now if necessary)
+        allowed_identifiers = {
+            " ",
+            "total_users",
+            "verified_users",
+            "pending_kyc",
+            "total_tickets_sold",
+            "total_transaction_amount",
+            "users_table",
+            "conversion_rate",
+            "lotterys",
+            "active_users",
+            "won_lottery",
+            "lost_lottery",
+            "won_percentage",
+            "current_won_percentage",
+            "lost_percentage",
+            "lottery_sales_overview",
+            "user_leaderboard"
+        
+        }
+
+        if self.identifier not in allowed_identifiers:
+            raise ValidationError(f"The identifier '{self.identifier}' is not valid or doesn't exist in the allowed identifiers.")
+
+    def save(self, *args, **kwargs):
+        # Call the clean method for validation
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class lottery_sales_bar_chart(models.Model):
+    month = models.CharField(max_length=3)  
+    year = models.IntegerField()
+    activity_count = models.IntegerField(default=0)
+
+
+class admin_navbar_access(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    url_name = models.CharField(max_length=100,blank=True)
+    identifier = models.CharField(max_length=100, unique=True, blank=True, null=True) 
+    def get_url(self):
+        """
+        Dynamically resolve the URL using its name.
+        """
+        try:
+            return reverse(self.url_name)
+        except Exception:
+            return "#" 
+
+    def __str__(self):
+        return self.name
+
+ 
+class adminProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role_CHOICES = [
+                ('', 'Select Role'),
+                ('admin', 'Admin'),
+                ('sales', 'Sales'), 
+                ]
+    role = models.CharField(max_length=12, choices=role_CHOICES, blank=True, default='')
+    navbar_access = models.ManyToManyField(admin_navbar_access, blank=True)
+    dashboard_preview = models.ManyToManyField(admin_dashboard_preview, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.role == 'admin':
+            self.user.is_staff = True
+            self.user.is_superuser = True
+        else:
+            self.user.is_staff = False
+            self.user.is_superuser = False
+        self.user.save()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role or 'No Role Assigned'}"

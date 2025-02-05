@@ -58,7 +58,13 @@ urlpatterns = [
     path('api/admin/reply/<int:reply_id>/edit_delete/', EditdeleteAdminReplyView.as_view(), name='edit_delete-admin-reply'),
     path('api/admin/messages/', ContactListView.as_view(), name='contact-list'),
     path('api/admin/reply/', AdminReplyView.as_view(), name='admin-reply'),
-
+    path('api/banner/', BannerView.as_view(), name='api_banner'),
+    path('api/previous-winners/', PreviousWinnersimgAPIView.as_view(), name='api_get_previous_winners'),
+    path('api/lottery_sales_bar_chart/', lottery_sales_bar_chart_View.as_view(), name='api_lottery_sales_bar_chart'),
+    path('api/lottery_sales_available_years/', lottery_sales_availableYearsView.as_view(), name='api_lottery_sales_available_years'),
+    path('api/leaderboard/', LeaderboardAPIView.as_view(), name='leaderboard_api'),
+    path('api/user-statistics/', user_statistics, name='user-statistics'),
+    path('api/statistics/', LotteryStatisticsView.as_view(), name='lottery_statistics'),
 ]
 
 if settings.DEBUG:
