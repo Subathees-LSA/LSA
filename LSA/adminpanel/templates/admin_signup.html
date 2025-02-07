@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    {% load static %}
+{% load static %}
 
 <head>
     <meta charset="UTF-8">
@@ -13,26 +13,81 @@
         const adminapiAdminSignupUrl = "{% url 'api_admin_signup' %}";
         const adminapiAdminloginupUrl = "{% url 'custom_admin_login' %}";
     </script>
-</head>
-<body>
 
-<div class="admin_signup_container">
-    <h2 class="admin_signup_title">Admin Signup</h2>
-    <form id="admin_signup_form" class="admin_signup_form_class" >
-        <input type="text" id="admin_signup_username_id" class="admin_signup_username_input" placeholder="Admin Username" required><br>
-        <span id="admin_signup_username_error" class="admin_signup_error"></span><br>
-        <input type="email" id="admin_signup_email_id" class="admin_signup_email_id_input" placeholder="Admin Email" required><br>
-        <span id="admin_signup_email_error" class="admin_signup_error"></span><br>
-        <div class="admin_signup_input_container">
-            <input type="password" id="admin_signup_password_id" class="admin_signup_password_input" placeholder="Password (min 8 characters)" required>
-            <span id="admin_signup_toggle_password" class="admin_signup_toggle_password_class">🙈</span>
+</head>
+
+<body>
+    <div class="admin-signup-first-container">
+        <div class="admin-signup-wrapper">
+            <div class="admin-signup-background"></div>
+            <div class="admin-signup-left">
+                <div class="admin-signup-left-section"></div>
+                <div class="admin-signup-inner-wrapper">
+                    <div class="admin-signup-inner-section"></div>
+                    <div class="admin-signup-circle-1"></div>
+                </div>
+            </div>
         </div>
-        <span id="admin_signup_password_error" class="admin_signup_error"></span><br>
-        <button type="submit" class="admin_signup_submit_button">Register Admin</button>
-        <p>Already have an account? <a href="{% url 'custom_admin_login' %}">Login here</a></p>
-        <div id="admin_signup_form_error_message" class="admin_signup_error_message"></div>
-    </form>
-</div>
+    </div>
+
+    <div class="admin-signup-welcome-container">
+        <div class="admin-signup-welcome-title">Welcome !</div>
+        <div class="admin-signup-welcome-description">
+            Clarity gives you the blocks and components you need to create a truly professional website.
+        </div>
+    </div>
+    </div>
+    <div class="admin-signup-container">
+        <!-- <h2 class="admin-signup-title">Admin Signup</h2> -->
+
+        <form id="admin_signup_form" class="admin-signup-form-class">
+            <div class="admin-form">
+                <h3 for="admin-signup-username-input" class="admin-signup-fullname-label">
+                    Full name
+                </h3>
+
+                <input type="text" id="admin_signup_username_id" class="admin-signup-username-input"
+                    placeholder="Admin Username" required>
+                <span id="admin_signup_username_error" class="admin-signup-error"></span>
+            </div>
+            <div class="admin-form">
+                <h3 class="admin-signup-email-label">
+                    Email address
+                </h3>
+                <input type="email" id="admin_signup_email_id" class="admin-signup-email-id-input"
+                    placeholder="Admin Email" required>
+                <span id="admin_signup_email_error" class="admin-signup-error"></span>
+            </div>
+            <div class="admin-form">
+                <h3 class="admin-signup-password-label">
+                    Password
+                </h3>
+                <div class="admin-signup-input-container">
+
+                    <input type="password" id="admin_signup_password_id" class="admin-signup-password-input"
+                        placeholder="Password (min 8 characters)" required>
+                    <span id="admin_signup_toggle_password" class="admin-signup-toggle-password-class">🙈</span>
+                </div>
+                <span id="admin_signup_password_error" class="admin-signup-error"></span>
+            </div>
+            <button type=" submit" class="admin-signup-submit-button">Register Admin</button>
+            <p>Already have an account? <a href="{% url 'custom_admin_login' %}">Login here</a></p>
+            <div id="admin_signup_form_error_message" class="admin-signup-error-message"></div>
+        </form>
+    </div>
+    </div>
+
+    <div class="admin_login_welcome-text-block">
+        <div class="admin_login_welcome-title">Welcome to our community</div>
+        <div class="admin_login_welcome-description">
+            Clarity gives you the blocks & components you need to create a truly professional website.
+        </div>
+    </div>
+    </div>
+    <img src="/media/lottery_images/image%201209.svg" class="lottery-image" />
+
+    <img src="/media/lottery_images/image%2030.svg" class="small-lottery-image" />
 
 </body>
+
 </html>

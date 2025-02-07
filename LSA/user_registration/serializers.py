@@ -118,3 +118,12 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         user.set_password(self.validated_data['new_password1'])
         user.save()
         return user              
+    
+
+from rest_framework import serializers
+from .models import UserPrivacy
+
+class UserPrivacySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPrivacy
+        fields = '__all__'    

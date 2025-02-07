@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.files.base import ContentFile
 import base64
-from .models import UserProfile
+from .models import *
 
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'newsletter', 'is_verified', 'kyc_status', 'view_kyc_image')
@@ -41,3 +41,20 @@ class UserProfileAdmin(admin.ModelAdmin):
             return HttpResponse("No Image Available", status=404)
 
 admin.site.register(UserProfile, UserProfileAdmin)
+
+
+@admin.register(UserPrivacy)
+class UserPrivacyAdmin(admin.ModelAdmin):
+    list_display = ('user', 'two_factor_auth_enabled', 'otp', 'otp_expiration')
+    list_filter = ('two_factor_auth_enabled',)
+    search_fields = ('user__username', 'otp')
+    readonly_fields = ('otp_expiration',)
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'two_factor_auth_enabled')
+        }),
+        ('OTP Settings', {
+            'fields': ('otp', 'otp_expiration'),
+            'description': 'Manage one-time passwords and their expiration time.'
+        }),
+    )

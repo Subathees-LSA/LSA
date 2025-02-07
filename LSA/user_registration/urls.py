@@ -31,4 +31,11 @@ urlpatterns = [
     path('api/password-reset-confirm/<uidb64>/<token>/', ApiPasswordResetConfirmView.as_view(), name='api_password_reset_confirm'),
     path('user_chat/', user_chats, name='user_chats'),
     path('contact/', contact_page, name='contact-page'), 
+    path('verify-otp/', VerifyOTPView.as_view(), name='verify_otp'),
+    path('privacy-security/', privacy_security_page, name='privacy-security'),
+    path('api/privacy-security/',PrivacySecurityView.as_view(), name='api-privacy-security'),
+    path('api/verify-otp/', VerifyOTPView.as_view(), name='api_verify-otp'),
+    path('api/resend-otp/', ResendOTPView.as_view(), name='resend_otp'),
+    path('auth/complete/google-oauth2/', google_auth_complete, name='google_auth_complete'),
+
 ]

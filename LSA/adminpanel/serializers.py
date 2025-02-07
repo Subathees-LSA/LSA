@@ -81,7 +81,7 @@ class api_admin_login_Serializer(serializers.Serializer):
 class LotteryCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = LotteryCategory
-        fields = ['id', 'name']
+        fields = ['id', 'name','category_logo']
 
 class LotteryEventSerializer(serializers.ModelSerializer):
     additional_images = serializers.SerializerMethodField()
@@ -196,3 +196,5 @@ class PreviousWinnerimgSerializer(serializers.ModelSerializer):
     class Meta:
         model = Previous_Winner_img
         fields = ['id', 'name', 'image'] 
+
+

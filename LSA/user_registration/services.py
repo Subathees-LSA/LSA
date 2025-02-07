@@ -180,3 +180,57 @@ def check_reset_token(uidb64, token):
 
 
 
+
+def privacy_security_page(request):
+    user = request.user  # Get the currently logged-in user
+
+    # Check if the user exists in the User table
+    # if not User.objects.filter(id=user.id).exists():
+    #     return redirect("login")
+    if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
+        return redirect('/login/')  # Redirects unauthenticated users or those not in User table
+    
+    # Prepare user data to be passed to the template
+    context = {
+        "username": user.username,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "last_login": user.last_login,
+        "date_joined": user.date_joined,
+    }
+    
+    return render(request, "privacy_security.html", context)
+
+
+
+
+from django.utils import timezone
+from user_registration.utils import generate_otp
+from django.core.mail import send_mail
+
+def resend_otp_service(user):
+    try:
+        user_privacy = user.userprivacy  # Access the related `userprivacy` instance
+    except AttributeError:
+        raise ValueError("User privacy details not found.")
+
+    # Generate a new OTP and set its expiration time
+    otp = generate_otp()
+    user_privacy.otp = otp
+    user_privacy.otp_expiration = timezone.now() + timezone.timedelta(minutes=5)  # OTP valid for 5 minutes
+    user_privacy.save()
+
+    # Send OTP to the user's email
+    send_otp_email(user.email, otp)
+
+    return "A new OTP has been sent to your email."
+
+
+def send_otp_email(email, otp):
+    subject = "Your OTP Code"
+    message = f"Your OTP code is {otp}. It is valid for the next 5 minutes."
+    from_email = "noreply@example.com"  # Replace with your sender email
+    recipient_list = [email]
+
+    send_mail(subject, message, from_email, recipient_list)

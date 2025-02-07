@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
     const messageList = document.getElementById("user_chats_message_list");
     const messageInput = document.getElementById("user_chats_message_input");
@@ -1348,15 +1349,14 @@ document.addEventListener('DOMContentLoaded', function () {
     perTicketPriceInput.addEventListener('input', lottery_events_updateTotalTickets);
 });
 
-
- // Function to get CSRF token from cookie
+// Function to get CSRF token from cookies
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            if (cookie.startsWith(name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
@@ -1367,26 +1367,22 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken');
 
-// Set up AJAX with CSRF token
+// Setup CSRF token for AJAX requests
 $.ajaxSetup({
-    headers: {
-        'X-CSRFToken': csrftoken
-    }
+    headers: { 'X-CSRFToken': csrftoken }
 });
-//login.html
+$(document).ready(function () {
+// Email validation handler
 $('#login-email').on('input', function () {
-    const email = $(this).val();
-    validateEmail(email,'login-email-error')
+    validateEmail($(this).val(), 'login-email-error');
 });
 
-
-// Password validation
+// Password validation handler
 $('#login-password').on('input', function () {
-    const password = $(this).val();
-    validatePassword(password,'login-password-error');
+    validatePassword($(this).val(), 'login-password-error');
 });
 
-
+// Toggle password visibility
 function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
     $(toggleButtonId).on('click', function () {
         const passwordField = $(passwordFieldId);
@@ -1397,39 +1393,174 @@ function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
 }
 togglePasswordVisibility('#login-toggle-password', '#login-password');
 
-    // Form submission
-    $('#login-form').submit(function (e) {
-        e.preventDefault();
-        // Get the URL from the data attribute
-        const loginUrl = $(this).data('url');
-        const redirectUrl = $(this).data('redirect-url');
-        // Clear previous login error message
-        $('#login-error').text('');
 
-        $.ajax({
-            type: 'POST',
-            url: loginUrl ,
-            data: JSON.stringify({
-                email: $('#login-email').val(),
-                password: $('#login-password').val()
-            }),
-            contentType: 'application/json',
-            success: function (response) {
-                alert(response.message + ' (User ID: ' + response.user_id + ')');
-                window.location.href = redirectUrl;
-            },
-            error: function () {
-                // Displaying invalid email or password message
-                $('#login-error').text('Invalid email or password.');
-            }
-        });
-    });
+// Function to get cookie value by name
+// function getCookie(name) {
+//     const value = '; ' + document.cookie;
+//     const parts = value.split('; ' + name + '=');
+//     if (parts.length === 2) return parts.pop().split(';').shift();
+//     return null;
+// }
 
-
-// Setup CSRF token
 $.ajaxSetup({
-    headers: { 'X-CSRFToken': csrftoken }
+    headers: {
+        'X-CSRFToken': getCookie('csrftoken') // Use the getCookie function
+    }
 });
+// Function to set a cookie
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+}
+
+// Function to delete a cookie
+function deleteCookie(name) {
+    document.cookie = `${name}=; Max-Age=-99999999; path=/;`;
+}
+
+// Populate form fields if cookies exist
+function populateFormFields() {
+    const email = getCookie('email');
+    const password = getCookie('password');
+
+    if (email && password) {
+        $('#login-email').val(email);
+        $('#login-password').val(password);
+        $('#remember-me-checkbox').prop('checked', true);
+    } else {
+        $('#remember-me-checkbox').prop('checked', false);
+    }
+}
+
+// Save cookies based on "Remember Me" checkbox
+function saveCookies() {
+    const rememberMe = $('#remember-me-checkbox').prop('checked');
+    if (rememberMe) {
+        const email = $('#login-email').val();
+        const password = $('#login-password').val();
+        setCookie('email', email, 30);
+        setCookie('password', password, 30);
+    } else {
+        deleteCookie('email');
+        deleteCookie('password');
+    }
+}
+
+let timerInterval;
+
+// Start OTP countdown timer
+function startOtpTimer(duration) {
+    const timerDisplay = $('#timer');
+    let timeRemaining = duration;
+
+    timerInterval = setInterval(() => {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        timerDisplay.text(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+        timeRemaining--;
+
+        if (timeRemaining < 0) {
+            clearInterval(timerInterval);
+            $('#resend-otp-button').prop('disabled', false); // Enable the "Resend OTP" button
+        }
+    }, 1000);
+}
+
+// Show OTP container and start timer
+function showOtpContainer(userId) {
+    $('#user-id').val(userId); // Set the user ID
+    $('.login-container').addClass('hidden-element'); // Hide login form
+    $('#otp-container').removeClass('hidden-element'); // Show OTP section
+    $('#resend-otp-button').prop('disabled', true); // Disable "Resend OTP" initially
+    startOtpTimer(300); // Start a 5-minute timer
+}
+
+// Handle OTP cancel button
+$('#otp-cancel-button').on('click', function () {
+    $('#otp-container').addClass('hidden-element'); // Hide OTP form
+    $('.login-container').removeClass('hidden-element'); // Show login form
+    clearInterval(timerInterval); // Stop the timer
+});
+
+// Handle OTP verification form submission
+$('#otp-form').submit(function (e) {
+    e.preventDefault();
+    const otpUrl = $(this).data('url'); // Fetch OTP verification URL
+
+    $.ajax({
+        type: 'POST',
+        url: otpUrl,
+        data: JSON.stringify({
+            user_id: $('#user-id').val(),
+            otp: $('#otp-code').val()
+        }),
+        contentType: 'application/json',
+        success: function (response) {
+            alert(response.message); // Display success message
+            if (response.redirect_url) {
+                window.location.href = response.redirect_url; // Redirect on success
+            }
+        },
+        error: function () {
+            $('#otp-error').text('Invalid or expired OTP.'); // Display error
+        }
+    });
+});
+
+// Handle "Resend OTP" button click
+$('#resend-otp-button').on('click', function () {
+    const resendOtpUrl = '/api/resend-otp/'; // Replace with actual URL
+    const userId = $('#user-id').val();
+
+    $.ajax({
+        type: 'POST',
+        url: resendOtpUrl,
+        data: JSON.stringify({ user_id: userId }),
+        contentType: 'application/json',
+        success: function () {
+            alert('A new OTP has been sent to your email.');
+            $('#resend-otp-button').prop('disabled', true); // Disable again
+            startOtpTimer(300); // Restart 5-minute timer
+        },
+        error: function () {
+            alert('Failed to resend OTP. Please try again later.');
+        }
+    });
+});
+
+// Handle login form submission
+$('#login-form').submit(function (e) {
+    e.preventDefault();
+    const loginUrl = $(this).data('url'); // Fetch login URL
+    saveCookies(); // Save cookies before submitting
+
+    $.ajax({
+        type: 'POST',
+        url: loginUrl,
+        data: JSON.stringify({
+            email: $('#login-email').val(),
+            password: $('#login-password').val()
+        }),
+        contentType: 'application/json',
+        success: function (response) {
+            if (response.message === "OTP sent to your email.") {
+                showOtpContainer(response.user_id); // Show OTP section if required
+            } else if (response.redirect_url) {
+                window.location.href = response.redirect_url; // Redirect on success
+            }
+        },
+        error: function () {
+            $('#login-error').text('Invalid email or password.'); // Show error
+        }
+    });
+});
+    // Initialize functionality
+    populateFormFields();
+    handleLogout('#logout-button', '/login/'); 
+});
+
+
 
 //signup.html
 // Toggle password visibility
@@ -2253,7 +2384,7 @@ $(document).ready(function() {
 
 //lottery_events_add.html
   // Fetch and render lottery events
-  function fetchLotteryEvents() {
+  function fetchLotteryEvents() {``
     fetch(api_get_lottery_events_url)
         .then(response => response.json())
         .then(data => {
@@ -3303,37 +3434,90 @@ function scrollToFirstCategory() {
         console.log('Scrolling to position:', firstCategory.offsetTop - categoriesTabs.offsetHeight-adjustheight);
     }
 }
+// function populateCategoryTabs(categories) {
+//     const tabsContainer = document.getElementById('categories_tabs');
+//     tabsContainer.innerHTML = ''; // Clear the tabs container
+
+//     categories.forEach((category, index) => {
+//         const tab = document.createElement('button');
+//         tab.classList.add('category-tab');
+//         tab.textContent = category.name;
+
+//         if (index === 0) {
+//             tab.classList.add('active'); // Set the first tab as active by default
+//         }
+
+//         const indicator = document.createElement('div');
+//         indicator.classList.add('tab-indicator');
+//         tab.appendChild(indicator);
+
+//         tab.onclick = function () {
+//             // Remove active class from all tabs
+//             document.querySelectorAll('.category-tab').forEach((t) => t.classList.remove('active'));
+//             tab.classList.add('active');
+
+//             // Scroll to the category section
+//             const categorySection = document.getElementById(`category_${category.id}`);
+//             if (categorySection) {
+//                 categorySection.scrollIntoView({ behavior: 'smooth' });
+//             }
+//         };
+
+//         tabsContainer.appendChild(tab);
+//     });
+// }
+// Update populateCategoryTabs to include data attributes
 function populateCategoryTabs(categories) {
-    const tabsContainer = document.getElementById('categories_tabs');
-    tabsContainer.innerHTML = ''; // Clear the tabs container
+const tabsContainer = document.getElementById('categories_tabs');
+tabsContainer.innerHTML = '';
 
-    categories.forEach((category, index) => {
-        const tab = document.createElement('button');
-        tab.classList.add('category-tab');
-        tab.textContent = category.name;
+categories.forEach((category, index) => {
+const tab = document.createElement('button');
+tab.classList.add('category-tab');
+tab.textContent = category.name;
+tab.dataset.categoryId = category.id; // Link tab with category ID
 
-        if (index === 0) {
-            tab.classList.add('active'); // Set the first tab as active by default
-        }
+if (index === 0) tab.classList.add('active');
 
-        const indicator = document.createElement('div');
-        indicator.classList.add('tab-indicator');
-        tab.appendChild(indicator);
+const indicator = document.createElement('div');
+indicator.classList.add('tab-indicator');
+tab.appendChild(indicator);
 
-        tab.onclick = function () {
-            // Remove active class from all tabs
-            document.querySelectorAll('.category-tab').forEach((t) => t.classList.remove('active'));
-            tab.classList.add('active');
+tab.onclick = function() {
+document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+tab.classList.add('active');
+const categorySection = document.getElementById(`category_${category.id}`);
+if (categorySection) categorySection.scrollIntoView({ behavior: 'smooth' });
+};
 
-            // Scroll to the category section
-            const categorySection = document.getElementById(`category_${category.id}`);
-            if (categorySection) {
-                categorySection.scrollIntoView({ behavior: 'smooth' });
-            }
-        };
+tabsContainer.appendChild(tab);
+});
+}
+function setupScrollHandler() {
+const navbar = document.querySelector('header');
+const navbarHeight = navbar ? navbar.offsetHeight : 0;
+const sections = document.querySelectorAll('.category_section');
 
-        tabsContainer.appendChild(tab);
-    });
+const observerOptions = {
+root: null,
+rootMargin: `-${navbarHeight}px 0px 0px 0px`,
+threshold: 0.5 // Adjust if needed (0.5 means 50% visible)
+};
+
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+const categoryId = entry.target.id.split('_')[1];
+document.querySelectorAll('.category-tab').forEach(tab => {
+const isActive = tab.dataset.categoryId === categoryId;
+tab.classList.toggle('active', isActive);
+tab.querySelector('.tab-indicator').style.display = isActive ? 'block' : 'none';
+});
+}
+});
+}, observerOptions);
+
+sections.forEach(section => observer.observe(section));
 }
 
 // Function to display the lottery events
@@ -3352,9 +3536,10 @@ function displayLotteryEvents(events) {
     events.forEach(event => {
         if (event.category && event.category.id) {
             const categoryId = event.category.id;
-            const categoryName = event.category.name || 'Unknown Category';       
+            const categoryName = event.category.name || 'Unknown Category'; 
+            const categoryLogo = event.category.category_logo || ''; // Get the category logo 
             if (!categoriesMap[categoryId]) {
-                categoriesMap[categoryId] = { id: categoryId, name: categoryName };
+                categoriesMap[categoryId] = { id: categoryId, name: categoryName, logo: categoryLogo };
             }
         }
     });
@@ -3370,11 +3555,20 @@ function displayLotteryEvents(events) {
         const categoryElement = document.createElement('div');
         categoryElement.id = `category_${category.id}`;
         categoryElement.classList.add('category_section');
-        categoryElement.innerHTML = `<h2>${category.name}</h2>`;
-
+        categoryElement.innerHTML = `
+        <div class="category_header">
+           ${category.logo ? `<img src="${category.logo}" alt="${category.name} Logo" class="category_icon">` : ''}
+            <h2>${category.name}</h2>
+        </div>`;
+    
         const viewAllButton = document.createElement('button');
         viewAllButton.classList.add('view_all_button');
-        viewAllButton.textContent = 'View All';
+        // Set inner HTML with image inside the button
+viewAllButton.innerHTML = `
+View all 
+<img src="/media/lottery_images/arrows (1).svg" alt="Arrow Icon1">
+`;
+       
         viewAllButton.onclick = function () {
             window.location.href = `/category_lottery_events/${category.name}/`;
         };
@@ -3404,23 +3598,30 @@ function displayLotteryEvents(events) {
                 `<div class="lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
                     <i class="fas fa-heart ${favoriteClass}"></i>
                 </div>`;
-
-
-            const enterNowButton = `<a href="/lottery_detail/${event.slug}/" class="lottery_events_enter_button">Enter now</a>`;
-
+                const enterNowButton = `
+            <a href="/lottery_detail/${event.slug}/" class="lottery_events_enter_button">
+            ${category.logo ? `<img src="${category.logo}" alt="${category.name} Logo" class="enter_icon">` : ''}
+          Enter Now
+        <img src="/media/lottery_images/arrows (2).svg" alt="Arrow Icon">
+    </a>`;
+            
 
             eventElement.innerHTML = `
                 ${favoriteIcon}
                 <div class="lottery_events_event_header">${drawDateString}</div>
                 ${event.image ? `<img src="${event.image}" alt="${event.title}" />` : ''}
+                
+                <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
                 <h3>${event.title}</h3>
-                <p><strong>Description:</strong> ${event.description}</p>
-                <div class="lottery_events_price">Prize: £${event.price}</div>
-                <div class="lottery_events_per_ticket_price">Per ticket price: £${event.per_ticket_price}</div>
+               <div class="lt-p"> <p> ${event.description}</p><div>
+               
+                <div class="lottery_events_per_ticket_price"> £${event.per_ticket_price}</div>
                 <div class="lottery_events_sold_percentage">
                     <div class="lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
                 </div>
-                <p>SOLD: ${event.sold_percentage}%</p>
+               <div class="lottery_events_ticket_info">
+        <p> ${event.total_tickets - event.sold_tickets} tickets remaining</p>
+    </div>
                 ${enterNowButton}
             `;
 
@@ -3433,7 +3634,7 @@ function displayLotteryEvents(events) {
         container.appendChild(categoryElement);
     });
 
-
+    setupScrollHandler();
     attachAddToCartListeners(); // Attach listeners for "Add to Cart" buttons
 }
 
@@ -3457,33 +3658,50 @@ async function fetchBanner() {
         if (data.image) {
             bannerContainer.innerHTML = `
                 <div class="custom-banner">
+                
                     <div class="banner-content">
-                    
+                   
                         ${data.show_title ? `<h2 class="banner-title">${data.title || 'Could you be our next winner?'}</h2>` : ''}
                         ${data.show_explore_button ? `<button class="explore-button" onclick="scrollToFirstCategory()">Explore Now</button>` : ''}
-                    </div>
+                   
+                        </div>
+                          <button class="db-banner" onclick="scrollToHowToPlay()">How to play</button>
                     <img src="${data.image}" alt="${data.title || 'Lottery Banner'}" class="banner-image">
                 <div class="banner-footer">
-                <div class="banner-footer-item">
-                    <i class="fas fa-trophy"></i>
-                    <span>£1,833,344</span>
-                    <p>Given in Prizes</p>
+                    <div class="banner-footer-item">
+                        <img src="/media/banner-footer/banner-footer (3).svg" alt="Prize Icon">
+                        <div>
+                            <p>£1,833,777</p>
+                            <span>Given in Prizes</span>
+                        </div>
+                    </div>
+                    <div class="banner-footer-item">
+                   <img src="/media/banner-footer/banner-footer (2).svg" alt="Prize Icon">
+                        <div>
+                        <p>£81,567,000</p>
+                        <span>Given in 732 Prizes</span>
+                        </div>
                 </div>
                 <div class="banner-footer-item">
-                    <i class="fas fa-gift"></i>
-                    <span>£81,567,732</span>
-                    <p>Given in Prizes</p>
+                     <img src="/media/banner-footer/banner-footer (1).svg" alt="Google Reviews">
+                        <div>
+                            <p>Google Reviews</p>
+                            <p>
+                                <i class="fas fa-star"></i> 
+                                <i class="fas fa-star"></i> 
+                                <i class="fas fa-star"></i> 
+                                <i class="fas fa-star"></i> 
+                                <i class="fas fa-star-half-alt"></i>
+                            </p>
+                           <p> <a href="#">Click Here 1532 Reviews</a> </p>
+                        </div>
                 </div>
-                <div class="banner-footer-item">
-                    <i class="fas fa-star"></i>
-                    <span>Google Reviews</span>
-                    <p><i class="fas fa-star"></i> 4.9</p>
-                </div>
-                <div class="banner-footer-item">
-                    <i class="fas fa-check"></i>
-                    <span>Trustpilot</span>
-                    <p><i class="fas fa-star"></i> 5.0</p>
-                </div>
+              <div class="banner-footer-item">
+    <a href="#" target="_blank">
+        <img src="/media/banner-footer/banner-footer (1).png" alt="Trustpilot Logo" class="trustpilot-image">
+    </a>
+</div>
+
             </div>
                     </div>
                 
@@ -3509,7 +3727,7 @@ async function fetchWinners_mainpage() {
         const data = await response.json();
         // Initially display the first 8 images in the order of 2, 3, 3
         const initialWinners = data.winners.slice(0, 8);
-        renderWinners_mainpage(initialWinners, false, [2, 3, 3]);
+        renderWinners_mainpage(initialWinners, false, [3, 3, 3]);
     } catch (error) {
         console.error("Failed to fetch winners:", error);
     }
@@ -3526,7 +3744,7 @@ async function toggleWinners_mainpage() {
         if (isShowingAll_previous_winner) {
             // If currently showing all, restore the initial 8 images
             const initialWinners = data.winners.slice(0, 8);
-            renderWinners_mainpage(initialWinners, false, [2, 3, 3]);
+            renderWinners_mainpage(initialWinners, false, [3, 3, 3]);
             button.textContent = "View All Winners"; // Change button text
         } else {
             // Show remaining winners
@@ -3646,7 +3864,7 @@ function displayCategoryLotteryEvents(events) {
 
 //cart.html
 
-function addToCart(event) {
+function addToCart(event,redirectToCart = false) {
     event.preventDefault();
     const eventSlug = event.target.getAttribute('data-event-slug');
     const ticketCount = document.getElementById('lot-detail-ticket-count').value;
@@ -3673,7 +3891,13 @@ function addToCart(event) {
     })
     .then(data => {
         if (data.success) {
-            showModal(data.message); // Show success modal
+            if (redirectToCart) {
+                // Redirect to cart page after adding to cart
+                window.location.href = cartUrl;
+            } else {
+                // Show success modal
+                showModal(data.message);
+            }
         }
     })
     .catch(error => {
@@ -3735,6 +3959,12 @@ function attachAddToCartListeners() {
     addToCartButtons.forEach(button => {
         button.addEventListener('click', addToCart);
     });
+    const buyNowButton = document.getElementById('buy-now-button');
+    if (buyNowButton) {
+        buyNowButton.addEventListener('click', function(event) {
+            addToCart(event, true); // Pass true to redirect to cart
+        });
+    } 
 }
 
 // Call functions on page load
@@ -3918,163 +4148,311 @@ function proceedToCheckout() {
 
 
 //lottery_detail.html
+function fetchLotteryEventDetails(eventSlug) {
+    fetch(`/api/lottery_detail/${eventSlug}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (!data) {
+            console.error("No data received from API.");
+            return;
+        }
 
-/*-------------------lottery_details-----------------------------------*/
-fetch(`/api/lottery_detail/${eventSlug}/`)
-.then((response) => response.json())
-.then((data) => {
-    // DOM elements for event details
-    const additionalImagesContainer = document.getElementById("additional-images-containerpopup");
-    const popup = document.getElementById("lot-detail-image-popup");
-    const popupImage = document.getElementById("lot-detail-popup-image");
-    const closePopup = document.getElementById("lot-detail-close-popup");
-    const prevImageBtn = document.getElementById("lot-detail-prev-image");
-    const nextImageBtn = document.getElementById("lot-detail-next-image");
-    const currentIndexSpan = document.getElementById("lot-detail-current-image-index");
-    const totalImagesSpan = document.getElementById("lot-detail-total-images");
-    const eventImage = document.getElementById("lot-detail-event-image");
-    const competitionDetailsList = document.getElementById("lot-detail-competition-list");
-    const ticketSlider = document.getElementById('lot-detail-ticket-slider');
-    const ticketInput = document.getElementById('lot-detail-ticket-count');
+        // DOM Elements
+        const eventImage = document.getElementById("lot-detail-event-image");
+        const additionalImagesContainer = document.getElementById("additional-images-containerpopup");
+        const popup = document.getElementById("lot-detail-image-popup");
+        const popupImage = document.getElementById("lot-detail-popup-image");
+        const closePopup = document.getElementById("lot-detail-close-popup");
+        const prevImageBtn = document.getElementById("lot-detail-prev-image");
+        const nextImageBtn = document.getElementById("lot-detail-next-image");
+        const competitionDetailsList = document.getElementById("lot-detail-competition-list");
+        const ticketInput = document.getElementById("lot-detail-ticket-count");
+        const amountInput = document.getElementById("lot-detail-total-amount");
+        const errorMessage = document.getElementById("ticket-error-message");
 
-    let currentIndex = 0;
+        const perTicketPrice = parseFloat(data.per_ticket_price) || 0;
+        const miniLimit = parseInt(data.mini_limit);
+        const maxLimit = parseInt(data.max_limit);
 
-    /*------- Populate lottery event details----------*/
-    document.getElementById('lot-detail-event-title').textContent = data.title;
-    document.getElementById('lot-detail-event-description').textContent = data.description;
-    document.getElementById('lot-detail-event-price').textContent = `Prize:£${data.price}`;
-    document.getElementById('lot-detail-event-per-ticket-price').textContent = `per ticket price: £${data.per_ticket_price}`;
-    document.getElementById('event-sold-percentage').textContent = `Sold: ${data.sold_percentage}%`;
-    document.getElementById('lot-detail-free-postal-description').textContent = data.free_postal_description;
-   
-    document.getElementById('lot-detail-ticket-info').textContent = `${data.sold_tickets}/${data.total_tickets}`;
-    document.getElementById('lot-detail-sold-bar-fill').style.width = `${data.sold_Percentage}%`;
-   
-    const formattedDrawDate = lottery_events_formatDrawDate(data.draw_date);
-    document.getElementById('lot-detail-event-draw-datetime').textContent = formattedDrawDate;
+        let currentIndex = 0;
 
-    /*-----------Update the primary event image-------------*/
-    eventImage.src = data.image;
+        // Populate Event Details
+        document.getElementById("lot-detail-event-title").textContent = data.title || "N/A";
+        document.getElementById("lot-detail-event-description").textContent = data.description || "N/A";
+        document.getElementById("lot-detail-event-price").textContent = `Prize: £${data.price || 0}`;
+        document.getElementById("lot-detail-event-per-ticket-price").textContent = `Per ticket price: £${data.per_ticket_price || 0}`;
+        document.getElementById("event-sold-percentage").textContent = `Sold: ${data.sold_percentage || 0}%`;
+        document.getElementById("lot-detail-ticket-max-limit").textContent = maxLimit;
 
-    
+        // Format and display draw date
+        document.getElementById("lot-detail-event-draw-datetime").textContent = lottery_events_formatDrawDate(data.draw_date);
 
-/*----------------- Populate additional images-----------------*/
-if (data.additional_images && data.additional_images.length > 0) {
-    data.additional_images.forEach((img) => {
-        const imgElement = document.createElement("img");
-        imgElement.src = img.image;
-        imgElement.alt = "Additional Image";
-        imgElement.classList.add("lot-detail-additional-image");
-        additionalImagesContainer.appendChild(imgElement);
+        // Update Primary Event Image
+        if (data.image) {
+            eventImage.src = data.image;
+        }
+
+        // Populate Additional Images & Popup
+        if (Array.isArray(data.additional_images) && data.additional_images.length > 0) {
+            data.additional_images.forEach((img, index) => {
+                const imgElement = document.createElement("img");
+                imgElement.src = img.image;
+                imgElement.alt = "Additional Image";
+                imgElement.classList.add("lot-detail-additional-image");
+                additionalImagesContainer.appendChild(imgElement);
+
+                // Add click event to show popup
+                imgElement.addEventListener("click", () => showPopup(index));
+            });
+
+            const additionalImages = document.querySelectorAll(".lot-detail-additional-image");
+
+            function showPopup(index) {
+                currentIndex = index;
+                popupImage.src = additionalImages[currentIndex].src;
+                document.getElementById("lot-detail-current-image-index").textContent = currentIndex + 1;
+                document.getElementById("lot-detail-total-images").textContent = additionalImages.length;
+                popup.classList.remove("hidden");
+            }
+
+            closePopup.addEventListener("click", () => popup.classList.add("hidden"));
+            popup.addEventListener("click", (e) => e.target === popup && popup.classList.add("hidden"));
+
+            nextImageBtn.addEventListener("click", () => {
+                currentIndex = (currentIndex + 1) % additionalImages.length;
+                showPopup(currentIndex);
+            });
+
+            prevImageBtn.addEventListener("click", () => {
+                currentIndex = (currentIndex - 1 + additionalImages.length) % additionalImages.length;
+                showPopup(currentIndex);
+            });
+        }
+
+        // Populate Competition Details
+        if (data.competition_details && data.competition_details.trim() !== "") {
+            const details = data.competition_details.split("\n").filter(detail => detail.trim() !== "");
+            details.forEach(detail => {
+                const listItem = document.createElement("li");
+                listItem.textContent = detail.trim();
+                competitionDetailsList.appendChild(listItem);
+            });
+        } else {
+            competitionDetailsList.textContent = "No competition details available.";
+        }
+
+        // Initialize Ticket and Amount Fields
+        ticketInput.value = miniLimit;
+        amountInput.value = (miniLimit * perTicketPrice).toFixed(2);
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = "block";
+        }
+
+        function clearError() {
+            errorMessage.textContent = "";
+            errorMessage.style.display = "none";
+        }
+
+        function updateAmount() {
+            let ticketCount = parseInt(ticketInput.value);
+
+            if (isNaN(ticketCount)) return;
+            if (ticketCount < miniLimit || ticketCount > maxLimit) {
+                showError(`Enter a quantity between ${miniLimit} and ${maxLimit}.`);
+            } else {
+                clearError();
+                amountInput.value = (ticketCount * perTicketPrice).toFixed(2);
+            }
+        }
+
+        function updateTicketCount() {
+            let enteredAmount = parseFloat(amountInput.value);
+            if (isNaN(enteredAmount)) return;
+
+            let calculatedTickets = Math.floor(enteredAmount / perTicketPrice);
+            if (calculatedTickets < miniLimit || calculatedTickets > maxLimit) {
+                showError(`Enter an amount corresponding to ${miniLimit} to ${maxLimit} tickets.`);
+            } else {
+                clearError();
+                ticketInput.value = calculatedTickets;
+            }
+        }
+
+        function adjustTicketInput() {
+            let ticketCount = parseInt(ticketInput.value);
+            if (isNaN(ticketCount)) return;
+
+            ticketCount = Math.max(miniLimit, Math.min(ticketCount, maxLimit));
+            ticketInput.value = ticketCount;
+            amountInput.value = (ticketCount * perTicketPrice).toFixed(2);
+        }
+
+        function adjustAmountInput() {
+            let calculatedTickets = Math.floor(parseFloat(amountInput.value) / perTicketPrice);
+            calculatedTickets = Math.max(miniLimit, Math.min(calculatedTickets, maxLimit));
+            ticketInput.value = calculatedTickets;
+            amountInput.value = (calculatedTickets * perTicketPrice).toFixed(2);
+        }
+
+        // Increment / Decrement Ticket Count
+        document.getElementById("lot-detail-increment-ticket").addEventListener("click", () => {
+            let currentValue = parseInt(ticketInput.value) || miniLimit;
+            if (currentValue < maxLimit) {
+                ticketInput.value = currentValue + 1;
+                amountInput.value = ((currentValue + 1) * perTicketPrice).toFixed(2);
+            } else {
+                showError(`Maximum ticket limit reached (${maxLimit}).`);
+            }
+        });
+
+        document.getElementById("lot-detail-decrement-ticket").addEventListener("click", () => {
+            let currentValue = parseInt(ticketInput.value) || miniLimit;
+            if (currentValue > miniLimit) {
+                ticketInput.value = currentValue - 1;
+                amountInput.value = ((currentValue - 1) * perTicketPrice).toFixed(2);
+            } else {
+                showError(`Minimum ticket limit reached (${miniLimit}).`);
+            }
+        });
+
+        // Event Listeners
+        ticketInput.addEventListener("input", updateAmount);
+        ticketInput.addEventListener("blur", adjustTicketInput);
+        amountInput.addEventListener("input", updateTicketCount);
+        amountInput.addEventListener("blur", adjustAmountInput);
+
+    // Allow only valid inputs
+    ticketInput.addEventListener("keypress", (event) => {
+        if (!/\d/.test(event.key)) event.preventDefault();
     });
 
-    const additionalImages = document.querySelectorAll(".lot-detail-additional-image");
-
-    /*------------Show popup with the clicked image---------*/
-    const showPopup = (index) => {
-        currentIndex = index;
-        popupImage.src = additionalImages[currentIndex].src;
-        currentIndexSpan.textContent = currentIndex + 1;
-        totalImagesSpan.textContent = additionalImages.length;
-        popup.classList.remove("hidden");
-    };
-
-    additionalImages.forEach((image, index) => {
-        image.addEventListener("click", () => showPopup(index));
-    });
-
-    closePopup.addEventListener("click", () => {
-        popup.classList.add("hidden");
-    });
-
-    nextImageBtn.addEventListener("click", () => {
-        currentIndex = (currentIndex + 1) % additionalImages.length;
-        showPopup(currentIndex);
-    });
-
-    prevImageBtn.addEventListener("click", () => {
-        currentIndex = (currentIndex - 1 + additionalImages.length) % additionalImages.length;
-        showPopup(currentIndex);
-    });
-
-    popup.addEventListener("click", (e) => {
-        if (e.target === popup) {
-            popup.classList.add("hidden");
+    amountInput.addEventListener("keypress", (event) => {
+        if (!/\d/.test(event.key) && event.key !== "." && event.key !== "Backspace") {
+            event.preventDefault();
         }
     });
-} else {
-    console.warn("No additional images found for this event.");
+
+}).catch(error => console.error("Error fetching data:", error));
 }
+function fetchSimilarLotteryEvents(eventSlug) {
+    fetch(`/api/similar_lottery_events/${eventSlug}/`)
+        .then(response => response.json())
+        .then(data => {
+            const activeEvents = data.filter(event => event.is_active);
+            const container = document.getElementById('similar-lottery-events-container');
+            const leftBtn = document.getElementById('scroll-left');
+            const rightBtn = document.getElementById('scroll-right');
 
-   
-       /*--------------------Populate competition details--------------*/ 
-if (data.competition_details && data.competition_details.trim() !== "") {
-    // Split the text by a delimiter (e.g., newline or comma)
-    const details = data.competition_details.split("\n"); // Assuming details are separated by newlines
 
-    details.forEach((detail) => {
-        if (detail.trim() !== "") { // Ignore empty lines
-            const listItem = document.createElement("li");
-            listItem.textContent = detail.trim();
-            competitionDetailsList.appendChild(listItem);
+            container.innerHTML = ""; // Clear previous content
+
+
+            if (activeEvents.length === 0) {
+                container.innerHTML = `<div class="no-similar-lotteries"><p>No similar lotteries available at the moment.</p></div>`;
+                // Hide scroll buttons if no similar events are available
+                leftBtn.style.display = 'none';
+                rightBtn.style.display = 'none';
+                return;
+            }
+
+
+            activeEvents.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.classList.add('similar_category_lottery_event');
+
+
+                eventElement.innerHTML = `
+                    <div class="similar_category_lottery_event_draw_date">${lottery_events_formatDrawDate(event.draw_date)}</div>
+                    ${event.image ? `<img src="${event.image}" alt="${event.title}" class="similar_category_lottery_event_img" />` : ''}
+                    <h3 class="similar_category_lottery_title">${event.title}</h3>
+                    <p class="similar_category_lottery_description">${event.description}</p>
+                    <div class="similar_category_lottery_per_ticket_price">£${event.per_ticket_price}</div>
+                    <div class="similar_category_lottery_sold_percentage">
+                        <div class="similar_category_lottery_sold_bar" style="width: ${event.sold_percentage}%"></div>
+                    </div>
+                    <div class="similar_category_lottery_events_ticket_info"><p>${event.total_tickets - event.sold_tickets} tickets remaining</p></div>
+                    <a href="/lottery_detail/${event.slug}/" class="similar_category_lottery_enter_button">
+                    <img src="${event.category.category_logo}" alt="${event.category.name} Logo" class="similar_category_lottery_enter_icon"> 
+                    Enter now
+                
+                    </a>
+                `;
+
+
+                container.appendChild(eventElement);
+            });
+
+
+            // Initialize scroll buttons if there are more than 3 events
+            setupScrollButtons(activeEvents.length);
+
+
+        })
+        .catch(error => console.error('Error fetching similar lottery events:', error));
+}
+function setupScrollButtons(eventCount) {
+    const container = document.getElementById('similar-lottery-events-container');
+    const leftBtn = document.getElementById('scroll-left');
+    const rightBtn = document.getElementById('scroll-right');
+    
+    const screenWidth = window.innerWidth;
+
+
+    // Determine device type and set conditions
+    const isMobile = screenWidth <= 768;
+    const isTablet = screenWidth > 768 && screenWidth <= 1024;
+
+
+    // Define when buttons should appear
+    const shouldShowButtons = isMobile ? eventCount > 1 : isTablet ? eventCount > 2 : eventCount > 3;
+
+
+    if (shouldShowButtons) {
+        leftBtn.style.display = 'block';
+        rightBtn.style.display = 'block';
+
+
+        // Set scroll amount dynamically
+        let scrollAmount;
+        if (isMobile) {
+            scrollAmount = 250;
+        } else if (isTablet) {
+            scrollAmount = 350;
+        } else {
+            scrollAmount = 400;
         }
-    });
-} else {
-    competitionDetailsList.textContent = "No competition details available.";
+
+
+        leftBtn.addEventListener('click', () => {
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            
+        });
+
+
+        rightBtn.addEventListener('click', () => {
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+    } else {
+        leftBtn.style.display = 'none';
+        rightBtn.style.display = 'none';
+        // **Disable scroll for mobile when only 1 event exists**
+        if (isMobile && eventCount === 1) {
+            container.style.overflowX = 'hidden'; // Prevent horizontal scroll
+        } else {
+            container.style.overflowX = 'auto'; // Allow scrolling when needed
+        }
+    }
 }
- 
-    $(document).ready(function () {
-        // Handle tab navigation
-        $('.lot-detail-tab-btn').on('click', function () {
-            const tabId = $(this).data('tab');
-    
-            // Highlight the active tab button
-            $('.lot-detail-tab-btn').removeClass('active');
-            $(this).addClass('active');
-    
-            // Show the active tab content
-            $('.lot-detail-tab-pane').removeClass('active');
-            $(`#${tabId}`).addClass('active');
-        });
-        const miniLimit = data.mini_limit; // backend mini limit
-                 const maxLimit = data.max_limit;
-        
-        
-                document.getElementById('lot-detail-ticket-max-limit').textContent = maxLimit;
-        
-        
-                ticketSlider.min = 1; // frontend minimum is 1
-                ticketSlider.max = maxLimit;
-                ticketSlider.value = miniLimit; // set the slider value to backend mini limit
-                ticketInput.value = miniLimit; // set the input value to backend mini limit
-        
-        
-                // Update slider and ticket input
-                ticketSlider.addEventListener("input", () => {
-                    ticketInput.value = ticketSlider.value;
-                });
-        
-        
-                // Increment ticket count
-                document.getElementById('lot-detail-increment-ticket').addEventListener("click", () => {
-                    const currentValue = parseInt(ticketInput.value);
-                    if (currentValue < maxLimit) {
-                        ticketInput.value = currentValue + 1;
-                        ticketSlider.value = currentValue + 1;
-                    }
-                });
-        
-        
-                // Decrement ticket count
-                document.getElementById('lot-detail-decrement-ticket').addEventListener("click", () => {
-                    const currentValue = parseInt(ticketInput.value);
-                    if (currentValue > 1) {
-                        ticketInput.value = currentValue - 1;
-                        ticketSlider.value = currentValue - 1;
-                    }
-                });
-            })
-        });
+// Handle window resize events
+window.addEventListener('resize', function() {
+    const container = document.getElementById('similar-lottery-events-container');
+    const eventCount = container.children.length;
+    setupScrollButtons(eventCount);
+});
+
+
 
 //favorite.html
 
@@ -4160,4 +4538,143 @@ function toggleFavorite(eventSlug) {
     })
     .catch(error => console.error('Error toggling favorite:', error));
 }
+/*Userdashboard*/
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("chatbotPopup").style.display = "block";
+});
+function toggleChatbot() {
+    let chatbot = document.getElementById("chatbotPopup");
+    chatbot.style.display = chatbot.style.display === "block" ? "none" : "block";
+}
+function closeChatbot() {
+    document.getElementById("chatbotPopup").style.display = "none";
+}
+function dbSubscribe() {
+    alert("You have subscribed successfully!");
+}
+function scrollToHowToPlay() {
+    document.getElementById("how-to-play").scrollIntoView({ behavior: "smooth" });
+}
+function scrollToSubscription() {
+    document.getElementById("db_Subscription").scrollIntoView({ behavior: "smooth" });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    let index = 0;
+    const slides = document.querySelectorAll(".testimonial-slide");
+    const dots = document.querySelectorAll(".dot");
+
+    if (slides.length === 0 || dots.length === 0) {
+        console.warn("No testimonials found.");
+        return;
+    }
+
+    function updateSlide() {
+        slides.forEach(slide => slide.classList.remove("active"));
+        dots.forEach(dot => dot.classList.remove("active"));
+
+        slides[index].classList.add("active");
+        dots[index].classList.add("active");
+    }
+
+    function autoSlide() {
+        index = (index + 1) % slides.length;
+        updateSlide();
+    }
+
+    dots.forEach((dot, i) => {
+        dot.addEventListener("click", function () {
+            index = i;
+            updateSlide();
+        });
+    });
+
+    setInterval(autoSlide, 10000);
+    updateSlide();
+});
+
+/*----------------2-FA----------*/
+$(document).ready(function () {
+    // Get the API URL from the data attribute in the form element
+    const apiUrl = $("#privacy-form").data("api-url");
+    function validateForm() {
+        let isValid = true;
+
+        // Clear previous errors
+        $('.privacy-error').text('');
+
+        // Validate DOB
+        const dob = $('#privacy-dob').val();
+        if (!dob) {
+            $('#privacy-dob-error').text("Date of Birth is required.");
+            isValid = false;
+        }
+
+        // Validate phone number
+        const phoneNumber = $('#privacy-phone-number').val();
+        const phoneRegex = /^\+44\d{10}$/;
+        if (!phoneNumber) {
+            $('#privacy-phone-error').text("Phone number is required.");
+            isValid = false;
+        } else if (!phoneRegex.test(phoneNumber)) {
+            $('#privacy-phone-error').text("Enter a valid UK phone number starting with (+44)1234567890.");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    $('#privacy-save-changes').click(function () {
+        if (validateForm()) {
+            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+            const data = {
+                dob: $('#privacy-dob').val(),
+                phone_number: $('#privacy-phone-number').val(),
+                two_factor_auth_enabled: $('#privacy-two-factor-auth').is(':checked'),
+            };
+
+            $.ajax({
+                url: apiUrl, // Use the API URL fetched from the data attribute
+                type: "PUT",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (response) {
+                    $('#privacy-message').text("Privacy settings updated successfully.").css("color", "green").show();
+                },
+                error: function (xhr) {
+                    $('#privacy-message').text("Failed to save changes.").css("color", "red").show();
+                }
+            });
+        }
+    });
+});
+/** Loader Start**/
+$(document).ready(function() {
+    console.log("Loader.js is loaded!");
+    // Create the preloader HTML dynamically
+    let preloaderHTML = `
+        <div id="preloader">
+            <div id="ep-preloader" class="ep-preloader">
+                <div class="animation-preloader">
+                    <img src="../static/images/logo.png" alt="Loading..." class="preloader-image" />
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    // Append preloader to the body
+    $("body").prepend(preloaderHTML);
+    // Ensure loader is visible initially
+    $("#preloader").show();
+});
+$(window).on('load', function() {
+    console.log("Page fully loaded! Hiding loader...");
+    setTimeout(function() {
+        // Fade out the preloader once the page is fully loaded
+        $("#preloader").fadeOut(500);
+    }, 1000); // Delay 1 second for a smoother transition
+});
 

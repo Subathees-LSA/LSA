@@ -891,6 +891,15 @@ right: 0px;
     text-align: center;
     color: #333333;
 }
+.signin-link-custom{
+    text-align: center;
+    margin-top: 10px;
+    font-family: Rajdhani;
+}
+
+.signin-link-custom a {
+    color: #FF6600;
+}
 
 .login-input-email,
 .login-input-password {
@@ -1362,6 +1371,30 @@ margin-top: 10px;
     position: absolute;
 }
 
+.custom-back-to-login {
+    background-color:#FF6600; /* Primary blue */
+    color: white;
+    padding: 10px 16px;
+    font-size: 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 5px; 
+}
+
+.custom-back-to-login:hover {
+    background-color: #FF6600; 
+    transform: scale(1.1);
+}
+
+.custom-back-to-login:active {
+    background-color: #FF6600; 
+    transform: scale(0.95);
+}
 
 
 /* Mobile view for FORGETPASSWORD */
@@ -1372,6 +1405,14 @@ display: none !important;
 }
 @media (max-width: 768px) {
 
+
+    .custom-back-to-login{
+        margin-left: 20px;
+        font-size: 16px;
+        padding: 8px;
+        gap: 0px;
+    }
+    
 .password-reset-container, 
 .password-reset-main-bg, 
 .password-reset-left-bg, 
@@ -2502,66 +2543,676 @@ top: 20px;
 
 
 /* admin_signup.html Styling */
-.admin_signup_container { max-width: 400px; margin: 0 auto; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-radius: 8px; background-color: #f9f9f9; }
-.admin_signup_title { text-align: center; }
+
+/* .admin_signup_title { text-align: center; }
 .admin_signup_form_class { display: flex; flex-direction: column; }
 .admin_signup_username_input[type="text"], .admin_signup_email_id_input[type="email"], .admin_signup_password_input[type="password"], .admin_signup_submit_button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; }
 .admin_signup_submit_button { background-color: #4CAF50; color: white; font-weight: bold; }
 .admin_signup_submit_button:hover { background-color: #45a049; }
 .admin_signup_toggle_password_class { position: absolute; right: 10px; top: 17px; cursor: pointer; font-size: 1em; }
 .admin_signup_input_container { position: relative; display: flex; align-items: center; }
-.admin_signup_error { color: red; font-size: 0.9em; }
+
 .admin_signup_valid { color: green; font-size: 0.9em; }
-.admin_signup_error_message { color: red; font-size: 0.9em; text-align: center; margin-top: 10px; }
+.admin_signup_error_message { color: red; font-size: 0.9em; text-align: center; margin-top: 0px; }
 
 
-/* custom_admin_login.html styling */
-.custom_admin_login_container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    background-color: #f9f9f9;
-}
-.custom_admin_login_title {
-    text-align: center;
-}
-.custom_admin_login_form_class {
-    display: flex;
-    flex-direction: column;
-}
 
-.custom_admin_login_email[type="email"],
-.custom_admin_login_password[type="password"],
-.custom_admin_login_button {
+
+/* ADMIN SIGNUP_CONTAINER START */
+
+.admin-signup-first-container {
     width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.custom_admin_login_button {
-    background-color: #4CAF50;
-    color: white;
-    font-weight: bold;
-}
-.custom_admin_login_button:hover {
-    background-color: #45a049;
-}
-/* Toggle button styling */
-.custom_admin_login_show_password {
-    position: absolute;
-    right: 10px;
-    top: 13px;
-    cursor: pointer;
-    font-size: 1em;
-}
-.custom_admin_login_input_container {
+    height: 100%;
     position: relative;
-    display: flex;
-    align-items: center;
+    background: white;
 }
+
+.admin-signup-wrapper {
+    width: 1440px;
+    height: 913px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
+
+.admin-signup-background {
+    width: 1500px;
+    height: 913px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    background: #F8FAFC;
+}
+
+.admin-signup-left {
+    width: 638.10px;
+    height: 913px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
+
+.admin-signup-left-section {
+    width: 638.10px;
+    height: 913px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    background: #FF6600;
+}
+
+.admin-signup-inner-wrapper {
+    width: 638.10px;
+    height: 913px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
+
+.admin-signup-inner-section {
+    width: 638.10px;
+    height: 913px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    background: #0F172A;
+}
+
+
+ .admin-signup-left-section {
+            width: 638.10px;
+            height: 913px;
+            left: 0px;
+            top: 0px;
+            position: absolute;
+            background: #FF6600;
+        }
+
+        .admin-signup-inner-section {
+            width: 638.10px;
+            height: 913px;
+            left: 0px;
+            top: 0px;
+            position: absolute;
+            background: #FF6600;
+        }
+
+        .admin-signup-circle-1 {
+            width: 372.93px;
+            height: 438.31px;
+            left: -91.56px;
+            top: -395px;
+            position: absolute;
+            transform: rotate(34.91deg);
+            transform-origin: 0 0;
+            opacity: 0.10;
+            border-radius: 9999px;
+            border: 7px rgb(255, 255, 255) solid;
+        }
+
+    
+
+        .admin-signup-welcome-container {
+            width: 496px;
+            height: 137px;
+            left: 720px;
+            top: 69px;
+            position: absolute;
+        }
+
+        .admin-signup-welcome-title {
+            width: 383px;
+            left: 0px;
+            top: 0px;
+            position: absolute;
+            color: #090914;
+            font-size: 52px;
+            font-family: Rajdhani;
+            font-weight: 600;
+            line-height: 62px;
+            word-wrap: break-word;
+        }
+
+        .admin-signup-welcome-description {
+            width: 496px;
+            left: 0px;
+            top: 77px;
+            position: absolute;
+            color: #52525B;
+            font-size: 18px;
+            font-family: Rajdhani;
+            font-weight: 500;
+            line-height: 30px;
+            word-wrap: break-word;
+        }
+
+        .admin-signup-container {
+            width: 540px;
+            margin-top: -25px;
+            height: auto;
+            left: 720px;
+            top: 225px;
+            position: absolute;
+             padding: 24px;
+            border-radius: 12px;
+
+        }
+
+        .admin-signup-title {
+            font-family: Rajdhani;
+            font-size: 24px;
+            color: #0F172A;
+            font-weight: 600;
+        }
+.admin-signup-password-label,
+.admin-signup-email-label,
+.admin-signup-fullname-label {
+    color: #090914;
+    font-size: 16px;
+    font-family: Rajdhani, sans-serif;
+    font-weight: 500;
+    word-wrap: break-word;
+    /* Remove position: absolute; */
+}
+
+
+        .admin-signup-username-input
+       {
+            width: 100%;
+            padding: 22px;
+            margin-top: -12px;
+            margin-bottom: 5px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+        }
+         
+        .admin-signup-email-id-input
+       {
+            width: 100%;
+            padding: 22px;
+            margin-top: -12px;
+            margin-bottom: 5px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+        }
+  
+        .admin-signup-password-input {
+            width: 100%;
+            padding: 22px;
+            margin-top: -12px;
+            margin-bottom: 5px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+        }
+
+        .admin-signup-error {
+            color: red;
+            font-size: 12px;
+            font-family:Rajdhani ;
+        }
+
+        .admin-signup-input-container {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .admin-signup-toggle-password-class {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+        }
+
+        .admin-signup-submit-button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: #FF6600;
+            color: white;
+            font-size: 16px;
+            font-family: Rajdhani;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+       
+
+        .admin-signup-form-class p {
+            font-family: Rajdhani;
+            font-size: 14px;
+            margin-top: 15px;
+            margin-left: 160px;
+        }
+
+        .admin-signup-form-class a {
+            color: #FF6600;
+           
+        }
+
+        /* Mobile View for Admin-signup */
+
+        /* General Mobile Styles */
+@media (max-width: 768px) {
+    /* Full Page Container */
+    .admin-signup-wrapper {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* Ensure everything aligns to the left */
+        justify-content: flex-start;
+        box-sizing: border-box;
+    }
+
+    .admin-signup-background {
+        width: 100%;
+        height: auto;
+        background: #F8FAFC;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Left Section */
+    .admin-signup-left-section {
+        display: none; /* Hide the left section on mobile */
+    }
+
+    /* Welcome Container */
+    .admin-signup-welcome-container {
+       width: 100%;
+height: auto;
+position: relative;
+text-align: center;
+top: 0;
+left: 0;
+    }
+
+    .admin-signup-welcome-title {
+       font-size: 32px;
+line-height: 40px;
+width: 100%;
+margin-left: 40px;
+margin-top: 20px;
+    }
+
+    .admin-signup-welcome-description {
+        font-size: 16px;
+line-height: 24px;
+margin-top: 5;
+width: 100%;
+margin-left: 37px;
+    }
+
+    /* Form Container */
+    .admin-signup-container {
+        width: 118%;
+        padding: 16px;
+        border-radius: 8px;
+        top: 170px;
+        left: 0;
+        background: white;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        margin: 0; /* Ensure no margin for left-alignment */
+    }
+
+    .admin-signup-title {
+        font-size: 20px;
+        text-align: left; /* Align the title to the left */
+        margin-bottom: 16px;
+        color: #0F172A;
+    }
+
+    /* Input Fields */
+    .admin-signup-username-input,
+    .admin-signup-email-id-input,
+    .admin-signup-password-input {
+        padding: 14px;
+        font-size: 14px;
+        margin-top: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .admin-signup-toggle-password-class {
+        top: 10px;
+        right: 10px;
+        font-size: 18px;
+    }
+
+    /* Error Messages */
+    .admin-signup-error {
+        font-size: 12px;
+        margin-top: 4px;
+        color: red;
+        text-align: left; /* Align error messages to the left */
+        padding-left: 16px; /* Align error messages with the form fields */
+    }
+
+    /* Submit Button */
+    .admin-signup-submit-button {
+        padding: 14px;
+        font-size: 16px;
+        background-color: #FF6600;
+        color: white;
+        width: 100%;
+        border-radius: 8px;
+        border: none;
+        margin-top: 12px;
+        cursor: pointer;
+    }
+
+    /* Additional Links */
+    .admin-signup-form-class p {
+        text-align: left; /* Align additional links to the left */
+        font-size: 14px;
+        color: #52525B;
+        margin-top: 15px;
+        padding-left: 16px; /* Align the text with the form fields */
+    }
+
+    .admin-signup-form-class a {
+        color: #FF6600;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    /* Hide Circles and Left Section */
+    .admin-signup-circle-1,
+    .admin-signup-inner-section,
+    .admin-signup-inner-wrapper,
+    .admin-signup-left,
+    .admin-signup-first-container {
+        display: none;
+    }
+
+    /* Ensuring entire container is aligned left */
+    .admin-signup-first-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; 
+        padding: 0 16px;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+}
+
+
+
+
+
+/* END OF ADMIN_SIGNUP */
+
+/* Start of Admini_Login */
+
+ .admin_login_container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: white;
+            box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+        }
+
+        .admin_login_background-wrapper {
+            width: 1440px;
+            height: 913px;
+            left: 0px;
+            top: 0px;
+            position: absolute;
+        }
+
+        .admin_login_background-inner {
+            width: 1500px;
+            height: 913px;
+            left: 0px;
+            top: 0px;
+            position: absolute;
+            background: #F8FAFC;
+        }
+
+        .admin_login_orange-background {
+            width: 638.10px;
+            height: 913px;
+            left: 0px;
+            top: 0px;
+            position: absolute;
+            background: #FF6600;
+        }
+
+        .admin_login_dark-background {
+            width: 638.10px;
+            height: 913px;
+            left: 0px;
+            top: 0px;
+            position: absolute;
+            background: #FF6600;
+        }
+
+        .admin_login_circle-background-1 {
+            width: 372.93px;
+            height: 438.31px;
+            left: -91.56px;
+            top: -395px;
+            position: absolute;
+            transform: rotate(34.91deg);
+            transform-origin: 0 0;
+            opacity: 0.10;
+            border-radius: 9999px;
+            border: 7px white solid;
+        }
+
+        .admin_login_welcome-text-block {
+            width: 458.20px;
+            height: 211px;
+            left: 90px;
+            top: 266px;
+            position: absolute;
+        }
+
+        .admin_login_welcome-title {
+            font-size: 60px;
+            font-family: Rajdhani;
+            font-weight: 600;
+            line-height: 66px;
+            color: white;
+            word-wrap: break-word;
+        }
+
+        .admin_login_welcome-description {
+            font-size: 20px;
+            font-family: Rajdhani;
+            font-weight: 600;
+            line-height: 30px;
+            color: white;
+            word-wrap: break-word;
+        }
+
+        .custom_admin_login_container {
+            position: absolute;
+            left: 695.40px;
+            top: 210px;
+            width: 200%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .custom_admin_login_title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        .custom_admin_login_form_class {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .custom_admin_login_form_class input,
+        .custom_admin_login_email[type="email"],
+        .custom_admin_login_password[type="password"] {
+            width: 130%;
+            padding: 30px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .custom_admin_login_button {
+            width: 128%;
+            padding: 16px;
+            background-color: #FF6600;
+            color: white;
+            border: none;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+
+
+        .error-text {
+            color: red;
+            font-family: Rajdhani;
+        }
+
+        /* Toggle button styling */
+        .custom_admin_login_show_password {
+            position: absolute;
+            right: -130px;
+            top: 230px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .admin-forget-password {
+            color: #FF6600;
+            margin-bottom: 5%;
+            margin-top: -8%;
+            margin-left: 450px;
+            width: 70%;
+            overflow-x: none;
+            font-family: Rajdhani;
+            text-decoration: none;
+        }
+
+        .admin-signup1 {
+            color: #425466;
+            margin-left: 170px;
+            margin-top: 20px;
+        }
+
+        .admin-signup2 {
+            color: #FF6600;
+            text-decoration: none;
+            font-family: Rajdhani;
+            text-align: center;
+            width: 70px;
+        }
+
+        .admin-login-welcome-message-custom {
+            width: 496px;
+            height: 137px;
+            left: 720px;
+            top: 10px;
+            position: absolute;
+        }
+
+        .admin-login-welcome-title-custom {
+            width: 383px;
+            font-size: 52px;
+            font-family: Rajdhani;
+            font-weight: 600;
+            line-height: 62px;
+            color: #090914;
+        }
+
+        .admin-login-welcome-subtitle-custom {
+            width: 496px;
+            font-size: 18px;
+            font-family: Rajdhani;
+            font-weight: 500;
+            line-height: 30px;
+            margin-top: -20px;
+            color: #52525B;
+        }
+
+        /* Mobile view */
+        @media (max-width: 768px) {
+    .admin_login_background-wrapper,
+    .admin_login_orange-background ,
+    .admin_login_welcome-text-block{
+       display: none;
+    }
+
+    .admin_login_welcome-text-block {
+    
+        margin-top: 50px;
+    }
+
+    .admin-login-welcome-message-custom {
+            left: 32px;
+            text-align: center;
+        font-size: 36px;
+        line-height: 42px;
+
+    }
+    .admin-login-welcome-title-custom{
+        margin-left: 72px;
+    }
+
+    .admin-login-welcome-description {
+            margin-left: 40px;
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+    .custom_admin_login_container {
+        width: 100%;
+        height: auto;
+        margin-top: 20px;
+        left: 0;
+        padding: 5px;
+        margin-left: -10px;
+    }
+
+    .custom_admin_login_form_class input {
+        font-size: 14px;
+        padding: 12px;
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    .custom_admin_login_button {
+        font-size: 14px;
+        padding: 12px;
+        width: 100%;
+        border-radius: 5px;
+        align-items: center;
+        margin-left: 90px;
+    }
+
+  .admin-forget-password {
+    align-self: flex-end;
+    margin-right: -150px; 
+    margin-top: -30px; 
+    font-size: 14px;
+    text-align: right; 
+}
+.admin-signup1{
+    width: 100%;
+    margin-left: 180px;
+}
+        }
+
+/* End of Admin_login */
 
 /* lottery_events_add.html Styling */
 /* Grid and Card Styling */
@@ -2640,32 +3291,6 @@ top: 20px;
 }
 
 
-/* lottery_events.html  Styling */
-.category_section {
-    margin-bottom: 40px; /* Add space between categories */
-}
-
-
-.category_section h2 {
-    text-align: 40px;
-    color: #333;
-    font-size: 1.5em;
-    margin-bottom: 20px;
-}
-
-.lottery_events_title {
-    text-align: center;
-    color: #333;
-}
-
-.lottery_events_displayed_container {
-    display: flex;
-    justify-content: flex-start;
-    gap: 20px;
-    flex-wrap: nowrap; 
-    overflow-x: auto; 
-}
-
 /* Container for the category list */
 .lottery_events_category_list {
     display: flex;
@@ -2690,211 +3315,1040 @@ top: 20px;
 .lottery_events_category_item:hover {
     background-color: #0056b3;
 }
+
+/* lottery_events.html  Styling */
+.category_section {
+    position: relative; /* Allows absolute positioning within */
+    /* margin-bottom: 10px;  */
+}
+
+.category_header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    font-size: 33px;
+    /* margin-bottom: 20px; */
+    font-family: Rajdhani;
+}
+
+.category_icon {
+    width: 30px; /* Adjust as needed */
+    height: auto;
+}
+/* .category_section h2 {
+    text-align: 40px;
+    color: #333;
+    font-size: 40px;
+    margin-bottom: 20px;
+} */
+
+.lottery_events_title {
+    text-align: center;
+    color: #333;
+}
+.lottery_events_displayed_container {
+    font-family: Rajdhani;
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    flex-wrap: nowrap; 
+    overflow-x: auto;
+    padding: 10px;
+}
+
+/* Lottery event card */
 .lottery_events_event {
-    background-color: #fff;
-    width: 300px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    width: 320px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    padding: 10px;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #f0f0f0;
 }
 
 .lottery_events_event img {
     width: 100%;
-    height: auto;
+    height: 240px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
+/* Favorite icon */
+.lottery_events_favorite i {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: gray;
+    cursor: pointer;
+    background: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: opacity 0.3s ease, transform 0.2s ease;
+    z-index: 1;
+}
+
+.lottery_events_event:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Header */
 .lottery_events_event_header {
-    background-color: #2b8a3e;
+    background-color: #ff6600;
     color: #fff;
-    padding: 10px;
-    font-weight: bold;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 20px;
+    display: inline-block;
+    text-align: center;
 }
 
+/* Title and description */
 .lottery_events_event h3 {
-    font-size: 1.2em;
-    color: #333;
-    margin: 10px 0;
-}
-
-.lottery_events_event p {
-    margin: 5px 0;
-    color: #666;
-}
-
-.lottery_events_price {
-    font-size: 1.5em;
-    color: #007bff;
-    font-weight: bold;
-    margin-top: 5px;
-}
-
-.lottery_events_sold_percentage {
-    background-color: #eee;
-    border-radius: 5px;
-    overflow: hidden;
+    color: #252A34;
+    font-size: 15px;
+    font-weight: 600;
     margin: 10px 20px;
+    text-align: left;
+}
+
+.lt-p {
+    margin: 10px 20px;
+    color: #BEBEBE;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.0;
+    text-align: left;
+}
+
+/* Price and ticket info */
+.lottery_events_per_ticket_price {
+    color: #FF6600;
+    font-size: 30px;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.lottery_events_ticket_info {
+    color: #343434;
+    font-size: 14px;
+    font-family: Open Sans;
+    font-weight: 400;
+}
+
+/* Progress bar */
+.lottery_events_sold_percentage {
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 15px 0px;
+    height: 10px;
+    width: 100%;
 }
 
 .lottery_events_sold_bar {
-    height: 8px;
-    background-color: #007bff;
+    height: 12px;
+    background: linear-gradient(90deg, #ff6600 0%, #ff3300 100%);
     width: 0%;
-    transition: width 0.3s ease;
+    transition: width 0.4s ease-in-out;
 }
 
+/* Enter button */
 .lottery_events_enter_button {
-    display: inline-block;
-    background-color: #007bff;
+    display: inline-flex;
+    align-items: center;
+    background-color: #ff6600;
     color: #fff;
+    width: 90%;
     text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    margin: 15px 0;
-}
-
-.lottery_events_enter_button:hover {
-    background-color: #0056b3;
-}
-
-.view_all_button {
-    display: inline-block;
-    margin: 10px 0;
-    padding: 10px 20px;
-    font-size: 10px;
+    padding: 12px 20px;
+    margin: 15px 0px;
     font-weight: bold;
-    color: #ffffff;
-    background-color: #ff8c00; /* Dark orange */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.enter_icon {
+    width: 25px;
+    height: 25px;
+}
+
+.lottery_events_enter_button img {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.lottery_events_enter_button:hover img {
+    transform: translateX(5px);
+}
+
+/* View all button */
+.view_all_button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 60px 20px;
+    font-size: 25px;
+    font-weight: bold;
+    background-color: white;
+    color: #ff6600;
+    border: 2px solid white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view_all_button img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Favorite icon active state */
+.lottery_events_favorite i.favorited {
+    color: red;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) { /* Tablet view */
+    .lottery_events_displayed_container {
+        flex-wrap: wrap; /* Allows multiple cards in rows */
+        justify-content: center;
+    }
+
+    .lottery_events_event {
+        width: 45%; /* Makes sure cards are evenly distributed */
+    }
+}
+
+@media (max-width: 768px) { /* Mobile view */
+    .lottery_events_displayed_container {
+        flex-wrap: nowrap; /* Keeps items in a horizontal row */
+        justify-content: flex-start;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+    }
+.lottery_events_displayed_container::-webkit-scrollbar {
+        display: none;
+    }
+  .view_all_button {
+        font-size: 19px;
+        padding: 31px 0px;
+    }
+    .lottery_events_displayed_container {
+        scrollbar-width: none; /* Firefox */
+    }
+    .lottery_events_event {
+        width: 280px; /* Slightly smaller to fit more items on screen */
+        flex: 0 0 auto; /* Ensures cards stay in a row */
+    }
+}
+.db-payment-label{
+    text-align: center;
+    margin: 40px 0;
+}
+
+.db-payment-label-image{
+    width: 100%; /* Make it responsive */
+    max-width: 800px; /* Adjust based on your layout */
+    height: auto;
+}
+
+/* Why Choose Us Section */
+.why-choose-us {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.why-choose-us-image {
+    width: 100%; /* Make it responsive */
+    max-width: 800px; /* Adjust based on your layout */
+    height: auto;
+}
+
+
+
+/* Payment Icons Section */
+/* .payment-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.payment-icons img {
+    width: 60px;
+    height: auto;
+} */
+
+/* Chatbot Widget */
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-family: Rajdhani;
+    z-index: 1000; 
+  
+}
+.chatbot-popup {
+    display: none; /* Previously 'none', now set to 'block' */
+    background: #F1F1F1;
+    padding: 10px;
+    text-align: right;
+    position: absolute;
+    bottom: 40px;
+    right: 20px;
+    border-radius: 8px;
+}
+
+
+.db-chatbot-btn {
+    display: block;
+    width: 150px;
+    margin: 5px;
+    padding: 10px;
+    background: #252A34;
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 15px;
+    font-family: Rajdhani;
+
+}
+.chatbot-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    float: right;
+    color:black;
+}
+.chatbot-icon { 
+    width: 50px;
+    height: 50px;
+    background: hsl(24, 100%, 50%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;  /* Centers horizontally */
+    align-items: center;  /* Centers vertically */
+    cursor: pointer; 
+    overflow: hidden; /* Ensures the image does not overflow */
 }
 
-.view_all_button:hover {
-    background-color: #ffa500; /* Brighter orange for hover effect */
-    transform: scale(1.05); /* Slight zoom effect */
-}
-
-.view_all_button:active {
-    background-color: #cc7a00; /* Deeper orange for active state */
-    transform: scale(1); /* Reset zoom effect */
-}
-
-.view_all_button:focus {
-    outline: 2px solid #ffff66; /* Yellow focus ring for accessibility */
-    outline-offset: 2px;
+.chatbot-img {
+    width: 40px; /* Adjust the size as needed */
+    height: 40px;
+    margin-top: -5px;
+    object-fit: contain; /* Ensures the image fits inside without cropping */
 }
 
 
-/* Reset Form Styling */
-/* .password-reset-container {
-    max-width: 400px;
-    margin: 0 auto;
+/* Container Styling */
+.db-container {
+    position: relative; /* Allows absolute positioning for stars */
+    display: flex;
+    background: linear-gradient(to right, #3749A6, #A64153);
+    border-radius: 15px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    font-family: Arial, sans-serif;
+    color: white;
+    font-family: Rajdhani;
+    flex-wrap: wrap;
+    overflow: hidden; /* Ensures stars don’t overflow */
 }
 
+/* Star Styling */
+.db-star {
+    position: absolute;
+    width: 40px; /* Adjust size */
+    height: auto;
+    opacity: 0.8; /* Slight transparency */
+}
 
-.password-reset-heading {
+/* Positioning Stars */
+.star-top-left {
+    top: 15px;
+    left: 45px;
+}
+
+.star-top-right {
+    top: 30px;
+    right:100px;
+}
+
+.star-bottom-left {
+    bottom: 70px;
+    left: 110px;
+}
+
+.star-bottom-right {
+    bottom: 10px;
+    right: 25px;
+}
+.star-bottom-left1 {
+    bottom: 100px;
+    left: 10px;
+}
+
+.star-bottom-right2 {
+    bottom: 40px;
+    right: 20%;
+}
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .db-star {
+        width: 30px; /* Reduce star size for smaller screens */
+    }
+    .star-bottom-left {
+       display:none;
+    }
+    
+}
+
+.db-left-section {
+    flex: 1;
     text-align: center;
+    padding: 20px;
+    border-radius: 10px 0 0 10px;
+}
+
+.db-heading {
+    margin-bottom: 20px;
+}
+
+.db-trophy-icon img {
+    width: 140px;
+}
+
+.db-right-section {
+    flex: 2;
+    padding: 20px;
+}
+
+.db-earnings {
+    text-align: left;
+}
+
+.db-earnings-tag {
+    background: #ff6600;
+    padding: 5px 10px;
+    border-radius: 45px;
+    color: white;
+    font-size: 14px;
+}
+
+.db-heading {
+    font-size: 32px;
+    margin: 10px 0;
+}
+
+.db-text {
+    font-size: 16px;
+    color: white; /* Adjusted to ensure readability */
+}
+
+.db-subscription {
+    margin-top: 20px;
+}
+
+input[type="db-email"] {
+    width: 50%;
+    padding: 10px;
+    margin: 10px 0;  
+}
+
+.db-checkbox {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.db-checkbox label {
+    margin-left: 5px;
+}
+
+.db-btn {
+    background: rgb(29, 202, 13);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.db-btn:hover {
+    background: darkgreen;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .db-container {
+        flex-direction: column;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .db-left-section {
+        border-radius: 10px 10px 0 0;
+        padding: 15px;
+    }
+
+    .db-right-section {
+        padding: 15px;
+    }
+    .db-earnings {
+        text-align: center;
+    }
+    
+    .db-heading {
+        font-size: 24px;
+    }
+
+    .db-text {
+        font-size: 14px;
+    }
+   
+    .db-chatbot-btn {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .chatbot-popup {
+        width: 200px;
+        bottom: 39px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chatbot-container {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .chatbot-popup {
+        width: 180px;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .db-container {
+        padding: 10px;
+    }
+
+    .db-heading {
+        font-size: 20px;
+    }
+
+    .db-btn {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .db-trophy-icon img {
+        width: 100px;
+    }
+}    
+@media (max-width: 1024px) {
+    .chatbot-container {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .chatbot-popup {
+        width: 180px;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .db-container {
+        padding: 10px;
+    }
+
+    .db-heading {
+        font-size: 20px;
+    }
+
+    .db-btn {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .db-trophy-icon img {
+        width: 100px;
+    }
+}    
+
+@media screen and (max-width: 768px) {
+    .why-choose-us,.payment-label {
+        margin: 20px 0;
+    }
+
+    .why-choose-us-image,.payment-label-image {
+        max-width: 100%; /* Allow full width for smaller screens */
+    }
+}
+.custom-banner {
+    position: relative;
+    width: 100%;
+    margin: auto;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3); /* Bottom shadow */
+}
+.banner-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.banner-content {
+    position: absolute;
+    top: 30%;
+    left: 10%;
+    transform: translate(0, -20%);
+    color: #fff;
+    z-index: 2;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align content to the left */
+    gap: 15px; /* Add space between title and button */
+}
+
+.db-banner {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    display: block;
+    font-family: Rajdhani;
+    font-weight: bold;
+    width: 150px;
+    margin: 5px;
+    font-size: 20px;
+    padding: 10px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.banner-title {
+    font-size: 50px;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.2;
+}
+.banner-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(26, 25, 25, 0.7); /* Add semi-transparent background */
+    color: white;
+    display: flex;
+    justify-content: space-around; /* Evenly space items */
+    align-items: center;
+    padding: 15px 0;
+    box-shadow: 0 -4px 6px rgba(219, 197, 197, 0.2); /* Shadow for footer section */
+    font-family:Rajdhani;
+}
+.banner-footer-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.banner-footer-item img {
+    height: 40%; /* Adjust based on your icons */
+}
+
+.banner-footer-item p {
+    margin: 0;
+    font-weight: bold;
+    color: white;
+}
+
+.banner-footer-item span {
+    color: white;
+    font-size: 14px;
+}
+.banner-footer-item p i {
+    color: gold; /* Makes the stars golden */
+    font-size: 18px; /* Adjust size if needed */
+}
+.banner-footer-item p a { color: white;}
+.banner-footer-item a {
+    color: gold;
+    text-decoration: none;
+    font-size: 14px;
+}
+.explore-button {
+    background: #252A34;
+    color: white;
+    font-size: 16px;
+    font-family:  Open Sans;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+    word-wrap: break-word;
+    transition: background-color 0.3s ease;
+}
+/* .trustpilot-image {
+    height: 100%; 
+    width: 100%;
+    vertical-align: middle;
+} */
+@media screen and (max-width: 768px) {
+    .custom-banner {
+        width: 100%;
+        border-radius: 5px; /* Reduce radius for smaller screens */
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Slightly lighter shadow */
+    }
+
+    .banner-content {
+        top: 50%;
+        left: 5%;
+        transform: translate(0, -50%);
+        gap: 10px; /* Reduce spacing */
+        text-align: center;
+        width: 90%;
+        align-items: center;
+
+    }
+
+    .banner-title {
+        display: none;
+    }
+
+    .db-banner {
+        top: 5px;
+        right: 5px;
+        width: 120px;
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    .banner-footer {
+        flex-direction: row; /* Stack footer items vertically */
+        /* padding: 10px; */
+        text-align: center;
+    }
+
+    .banner-footer-item {
+        justify-content: center;
+        gap: 5px;
+        font-size: 12px;
+    }
+
+    .banner-footer-item img {
+        height: 30px; /* Adjust icon size */
+    }
+.trustpilot-image{display:none;}
+    .explore-button {
+       display: none;
+    }
+}
+.how-to-play_why-choose-us_container {
+    margin: 0 auto;
+    border-radius: 15px;
+    /* width: 100%; */
+}
+/* .how-play-image {
+    width: 100%;
+    max-width: 800px; 
+    height: auto;
+} */
+/* Section Title */
+/* How to Play Section */
+.how-to-play {
+    background-color:#FFD2B45C;
+    padding: 30px 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+.how-to-play h2 {
+    text-align: center;
+    margin-bottom: 20px;
     color: #333;
 }
+.how-to-play .how-to-playsteps {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
 
+.how-to-play .how-to-playstep {
+    text-align: center;
+    flex: 1 1 calc(25% - 10px); /* Responsive with 4 columns */
+    margin: 10px;
+    max-width: 250px;
+}
 
-.reset-label {
-    display: block;
-    margin-top: 10px;
+.how-to-play .how-to-playstep i {
+    font-size: 30px;
+    color: #ff8c42;
+    margin-bottom: 10px;
+}
+
+.how-to-play .how-to-playstep p {
     font-size: 14px;
     color: #555;
 }
 
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .how-to-play .how-to-playstep {
+        flex: 1 1 calc(50% - 10px); /* Adjust to 2 columns */
+    }
+}
 
-.reset-input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-} 
+@media (max-width: 480px) {
+    .how-to-play .how-to-playstep{
+        flex: 1 1 100%; /* Stack vertically */
+        max-width: 100%;
+    }
+}
 
-
-.reset-button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 15px;
-    border: none;
-    border-radius: 4px;
-    background-color: #4CAF50;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-} 
-
-
- .reset-button:hover {
-    background-color: #45a049;
-} 
-
-
-.reset-message {
-    margin-top: 15px;
+/* Title Styling */
+.previous-winners-title {
     text-align: center;
-    font-size: 14px;
-} */
+    font-size: 1.8rem; /* Slightly smaller for mobile */
+    margin: 15px 0;
+}
 
+/* Container Styling */
+.previous-winners-container {
+    text-align: center;
+    margin: 15px auto;
+    background-color: #FFD2B45C;
+    font-family: Rajdhani;
+    padding: 10px; /* Add padding for better spacing */
+}
 
-/* Email Sent Message Styling */
-/* .email-sent-container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    font-family: Arial, sans-serif;
+/* Winner Row - Responsive Grid */
+.previous-mainpage-winner-row {
+    display: flex;
+    flex-wrap: wrap; /* Allows images to stack on smaller screens */
+    justify-content: center;
+    gap: 10px; /* Add space between images */
+    margin-bottom: 15px;
+}
+
+/* Individual Winner Styling */
+.previous-mainpage-winner {
+    margin: 10px;
+}
+
+/* Winner Images - Responsive */
+.previous-mainpage-winner img {
+    width: 100%; /* Make images fully responsive */
+    max-width: 300px; /* Restrict maximum size */
+    height: 300px; /* Maintain aspect ratio */
+    border-radius: 10px;
+}
+
+/* View All Button - Responsive */
+.view-all-button-previous-winner-mainpage {
+    display: block;
+    width: 90%; /* Make button full-width on smaller screens */
+    max-width: 250px; /* Restrict max width */
+    margin: 15px auto; /* Center button */
+    background-color: #FF6600;
+    color: white;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1rem;
     text-align: center;
 }
 
+/* Mobile View Adjustments */
+@media (max-width: 768px) {
+    .previous-winners-title {
+        font-size: 1.5rem;
+    }
 
-.email-sent-heading {
-    color: #333;
+    .previous-mainpage-winner-row {
+        flex-direction: row; /* Stack items on top of each other */
+        align-items: center;
+    }
+
+    .previous-mainpage-winner img {
+        max-width: 90px; /* Reduce image size for small screens */
+        max-height:90px;
+    }
+
+    .view-all-button-previous-winner-mainpage {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+}
+/* Mobile View Adjustments */
+@media (max-width: 1024px) {
+    .previous-winners-title {
+        font-size: 1.5rem;
+    }
+
+    .previous-mainpage-winner-row {
+        flex-direction: row; /* Stack items on top of each other */
+        align-items: center;
+    }
+
+    .previous-mainpage-winner img {
+           width: 100%; /* Make images fully responsive */
+    max-width: 300px; /* Restrict maximum size */
+    height: 300px; /* Maintain aspect ratio */
+    border-radius: 10px;
+    }
+
+    .view-all-button-previous-winner-mainpage {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+}
+.testimonial-section {
+    text-align: center;
+    padding: 20px 0px;
+}
+.testimonial-container {
+    display: flex;
+    align-items: stretch; /* Ensures both sections stretch equally */
+    justify-content: center;
+    margin: auto;
+    background: white;
+    overflow: hidden;
+    font-family: Rajdhani;
+    height: 350px;
+    
 }
 
-
-.email-sent-message {
-    margin-top: 15px;
-    font-size: 14px;
-}
-
-
-.email-sent-button {
+.testimonial-slide {
+    display: none;
     width: 100%;
-    padding: 10px;
-    margin-top: 15px;
-    border: none;
-    border-radius: 4px;
-    background-color: #4CAF50;
-    color: white;
+    flex-direction: row;
+    align-items: stretch; /* Ensures both sections match height */
+    justify-content: space-between;
+}
+
+.testimonial-slide.active {
+    display: flex;
+}
+
+.testimonial-text {
+    width: 50%;
+    padding: 50px; /* Adjust padding as needed */
+    background: #e9f0ff;
+    transition: opacity 0.5s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centers text inside */
+}
+
+.testimonial-text h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
     font-weight: bold;
+}
+
+.testimonial-text p {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.testimonial-image {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+      height: 100%;
+}
+
+.testimonial-image img {
+    width: 100%;
+    height: 100%; /* Ensures image fills the container */
+    object-fit: cover; /* Prevents distortion */
+    display: block;
+}
+
+
+.dots {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.dot {
+    height: 10px;
+    width: 10px;
+    margin: 0 5px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
     cursor: pointer;
 }
 
+.dot.active {
+    background-color: #ff5722;
+}
 
-.email-sent-button:hover {
-    background-color: #45a049;
-} */
+/* Responsive */
+@media (max-width: 768px) {
+    .testimonial-container {
+        flex-direction: column;
+        height:auto;
+    }
+    .testimonial-slide {
+        flex-direction: column;
+    }
+    .testimonial-text, .testimonial-image {
+        width: 100%;
+        text-align: center;
+    }
+   
+    .testimonial-image {
+        order: -1; /* Moves the image above the text */
+        width: 100%;
+        text-align: center;
+    }
 
-
+    .testimonial-text h3 {
+        font-size: 15px;
+        font-weight: bold;
+        width: 90%;
+    }
+    
+    .testimonial-text p {
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    
+    .testimonial-text {
+        padding: 20px;
+    }
+}
 /*      password confirm         */
-
-
 /* General reset */
 #cart body {
     font-family: Arial, sans-serif;
@@ -2991,34 +4445,53 @@ top: 20px;
     }
 }
 
-
-
-/*----------lottery_details--------------*/
+/*-------------------lottery details-------------------*/
 .lottery-detail-page {
-    font-family: Arial, sans-serif;
+    font-family: Rajdhani;
     margin: 0;
     padding: 0;
+    overflow-x: hidden; 
 }
 
 .lot-detail-container {
     display: flex;
     flex-direction: row;
-    max-width: 1200px;
+    justify-content: space-between; 
     margin: 0 auto;
     padding: 20px;
+   
+}
+
+.lot-detail-left, .lot-detail-right {
+    flex: 1;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.share-text{
+    color: black;
+    font-size: 21.35px;
+    font-family: Rajdhani;
+    font-weight: 600;
+    line-height: 30.84px;
+    word-wrap: break-word}
+
+.lot-detail-right {
+    /* Specific styling for the right side, such as event details */
+    margin-left: 10px; /* Space between the left and right sections */
 }
 
 .lot-detail-image {
     flex: 1;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+    /* justify-content: center; */
+    /* align-items: center; */
+    padding: 10px;
 }
 
 .lot-detail-image img {
-    width: 300px;   /* Set a fixed width */
-    height: auto;   /* Maintain aspect ratio */
+    width: 600px;   
+    height: auto;  
 }
 
 
@@ -3038,12 +4511,11 @@ top: 20px;
     margin: 5px 0;
     
 }
-
-.lot-detail-price {
-    font-size: 1.5em;
-    color: #007bff;
-    margin: 10px 0;
+#lot-detail-event-title{
+    color: #FF6600; font-size: 33.70px; font-family: Rajdhani; font-weight: 700; line-height: 29.19px; 
 }
+
+.lot-detail-event-draw-datetime{top: 0px; position: absolute; color: white; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word    }
 
 .lot-detail-sold-bar-container {
     margin-top: 20px;
@@ -3064,7 +4536,7 @@ top: 20px;
 }
 
 .lot-detail-sold-bar-fill-class {
-    background-color: #007bff;
+    background-color:#FF6600;
     height: 100%;
     text-align: center;
     color: white;
@@ -3072,15 +4544,7 @@ top: 20px;
     font-size: 0.9em;
 }
 
-@media (max-width: 768px) {
-    .lot-detail-container {
-        flex-direction: column;
-    }
 
-    .lot-detail-image {
-        margin-bottom: 20px;
-    }
-}
 /* General Tab Container Styles */
 .lot-detail-tab-container {
     margin-top: 20px;
@@ -3091,35 +4555,13 @@ top: 20px;
     border-bottom: 2px solid #ddd;
 }
 
-.lot-detail-tab-btn {
-    padding: 10px 20px;
-    cursor: pointer;
-    border: none;
-    background-color: #f5f5f5;
-    font-size: 16px;
-    margin-right: 5px;
-}
-
-.lot-detail-tab-btn.active {
-    background-color: #007bff;
-    color: #fff;
-}
-
 .lot-detail-tab-content-container {
-    max-height: 400px;
+    max-height: 310px;
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid #ccc;
     padding: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.lot-detail-tab-pane {
-    display: none;
-}
-
-.lot-detail-tab-pane.active {
-    display: block;
 }
 
 /* Ticket Control Styles */
@@ -3130,41 +4572,125 @@ top: 20px;
 .lot-detail-ticket-control-buttons {
     display: flex;
     align-items: center;
+   
 }
 
 .lot-detail-control-btn {
     margin: 0 10px;
+    border-radius: 100px;
+    width: 40px;
+    height: 40px;
+    background-color: #f3f3f3;
+    border: 1px solid #ccc;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.lot-detail-control-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.lot-detail-control-btn:active {
+    background-color: #d1d1d1;
 }
 
 .lot-detail-ticket-slider-container {
-    margin: 10px 0;
+    margin: 5px 0;
 }
-
 .lot-detail-ticket-limit-info {
-    font-size: 14px;
-    color: #555;
+    color: black; font-size: 23.72px; font-family: Rajdhani; font-weight: 600; text-decoration: underline; height: 100%; padding: 10px; background: #F4F4F4; align-items: center; gap: 10px;  
+}
+.amount-input {
+    width: 100px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    text-align: left;
+    background: transparent;
 }
 
-.lot-detail-competition {
-    margin: 20px 0;
+.currency-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    padding: 5px;
+    width: fit-content;
+    background: #f8f8f8;
+    border-radius: 5px;
 }
+.currency-symbol {
+    font-size: 20px;
+    /* font-weight: bold; */
+    margin-right: -13px;
+    color: #333;
+}
+
+#lot-detail-ticket-count {
+    border: 1px solid #ccc; /* Add a border to indicate it's editable */
+    background: #fff; /* Ensure background is visible */
+    font-size: 16px; 
+    color: #000; 
+    text-align: left; 
+    padding-left: 10px; 
+    width: 60px; 
+    
+}
+.lot-detail-total-label{font-weight: bold;}
+.ticket-count-label {
+    margin: 0 10px;
+    font-size: 16px;
+    color: #000; 
+    font-weight: bold; 
+    pointer-events: none;
+}
+
+/* Competition Details Container */
+.lot-detail-competition-container {
+    width: 100%;
+    
+    margin: 20px auto; /* Center the section */
+    padding: 20px;
+   
+    background-color: #fff; /* White background */
+
+}
+/* Competition Details Content */
+.lot-detail-competition-content {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333; /* Darker text */
+}
+
+/* Adjust Header */
+.lot-detail-competition-container h2 {
+    /* text-align: center; */
+    font-size: 22px;
+    color: #222;
+    margin-bottom: 10px;
+}
+
 
 
 
 /* Additional Images Styling */
 #additional-images-containerpopup img {
-    width: 100px;
-    height: auto; 
-    max-width: 100%; 
-    margin: 10px; 
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow */
+    width: 130px;
+    height: 100px; 
+    /* max-width: 100%;  */
+    margin: 12.5px; 
     cursor: pointer; /* Indicate clickable images */
     object-fit: cover; /* Ensure consistent scaling */
 }
 /* Popup Container */
-#lot-detail-image-popup {
+#lot-detail-image-popup { 
     display: none;
     position: fixed;
     top: 0;
@@ -3190,8 +4716,8 @@ top: 20px;
 
 /* Popup Image */
 #lot-detail-popup-image {
-    max-width: 90%;
-    max-height: 80vh;
+    width: 500px;
+    height: 500px;
 }
 
 /* Navigation Buttons */
@@ -3206,23 +4732,39 @@ top: 20px;
     padding: 10px;
     font-size: 18px;
 }
+.lot-detail-prev-btn, 
+.lot-detail-next-btn, 
+.lot-detail-close-btn {
+    width: 40px;  /* Adjust as needed */
+    height: 40px; /* Adjust as needed */
+    border-radius: 50%;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px; /* Adjust if needed */
+    cursor: pointer;
+}
 
+/* Positioning adjustments */
 .lot-detail-prev-btn {
+    position: absolute;
     left: 10px;
 }
 
 .lot-detail-next-btn {
+    position: absolute;
     right: 10px;
 }
-
-/* Close Button */
+.lot-detail-close-btn:hover {
+    background-color: #FF6600;
+}
 .lot-detail-close-btn {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: 24px;
-    cursor: pointer;
-    color: white;
+   color: #000;
 }
 
 /* Image Counter */
@@ -3234,6 +4776,565 @@ top: 20px;
 .hidden {
     display: none;
 }
+/* Social Icons */
+.lot-social-icons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    
+}
+
+.icon {
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    display: inline-block;
+background-color: rgba(255, 102, 0, 0.05);
+}
+
+/* Set Background Images */
+.facebook {
+    background-image: url("/media/lottery_images/Frame.svg");
+}
+
+.twitter {
+    background-image: url("/media/lottery_images/Frame (1).svg");
+}
+
+.whatsapp {
+    background-image: url("/media/lottery_images/Frame (2).svg");
+}
+.add-to-cart-button:hover {
+    background-color: grey;
+}
+.add-to-cart-button {
+    width: 30%;
+    height: 50px;
+    border-radius: 23.72px;
+    border: 1.19px solid #D9DADB;
+    background-color: transparent; /* If you want to remove the background */
+    cursor: pointer;
+    margin-left:5%;
+    font-family: Rajdhani;
+}
+.buy-now-button {
+     width: 35%; 
+     height: 50px; background: #FF6600; 
+     border-top-left-radius: 10px;
+      border-bottom-right-radius: 10px; 
+      color: white; padding: 10px; font-size: 16px;
+       border: none; cursor: pointer; margin-top: 10px;
+       font-family: Rajdhani;
+    }
+    .cart-icon {
+        width: 30px; /* Adjust size as needed */
+        height: 30px;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+    
+.buy-now-button:hover {
+    background-color: #cc5500;
+}
+
+@media (max-width: 768px) {
+    .lot-detail-container {
+        flex-direction: column; /* Stack elements vertically */
+        padding: 10px;
+    }
+
+    .lot-detail-left, 
+    .lot-detail-right {
+        width: 100%; /* Take full width */
+        padding: 10px;
+    }
+
+    .lot-detail-image img {
+        width: 100%; /* Make images responsive */
+        height: auto;
+    }
+
+  
+
+    .lot-detail-info {
+        padding: 10px;
+    }
+
+    /* Popup Container - Full Screen */
+    #lot-detail-image-popup {
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+    }
+
+    /* Make Popup Image Responsive */
+    #lot-detail-popup-image {
+        width: 90%;  /* Make the image fit within the screen */
+        height: auto;
+        max-width: 400px; /* Set a reasonable max width */
+    }
+
+    /* Adjust Navigation Buttons */
+    .lot-detail-popup-nav {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+        padding: 5px;
+    }
+
+    /* Reduce Button Size for Mobile */
+    .lot-detail-prev-btn,
+    .lot-detail-next-btn,
+    .lot-detail-close-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    /* Position Previous & Next Buttons */
+    .lot-detail-prev-btn {
+        left: 10px;
+    }
+
+    .lot-detail-next-btn {
+        right: 10px;
+    }
+
+    /* Adjust Close Button */
+    .lot-detail-close-btn {
+        top: 5px;
+        right: 15px;
+    }
+
+    /* Ensure Image Counter is Visible */
+    .lot-detail-image-counter {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .lot-detail-competition-container {
+        width: 90%;
+        padding: 15px;
+    }
+    .add-to-cart-button {
+        width: 50%;
+        height: 50px;
+        border-radius: 23.72px;
+        border: 1.19px solid #D9DADB;
+        background-color: transparent; /* If you want to remove the background */
+        cursor: pointer;
+        margin-left:5%;
+        font-family: Rajdhani;
+    }
+    .buy-now-button {
+         width: 40%; 
+         height: 50px; background: #FF6600; 
+         border-top-left-radius: 10px;
+          border-bottom-right-radius: 10px; 
+          color: white; padding: 10px; font-size: 16px;
+           border: none; cursor: pointer; margin-top: 10px;
+           font-family: Rajdhani;
+        }
+   
+
+    .lot-detail-control-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .amount-input {
+        width: 100px;
+        font-size: 14px;
+    }
+
+    .currency-container {
+        align-items: center;
+        display:flex;
+    }
+
+    #lot-detail-ticket-count {
+        width: 70px;
+        font-size: 14px;
+    }
+    .lot-detail-competition-container h2 {
+        font-size: 20px;
+    }
+    #additional-images-containerpopup img {
+        width: 142px;
+        height: 100px; 
+        /* max-width: 100%;  */
+        margin: 12.5px; 
+        cursor: pointer; /* Indicate clickable images */
+        object-fit: cover; /* Ensure consistent scaling */
+    }
+    .lot-detail-competition-content {
+        font-size: 14px;
+    }
+}
+
+
+@media (max-width: 1024px) {
+    .lot-detail-container {
+        flex-direction: column; /* Stack elements vertically */
+        padding: 10px;
+    }
+
+    .lot-detail-left, 
+    .lot-detail-right {
+        width: 100%; /* Take full width */
+        padding: 10px;
+    }
+
+    .lot-detail-image img {
+        width: 100%; /* Make images responsive */
+        height: auto;
+    }
+
+  
+
+    .lot-detail-info {
+        padding: 10px;
+    }
+
+    /* Popup Container - Full Screen */
+    #lot-detail-image-popup {
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+    }
+
+    /* Make Popup Image Responsive */
+    #lot-detail-popup-image {
+        width: 90%;  /* Make the image fit within the screen */
+        height: auto;
+        max-width: 400px; /* Set a reasonable max width */
+    }
+
+    /* Adjust Navigation Buttons */
+    .lot-detail-popup-nav {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+        padding: 5px;
+    }
+
+    /* Reduce Button Size for Mobile */
+    .lot-detail-prev-btn,
+    .lot-detail-next-btn,
+    .lot-detail-close-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    /* Position Previous & Next Buttons */
+    .lot-detail-prev-btn {
+        left: 10px;
+    }
+
+    .lot-detail-next-btn {
+        right: 10px;
+    }
+
+    /* Adjust Close Button */
+    .lot-detail-close-btn {
+        top: 5px;
+        right: 15px;
+    }
+
+    /* Ensure Image Counter is Visible */
+    .lot-detail-image-counter {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .lot-detail-competition-container {
+        width: 90%;
+        padding: 15px;
+    }
+    .add-to-cart-button {
+        width: 50%;
+        height: 50px;
+        border-radius: 23.72px;
+        border: 1.19px solid #D9DADB;
+        background-color: transparent; /* If you want to remove the background */
+        cursor: pointer;
+        margin-left:5%;
+        font-family: Rajdhani;
+    }
+    .buy-now-button {
+         width: 40%; 
+         height: 50px; background: #FF6600; 
+         border-top-left-radius: 10px;
+          border-bottom-right-radius: 10px; 
+          color: white; padding: 10px; font-size: 16px;
+           border: none; cursor: pointer; margin-top: 10px;
+           font-family: Rajdhani;
+        }
+   
+
+    .lot-detail-control-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .amount-input {
+        width: 100px;
+        font-size: 14px;
+    }
+
+    .currency-container {
+        align-items: center;
+        display:flex;
+    }
+
+    #lot-detail-ticket-count {
+        width: 70px;
+        font-size: 14px;
+    }
+    .lot-detail-competition-container h2 {
+        font-size: 20px;
+    }
+    #additional-images-containerpopup img {
+        width: 142px;
+        height: 100px; 
+        /* max-width: 100%;  */
+        margin: 12.5px; 
+        cursor: pointer; /* Indicate clickable images */
+        object-fit: cover; /* Ensure consistent scaling */
+    }
+    .lot-detail-competition-content {
+        font-size: 14px;
+    }
+}
+
+.lot-detail-similar-events {
+    width: 95%;
+    padding: 10px;
+}
+.similar_category_lottery_event {
+    flex-shrink: 0; /* Prevents events from shrinking */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #ffffff;
+    width: 350px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 10px;  /* Reduced from 20px to 10px */
+    padding: 10px; 
+    /* margin-bottom: 20px; */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #f0f0f0;
+}
+.similar_category_lottery_event:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+.similar_category_lottery_event_img {
+    width: 100%;
+    height: 240px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px; 
+}
+.similar_category_lottery_event_draw_date {
+    background-color: #ff6600;
+    color: #fff;
+    padding: 8px 16px;  /* Adjust padding for better appearance */
+    font-size: 14px;
+    border-radius: 20px;
+    display: inline-block; /* Allows content-based width */
+    text-align: center;
+}
+.similar_category_lottery_title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: left;
+    margin: 10px 20px;
+    color: #333;
+
+}
+
+.similar_category_lottery_description {
+    margin-top: 5px;
+    text-align: left;
+    margin: 10px 20px;
+    color: #BEBEBE;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.similar_category_lottery_per_ticket_price {
+    
+    text-align: left;
+    margin: 10px 20px;
+    color: #FF6600;
+    font-size: 30px; font-weight: 700;
+    margin-top: 10px;
+}
+.similar_category_lottery_sold_percentage{
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 10px 20px;
+    height: 12px;
+}
+.similar_category_lottery_sold_bar{
+    height: 12px;
+    background: linear-gradient(90deg, #ff6600 0%, #ff3300 100%);
+    width: 0%;
+    transition: width 0.4s ease-in-out;
+}
+.similar_category_lottery_events_ticket_info{
+    color: #343434;
+    font-size: 14px;
+    font-family: Open Sans;
+    font-weight: 400;
+    text-align: left;
+    margin: 10px 20px;
+}
+.similar_category_lottery_enter_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color:#ff6600;
+    color: #fff;
+    width: 70%;
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 15px 0;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    gap: 40px; /* Space between text and icon */
+}
+.similar_category_lottery_enter_button:hover  {
+    background-color: #cc5200;
+    transform: scale(1.05);
+}
+.similar_category_lottery_enter_icon {
+    width: 25px; /* Adjust size */
+    height: 25px;
+    justify-content: right;
+ 
+}
+.similar_category_lottery_enter_button img {
+    width: 18px; /* Adjust size of the icon */
+    height: auto;
+    transition: transform 0.3s ease;
+}
+.similar_category_lottery_enter_button:hover img {
+    transform: translateX(5px); /* Small movement for effect */
+}
+.similar-events-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+}
+
+.similar-lottery-events-scroll {
+    display: flex;
+    gap: 10px;
+    overflow: hidden; /* Hide scroll bar */
+    width: 90%;
+    scroll-behavior: smooth;
+    padding: 10px 0;
+}
+
+.scroll-btn {
+    background-color: #ff6600;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 10;
+}
+
+#scroll-left {
+    left: 0;
+}
+
+#scroll-right {
+    right: 0;
+}
+
+.scroll-btn:hover {
+    background-color: #cc5200;
+}
+/* style.css - Updated Mobile Styles */
+@media (max-width: 768px) {
+    .similar-events-wrapper {
+        padding: 0 1%;
+    }
+
+    .similar-lottery-events-scroll {
+        width: 85%;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .similar_category_lottery_event {
+        width: 300px;
+        scroll-snap-align: start;
+    }
+
+    .scroll-btn {
+        padding: 8px 12px;
+        font-size: 10px;
+        background-color: #ff6600;
+    }
+
+    #scroll-left {
+        left: 0px;
+    }
+
+    #scroll-right {
+        right: 10px;
+    }
+}
+@media (max-width: 1024px) and (min-width: 769px) {
+    .similar-lottery-events-scroll {
+        width: 90%;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .similar_category_lottery_event {
+        width: 320px;
+        scroll-snap-align: start;
+    }
+
+    .scroll-btn {
+        padding: 10px 15px;
+        font-size: 18px;
+        background-color: #ff6600;
+        position: absolute;
+    }
+
+    #scroll-left {
+        left: 10px;
+    }
+
+    #scroll-right {
+        right: 10px;
+    }
+}
+
+
 
         /* Close button styling */
 .cart-modal-close {
@@ -3304,63 +5405,26 @@ top: 20px;
 }
 /* Button styles for modal */
 #cart-keep-shopping {
-    background-color: #4CAF50; /* Green */
+    background-color: #FF6600; 
     color: white;
     font-size: 16px;
 }
 
 #cart-keep-shopping:hover {
-    background-color: #45a049;
+    background-color: #FF6600;
 }
 
 #cart-view-cart {
-    background-color: #007BFF; /* Blue */
+    background-color: #FF6600; /* Blue */
     color: white;
     font-size: 16px;
 }
 
+
 #cart-view-cart:hover {
-    background-color: #0056b3;
-}
-.add-to-cart-button {
-    background-color: #4CAF50; /* Green background */
-    color: white; /* White text */
-    padding: 10px 20px; /* Padding for better button size */
-    font-size: 16px; /* Text size */
-    border: none; /* No border */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
+    background-color: #FF6600;
 }
 
-#lot-detail-ticket-count {
-    border: none;
-    background: none;
-    font-size: 16px; 
-    color: #000; 
-    text-align: left; 
-    padding-left: 10px; 
-    pointer-events: none; 
-    width: 40px; 
-}
-.ticket-count-label {
-    margin: 0 10px;
-    font-size: 16px;
-    color: #000; 
-    font-weight: bold; 
-    pointer-events: none;
-}
-
-
-.lottery_events_favorite i {
-    color: gray;
-    cursor: pointer;
-}
-
-
-.lottery_events_favorite i.favorited {
-    color: red;
-}
 
 
 /*custom_admin_dashboard.html*/
@@ -3677,6 +5741,7 @@ top: 20px;
 
 
 .navbar {
+    
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -3763,7 +5828,7 @@ top: 20px;
 
 .hamburger span {
     display: block;
-    background-color: #303030;
+    background-color:#FF6600;
     height: 4px;
     width: 100%;
     border-radius: 4px;
@@ -3911,7 +5976,7 @@ top: 20px;
 
 .footer-body {
     margin: 0;
-    font-family: 'Open Sans', sans-serif;
+    font-family:Rajdhani;
 }
 
 
@@ -3930,6 +5995,7 @@ top: 20px;
     max-width: 1200px;
     margin: 0 auto;
     padding-bottom: 70px;
+    font-family:Rajdhani;
 }
 
 
@@ -4033,7 +6099,7 @@ top: 20px;
 /* Responsive Design */
 @media (max-width: 768px) {
     .footer-container {
-        flex-direction: column;
+        flex-direction: row;
         padding: 20px;
         text-align: center;
     }
@@ -4376,49 +6442,86 @@ top: 20px;
 
 
 /*------------error---*/
-
 .error-page-body {
-    font-family:'Rajdhani',Open Sans;
+    font-family: 'Rajdhani', 'Open Sans', sans-serif;
     text-align: center;
     background-color: white;
     margin: 0;
     padding: 0;
-  }
+}
 
-  .error-container {
+.error-container {
     margin-top: 10%;
-  }
+    padding: 20px;
+}
 
-  .error-image {
+.error-image {
     max-width: 100%;
     height: auto;
-  }
+}
 
-  .error-heading {
-    text-align: center;
+.error-heading {
     color: #565872;
     font-size: 20px;
-    font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
     text-transform: uppercase;
     line-height: 34px;
     letter-spacing: 4px;
-  }
+    padding: 10px;
+}
 
-  .error-button {
+.error-button {
     display: inline-block;
     margin-top: 20px;
-    padding: 10px 20px;
+    padding: 12px 25px;
     font-size: 1rem;
     color: #fff;
     background-color: #FF6600;
     text-decoration: none;
     border-radius: 30px;
-  }
+    transition: background-color 0.3s ease;
+}
 
-  .error-button:hover {
+.error-button:hover {
     background-color: #FF7700;
-  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .error-container {
+        margin-top: 5%;
+        padding: 15px;
+    }
+
+    .error-heading {
+        font-size: 18px;
+        line-height: 28px;
+        letter-spacing: 2px;
+    }
+
+    .error-button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .error-container {
+        margin-top: 3%;
+        padding: 10px;
+    }
+
+    .error-heading {
+        font-size: 16px;
+        line-height: 24px;
+    }
+
+    .error-button {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+}
+
 /*___________custom admin ds______________*/
 .custom_admin_dashboard_lottery-events-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -4679,30 +6782,41 @@ top: 20px;
 .category_lottery_enter_button:hover {
     background: #0056b3;
 }
-
 .categories-tabs {
+    position: sticky;
+    top: 0; /* Adjust based on your layout */
+    z-index: 1000; /* Ensures it stays on top */
     display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 40px;
     overflow-x: auto;
     background: #252A34;
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar for modern browsers */
+    
 }
+
+.categories-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Webkit browsers */
+}
+
 
 .category-tab {
     position: relative;
-    padding: 10px 20px;
+    padding: 8px 16px;
     background-color: transparent;
     color: white;
-    font-size: 18px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
+    font-size: 19px;
+    font-family: 'Rajdhani';
     border: none;
     border-radius: 10px;
     cursor: pointer;
     transition: color 0.3s ease;
     word-wrap: break-word;
+    scroll-snap-align: start;
 }
 
 .category-tab:focus {
@@ -4710,6 +6824,7 @@ top: 20px;
 }
 
 .category-tab.active {
+    font-weight: bold;
     color: white;
 }
 
@@ -4718,7 +6833,7 @@ top: 20px;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 5px;
+    height: 4px;
     background: #FF6600;
     border-radius: 5px;
     display: none;
@@ -4727,293 +6842,54 @@ top: 20px;
 .category-tab.active .tab-indicator {
     display: block;
 }
-/* .custom-banner {
+
+@media screen and (max-width: 768px) {
+.category_section {
+    position: relative; /* Allows absolute positioning within */
+    /* margin-bottom: 40px;  */
+}
+.categories-tabs {
     position: relative;
-    width: 100%;
-    max-width: 1200px;
-    margin: auto;
-    overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.banner-image {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.banner-content {
-    position: absolute;
-    top: 20%;
-    left: 10%;
-    transform: translate(0, -20%);
-    color: #fff;
-    z-index: 2;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-}
-
-.banner-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 0 0 10px;
-    line-height: 1.2;
-}
-
-.explore-button {
+    top: 0; /* Adjust based on your layout */
+    z-index: 1000; /* Ensures it stays on top */
+    display: flex;
+    gap: 40px;
+    overflow-x: auto;
     background: #252A34;
-    color: white;
-    font-size: 16px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 600;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    display: inline-block;
-    word-wrap: break-word;
-    transition: background-color 0.3s ease;
-} */
-.custom-banner {
-    position: relative;
-    width: 100%;
-    
-    margin: auto;
-    overflow: hidden;
+    padding: 0px;
+    border-radius: 10px;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar for modern browsers */
     
 }
 
-.banner-image {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.banner-content {
-    position: absolute;
-    top: 30%;
-    left: 10%;
-    transform: translate(0, -20%);
-    color: #fff;
-    z-index: 2;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+.category_header {
     display: flex;
-    flex-direction: column; /* Stack items vertically */
-    align-items: flex-start; /* Align content to the left */
-    gap: 15px; /* Add space between title and button */
-}
-
-.banner-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 0;
-    line-height: 1.2;
-}
-.banner-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Add semi-transparent background */
-    color: white;
-    display: flex;
-    justify-content: space-around; /* Evenly space items */
     align-items: center;
-    padding: 15px 0;
-    box-shadow: 0 -4px 6px rgba(219, 197, 197, 0.2); /* Shadow for footer section */
-}
-
-.banner-footer-item {
-    text-align: center;
-    color: #fff;
-    font-size: 14px;
-    line-height: 1.5;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.banner-footer-item span {
-    display: block;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.banner-footer-item p {
-    margin: 5px 0 0;
-    font-size: 12px;
-}
-
-.banner-footer-item i {
-    font-size: 18px;
-    margin-bottom: 5px;
-    display: block;
-    color: #FFD700; /* Gold color for icons */
-}
-
-
-.how-to-play_why-choose-us_container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    
-}
-
-/* Section Title */
-
-
-/* How to Play Section */
-.how-to-play {
-    background-color: #fff4eb;
-    padding: 30px 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-}
-.how-to-play h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-}
-.how-to-play .how-to-playsteps {
-    display: flex;
-    justify-content: space-between;
     gap: 10px;
-    flex-wrap: wrap;
-}
-
-.how-to-play .how-to-playstep {
-    text-align: center;
-    flex: 1 1 calc(25% - 10px); /* Responsive with 4 columns */
-    margin: 10px;
-    max-width: 250px;
-}
-
-.how-to-play .how-to-playstep i {
-    font-size: 30px;
-    color: #ff8c42;
-    margin-bottom: 10px;
-}
-
-.how-to-play .how-to-playstep p {
-    font-size: 14px;
-    color: #555;
-}
-
-/* Why Choose Us Section */
-.why-choose-us {
-    background-color: #ffffff;
-    padding: 30px 20px;
-    border-radius: 8px;
-}
-.why-choose-us h2 {
-    text-align: center;
-    margin-bottom: 20px;
     color: #333;
-}
-.why-choose-us .why-choose-us_reasons {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
-    flex-wrap: wrap;
+    font-size: 20px;
+    /* margin-bottom: 20px; */
+    font-family: Rajdhani;
 }
 
-.why-choose-us .why-choose-us_reason {
-    text-align: center;
-    flex: 1 1 calc(33.33% - 20px); /* Responsive with 3 columns */
-    margin: 10px;
-    max-width: 300px;
-}
+    .categories-tabs {
+        gap: 20px; /* Reduce gap for better mobile spacing */
+        padding: 10px; /* Adjust padding for better usability */
+        max-width: 100vw; /* Ensure it fits the screen */
+    }
 
-.why-choose-us .why-choose-us_reason i {
-    font-size: 30px;
-    color: #3b82f6;
-    margin-bottom: 10px;
-}
+    .category-tab {
+        font-size: 16px; /* Reduce font size for better fit */
+        padding: 6px 12px; /* Adjust padding for smaller touch areas */
+    }
 
-.why-choose-us .why-choose-us_reason h3 {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.why-choose-us .why-choose-us_reason p {
-    font-size: 14px;
-    color: #555;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .how-to-play .how-to-playstep, 
-    .why-choose-us .why-choose-us_reason {
-        flex: 1 1 calc(50% - 10px); /* Adjust to 2 columns */
+    .category-tab .tab-indicator {
+        height: 3px; /* Slightly thinner indicator */
     }
 }
-
-@media (max-width: 480px) {
-    .how-to-play .how-to-playstep, 
-    .why-choose-us .why-choose-us_reason {
-        flex: 1 1 100%; /* Stack vertically */
-        max-width: 100%;
-    }
-}
-.explore-button {
-    background: #252A34;
-    color: white;
-    font-size: 16px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 600;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    display: inline-block;
-    word-wrap: break-word;
-    transition: background-color 0.3s ease;
-}
-
-.previous-winners-title {
-    text-align: center;
-    font-size: 2rem;
-    margin: 20px 0;
-}
-
-.previous-winners-container {
-    text-align: center;
-    margin: 20px auto;
-    width: 80%;
-}
-
-.previous-mainpage-winner-row {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 15px;
-}
-
-.previous-mainpage-winner {
-    margin: 10px;
-}
-
-.previous-mainpage-winner img {
-    width: 388px;
-    height: 344px;
-    border-radius: 10px;
-}
-
-.view-all-button-previous-winner-mainpage {
-    display: block; /* Make it a block element */
-    margin: 20px auto; /* Center it horizontally */
-    background-color: orange;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 1rem;
-    text-align: center; /* Center text inside the button */
-}
-
-
-
-
 /*---------------------reply old-----------------*/
 /* admin_contact_reply.html */
 
@@ -5224,13 +7100,7 @@ top: 20px;
 .email-item:hover .delete-icon {
     display: inline;
 }
-
-
-
-
-
 /* user_chats.html */
-
 #user_chats {
     width: 80%;
     margin: 0 auto;
@@ -5408,21 +7278,6 @@ top: 20px;
     font-size: 14px;
     margin-bottom: 10px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Style for the chat messages */
 .chat-user-message, .chat-admin-message {
     position: relative;
@@ -5467,16 +7322,7 @@ top: 20px;
 .message-actions span:hover {
     background-color: #ccc;
 }
-
-
-
-
-
 /* admin_contact_reply.html */
-
-
-
-/* Modal styles */
 .admin_contact_reply_modal {
     display: none;
     position: fixed;
@@ -5560,6 +7406,331 @@ top: 20px;
         transform: scale(1);
     }
 }
+/*-----------------2-FA-------------*/
+.otp-verification-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.otp-verification-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 300px;
+}
+.otp-input-field { margin-top: 10px; width: 100%; padding: 8px; }
+.otp-submit-button, .otp-cancel-button { margin-top: 10px; padding: 8px 15px; }
+.otp-cancel-button { background: red; color: white; border: none; }
+.hidden-element {
+    display: none;
+}
+
+
+.privacy-container {
+    width: 100%;
+    max-width: 750px;
+    margin-left: 0;
+    background: white;
+    padding: 24px;
+    position: relative;
+    left: 0;
+}
+.privacy-container h1 {
+    margin-left: 0;
+    font-size: 48px;
+    font-family: Rajdhani, sans-serif;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.85);
+    text-align: left;
+    margin-bottom: 20px;
+}
+.privacy-profile-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+.privacy-profile-section h2 {
+    font-size: 20px;
+    font-family: Rajdhani, sans-serif;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 16px;
+}
+
+#privacy-form {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#privacy-form>* {
+    width: 300px;
+    margin-right: 100px;
+    margin-bottom: 20px;
+
+}
+
+
+.privacy-form-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+#privacy-form label {
+    font-size: 16px;
+    font-family: Rajdhani, sans-serif;
+    font-weight: 700;
+    color: #333;
+    width: 30%;
+    text-align: left;
+    display: block;
+    margin-bottom: 8px;
+}
+
+#privacy-form input {
+    flex: 1;
+    padding: 8px;
+    font-size: 16px;
+    font-family: Rajdhani, sans-serif;
+    border: 1px solid #7D899D;
+    border-radius: 4px;
+}
+
+#privacy-form input[readonly] {
+    background: #f0f0f0;
+    opacity: 0.6;
+}
+
+#privacy-form .email-input {
+    width: 100%;
+
+}
+
+.privacy-error {
+    color: red;
+    font-size: 14px;
+    font-family: Rajdhani, sans-serif;
+}
+
+#privacy-two-factor-auth {
+    width: 20px;
+    height: 20px;
+}
+
+#privacy-save-changes {
+    margin-left: 450px;
+    width: 20%;
+    padding: 12px;
+    font-size: 16px;
+    font-family: Rajdhani, sans-serif;
+    font-weight: 700;
+    color: white;
+    background: #FF4B00;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+#privacy-save-changes:hover {
+    opacity: 0.8;
+}
+
+#privacy-message {
+    text-align: center;
+    font-size: 14px;
+    font-family: Rajdhani, sans-serif;
+    color: green;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .privacy-container {
+        padding: 16px;
+    }
+
+    .privacy-container h1 {
+        font-size: 32px;
+        margin-bottom: 16px;
+    }
+
+    .privacy-profile-section {
+        padding: 16px;
+    }
+
+    .privacy-profile-section h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+
+    #privacy-form>* {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 16px;
+
+    }
+
+    #privacy-form label {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    #privacy-save-changes {
+        width: 100%;
+
+        margin-left: 0;
+        padding: 12px;
+    }
+
+    #privacy-message {
+        font-size: 12px;
+    }
+}
+
+/*loader*/
+.ep-preloader {
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    cursor: default;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 100%;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    z-index: 9000;
+    background: #fff;
+  }
+  
+  .ep-preloader .animation-preloader {
+    z-index: 1000;
+    position: relative;
+  }
+  
+  .ep-preloader .animation-preloader::after {
+    position: absolute;
+    left: 50%;
+    top: 30px;
+    content: "";
+    height: 50px;
+    width: 50px;
+    background-image: url("../static/images/logo.png");
+    transform: translateX(-50%);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  
+  .preloader-image {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 100%;
+      max-height: 100%;
+  }
+  
+  .ep-preloader .animation-preloader .spinner {
+    -webkit-animation: spinner 1s infinite linear;
+    animation: spinner 1s infinite linear;
+    border-radius: 50%;
+    border: 3px solid #fff1ec;
+    border-top-color: #FF6600; /* Set Orange */
+    height: 110px;
+    margin: 0 auto 30px auto;
+    width: 110px;
+  }
+  
+  .ep-preloader.secondary .animation-preloader .spinner {
+    border-top-color: #FF6600; /* Set Orange */
+  }
+  
+  .ep-preloader .loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  .ep-preloader .loader .row {
+    height: 100%;
+  }
+  
+  .ep-preloader .loader .loader-section {
+    padding: 0px;
+  }
+  
+  .ep-preloader .loader .loader-section .bg {
+    background-color: var(--ep-white-color);
+    height: 100%;
+    left: 0;
+    width: 100%;
+    -webkit-transition: all 800ms cubic-bezier(0.77, 0, 0.175, 1);
+    -o-transition: all 800ms cubic-bezier(0.77, 0, 0.175, 1);
+    transition: all 800ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  
+  .ep-preloader.loaded .animation-preloader {
+    opacity: 0;
+    -webkit-transition: 0.3s ease-out;
+    -o-transition: 0.3s ease-out;
+    transition: 0.3s ease-out;
+  }
+  
+  .ep-preloader.loaded .loader-section .bg {
+    width: 0;
+    -webkit-transition: 0.7s 0.3s allcubic-bezier(0.1, 0.1, 0.1, 1);
+    -o-transition: 0.7s 0.3s allcubic-bezier(0.1, 0.1, 0.1, 1);
+    transition: 0.7s 0.3s allcubic-bezier(0.1, 0.1, 0.1, 1);
+  }
+  
+  @-webkit-keyframes spinner {
+    to {
+      -webkit-transform: rotateZ(360deg);
+      transform: rotateZ(360deg);
+    }
+  }
+  
+  @keyframes spinner {
+    to {
+      -webkit-transform: rotateZ(360deg);
+      transform: rotateZ(360deg);
+    }
+  }
+  
+  @media only screen and (max-width: 767px) {
+    .ep-preloader .animation-preloader .txt-loading {
+      font: bold 3em "Outfit", sans-serif;
+    }
+  }
+  
+  .preloader-image {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 100%;
+      max-height: 100%;
+  }
 
 
 

@@ -30,18 +30,20 @@
       </script>
     <script src="{% static 'js/custom.js' %}"></script>
 </head>
-<body>
+<body class="lotterybody">
     {% include 'header.html' %}
      {% comment %} <button class="explore-button" onclick="scrollToCenterCategory()">Explore Now</button> {% endcomment %}
      
      {% comment %} <button class="explore-button" onclick="scrollToFirstCategory()">Explore Now</button> {% endcomment %}
     
      <div class="banner-container" id="banner_container">
+
+        
         <!-- Banner will be dynamically loaded here -->
     </div>  
      
     {% comment %} <h1 class="lottery_events_title">Lottery Events</h1> {% endcomment %}
-
+<br>
     <div class="categories-tabs" id="categories_tabs">
         <!-- Tabs will be dynamically added here -->
     </div>
@@ -51,9 +53,12 @@
     <div class="lottery-events-container" id="lottery_events_container">
         <!-- Events corresponding to the selected category will be displayed here -->
     </div>
-    <div class="how-to-play_why-choose-us_container">
+    <br>
+    <div class="how-to-play_why-choose-us_container"id="how-to-play">
+        <!-- <img src="/media/lottery_images/how_play.png" alt="how play" class="how-play-image"> -->
+      
         <!-- How to Play Section -->
-        <div class="how-to-play">
+         <div class="how-to-play">
             <h2>How to Play</h2>
             <div class="how-to-playsteps">
                 <div class="how-to-playstep">
@@ -77,35 +82,104 @@
     
         <!-- Why Choose Us Section -->
         <div class="why-choose-us">
-            <h2>Why Choose Us?</h2>
-            <div class="why-choose-us_reasons">
-                <div class="why-choose-us_reason">
-                    <i class="fas fa-ticket-alt"></i>
-                    <h3>Great Odds</h3>
-                    <p>Limited tickets in each draw</p>
-                </div>
-                <div class="why-choose-us_reason">
-                    <i class="fas fa-eye"></i>
-                    <h3>Transparent</h3>
-                    <p>We show the number of entries in every draw</p>
-                </div>
-                <div class="why-choose-us_reason">
-                    <i class="fas fa-trophy"></i>
-                    <h3>Guaranteed</h3>
-                    <p>Guaranteed winner even if we don’t sell out</p>
-                </div>
-            </div>
+            <img src="/media/lottery_images/why_choose_us.png" alt="Why Choose Us" class="why-choose-us-image">
         </div>
+        
     </div>
     
  <h1 class="previous-winners-title">Meet our Previous Winners</h1>
+ <div class="testimonial-section">
+    {% if testimonials %}
+        <div class="testimonial-container">
+            {% for testimonial in testimonials %}
+                <div class="testimonial-slide {% if forloop.first %}active{% endif %}">
+                    <div class="testimonial-text">
+                        <h3>"{{ testimonial.quote }}"</h3>
+                        <p>- {{ testimonial.name }}</p>
+                    </div>
+                    <div class="testimonial-image">
+                        <img src="{{ testimonial.image.url }}" alt="{{ testimonial.name }}">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="dots">
+            {% for testimonial in testimonials %}
+                <span class="dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></span>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No testimonials available.</p>
+    {% endif %}
+</div>
+
     <div id="previous_winner_section" class="previous-winners-container">
         <!-- Winner rows will be dynamically rendered here -->
     </div>
     
     <button id="view_all_button_previous_winner_mainpage" class="view-all-button-previous-winner-mainpage" onclick="toggleWinners_mainpage()">View All Winners</button> 
-  
-    
-     
+    <!-- Subscription Section -->
+    <div class="db-container"id="db_Subscription">
+            <!-- Star Images -->
+    <img src="/media/star/star (1).svg" class="db-star star-top-left" alt="Star">
+    <img src="/media/star/star (2).svg" class="db-star star-top-right" alt="Star">
+    <img src="/media/star/star (3).svg" class="db-star star-bottom-left" alt="Star">
+    <img src="/media/star/star (1).svg" class="db-star star-bottom-right" alt="Star">
+    <img src="/media/star/star (1).svg" class="db-star star-bottom-left1" alt="Star">
+    <img src="/media/star/star (1).svg" class="db-star star-bottom-right2" alt="Star">
+
+        <div class="db-left-section">
+            <h2 class="db-heading">Login & Earn</h2>
+            <div class="db-trophy-icon">
+                <img src="/media/lottery_images/trophy 1.svg" alt="Trophy">
+            </div>
+        </div>
+        <div class="db-right-section">
+            <div class="db-earnings">
+                <span class="db-earnings-tag">Total Earnings</span>
+                <h1 class="db-heading">#120000.00</h1>
+                <p class="db-text">Please note this is the total sum of your transactions here on <strong>DGE AFRICA</strong></p>
+            </div>
+            <div class="db-subscription">
+                <p class="db-text">Get Subscription now receive offers from us</p>
+                <input type="email" id="db-email" required >
+                <div class="db-checkbox">
+                    <input type="checkbox" id="db-notify" checked>
+                    <label for="db-notify" class="db-text">Notify me news and blog information</label>
+                </div>
+                <button class="db-btn"onclick="dbSubscribe()">Subscribe Now</button>
+            </div>
+        </div>
+    </div>
+
+
+
+<!-- paymentlabel -->
+    <div class="db-payment-label">
+        <img src="/media/lottery_images/payment_label.png" alt="paymentlabel" class="db-payment-label-image">
+    </div>
+
+ <!-- Payment Icons Section -->
+ <!-- <div class="payment-icons">
+    <img src="/media/lottery_images/arrows (1).svg" alt="Visa">
+    <img src="mastercard.png" alt="Mastercard">
+    <img src="paypal.png" alt="PayPal">
+    <img src="gpay.png" alt="Google Pay">
+    <img src="applepay.png" alt="Apple Pay">
+</div> -->
+
+<!-- Chatbot Widget -->
+<div class="chatbot-container">
+    <div class="chatbot-popup" id="chatbotPopup">
+        <button class="chatbot-close-btn" onclick="closeChatbot()">✖</button>
+        <button class="db-chatbot-btn"onclick="scrollToHowToPlay()">How to play</button>
+        <button class="db-chatbot-btn"onclick="scrollToSubscription()">Subscribe us!</button>
+    </div>
+    <div class="chatbot-icon" onclick="toggleChatbot()">
+        <img src="/media/lottery_images/chatbot.svg" alt="Chatbot" class="chatbot-img">
+    </div>
+</div>
+    {% include 'footer.html' %}     
 </body>
 </html>

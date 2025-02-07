@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,28 +15,74 @@
     </script>
 
 </head>
+
 <body>
-    <div class="custom_admin_login_container">
-        <h2 class="custom_admin_login_title">Admin Login</h2>
-        <form id="custom_admin_login_form" class="custom_admin_login_form_class">
-            <input type="email" id="custom_admin_login_email_id" class="custom_admin_login_email" name="admin_email" required placeholder="Email">
-            <span id="custom_admin_login_email_error" style="color: red;"></span><br>
-
-            <div class="custom_admin_login_input_container">
-                <input type="password" id="custom_admin_login_password_id" class="custom_admin_login_password" name="admin_password" placeholder="Password" required>
-                <span id="custom_admin_login_toggle_password" class="custom_admin_login_show_password">🙈</span>
+    <div class="admin_login_container">
+        <div class="admin_login_background-wrapper">
+            <div class="admin_login_background-inner"></div>
+            <div class="admin_login_orange-background">
+                <div class="admin_login_dark-background">
+                    <div class="admin_login_circle-background-1"></div>
+                    <div class="circle-background-2"></div>
+                </div>
             </div>
-            
-            <span id="custom_admin_login_password_error" style="color: red;"></span><br>
-            <span id="custom_admin_login_error" style="color: red;"></span><br>
+        </div>
 
-            <button type="submit" class="custom_admin_login_button" >Login</button>
-            <p>you don't have an account? please signup <a href="{% url 'admin_signup' %}">SignUp here</a></p>
-            <p id="custom_admin_login_errorMessage" style="color:red;"></p>
-            <a href="{% url 'password_reset_page' %}">Forgot password?</a>
-        </form>
-    </div>
+        <div class="admin-login-welcome-message-custom">
+            <h1 class="admin-login-welcome-title-custom">Welcome !</h1>
+            <p class="admin-login-welcome-subtitle-custom">
+                Clarity gives you the blocks and components you need to create a truly professional website.
+            </p>
+        </div>
 
-   
+        <div class="admin_login_welcome-text-block">
+            <div class="admin_login_welcome-title">Welcome to our community</div>
+            <div class="admin_login_welcome-description">
+                Clarity gives you the blocks & components you need to create a truly professional website.
+            </div>
+        </div>
+
+        <div class="custom_admin_login_container">
+            <!-- <h2 class="custom_admin_login_title">Admin Login</h2> -->
+            <form id="custom_admin_login_form" class="custom_admin_login_form_class">
+                <h3
+                    style="width: 100%; color: #090914; margin-bottom: 0px; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
+                    E-mail </h3>
+                <input type="email" id="custom_admin_login_email_id" class="custom_admin_login_email" name="admin_email"
+                    required placeholder="Email">
+                <span id="custom_admin_login_email_error" class="error-text"></span><br>
+
+                <div class="custom_admin_login_input_container">
+                    <h3
+                        style="width: 100%; color: #090914; font-size: 16px; margin-bottom: 0; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
+                        Password</h3>
+                    <input type="password" id="custom_admin_login_password_id" class="custom_admin_login_password"
+                        name="admin_password" placeholder="Password" required>
+                    <span id="custom_admin_login_toggle_password" class="custom_admin_login_show_password">🙈</span>
+
+                </div>
+
+                <span id="custom_admin_login_password_error" class="error-text"></span><br>
+                <span id="custom_admin_login_error" class="error-text"></span><br>
+                <a class="admin-forget-password" href="{% url 'password_reset_page' %}">Forgot password?</a>
+                <button type="submit" class="custom_admin_login_button">Login</button>
+
+                <p class="admin-signup1">Don’t have an account? <a class="admin-signup2"
+                        href="{% url 'admin_signup' %}">Sign Up </a></p>
+                <p id="custom_admin_login_errorMessage" class="error-text"></p>
+
+            </form>
+
+
+        </div>
+
+
+
+        <img src="/media/lottery_images/image%201209.svg" class="lottery-image" />
+
+        <img src="/media/lottery_images/image%2030.svg" class="small-lottery-image" />
+
+
 </body>
+
 </html>
