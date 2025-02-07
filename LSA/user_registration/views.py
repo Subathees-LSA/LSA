@@ -25,6 +25,13 @@ from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse  # Import reverse
 from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
 from django.contrib.auth import login
+from .serializers import UserPrivacySerializer
+from .utils import generate_otp  # Import the function
+from django.contrib.auth.models import User
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
@@ -90,18 +97,62 @@ class LoginView(APIView):
             try:
                 user = User.objects.get(email=email)
                 if user.check_password(password):
-                    # Specify the backend as a string
-                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-
-                    return Response({
-                        "message": "Login successful.",
-                        "user_id": user.id
-                    }, status=status.HTTP_200_OK)
+                    if user.userprivacy.two_factor_auth_enabled:
+                        # Generate and send OTP if 2FA is enabled
+                        otp = generate_otp()
+                        user.userprivacy.set_otp(otp)
+                        send_mail(
+                            'Your OTP Code',
+                            f'Your OTP code is {otp}. It is valid for the next 5 minutes.',
+                            settings.DEFAULT_FROM_EMAIL,
+                            [user.email],
+                            fail_silently=False,
+                        )
+                        return Response({
+                            "message": "OTP sent to your email.",
+                            "user_id": user.id
+                        }, status=status.HTTP_200_OK)
+                    else:
+                        # If 2FA is disabled, login and redirect to user_welcome_page
+                        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                        return Response({
+                            "message": "Login successful.",
+                            "redirect_url": reverse('user_welcome_page')  # Add the redirect URL for 2FA disabled
+                        }, status=status.HTTP_200_OK)
                 else:
                     return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
             except User.DoesNotExist:
                 return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class LoginView(APIView):
+#     def post(self, request):
+#         user_agent = request.headers.get('User-Agent', '')
+#         if not user_agent or 'Mozilla' not in user_agent:
+#             return Response(
+#                 {"detail": "Access denied. This endpoint is restricted to browsers only."},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
+
+#         serializer = LoginSerializer(data=request.data)
+#         if serializer.is_valid():
+#             email = serializer.validated_data['email']
+#             password = serializer.validated_data['password']
+#             try:
+#                 user = User.objects.get(email=email)
+#                 if user.check_password(password):
+#                     # Specify the backend as a string
+#                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+#                     return Response({
+#                         "message": "Login successful.",
+#                         "user_id": user.id
+#                     }, status=status.HTTP_200_OK)
+#                 else:
+#                     return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+#             except User.DoesNotExist:
+#                 return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class KYCStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -211,10 +262,6 @@ class UserListView(generics.ListAPIView):
                 {"error": "An error occurred while fetching the KYC waiting list."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
- 
-
-
-
 class UserKycWaitingListView(generics.ListAPIView):
     serializer_class = UserKycwaitingDetailsSerializer
     permission_classes = [IsAdminUser]
@@ -322,3 +369,98 @@ class ApiPasswordResetConfirmView(APIView):
 
 
         return Response({"error": "Token expired or invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import UserPrivacy
+from .serializers import UserPrivacySerializer
+from rest_framework.permissions import IsAuthenticated
+
+class PrivacySecurityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UserPrivacySerializer(user.userprivacy)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    def put(self, request):
+        user = request.user
+        user_privacy = user.userprivacy
+        serializer = UserPrivacySerializer(user_privacy, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Privacy settings updated successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from django.shortcuts import redirect
+from user_registration.utils import verify_otp  
+class VerifyOTPView(APIView):
+    def post(self, request):
+        user_id = request.data.get("user_id")  # Retrieve `user_id` from the request body
+        otp = request.data.get("otp")  # Retrieve the `otp` from the request body
+
+        if not user_id or not otp:
+            return Response({"error": "User ID and OTP are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch the user instance based on the provided `user_id`
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Verify the OTP
+        if verify_otp(user, otp):
+            # Log in the user after successful OTP verification
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            # Redirect to the `user_welcome_page`
+            return Response({
+                "message": "Login successful.",
+                "redirect_url": request.build_absolute_uri('/user_welcome_page/')  # Adjust path as needed
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid or expired OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from user_registration.services import resend_otp_service
+
+class ResendOTPView(APIView):
+    def post(self, request):
+        user_id = request.data.get("user_id")  # Retrieve user ID from the request body
+        if not user_id:
+            return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(id=user_id)  # Fetch the user instance
+        except User.DoesNotExist:
+            return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            # Call the service to handle the OTP resend logic
+            message = resend_otp_service(user)
+            return Response({"message": message}, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
+#google redirection
+from django.urls import path, re_path
+from django.shortcuts import redirect
+from social_django.views import complete
+from social_core.exceptions import AuthCanceled
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Custom view to handle AuthCanceled error
+def google_auth_complete(request, backend='google-oauth2'):
+    try:
+        return complete(request, backend=backend)
+    except AuthCanceled:
+        logger.error("Google Authentication Canceled")
+        return redirect('user_signup')  # Redirect to signup page instead of error

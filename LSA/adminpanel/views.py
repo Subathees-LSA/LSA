@@ -999,3 +999,14 @@ def user_statistics(request):
         'logged_in_this_week_names': active_users,
         
     })    
+
+class SimilarLotteryEvents(APIView):
+    def get(self, request, slug, format=None):
+        event = get_object_or_404(LotteryEvent, slug=slug)
+        category = event.category
+        similar_events = LotteryEvent.objects.filter(category=category).exclude(slug=slug)
+        serializer = LotteryEventSerializeradd_get(similar_events, many=True)
+        return Response(serializer.data)
+
+ 
+

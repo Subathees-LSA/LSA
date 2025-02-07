@@ -8,7 +8,7 @@ from user_registration.models import *
                        
 class LotteryCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    
+    category_logo = models.ImageField(upload_to='category_logos/', null=True, blank=True, default='')
     def __str__(self):
         return self.name  
                             
@@ -258,3 +258,13 @@ class adminProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role or 'No Role Assigned'}"
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=255)
+    quote = models.TextField()
+    image = models.ImageField(upload_to='testimonials/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+        

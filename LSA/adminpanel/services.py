@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseForbidden
 from django.http import HttpResponseForbidden, HttpResponseServerError
-from .models import LotteryEvent
+from .models import LotteryEvent, Testimonial
 from django.shortcuts import render,get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
@@ -48,13 +48,17 @@ def custom_admin_dashboard(request):
             return HttpResponseForbidden("You do not have permission to access this page.")
     except Exception as e:
         return HttpResponseForbidden("An unexpected error occurred: " + str(e))        
+from django.shortcuts import render
+from django.http import HttpResponseServerError
 
 def lottery_events(request):
     try:
-        return render(request, 'lottery_events.html')
-    except Exception as e:
-        return HttpResponseServerError(f"Error rendering lottery events page")
+        events = LotteryEvent.objects.all()  # Fetch lottery events
+        testimonials = Testimonial.objects.all()  # Fetch testimonials
 
+        return render(request, 'lottery_events.html', {"events": events, "testimonials": testimonials})
+    except Exception as e:
+        return HttpResponseServerError(f"Error rendering lottery events page: {str(e)}")
 
 def lottery_events_add(request):
     try:
@@ -121,6 +125,8 @@ def get_lottery_categories(request):
 def category_lottery_events_view(request, category_name):
     try:
         category = LotteryCategory.objects.get(name=category_name)
-        return render(request, 'category_lottery_events.html', {'category_id': category.id, 'category_name': category.name})
+        return render(request, 'category_lottery_events.html', {'category_id': category.id, 'category_name': category.name,'category_logo':category.category_logo})
     except LotteryCategory.DoesNotExist:
         return render(request, '404.html', status=404)
+    
+

@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/update-cart/', update_cart, name='api_update_cart'),
     path('api/lottery_detail/<slug:slug>/', LotteryDetail.as_view(), name='api_get_lottery_event_detail'),
     path('lottery_detail/<slug:slug>/', lottery_detail_view, name='lottery_detail'),
+    path('api/similar_lottery_events/<slug:slug>/', SimilarLotteryEvents.as_view(), name='api_get_similar_lottery_events'),
     path('api/add_to_favorites/', add_to_favorites, name='add_to_favorites'),
     path('favorites/', favorites_page, name='favorites'),
     path('api/get_favorites/', get_favorites, name='get_favorites'),
@@ -65,6 +66,7 @@ urlpatterns = [
     path('api/leaderboard/', LeaderboardAPIView.as_view(), name='leaderboard_api'),
     path('api/user-statistics/', user_statistics, name='user-statistics'),
     path('api/statistics/', LotteryStatisticsView.as_view(), name='lottery_statistics'),
+
 ]
 
 if settings.DEBUG:

@@ -53,7 +53,7 @@
                         <span id="login-error" class="login-error-text"></span>
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div style="display: flex; align-items: center;">
-                                <input type="checkbox"
+                                <input type="checkbox" id="remember-me-checkbox"
                                     style="width: 20px; height: 20px; border-radius: 5px; border: 1px #94A3B8 solid;" />
                                 <h4 class="remember"
                                     style="color: #18181B; font-size: 14px; font-family: Rajdhani; font-weight: 500; line-height: 22px; word-wrap: break-word; margin-left: 8px;">
@@ -83,7 +83,9 @@
                                 Gmail
                             </a>
                         </div>
-
+                        <p class="signin-link-custom">Don't  have an account? <a href="{% url 'user_signup'%}">Signup here</a>
+                        </p>
+        
                     </form>
                 </div>
             </div>
@@ -93,6 +95,22 @@
 
         </div>
 
+    </div>
+    
+    <div id="otp-container" class="otp-container hidden-element">
+        <div class="otp-inner-container">
+            <h2>Enter OTP</h2>
+            <p>An OTP has been sent to your email. Please enter it below to verify your login.</p>
+            <div id="otp-timer">Time remaining: <span id="timer">05:00</span></div>
+            <form id="otp-form" class="otp-form" data-url="{% url 'verify_otp' %}">
+                <input type="hidden" id="user-id">
+                <input type="text" id="otp-code" class="otp-input" placeholder="Enter OTP" required><br>
+                <span id="otp-error" style="color: red;"></span><br>
+                <button type="submit" class="otp-button">Verify OTP</button>
+            </form>
+            <button id="resend-otp-button" class="otp-resend-button" disabled>Resend OTP</button>
+            <button id="otp-cancel-button" class="otp-cancel-button">Cancel</button>
+        </div>
     </div>
 </body>
 
