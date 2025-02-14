@@ -42,7 +42,164 @@ from .serializers import PreviousWinnerimgSerializer
 from datetime import timedelta
 from django.db import DatabaseError
 from rest_framework.serializers import Serializer
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from django.db.models import Subquery, OuterRef
+from django.http import JsonResponse
+from .models import Contact
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import LotteryStatistics
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import datetime
+import random
 
+def create_dummy_contacts():
+    dummy_contacts = []
+    for i in range(30):
+        contact = Contact(
+            name=f"User {i+1}",
+            email=f"user{i+1}@example.com",
+            description="This is a dummy contact entry.",
+            
+        )
+        dummy_contacts.append(contact)
+
+    # Bulk create for better performance
+    Contact.objects.bulk_create(dummy_contacts)
+
+#create_dummy_contacts()
+
+def generate_dummy_data():
+    # Clear existing data**
+   
+
+    # Dummy data for yearly reports
+    years = list(range(2012, 2020))
+    for year in years:
+        win_lottery = random.randint(500_000, 1_000_000)
+        lost_lottery = random.randint(10_000, 50_000)
+        Report.objects.create(year=year, win_lottery=win_lottery, lost_lottery=lost_lottery)
+
+    # Dummy data for regional sales
+    regions = ['Africa', 'Asia', 'Europe', 'Latin America', 'North America']
+    for region in regions:
+        total_sales = random.randint(100_000_000, 200_000_000)
+        average = random.randint(1_000_000, 2_000_000)
+        return_value = random.randint(10_000, 30_000)
+        RegionalSales.objects.create(region=region, total_sales=total_sales, average=average, return_value=return_value)
+
+    print("Dummy data has been generated successfully!")
+
+# Call the function to populate the database
+#generate_dummy_data()
+
+@csrf_exempt
+@api_view(['POST'])
+def block_user(request):
+    user_id = request.data.get('user_id')
+    action = request.data.get('action')  # "block" or "unblock"
+
+    try:
+        user = User.objects.get(id=user_id)
+        user_profile = user.userprofile
+        
+        if action == "block":
+            user_profile.is_blocked = True
+            message = f"User {user.username} has been blocked successfully."
+        else:
+            user_profile.is_blocked = False
+            message = f"User {user.username} has been unblocked successfully."
+
+        user_profile.save()
+        return Response({"message": message}, status=status.HTTP_200_OK)
+    
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class ReportListView(generics.ListAPIView):
+    queryset = Report.objects.all()
+    serializer_class = ReportSerializer
+class RegionalSalesListView(generics.ListAPIView):
+    queryset = RegionalSales.objects.all()
+    serializer_class = RegionalSalesSerializer
+
+class LotterySummaryView(APIView):
+    def get(self, request, *args, **kwargs):
+        total_won_lottery = LotteryStatistics.objects.aggregate(won_total=Sum('won_lottery'))['won_total'] or 0
+        total_lost_lottery = LotteryStatistics.objects.aggregate(lost_total=Sum('lost_lottery'))['lost_total'] or 0
+
+        # Assuming €1 per lottery count
+        total_won_amount = f"€{total_won_lottery / 1e6:.1f}"
+        total_lost_amount = f"€{total_lost_lottery / 1e6:.1f}"
+        year = datetime.now().year  
+
+        # Filter users who logged in during the current year
+        active_users = UserProfile.objects.filter(
+            user__last_login__year=year
+        ).count()
+        current_time = timezone.now()
+    
+    # Filter active lottery events where draw_date is in the future
+        active_lotteries = LotteryEvent.objects.filter(is_active=True, draw_date__gt=current_time).count()
+
+        statistics = LotteryStatistics.objects.all()
+    
+    # Assuming sales amount is proportional to the total lottery tickets
+        for stat in statistics:
+            stat.sales_amount = (stat.won_lottery + stat.lost_lottery) * 10  # Example calculation
+
+        data = {
+            "won_lottery_count": total_won_lottery,
+            "won_lottery_amount": total_won_amount,
+            "lost_lottery_count": total_lost_lottery,
+            "lost_lottery_amount": total_lost_amount,
+            "active_users": active_users,
+            "active_lotteries": active_lotteries,
+            "sales_amount":stat.sales_amount,
+        }
+        return Response(data)
+
+@api_view(['POST'])
+def mark_messages_as_read(request, email):
+    try:
+        Contact.objects.filter(email=email).update(is_read=True)
+        return Response({"status": "success", "message": "Messages marked as read"})
+    except Exception as e:
+        return Response({"status": "error", "message": str(e)}, status=500)
+
+def latest_unread_notifications(request):
+    # Subquery to get the latest 'created_at' per email where 'is_read=False'
+    latest_message_subquery = (
+        Contact.objects
+        .filter(email=OuterRef('email'), is_read=False)
+        .order_by('-created_at')
+        .values('id')[:1]  # Get the latest record for each email
+    )
+
+    # Main query to fetch contacts using the subquery, ordered by created_at (most recent first)
+    latest_messages = (
+        Contact.objects
+        .filter(id__in=Subquery(latest_message_subquery))
+        .order_by('-created_at')  # Order by the most recent messages
+    )
+
+    notifications = [
+        {
+            'email': message.email,
+            'name': message.name,
+            'description': message.description,
+            'created_at': message.created_at,
+        }
+        for message in latest_messages
+    ]
+
+    return JsonResponse(notifications, safe=False)
+    
 class ChatMessagesView(APIView):
     def get(self, request, email):
         contact_messages = Contact.objects.filter(email=email).order_by('created_at')
@@ -302,6 +459,7 @@ class UserProfileDeleteAPIView(APIView):
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
+
 class api_dashboard_preview_admin_view(APIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -322,8 +480,8 @@ class api_dashboard_preview_admin_view(APIView):
         total_tickets_sold = transactions.aggregate(Sum('tickets_sold'))['tickets_sold__sum'] or 0
         total_transaction_amount = transactions.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
-        # Fetch User Profiles and include kyc_image_url
-        user_profiles = UserProfile.objects.all()
+        user_profiles = UserProfile.objects.all().order_by('is_blocked', '-user__date_joined')
+
         users_table = []
         for profile in user_profiles:
             serializer = UserKycwaitingDetailsSerializer(profile)
@@ -339,7 +497,18 @@ class api_dashboard_preview_admin_view(APIView):
         }
 
         # Tabs from admin profile with type
-        admin_dashboard_preview = role_specific_dashboard_preview.values('name', 'identifier', 'type')
+        from django.conf import settings
+        from django.db.models import F
+
+        admin_dashboard_preview = role_specific_dashboard_preview.annotate(
+            image_url=F('dashboard_preview_image')
+        ).values('name', 'identifier', 'type', 'image_url')
+
+        # Add this line to include full image URL
+        for tab in admin_dashboard_preview:
+            if tab["image_url"]:
+                tab["image_url"] = request.build_absolute_uri(settings.MEDIA_URL + tab["image_url"])
+
 
         # Example data for conversion rates
         rates = ConversionRate.objects.values('card_type', 'region', 'rate', 'is_physical')
@@ -360,14 +529,14 @@ class api_navbar_access_tabsView(APIView):
         try:
             profile = adminProfile.objects.get(user=request.user)
             if profile.role == 'admin':
-                #tabs = AdminTab.objects.all()  # Show all tabs for admins
-                navbar_access_tabs = profile.navbar_access.all()
+                navbar_access_tabs = profile.navbar_access.all()  # Show all tabs for admins
             else:
                 navbar_access_tabs = profile.navbar_access.all()  # Role-specific tabs
-            serializer = admin_navbar_accessSerializer(navbar_access_tabs, many=True)
+
+            serializer = admin_navbar_accessSerializer(navbar_access_tabs, many=True, context={'request': request})
             return Response(serializer.data)
         except adminProfile.DoesNotExist:
-            return Response({"error": "Profile not found"}, status=404) 
+            return Response({"error": "Profile not found"}, status=404)
  
          
 class api_admin_signup(generics.CreateAPIView):
@@ -464,6 +633,7 @@ class api_admin_login(APIView):
         except Exception as e:
             # Catch any unexpected exceptions and return an internal server error
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+       
 
 class api_get_lottery_events(APIView):  
 
@@ -475,9 +645,18 @@ class api_get_lottery_events(APIView):
                     {"detail": "Access denied. This endpoint is restricted to browsers only."},
                     status=status.HTTP_403_FORBIDDEN
                 )
-                
+            search_query = request.query_params.get('search', '').strip()
+            category_id = request.query_params.get('category', '')
+    
             # Fetch all lottery events from the database
             lottery_events = LotteryEvent.objects.all()
+             # Filter by search term if provided
+            if search_query:
+                lottery_events = lottery_events.filter(title__istartswith=search_query)
+
+            # Filter by category if provided
+            if category_id:
+                lottery_events = lottery_events.filter(category_id=category_id)
             
             
             favorites_slugs = json.loads(request.COOKIES.get('favorites', '[]'))

@@ -5,7 +5,17 @@ from django.utils.timezone import now
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from user_registration.models import *
-                       
+class Report(models.Model):
+    year = models.IntegerField()
+    win_lottery = models.FloatField()
+    lost_lottery = models.FloatField()
+
+class RegionalSales(models.Model):
+    region = models.CharField(max_length=100)
+    total_sales = models.FloatField()
+    average = models.FloatField()
+    return_value = models.FloatField()
+
 class LotteryCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     category_logo = models.ImageField(upload_to='category_logos/', null=True, blank=True, default='')
@@ -102,6 +112,7 @@ class Contact(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='user_files/', blank=True, null=True)
     starred = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False) 
 
     def __str__(self):
         return f"{self.name} - {self.email}"
@@ -168,10 +179,11 @@ class Leaderboard(models.Model):
 
 class admin_dashboard_preview(models.Model):
     name = models.CharField(max_length=100, help_text="Tab name to display")
+    dashboard_preview_image = models.ImageField(upload_to='dashboard_preview_image/', blank=True, null=True)
     identifier = models.CharField(max_length=50, unique=True, help_text="Unique identifier for this container (used in frontend)")
     type = models.CharField(
-        max_length=30,
-        choices=[(' ', 'Select type'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'), ('lottery_sales_overview', 'lottery_sales_overview'), ('user_leaderboard', 'user_leaderboard')],
+        max_length=100,
+        choices=[(' ', 'Select type'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'), ('lottery_sales_overview', 'lottery_sales_overview'), ('user_leaderboard', 'user_leaderboard'), ('lottery_sales_overview_regional_reports', 'lottery_sales_overview_regional_reports'), ('overview_counts', 'overview_counts'),],
         default='',
         help_text="Type of content"
     )
@@ -199,7 +211,14 @@ class admin_dashboard_preview(models.Model):
             "current_won_percentage",
             "lost_percentage",
             "lottery_sales_overview",
-            "user_leaderboard"
+            "user_leaderboard",
+            "lottery_sales_overview_regional_reports",
+            "total_lottery_won_lost_count",
+            "overview_sales_count_won-lottery-amount",
+            "overview_sales_count_lost-lottery-amount",
+            "overview_active_users_count",
+            "overview_active_lotteries_count",
+            "overview_sales_amount",
         
         }
 
@@ -212,6 +231,7 @@ class admin_dashboard_preview(models.Model):
         super().save(*args, **kwargs)
 
 
+
 class lottery_sales_bar_chart(models.Model):
     month = models.CharField(max_length=3)  
     year = models.IntegerField()
@@ -220,16 +240,19 @@ class lottery_sales_bar_chart(models.Model):
 
 class admin_navbar_access(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    url_name = models.CharField(max_length=100,blank=True)
-    identifier = models.CharField(max_length=100, unique=True, blank=True, null=True) 
+    url_name = models.CharField(max_length=100, blank=True)
+    identifier = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    nav_bar_image = models.ImageField(upload_to='navbar_images/', blank=True, null=True)
+    ordering = models.PositiveIntegerField(default=0)  # Custom ordering field
+
+    class Meta:
+        ordering = ['ordering']  # Default ordering
+
     def get_url(self):
-        """
-        Dynamically resolve the URL using its name.
-        """
         try:
             return reverse(self.url_name)
         except Exception:
-            return "#" 
+            return "#"
 
     def __str__(self):
         return self.name

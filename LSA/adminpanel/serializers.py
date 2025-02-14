@@ -2,8 +2,16 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import *
 from rest_framework import serializers
-from .models import LotteryEventImages
-from .models import Contact
+
+class ReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['year', 'win_lottery', 'lost_lottery']
+
+class RegionalSalesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegionalSales
+        fields = ['region', 'total_sales', 'average', 'return_value']
 
 class api_admin_signup_Serializer(serializers.ModelSerializer):
     admin_username = serializers.CharField(write_only=True)
@@ -63,15 +71,24 @@ class LotteryStatisticsSerializer(serializers.ModelSerializer):
         model = LotteryStatistics
         fields = '__all__'
 
+
 class admin_navbar_accessSerializer(serializers.ModelSerializer):
     resolved_url = serializers.SerializerMethodField()
+    nav_bar_image_url = serializers.SerializerMethodField()  # Serialize the image URL
 
     class Meta:
         model = admin_navbar_access
-        fields = ['name', 'url_name', 'resolved_url', 'identifier'] 
+        fields = ['name', 'url_name', 'resolved_url', 'identifier', 'nav_bar_image_url']
 
     def get_resolved_url(self, obj):
         return obj.get_url()
+
+    def get_nav_bar_image_url(self, obj):
+        if obj.nav_bar_image:
+            request = self.context.get('request')
+            return request.build_absolute_uri(obj.nav_bar_image.url)  # Full image URL
+        return None  # No image uploaded
+
 
    
 class api_admin_login_Serializer(serializers.Serializer):

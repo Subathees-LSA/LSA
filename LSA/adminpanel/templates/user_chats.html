@@ -9,6 +9,9 @@
     <script src="{% static 'js/custom.js' %}" defer></script>
    <script> 
    const user_chats_csrfToken = "{{ csrf_token }}";
+   window.onload = function() {
+    user_chat_view();
+   };
    </script>
 </head>
 <body>

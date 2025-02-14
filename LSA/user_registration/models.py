@@ -13,6 +13,8 @@ class UserProfile(models.Model):
     kyc_image = models.BinaryField(null=True, blank=True)
     kyc_window_shown = models.BooleanField(default=False)
     ip_address = models.GenericIPAddressField(null=True, blank=True) 
+    is_blocked = models.BooleanField(default=False)
+
     def __str__(self):
         return self.user.username
 
@@ -20,7 +22,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.utils import timezone
-from datetime import timedelta
 from django.core.validators import RegexValidator
 class UserPrivacy(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

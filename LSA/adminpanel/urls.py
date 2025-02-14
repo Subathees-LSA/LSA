@@ -66,6 +66,12 @@ urlpatterns = [
     path('api/leaderboard/', LeaderboardAPIView.as_view(), name='leaderboard_api'),
     path('api/user-statistics/', user_statistics, name='user-statistics'),
     path('api/statistics/', LotteryStatisticsView.as_view(), name='lottery_statistics'),
+    path('reports/', ReportListView.as_view(), name='reports'),
+    path('regional-sales/', RegionalSalesListView.as_view(), name='regional-sales'),
+    path('api/lottery-summary/', LotterySummaryView.as_view(), name='lottery-summary'), 
+    path('api/mark-read/<str:email>/', mark_messages_as_read, name='mark-messages-as-read'),
+    path('api/latest-unread-notifications/', latest_unread_notifications, name='latest_unread_notifications'),
+    path('block-user/', block_user, name='block-user'), 
 
 ]
 
