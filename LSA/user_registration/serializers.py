@@ -84,7 +84,7 @@ class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url','ip_address']
+        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url','ip_address','is_blocked']
 
 
     def get_kyc_image_url(self, obj):

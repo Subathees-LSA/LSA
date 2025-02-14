@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,39 +10,41 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+
+    </style>
+
     <script>
-        const api_navbar_access_tabsView_url =  "{% url 'api_navbar_access_tabsView' %}";
-        const api_dashboard_preview_admin_view_url =  "{% url 'api_dashboard_preview_admin_view' %}";
-        const adminupdaetkycapprovalUrl =  "{% url 'user-kyc-status-update' %}";
+        const api_navbar_access_tabsView_url = "{% url 'api_navbar_access_tabsView' %}";
+        const api_dashboard_preview_admin_view_url = "{% url 'api_dashboard_preview_admin_view' %}";
+        const adminupdaetkycapprovalUrl = "{% url 'user-kyc-status-update' %}";
         const csrfToken = "{{ csrf_token }}";
-        const lottery_events_add_csrftoken="{{ csrf_token}}"; 
+        const lottery_events_add_csrftoken = "{{ csrf_token}}";
         const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
         const api_lottery_events_add_url = "{% url 'api_lottery_events_add' %}";
         const apiEditDeleteLotteryEventsUrl = "{% url 'api_edit_delete_lottery_events' 0 %}";
         const get_lottery_categories_url = "{% url 'get-lottery-categories' %}";
         const admin_chats_csrfToken = "{{ csrf_token }}";
+        window.onload = function () {
+            initializeDashboard();
+            admin_chat_view()
+            filterCategories();
+        };
     </script>
-    <style>
-/* Hide cards after the third one */
-.lottery-event-card:nth-child(n+4) {
-    display: none;
-}
-
-</style>
-
 </head>
+
 <body>
     <div class="custom_admin_dashboard_container">
         <!-- Sidebar -->
-        <aside class="custom_admin_dashboard_sidebar" >
-            <h2>LSA</h2>
+        <aside class="custom_admin_dashboard_sidebar">
+            <img src="/media/images/logo.png" class="admin-dashboard-small-lottery-image" />
             <nav>
                 <ul>
                     <!-- Tabs will be dynamically appended here -->
                 </ul>
                 <!-- Static logout link -->
-              <a class="custom_admin_dashboard_logout" href="{% url 'admin_logout_view' %}">Logout</a>
-                
+                <a class="custom_admin_dashboard_logout" href="{% url 'admin_logout_view' %}">Logout</a>
+
             </nav>
         </aside>
         <!-- Main Content -->
@@ -49,101 +52,197 @@
             <header class="custom_admin_dashboard_topbar">
                 <input type="text" placeholder="Search card" class="custom_admin_dashboard_search-bar">
                 <div class="custom_admin_dashboard_account-info">
-                    <span class="custom_admin_dashboard_icon">🔔</span>
-                    <span class="custom_admin_dashboard_icon">👤</span>
+                    <div id="notification-bell-container">
+                        <div id="notification-bell">
+                            <img src="https://cdn-icons-png.flaticon.com/512/1827/1827392.png" alt="Notification Bell">
+                            <div id="notification-count">0</div>
+                        </div>
+
+                        <div id="notification-popup">
+                            <p id="no-notifications">No new notifications</p>
+                            <div id="notification-section">
+                                <!-- Dynamic notifications will be appended here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
             <section class="custom_admin_dashboard_dashboard">
-                <h1>Admin Management: System Overview</h1>
-                <div class="custom_admin_dashboard_overview_count" id="custom_admin_dashboard_overview_dynamic_count">
-                </div> 
-               
-                <div class="custom_admin_dashboard_conversion_rate" id="custom_admin_dashboard_conversion_dynamic_rate_table">
-                    <!-- Dynamic table will be rendered here -->
-                </div>
-                <div style=" visibility: hidden;opacity: 0;position: absolute;" id="custom_admin_dashboard_dynamic_lottery_sales_count_and_bar_chart">
-               <div id="lottery_sales_dynamic_count_filter" style="display: none;"> <label for="month">Month:</label>
-    <select id="month">
-        <option value="1">January</option>
-        <option value="2">February</option>
-        <option value="3">March</option>
-        <option value="4">April</option>
-        <option value="5">May</option>
-        <option value="6">June</option>
-        <option value="7">July</option>
-        <option value="8">August</option>
-        <option value="9">September</option>
-        <option value="10">October</option>
-        <option value="11">November</option>
-        <option value="12">December</option>
-    </select>
+                <h1>Overview</h1>
+                <div id="custom_admin_dashboard_overview_lottery_won_lost_count">
 
-    <label for="year">Year:</label>
-    <select id="year">
-        <option value="2023">2023</option>
-        <option value="2024">2024</option>
-        <option value="2025">2025</option>
-    </select>
-
-    <button id="filterBtn">Filter</button></div>
-
-                <div class="custom_admin_dashboard_overview_statistics_count" >
                 </div>
-           
-            <div>
-                <div id="custom_admin_dashboard_bar_chart_filter" style="display: none;">
-                <h1>Monthly Sales Chart</h1>
-    
-        <!-- Year Selection Dropdown -->
-        <label for="yearSelect">Select Year:</label>
-        <select id="yearSelect"></select></div>
-    <div style="width: 50%;height: 50%;">
-        <canvas id="salesChart" width="800" height="400"></canvas></div>
-               </div>
-               <h1 id="leaderboard_title"></h1>
-               <div class="leaderboard_class" id="leaderboard" style="display: none;">
-                <!-- Data will be injected here -->
-              </div>
-            </div>
-                <div class="custom_admin_dashboard_user_table" id="custom_admin_dashboard_user_list_table">
-                    <!-- Dynamic table will be rendered here -->
-                </div>
-                <div id="lottery_cards_add_and_list">
-                    <!-- "+" Icon -->
-                    <div class="lottery_cards_heading" >
-                       
-                    <h2 id="lottery_card_title"></h2>
-                    <button id="custom_admin_dashboard_openFormButton" class="custom_admin_dashboard_open-form-btn">+</button> 
+                <div class="overview_dashboard" id="regional_sales_overview_dashboard">
+                    <!-- Reports Chart Section -->
+                    <div class="overview_chart-container">
+                        <div class="overview_metrics">
+                            <div>Won Lottery: <span id="overview_wonLottery">€0</span></div>
+                            <div>Lost Lottery: <span id="overview_lostLottery">€0</span></div>
+                        </div>
+                        <canvas id="overview_reportsChart"></canvas>
                     </div>
-                   
+
+                    <!-- Regional Sales Chart Section -->
+                    <div class="overview_chart-container">
+                        <h3 class="overview_regional_sales_title">Regional Sales</h3>
+                        <canvas id="overview_regionalChart"></canvas>
+
+                        <!-- Regional Metrics (Total Sales, Average, Return) -->
+                        <div class="overview_regional-metrics">
+                            <div>
+                                <div>Total Sales</div>
+                                <div class="overview_value" id="overview_totalSales">€0</div>
+                            </div>
+                            <div>
+                                <div>Average</div>
+                                <div class="overview_value" id="overview_averageSales">€0</div>
+                            </div>
+                            <div>
+                                <div>Return</div>
+                                <div class="overview_value" id="overview_returnSales">€0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="custom_admin_dashboard_overview_count" id="custom_admin_dashboard_overview_dynamic_count">
+                </div>
+
+                <div class="custom_admin_dashboard_conversion_rate"
+                    id="custom_admin_dashboard_conversion_dynamic_rate_table">
+                    <!-- Dynamic table will be rendered here -->
+                </div>
+                <div style=" display: none;opacity: 0;position: absolute;"
+                    id="custom_admin_dashboard_dynamic_lottery_sales_count_and_bar_chart">
+                    <div id="lottery_sales_dynamic_count_filter" style="display: none;"> <label
+                            for="month">Month:</label>
+                        <select id="month">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+
+                        <label for="year">Year:</label>
+                        <select id="year">
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>
+
+                        <button id="filterBtn">Filter</button>
+                    </div>
+
+                    <div class="custom_admin_dashboard_overview_statistics_count">
+                    </div>
+
+                    <div>
+                        <div id="custom_admin_dashboard_bar_chart_filter" style="display: none;">
+                            <h1>Monthly Sales Chart</h1>
+
+                            <!-- Year Selection Dropdown -->
+                            <label for="yearSelect">Select Year:</label>
+                            <select id="yearSelect"></select>
+                        </div>
+                        <div style="width: 50%;height: 50%;">
+                            <canvas id="salesChart" width="800" height="400"></canvas>
+                        </div>
+                    </div>
+                    <h1 id="leaderboard_title"></h1>
+                    <div class="leaderboard_class" id="leaderboard" style="display: none;">
+                        <!-- Data will be injected here -->
+                    </div>
+                </div>
+                <div class="custom_admin_dashboard_user_table" id="custom_admin_dashboard_user_list_table">
+                    <h2>User Management</h2>
+                    <!-- Dynamic table will be rendered here -->
+                </div>
+                <div id="lottery_cards_add_and_list" hidden>
+                    <div class="lottery_cards_heading">
+                        <h2 class="lottery_card_title2">Admin Management Lotteries</h2>
+                        <h2 id="lottery_card_title"></h2>
+                    </div>
+                    <div id="lottery_header_filter-containers" hidden>
+                        <button id="custom_admin_dashboard_openFormButton" class="custom_admin_dashboard_open-form-btn">
+                            Add Lotteries
+                            <img src="/media/admin_files/Group1.png" style="height: 12px; width: 14px;"
+                                alt="Button Icon">
+                        </button>
+
+                        <span id="filter-icon" style="cursor: pointer;"><img src="/media/admin_files/Frame1.png"
+                                alt="Button_Icon" class="admin_dashbord_filter_icon"></span>
+                        <select id="category-filter" class="admin-dashboard-category-filter"
+                            onchange="fetchLotteryEvents('', this.value)" style="display: none;">
+                            <option value="">All Categories</option>
+                        </select>
+
+                        <input type="text" id="lottery-search-input" placeholder="Search by title..."
+                            oninput="fetchLotteryEvents(this.value)" />
+                    </div>
+
                     <div id="lottery-events-wrapper">
                         <input type="checkbox" id="custom_admin_dashboard_lottery_view-more-toggle">
                         <div id="lottery-events-container" class="custom_admin_dashboard_lottery-events-grid">
                             <!-- Lottery event cards will be dynamically injected here -->
                         </div>
-                        <label for="custom_admin_dashboard_lottery_view-more-toggle" id="custom_admin_dashboard_view-more-button" class="custom_admin_dashboard_lottery_view-more-btn"  hidden>View More</label>
+                        <div id='lottery_prevPage_and_nextPage_button' hidden>
+                            <button type="button" id="prevPageButton" class="btnbtn-secondary">&lt;</button>
+                            <span id="pageButtons"></span>
+                            <button type="button" id="nextPageButton" class="btnbtn-secondary">&gt;</button>
+                        </div>
+
                     </div>
                 </div>
 
-                <div class="admin_contact_reply_container" id="admin_reply_chat_bot" style=" visibility: hidden;opacity: 0;position: absolute;">
+                <div class="admin_contact_reply_container" id="admin_reply_chat_bot"
+                    style=" display: none;opacity: 0;position: absolute;">
                     <button id="admin_contact_reply_back_button" style="display: none;">Back</button>
                     <h1 class="admin_contact_reply_heading">Contact Messages</h1>
-                    <div id="admin_contact_reply_message_list" class="admin_contact_reply_chat_container">
-                        <!-- Dynamic content loaded via JavaScript -->
+                    <span class="search-container">
+                        <input type="text" id="searchEmail" placeholder="Search by email..." oninput="filterEmails()">
+                    </span>
+                    <div style="display: flex;">
+
+
+                        <div id="all_users_name" class="admin_contact_reply_chat_container">
+                            <!-- Dynamic all_users_name content loaded via JavaScript -->
+                        </div>
+                        <div id="user_specfic_chat">
+                            <div id="userChat_Icons" style="display:flex">
+                                <!-- Dynamic Fetch UserName and Star Icon -->
+                            </div>
+
+                            <input type="email" id="admin_contact_reply_email" name="email" placeholder="User Email"
+                                hidden>
+                            <input type="text" id="Chat_UserId" name="Chat_UserId" placeholder="Username" hidden>
+
+                            <div id="specfic_user_chats">
+                                <!-- Dynamic specfic_user_chats content loaded via JavaScript -->
+                                user chat
+                            </div>
+
+                            <div id="admin_contact_reply_form_container" style="display: none;">
+                                <h2 class="admin_contact_reply_sub_heading">Reply to User</h2>
+                                <form id="admin_contact_reply_form" class="admin_reply_form">
+                                    <textarea id="admin_contact_reply_message" name="message"
+                                        placeholder="Your reply..."></textarea>
+                                    <input type="file" id="admin_contact_reply_file" name="file"
+                                        accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx">
+                                    <button type="submit">Send Reply</button>
+                                </form>
+                                <p id="admin_contact_reply_response_message"></p>
+                            </div>
+                        </div>
                     </div>
-                
-                    <div id="admin_contact_reply_form_container" style="display: none;">
-                        <h2 class="admin_contact_reply_sub_heading">Reply to User</h2>
-                        <form id="admin_contact_reply_form" class="admin_reply_form">
-                            <input type="email" id="admin_contact_reply_email" name="email" placeholder="User Email" readonly>
-                            <textarea id="admin_contact_reply_message" name="message" placeholder="Your reply..."></textarea>
-                            <input type="file" id="admin_contact_reply_file" name="file" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx">
-                            <button type="submit">Send Reply</button>
-                        </form>
-                        <p id="admin_contact_reply_response_message"></p>
-                    </div>
-                </div> 
-                
+                </div>
+
             </section>
         </main>
     </div>
@@ -152,124 +251,178 @@
             <span class="admin_contact_reply_close" id="admin_contact_reply_closeEditModal">&times;</span>
             <h2>Edit Message</h2>
             <form id="admin_contact_reply_editMessageForm">
-                <textarea id="admin_contact_reply_editMessageInput" placeholder="Edit your message..." rows="4"></textarea>
-                <input type="file" id="admin_contact_reply_editMessageFile" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx" />
+                <textarea id="admin_contact_reply_editMessageInput" placeholder="Edit your message..."
+                    rows="4"></textarea>
+                <input type="file" id="admin_contact_reply_editMessageFile"
+                    accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx" />
                 <button type="submit">Save Changes</button>
             </form>
         </div>
-    </div>    
-        <!-- Modal for viewing the KYC image -->
-<div id="custom_admin_user_kyc_waiting_list-kycModal" class="user_kyc_waiting_list-modal">
-    <div class="user_kyc_waiting_list-modal-content">
-        <div class="user_kyc_waiting_list-modal-header">
-            <span id="custom_admin_user_kyc_waiting_list-userName"></span> | 
-            <span id="custom_admin_user_kyc_waiting_list-userEmail"></span> | 
-            <span id="custom_admin_user_kyc_waiting_list-kycStatus"></span>
-        </div>
-        <span class="user_kyc_waiting_list-close-btn">&times;</span>
-        <img id="custom_admin_user_kyc_waiting_list-kycImage" class="user_kyc_waiting_list-modal-image" src="" alt="KYC Image">
     </div>
-</div>
+    <!-- Modal for viewing the KYC image -->
+    <div id="custom_admin_user_kyc_waiting_list-kycModal" class="user_kyc_waiting_list-modal">
+        <div class="user_kyc_waiting_list-modal-content">
+            <div class="user_kyc_waiting_list-modal-header">
+                <span id="custom_admin_user_kyc_waiting_list-userName"></span> |
+                <span id="custom_admin_user_kyc_waiting_list-userEmail"></span> |
+                <span id="custom_admin_user_kyc_waiting_list-kycStatus"></span>
+            </div>
+            <span class="user_kyc_waiting_list-close-btn">&times;</span>
+            <img id="custom_admin_user_kyc_waiting_list-kycImage" class="user_kyc_waiting_list-modal-image" src=""
+                alt="KYC Image">
+        </div>
+    </div>
 
-<!-- Modal Structure -->
-<div id="lotteryEventModal" class="custom_admin_dashboard_modal">
-    <div class="custom_admin_dashboard_modal-content">
-        <span class="custom_admin_dashboard_close-button" id="custom_admin_dashboard_closeModal">&times;</span>
-        <h2>Add New Lottery Event</h2>
-        <form id="addLotteryEventForm" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="text" name="title" placeholder="Title" required><br>
-            <span class="lottery_events_add_title_error" id="lottery_events_add_title_validation"></span><br>
-        
-            <input type="text" name="slug" placeholder="Slug (leave blank to auto-generate)" optional><br>
-            <span class="lottery_events_add_slug_error" id="lottery_events_add_slug_validation"></span><br>
-        
-        
-            <textarea name="description" placeholder="Description" required></textarea><br>
-            <span class="lottery_events_add_description_error" id="lottery_events_add_description_validation"></span><br>
-            <label for="category">Category:</label>
-            <select id="lottery_events_add_category" name="category" required>
-                <option value="">Select Category</option>
-            </select>
-            <span class="lottery_events_add_category_error" id="lottery_events_add_category_validation"></span><br>
-        
-            <input type="number" name="price" placeholder="Price" min="0" required><br>
-            <span class="lottery_events_add_price_error" id="lottery_events_add_price_validation"></span><br>
-        
-            <input type="datetime-local" name="draw_date" required><br>
-            <span class="lottery_events_add_drawdate_error" id="lottery_events_add_drawdate_validation"></span><br>
-        
-            <input type="file" name="image" accept="image/*" required><br>
-            <span class="lottery_events_add_image_error" id="lottery_events_add_image_validation"></span><br>
-        
-            <input type="checkbox" name="is_active" checked> Active<br>
-            <span class="lottery_events_add_isactive_error" id="lottery_events_add_isactive_validation"></span><br>
-        
-          
-        <!-- Total Budget Amount -->
-        <label for="totalBudget">Total Budget Amount:</label>
-        <input type="number" id="lottery_events_add_totalBudget" name="total_budget" placeholder="Enter Total Budget" min="0" required><br>
-        <span class="lottery_events_add_budget_error" id="lottery_events_add_budget_validation"></span><br>
-        <!-- Revenue Type -->
-        <label for="revenueType">Revenue Type:</label>
-        <select id="lottery_events_add_revenueType" name="revenue_type">
-            <option value="fixed">Fixed Amount</option>
-            <option value="percentage">Percentage</option>
-        </select><br>
-        <span class="lottery_events_add_revenue_type_error" id="lottery_events_add_revenue_type_validation"></span><br>
-        
-        <!-- Revenue Input -->
-        <div id="lottery_events_add_fixedAmountInput">
-            <label for="fixedRevenue">Fixed Revenue Amount:</label>
-            <input type="number" id="lottery_events_add_fixedRevenue" name="fixed_revenue" placeholder="Enter Fixed Revenue" min="0"><br>
-            <span class="lottery_events_add_fixed_revenue_error" id="lottery_events_add_fixed_revenue_validation"></span><br>
+    <!-- Modal Structure -->
+    <div id="lotteryEventModal" class="custom_admin_dashboard_modal">
+        <div class="custom_admin_dashboard_modal-content">
+            <span class="custom_admin_dashboard_close-button" id="custom_admin_dashboard_closeModal">&times;</span>
+            <h2>Add New Lottery Event</h2>
+            <form id="addLotteryEventForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="custom_admin_dashboard_title">
+                    <input type="text" class="custom_admin_dashboard_modal_title" name="title" placeholder="Title"
+                        required><br>
+                    <span class="lottery_events_add_title_error" id="lottery_events_add_title_validation"></span><br>
+                </div>
+                <div class="custom_admin_dashboard_slug">
+                    <input type="text" name="slug" placeholder="Slug (leave blank to auto-generate)" optional><br>
+                    <span class="lottery_events_add_slug_error" id="lottery_events_add_slug_validation"></span><br>
+                </div>
+                <div class="custom_admin_dashboard_description">
+                    <textarea name="description" placeholder="Description" required></textarea><br>
+                    <span class="lottery_events_add_description_error"
+                        id="lottery_events_add_description_validation"></span><br>
+                </div>
+
+                <label for="category">Category:</label>
+                <div class="custom_admin_dashboard_category">
+                    <select id="lottery_events_add_category" name="category" required>
+                        <option value="">Select Category</option>
+                    </select>
+                    <span class="lottery_events_add_category_error"
+                        id="lottery_events_add_category_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_price">
+                    <input type="number" name="price" placeholder="Price" min="0" required><br>
+                    <span class="lottery_events_add_price_error" id="lottery_events_add_price_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_draw_date">
+                    <input type="datetime-local" name="draw_date" required><br>
+                    <span class="lottery_events_add_drawdate_error"
+                        id="lottery_events_add_drawdate_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_image">
+                    <input type="file" name="image" accept="image/*" required><br>
+                    <span class="lottery_events_add_image_error" id="lottery_events_add_image_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_is_active">
+                    <input type="checkbox" name="is_active" checked> Active<br>
+                    <span class="lottery_events_add_isactive_error"
+                        id="lottery_events_add_isactive_validation"></span><br>
+                </div>
+
+                <label for="totalBudget">Total Budget Amount:</label>
+                <div class="custom_admin_dashboard_total_budget">
+                    <input type="number" id="lottery_events_add_totalBudget" name="total_budget"
+                        placeholder="Enter Total Budget" min="0" required><br>
+                    <span class="lottery_events_add_budget_error" id="lottery_events_add_budget_validation"></span><br>
+                </div>
+
+                <label for="revenueType">Revenue Type:</label>
+                <div class="custom_admin_dashboard_revenue_type">
+                    <select id="lottery_events_add_revenueType" name="revenue_type">
+                        <option value="fixed">Fixed Amount</option>
+                        <option value="percentage">Percentage</option>
+                    </select><br>
+                    <span class="lottery_events_add_revenue_type_error"
+                        id="lottery_events_add_revenue_type_validation"></span><br>
+                </div>
+
+                <div id="lottery_events_add_fixedAmountInput" class="custom_admin_dashboard_fixed_revenue">
+                    <label for="fixedRevenue">Fixed Revenue Amount:</label>
+                    <input type="number" id="lottery_events_add_fixedRevenue" name="fixed_revenue"
+                        placeholder="Enter Fixed Revenue" min="0"><br>
+                    <span class="lottery_events_add_fixed_revenue_error"
+                        id="lottery_events_add_fixed_revenue_validation"></span><br>
+                </div>
+
+                <div id="lottery_events_add_percentageInput" class="custom_admin_dashboard_percentage_revenue"
+                    style="display: none;">
+                    <label for="percentageRevenue">Percentage Revenue:</label>
+                    <input type="number" id="lottery_events_add_percentageRevenue" name="percentage_revenue"
+                        placeholder="Enter percentage" min="0" max="100"
+                        oninput="this.value = Math.min(Math.max(this.value, 0), 100)" required><br>
+                    <span class="lottery_events_add_percentage_revenue_error"
+                        id="lottery_events_add_percentage_revenue_validation"></span><br>
+                </div>
+
+                <div id="lottery_events_add_total_amount_container" class="custom_admin_dashboard_total_amount"
+                    style="display: none;">
+                    <label for="totalAmount">Total Amount:</label>
+                    <input type="number" id="lottery_events_add_totalAmount" name="total_amount" readonly><br>
+                    <span class="lottery_events_add_total_amount_error"
+                        id="lottery_events_add_total_amount_validation"></span><br>
+                </div>
+
+                <label for="perTicketPrice">Per Ticket Price:</label>
+                <div class="custom_admin_dashboard_per_ticket_price">
+                    <input type="number" id="lottery_events_add_perTicketPrice" name="per_ticket_price"
+                        placeholder="Enter Per Ticket Price" min="0" required><br>
+                    <span class="lottery_events_add_per_ticket_error"
+                        id="lottery_events_add_per_ticket_validation"></span><br>
+                </div>
+
+                <div id="lottery_events_add_total_tickets_container" class="custom_admin_dashboard_total_tickets"
+                    style="display: none;">
+                    <label for="totalTickets">Total Tickets:</label>
+                    <input type="number" id="lottery_events_add_totalTickets" name="calculated_total_tickets"
+                        readonly><br>
+                    <span class="lottery_events_add_total_tickets_error"
+                        id="lottery_events_add_total_tickets_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_mini_limit">
+                    <input type="number" name="mini_limit" placeholder="Minimum Tickets" min="1" required><br>
+                    <span class="lottery_events_add_minilimit_error"
+                        id="lottery_events_add_minilimit_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_max_limit">
+                    <input type="number" name="max_limit" placeholder="Maximum Tickets" min="0" required><br>
+                    <span class="lottery_events_add_maxlimit_error"
+                        id="lottery_events_add_maxlimit_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_free_postal_description">
+                    <textarea name="free_postal_description" placeholder="Free Postal Description"
+                        required></textarea><br>
+                    <span class="lottery_events_add_freepostal_error"
+                        id="lottery_events_add_freepostal_validation"></span><br>
+                </div>
+
+                <div class="custom_admin_dashboard_competition_details">
+                    <textarea name="competition_details" placeholder="Competition Details" required></textarea><br>
+                    <span class="lottery_events_add_competitiondetails_error"
+                        id="lottery_events_add_competitiondetails_validation"></span><br>
+                </div>
+
+
+                <h3>Additional Images</h3>
+                <div id="additional-images-container">
+                </div>
+                <button type="button" class="custom_admin_dashboard_button" id="add-image-button">Add Another
+                    Image</button>
+                <br><br>
+                <button type="button" class="custom_admin_dashboard_button" onclick="submitAddLotteryEvent()">Add
+                    Event</button>
+            </form>
         </div>
-        
-        <div id="lottery_events_add_percentageInput" style="display: none;">
-            <label for="percentageRevenue">Percentage Revenue:</label>
-           
-            <input type="number" id="lottery_events_add_percentageRevenue" name="percentage_revenue" placeholder="Enter percentage" min="0"  max="100"  oninput="this.value = Math.min(Math.max(this.value, 0), 100)" required><br>
-            <span class="lottery_events_add_percentage_revenue_error" id="lottery_events_add_percentage_revenue_validation"></span><br>
-        </div>
-        
-        <!-- Display Total Amount -->
-        <div id="lottery_events_add_total_amount_container" style="display: none;">
-            <label for="totalAmount">Total Amount:</label>
-            <input type="number" id="lottery_events_add_totalAmount" name="total_amount" readonly><br>
-            <span class="lottery_events_add_total_amount_error" id="lottery_events_add_total_amount_validation"></span><br>
-        </div>
-        
-        <!-- Per Ticket Price -->
-        <label for="perTicketPrice">Per Ticket Price:</label>
-        <input type="number" id="lottery_events_add_perTicketPrice" name="per_ticket_price" placeholder="Enter Per Ticket Price" min="0" required><br>
-        <span class="lottery_events_add_per_ticket_error" id="lottery_events_add_per_ticket_validation"></span><br>
-        <!-- Display Total Tickets -->
-        <div id="lottery_events_add_total_tickets_container" style="display: none;">
-            <label for="totalTickets">Total Tickets:</label>
-            <input type="number" id="lottery_events_add_totalTickets" name="calculated_total_tickets" readonly><br>
-            <span class="lottery_events_add_total_tickets_error" id="lottery_events_add_total_tickets_validation"></span><br>
-        </div>
-        <input type="number" name="mini_limit" placeholder="Minimum Tickets" min="1" required><br>
-        <span class="lottery_events_add_minilimit_error" id="lottery_events_add_minilimit_validation"></span><br>
-        
-        <input type="number" name="max_limit" placeholder="Maximum Tickets" min="0" required><br>
-        <span class="lottery_events_add_maxlimit_error" id="lottery_events_add_maxlimit_validation"></span><br>
-        
-        <textarea name="free_postal_description" placeholder="Free Postal Description" required></textarea><br>
-        <span class="lottery_events_add_freepostal_error" id="lottery_events_add_freepostal_validation"></span><br>
-        
-        <textarea name="competition_details" placeholder="Competition Details" required></textarea><br>
-        <span class="lottery_events_add_competitiondetails_error" id="lottery_events_add_competitiondetails_validation"></span><br>
-        
-        <h3>Additional Images</h3>
-        <div id="additional-images-container">
-        </div>
-        <button type="button" id="add-image-button">Add Another Image</button>
-        <br><br>
-        <button type="button" onclick="submitAddLotteryEvent()">Add Event</button>
-        </form>
-         </div>
-</div>
+    </div>
 </body>
 <script src="{% static 'js/custom.js' %}"></script>
 <script src="{% static 'plugins/chart.js' %}"></script>

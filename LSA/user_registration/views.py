@@ -96,7 +96,12 @@ class LoginView(APIView):
             password = serializer.validated_data['password']
             try:
                 user = User.objects.get(email=email)
-                if user.check_password(password):
+                user_profile = UserProfile.objects.filter(user=user).first()
+                if user_profile and user_profile.is_blocked:
+                    return Response({
+                        "error": "You are blocked."
+                    }, status=status.HTTP_403_FORBIDDEN)
+                elif user.check_password(password):
                     if user.userprivacy.two_factor_auth_enabled:
                         # Generate and send OTP if 2FA is enabled
                         otp = generate_otp()
@@ -124,35 +129,6 @@ class LoginView(APIView):
             except User.DoesNotExist:
                 return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# class LoginView(APIView):
-#     def post(self, request):
-#         user_agent = request.headers.get('User-Agent', '')
-#         if not user_agent or 'Mozilla' not in user_agent:
-#             return Response(
-#                 {"detail": "Access denied. This endpoint is restricted to browsers only."},
-#                 status=status.HTTP_403_FORBIDDEN
-#             )
-
-#         serializer = LoginSerializer(data=request.data)
-#         if serializer.is_valid():
-#             email = serializer.validated_data['email']
-#             password = serializer.validated_data['password']
-#             try:
-#                 user = User.objects.get(email=email)
-#                 if user.check_password(password):
-#                     # Specify the backend as a string
-#                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-
-#                     return Response({
-#                         "message": "Login successful.",
-#                         "user_id": user.id
-#                     }, status=status.HTTP_200_OK)
-#                 else:
-#                     return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
-#             except User.DoesNotExist:
-#                 return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class KYCStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]

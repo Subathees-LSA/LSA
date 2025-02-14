@@ -34,7 +34,9 @@ class admindashboardpreviewAdmin(admin.ModelAdmin):
 
 @admin.register(admin_navbar_access)
 class admin_navbar_accessAdmin(admin.ModelAdmin):
-    list_display = ('name', 'url_name')
+    list_display = ('name', 'url_name', 'ordering', 'resolved_url')  # Show ordering field
+    list_editable = ('ordering',)  # Allow inline editing of the ordering field
+    ordering = ['ordering']  # Ensure objects are displayed in custom order
 
     def resolved_url(self, obj):
         return obj.get_url()

@@ -9,8 +9,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}" defer></script>
     {% include 'header.html' %}
-
-
 </head>
 
 <body class="privacy-body">
@@ -20,6 +18,7 @@
             <h2>Personal Profile</h2>
             <form id="privacy-form" data-api-url="{% url 'api-privacy-security' %}">
                 {% csrf_token %}
+
                 <!-- Read-only fields -->
                 <label for="privacy-username">Username:</label>
                 <input type="text" id="privacy-username" name="username" value="{{ username }}" readonly />
@@ -40,21 +39,19 @@
 
                 <label for="privacy-phone-number">Phone Number (UK):</label>
                 <input type="text" id="privacy-phone-number" name="phone_number"
-                    value="{{ user.userprivacy.phone_number }}" placeholder="+44-1234567890" />
+                value="{{ user.userprivacy.phone_number|default:'' }}" placeholder="+44-1234567890" />
                 <div id="privacy-phone-error" class="privacy-error"></div>
 
+                <!-- Two-Factor Authentication Checkbox -->
                 <!-- <label for="privacy-two-factor-auth">Enable Two-Factor Authentication (2FA):</label>
-                <input type="checkbox" id="privacy-two-factor-auth" name="two_factor_auth_enabled" 
-                {% if user.userprivacy.two_factor_auth_enabled %} checked {% endif %} /> -->
+                <input type="checkbox" id="privacy-two-factor-auth" name="two_factor_auth_enabled"
+                    {% if user.userprivacy.two_factor_auth_enabled %} checked {% endif %} /> -->
 
                 <button type="button" id="privacy-save-changes">Save Changes</button>
-
             </form>
-
         </div>
         <div id="privacy-message" style="display:none;"></div>
     </div>
-
 </body>
 
 </html>
