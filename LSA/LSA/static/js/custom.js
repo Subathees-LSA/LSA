@@ -4288,7 +4288,7 @@ View all
                 </div>`;
                 const enterNowButton = `
             <a href="/lottery_detail/${event.slug}/" class="lottery_events_enter_button">
-            ${category.logo ? `<img src="${category.logo}" alt="${category.name} Logo" class="enter_icon">` : ''}
+            ${category.logo ? `<img src="${category.logo}" alt="${category.name} Logo" class="lottery_events_enter_enter_icon">` : ''}
           Enter Now
         <img src="/media/lottery_images/arrow (2).png" alt="Arrow Icon">
     </a>`;
@@ -4297,16 +4297,18 @@ View all
             eventElement.innerHTML = `
                 ${favoriteIcon}
                 <div class="lottery_events_event_header">${drawDateString}</div>
-                ${event.image ? `<img src="${event.image}" alt="${event.title}" />` : ''}
-                
+                ${event.image ? `<img src="${event.image}" alt="${event.title}" class="similar_category_lottery_event_img" />` : ''}
+                  
                 <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
                 <h3>${event.title}</h3>
                <div class="lt-p"> <p> ${event.description}</p><div>
                
                 <div class="lottery_events_per_ticket_price"> £${event.per_ticket_price}</div>
+                <div class="lottery_events_soldpercentage">SOLD: ${event.sold_percentage}%</div>
                 <div class="lottery_events_sold_percentage">
                     <div class="lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
                 </div>
+
                <div class="lottery_events_ticket_info">
         <p> ${event.total_tickets - event.sold_tickets} tickets remaining</p>
     </div>
@@ -4367,7 +4369,7 @@ async function fetchBanner() {
                    <img src="/media/banner-footer/banner-footer (4).png" alt="Prize Icon">
                         <div>
                         <p>£81,567,000</p>
-                        <span>Given in 732 Prizes</span>
+                        <span>Given in Prizes</span>
                         </div>
                 </div>
                 <div class="banner-footer-item">
@@ -4381,7 +4383,7 @@ async function fetchBanner() {
                                 <i class="fas fa-star"></i> 
                                 <i class="fas fa-star-half-alt"></i>
                             </p>
-                           <p> <a href="#">Click Here 1532 Reviews</a> </p>
+                           <p> <a href="#"target="_blank">Click Here 1532 Reviews</a> </p>
                         </div>
                 </div>
               <div class="banner-footer-item">

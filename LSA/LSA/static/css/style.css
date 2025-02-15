@@ -670,22 +670,6 @@
 
 /* custom_admin_dashboard.html leaderboard */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  .custom_admin_dashboard_container {
             display: flex;
             font-family: Rajdhani;
@@ -789,8 +773,8 @@
             border-radius: 15px;
         }
 
-        .custom_admin_dashboard_account-info .custom_admin_dashboard_icon {
-            margin-left: 15px;
+        .custom_admin_dashboard_account-info  {
+            margin-left: 97%;
             cursor: pointer;
         }
 
@@ -2001,8 +1985,7 @@
 /* custom_admin_dashboard_nav_bar css */
 
 .custom_admin_dashboard_nav_bar_images {
-    border-radius: 50%;
-    object-fit: cover;
+    border-radius: 10%;
 }
 /* static/css/styles.css */
 body.user_welcome_page_body {
@@ -5386,8 +5369,8 @@ margin-left: 37px;
     width: 100%;
     height: 240px;
     object-fit: cover;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    /* border-top-left-radius: 10px;
+    border-top-right-radius: 10px; */
 }
 
 /* Favorite icon */
@@ -5406,7 +5389,7 @@ margin-left: 37px;
     justify-content: center;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: opacity 0.3s ease, transform 0.2s ease;
-    z-index: 1;
+   
 }
 
 .lottery_events_event:hover {
@@ -5454,11 +5437,18 @@ margin-left: 37px;
 .lottery_events_ticket_info {
     color: #343434;
     font-size: 14px;
-    font-family: Open Sans;
     font-weight: 400;
 }
+.lottery_events_soldpercentage{
+    color: #FF6600;
+    font-size: 14px;
+    font-weight: 400;
+    margin-top: 10px;
+    font-weight: bold;
 
+}
 /* Progress bar */
+
 .lottery_events_sold_percentage {
     background-color: #e0e0e0;
     border-radius: 8px;
@@ -5493,14 +5483,11 @@ margin-left: 37px;
     font-size: 16px;
 }
 
-.enter_icon {
-    width: 25px;
-    height: 25px;
-}
+
 
 .lottery_events_enter_button img {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     transition: transform 0.3s ease;
 }
 
@@ -5618,7 +5605,7 @@ margin-left: 37px;
     bottom: 20px;
     right: 20px;
     font-family: Rajdhani;
-    z-index: 1000; 
+    /* z-index: 1000;  */
   
 }
 .chatbot-popup {
@@ -5920,6 +5907,7 @@ input[type="db-email"] {
     }
 }
 .custom-banner {
+    font-family: Rajdhani;
     position: relative;
     width: 100%;
     margin: auto;
@@ -5996,7 +5984,7 @@ input[type="db-email"] {
 
 .banner-footer-item p {
     margin: 0;
-    font-weight: bold;
+    /* font-weight: bold; */
     color: white;
 }
 
@@ -6015,10 +6003,10 @@ input[type="db-email"] {
     font-size: 14px;
 }
 .explore-button {
+    font-family: Rajdhani;
     background: #252A34;
     color: white;
     font-size: 16px;
-    font-family:  Open Sans;
     font-weight: 600;
     padding: 10px 20px;
     border: none;
@@ -7864,15 +7852,10 @@ background-color: rgba(255, 102, 0, 0.05);
     gap: 40px; /* Space between text and icon */
 }
 
-.similar_category_lottery_enter_icon {
-    width: 25px; /* Adjust size */
-    height: 25px;
-    justify-content: right;
- 
-}
+
 .similar_category_lottery_enter_button img {
-    width: 18px; /* Adjust size of the icon */
-    height: auto;
+    width: 22px; /* Adjust size of the icon */
+    height: 22px;
     transition: transform 0.3s ease;
 }
 /* .similar_category_lottery_enter_button:hover img {
@@ -8233,7 +8216,7 @@ background-color: rgba(255, 102, 0, 0.05);
 
 
 .navbar {
-    
+    font-family: Rajdhani;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -9026,6 +9009,7 @@ background-color: rgba(255, 102, 0, 0.05);
 }
 
 .category_custom-banner {
+    
     position: relative;
     width: 100%;
     height: auto;
