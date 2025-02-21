@@ -183,7 +183,7 @@ class admin_dashboard_preview(models.Model):
     identifier = models.CharField(max_length=50, unique=True, help_text="Unique identifier for this container (used in frontend)")
     type = models.CharField(
         max_length=100,
-        choices=[(' ', 'Select type'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'), ('lottery_sales_overview', 'lottery_sales_overview'), ('user_leaderboard', 'user_leaderboard'), ('lottery_sales_overview_regional_reports', 'lottery_sales_overview_regional_reports'), ('overview_counts', 'overview_counts'),],
+        choices=[(' ', 'Select type'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'), ('lottery_sales_overview', 'lottery_sales_overview'), ('user_leaderboard', 'user_leaderboard'), ('lottery_sales_overview_regional_reports', 'lottery_sales_overview_regional_reports'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
         default='',
         help_text="Type of content"
     )
@@ -219,6 +219,7 @@ class admin_dashboard_preview(models.Model):
             "overview_active_users_count",
             "overview_active_lotteries_count",
             "overview_sales_amount",
+            "notification-bell-container"
         
         }
 
@@ -229,7 +230,6 @@ class admin_dashboard_preview(models.Model):
         # Call the clean method for validation
         self.clean()
         super().save(*args, **kwargs)
-
 
 
 class lottery_sales_bar_chart(models.Model):
@@ -290,4 +290,22 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return self.name
-        
+# FInd us
+class SocialLink(models.Model):
+    name = models.CharField(max_length=100, unique=True)  # Name of the social media platform (e.g., Facebook)
+    icon = models.ImageField(upload_to='social_icons/')  # Logo image for the platform
+    url = models.URLField()  # URL to the social media page
+    title = models.CharField(max_length=100, default='Find Us')  # Add title field to control header in the frontend
+
+    def __str__(self):
+        return self.name
+    
+
+# our locations
+class Location(models.Model):
+    name = models.CharField(max_length=100)  # Location Name (e.g., UK, USA)
+    map_url = models.URLField()  # URL to the map or location page (Google Maps, etc.)
+    title = models.CharField(max_length=100, default='Our Locations') 
+    
+    def __str__(self):
+        return self.name

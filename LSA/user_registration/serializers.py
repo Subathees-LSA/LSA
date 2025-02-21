@@ -80,18 +80,21 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
     user = UserList()  # Nest the UserSerializer to include user details
     kyc_image_url = serializers.SerializerMethodField()
-
+    profile_image_url = serializers.SerializerMethodField()  # New field for profile image
 
     class Meta:
         model = UserProfile
-        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url','ip_address','is_blocked']
-
+        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url', 'ip_address', 'is_blocked', 'profile_image_url']
 
     def get_kyc_image_url(self, obj):
-        # Return the URL for the image view based on the profile ID
         if obj.kyc_image:
             return f"/view_kyc_image/{obj.id}/"
         return None
+
+    def get_profile_image_url(self, obj):
+        if obj.profile_image:  # Assuming 'profile_image' is the field storing the profile picture
+            return obj.profile_image.url
+        return None   
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()

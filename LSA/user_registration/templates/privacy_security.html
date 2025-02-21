@@ -1,13 +1,18 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy & Security</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}" defer></script>
+    <script>
+        const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
+        window.onload = function () {
+            header_navbar_fetchCategories();
+        }; 
+    </script>
     {% include 'header.html' %}
 </head>
 

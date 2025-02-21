@@ -72,6 +72,8 @@ urlpatterns = [
     path('api/mark-read/<str:email>/', mark_messages_as_read, name='mark-messages-as-read'),
     path('api/latest-unread-notifications/', latest_unread_notifications, name='latest_unread_notifications'),
     path('block-user/', block_user, name='block-user'), 
+    path('social-links/', footer_view, name='social_links'),
+    path('locations/', locations_view, name='locations'),
 
 ]
 

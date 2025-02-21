@@ -32,6 +32,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.http import JsonResponse
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
@@ -440,3 +442,10 @@ def google_auth_complete(request, backend='google-oauth2'):
     except AuthCanceled:
         logger.error("Google Authentication Canceled")
         return redirect('user_signup')  # Redirect to signup page instead of error
+
+#Clearing the session for POP up message
+def clear_google_session(request):
+    if request.method == "POST":
+        request.session.pop("google_user_email", None)  # Remove session key
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=400)

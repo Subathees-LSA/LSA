@@ -11,10 +11,15 @@
         const add_csrftoken = "{{ csrf_token }}"; 
         const category_id = "{{ category_id }}";
         const api_get_category_lottery_events_url = "{% url 'api_get_category_lottery_events' category_id=category_id %}";
+        const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
+        
         const bannerUrl = "{% url 'api_banner' %}";
         window.onload = function() {
             fetchCategoryLotteryEvents();
             category_fetchBanner();
+            updateCartCount(); 
+            updateFavoritesCount();
+            header_navbar_fetchCategories();
         };
     </script>
     <script src="{% static 'js/custom.js' %}"></script>

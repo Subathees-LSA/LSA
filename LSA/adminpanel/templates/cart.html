@@ -9,9 +9,12 @@
     <script>
         const cartUrl = "{% url 'cart' %}";  
         const api_get_cart_url = "{% url 'api_get_cart' %}";
+        const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
         window.onload = function () {
             fetchCartItems();
             updateCartCount();
+            header_navbar_fetchCategories();
+          updateFavoritesCount();
         }; 
     </script>
     <script src="{% static 'js/custom.js' %}"></script>

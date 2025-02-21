@@ -47,19 +47,43 @@
                 <li><a href="{% url 'terms_page' %}">THEBETZONES UK</a></li>
                 <li><a href="mailto:support@win4all.com">support@thebetzones.com</a></li>
             </ul>
-            <div class="social-icons">
+            {% comment %} <div class="social-icons">
                 <h4>Find Us On Social</h4>
                 <a href="#"><img src="/media/images/facebook.png" alt="Facebook"></a>
                 <a href="#"><img src="/media/images/Vector.png" alt="Vector"></a>
                 <a href="#"><img src="/media/images/instagram.png" alt="Instagram"></a>
-                 </div>
+                 </div> {% endcomment %}
+                 <h4>{{ social_links.first.title }}</h4> 
+         
+                 <div class="social-icons">
+                     
+                     
+                     {% for link in social_links%}
+                     
+                         {% if link.icon %}
+                             <a href="{{ link.url }}" target="_blank">
+                                 <img src="{{ link.icon.url }}" alt="{{ link.name }} logo" class="social-logo">
+                             </a>
+                             
+                         {% endif %}
+                     {% endfor %}
+                 </div>   
+ 
         </div>
         <div class="footer-section">
-            <h4>Our Locations</h4>
+            {% comment %} <h4>Our Locations</h4>
             <ul>
                 <li><a href="#">UK, FR, AS</a></li>
                 <li><a href="#">USA</a></li>
+            </ul> {% endcomment %}
+            <h4>{{ locations.first.title }}</h4> 
+            <ul>
+                
+                {% for location in locations %}
+                    <li><a href="{{ location.map_url }}" target="_blank">{{ location.name }}</a></li>
+                {% endfor %}
             </ul>
+
         </div>
     </div>
     <div class="footer-bar">

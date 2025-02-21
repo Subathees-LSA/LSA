@@ -7,27 +7,42 @@
      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
       <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
  <script src="{% static 'js/custom.js' %}"></script>
-   
+ <script>
+    const cartUrl = "{% url 'cart' %}";  
+    const api_get_cart_url = "{% url 'api_get_cart' %}";
+    const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
+    window.onload = function () {
+        fetchCartItems();
+        updateCartCount();
+        header_navbar_fetchCategories();
+      updateFavoritesCount();
+    }; 
+</script>
  </head>
  <body class="nav-body">
      <nav class="navbar">
          <div class="navbar-logo">
             <img src="/media/images/logo.png" alt="Logo">   </div>
          <ul class="navbar-links">
-             <li><a href="#">Latest Competitions</a></li>
-             {% comment %} <li class="dropdown_competitions">
-                <label class="dropbtn_competitions">Competitions <i class="fas fa-chevron-down"></i></label>
-                <div class="dropdown-content_competitions" id="categories_dropdown_competitions">
+             <!-- <li><a href="#">Latest Competitions</a></li> -->
+             <li class="dropdown_competitions">
+                   <span class="dropbtn_competitions">Competitions <i class="fas fa-chevron-down"></i></span>
+                   <div class="dropdown-content_competitions" id="categories_dropdown_competitions">
                     <!-- Categories will be dynamically added here -->
                 </div>
-            </li>  {% endcomment %}
+            </li>
              <li><a href="#">Entry Lists</a></li>
-             <li><a href="#">Live Draws</a></li>
              <li><a href="#">Winners</a></li>
-             <li><a href="#">Gift Cards</a></li>
+             <li><a href="#">Result</a></li>
              <li><a href="#">How it Works</a></li>
-         </ul>
-         {% comment %} <div class="navbar-favorites">
+        
+         <div class="navbar-auth">
+            <a href="{% url 'user_login' %}" class="login">Login</a>
+            <a href="{% url 'user_signup' %}" class="register">Register</a>
+        </div>
+    </ul>
+    <div class="navbar-icons">
+      <div class="navbar-favorites">
             <a href="/favorites/" class="favorites-link">
                 <i class="fas fa-heart"></i>
                 <span id="favorites-count">0</span>
@@ -36,13 +51,10 @@
         <div class="navbar-cart">
             <a href="{% url 'cart' %}" class="cart-icon">
                 <i class="fas fa-shopping-cart"></i>
-                <span id="cart-item-count">0</span> <!-- Cart count display -->
+                <span class="header-cart-item-count"  id="cart-item-count">0</span> <!-- Cart count display -->
             </a>  
-        </div>    {% endcomment %}
-         <div class="navbar-auth">
-             <a href="{% url 'user_login' %}" class="login">Login</a>
-             <a href="{% url 'user_signup' %}" class="register">Register</a>
-         </div>
+        </div>   
+    <div></div>    
          <div class="hamburger" onclick="toggleMenu()">
              <span></span>
              <span></span>

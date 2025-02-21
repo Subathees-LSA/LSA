@@ -1,6 +1,10 @@
 from django.contrib.auth import get_user_model
 from .models import UserProfile
 from django.db import transaction
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import redirect
 
 User = get_user_model()
 
@@ -19,6 +23,11 @@ def save_user_profile(backend, user, response, *args, **kwargs):
             # Check if a user with the same email already exists
             existing_user = User.objects.filter(email=email).first()
             if existing_user:
+                backend.strategy.request.session['google_user_email'] = email  
+                backend.strategy.request.session.modified = True 
+                # Store email in a cookie (without returning response)
+                backend.strategy.request.COOKIES["google_user_email"] = email  
+
                 if user != existing_user:
                     # Merge Google user data into the existing user
                     existing_user.first_name = first_name or existing_user.first_name
@@ -42,6 +51,12 @@ def save_user_profile(backend, user, response, *args, **kwargs):
                     'newsletter': True,  # Default value
                 },
             )
+              # 🔹 Check if the user has a password; if not, redirect to password reset confirm page
+            if not user.has_usable_password():
+                uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
+                return redirect(f"/password-reset-confirm/{uidb64}/{token}/")  # Updated
+
             
 def link_to_existing_user(backend, user, response, *args, **kwargs):
     if backend.name == 'google-oauth2':

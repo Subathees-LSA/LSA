@@ -67,6 +67,16 @@ class ContactAdmin(admin.ModelAdmin):
         self.message_user(request, "Selected messages marked as processed.")
     mark_as_processed.short_description = "Mark selected messages as processed"
 
+
+# social app links
+@admin.register(SocialLink)
+class SocialLinkAdmin(admin.ModelAdmin):
+    list_display = ('name', 'url', 'icon') 
+    search_fields = ('name', 'title')  # Allow searching by name and title
+    
+# Our Locations
+admin.site.register(Location)
+
 admin.site.register(LotteryCategory)
 admin.site.register(Banner)
 admin.site.register(Previous_Winner_img)
