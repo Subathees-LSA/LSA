@@ -11,6 +11,7 @@
         const csrfToken = "{{ csrf_token }}";
         const kycStatusUrl = "{% url 'kyc-status' %}";
         const kycUploadUrl = "{% url 'kyc-upload' %}";
+        const googleEmail = "{{ email|default:'' }}";
     </script>
     <script src="{% static 'js/custom.js' %}" defer></script>
 
@@ -37,7 +38,10 @@
             <button class="user_welcome_page_ok-button" id="okButton" onclick="closeKYCModal()">OK</button>
         </div>
     </div>
-    
+    <div id="google-popup" class="google-popup">
+        <p>We found that this account already exists (<span id="google-user-email"></span>). We are linking it to your existing account.</p>
+    </div>
+
 </body>
 </html>
 

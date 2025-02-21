@@ -110,197 +110,199 @@ function admin_chat_view() {
     basketIcon.style.marginBottom = "10px";
     basketIcon.onclick = () => deleteSelectedContacts();
 
-    document.querySelector(".admin_contact_reply_container").prepend(basketIcon, backButton);
+    document.querySelector(".admin_contact_reply_container").prepend(backButton);
+    document.querySelector(".delete_Container").prepend(basketIcon);
+
 
     let selectedEmails = [];
 
     fetch("/api/admin/messages/")
-    .then((response) => response.json())
-    .then((data) => {
-        // Convert the object to an array of emails, sorted by created_at
-        const sortedEmails = Object.entries(data); 
+        .then((response) => response.json())
+        .then((data) => {
+            // Convert the object to an array of emails, sorted by created_at
+            const sortedEmails = Object.entries(data);
 
-        sortedEmails.forEach(([email, messages]) => {
-            let user_name;  
+            sortedEmails.forEach(([email, messages]) => {
+                let user_name;
 
-            messages.forEach((message) => {
-                user_name = message.name;  
-            });
+                messages.forEach((message) => {
+                    user_name = message.name;
+                });
 
-            const emailItem = document.createElement("div");
-            emailItem.className = "email-item";
-            emailItem.innerHTML = `
+                const emailItem = document.createElement("div");
+                emailItem.className = "email-item";
+                emailItem.innerHTML = `
                 <input type="checkbox" class="email-checkbox" data-email="${email}">
                 <span class="email-text">${user_name}</span>
                 <span class="last-message"></span>
                 <span class="delete-icon" title="Delete Email">🗑️</span>
             `;
-            const lastMessageElement = emailItem.querySelector(".last-message");
+                const lastMessageElement = emailItem.querySelector(".last-message");
 
-            fetch(`/api/admin/chat/${email}/`)
-            .then((response) => response.json())
-            .then((messages) => {
-                const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
-               
-                const lastMessageContent = lastMessage?.file
-                ? "File Attached" // If a file exists, display "File Attached"
-                : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
-                lastMessageElement.innerText = `${lastMessageContent}`;
-                if (lastMessageContent.length > 5) {
-                    lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
-                }
-             })
-            .catch((error) => console.error("Error fetching messages by email:", error));
-            
-            
-
-            // Attach checkbox selection functionality
-            emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
-
-            // Attach delete functionality
-            emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
-
-            // Open chat on click (excluding the delete icon and checkbox)
-            emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
-            emailItem.querySelector(".last-message").onclick = () => fetchMessagesByEmail(email);
-
-            
-
-            // Append the email item to the message list
-            all_users_name.appendChild(emailItem);
-        
-    });
-    })
-    .catch((error) => console.error("Error fetching messages:", error));
-
-            const editAdminMessage = (id, oldMessage) => {
-            // Open the modal
-            const modal = document.getElementById("admin_contact_reply_editMessageModal");
-            const editMessageInput = document.getElementById("admin_contact_reply_editMessageInput");
-            const editMessageFile = document.getElementById("admin_contact_reply_editMessageFile");
-            const editMessageForm = document.getElementById("admin_contact_reply_editMessageForm");
-        
-            // Populate the existing message
-            editMessageInput.value = oldMessage;
-            editMessageFile.value = ""; // Reset file input
-            modal.style.display = "block";
-        
-            // Handle the form submission
-            editMessageForm.onsubmit = (e) => {
-                e.preventDefault();
-        
-                const newMessage = editMessageInput.value.trim();
-                const newFile = editMessageFile.files[0];
-                if (!newMessage && !newFile) {
-                    alert("Message or file is required.");
-                    return;
-                }
-        
-                const formData = new FormData();
-                formData.append("reply_message", newMessage);
-                if (newFile) {
-                    formData.append("file", newFile);
-                }
-        
-                fetch(`/api/admin/reply/${id}/edit_delete/`, {
-                    method: "PUT",
-                    headers: {
-                        "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
-                    },
-                    body: formData,
-                })
+                fetch(`/api/admin/chat/${email}/`)
                     .then((response) => response.json())
-                    .then((data) => {
-                        if (data.message) {
-                            alert(data.message);
-                            modal.style.display = "none"; // Close the modal
-                            fetchMessagesByEmail(document.getElementById("admin_contact_reply_email").value);
-                        } else {
-                            alert("Error editing message.");
+                    .then((messages) => {
+                        const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
+
+                        const lastMessageContent = lastMessage?.file
+                            ? "File Attached" // If a file exists, display "File Attached"
+                            : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
+                        lastMessageElement.innerText = `${lastMessageContent}`;
+                        if (lastMessageContent.length > 5) {
+                            lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
                         }
                     })
-                    .catch((error) => {
-                        console.error("Error editing message:", error);
-                        alert("Error editing message.");
-                    });
-            };
-        };
-        
-        // Close the modal when clicking the close button or outside the modal
-        document.getElementById("admin_contact_reply_closeEditModal").onclick = () => {
-            document.getElementById("admin_contact_reply_editMessageModal").style.display = "none";
-        };
-        
-        window.onclick = (event) => {
-            const modal = document.getElementById("admin_contact_reply_editMessageModal");
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        };
-        
-        
-        const deleteAdminMessage = (id) => {
-            if (confirm("Are you sure you want to delete this message?")) {
-                fetch(`/api/admin/reply/${id}/edit_delete/`, {
-                    method: "DELETE",
-                    headers: {
-                        "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
-                    },
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.message) {
-                            alert(data.message);
-                            fetchMessagesByEmail(document.getElementById("admin_contact_reply_email").value);
-                        } else {
-                            alert("Error deleting message.");
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error deleting message:", error);
-                        alert("Error deleting message.");
-                    });
-            }
-        };
-        // Fetch Username and set current username
-    const fetchUserName = (email) => {
-            const user_Icon = document.createElement("span");
-            user_Icon.className = "user-Icon";
-            user_Icon.style.cursor = "pointer";
-            user_Icon.style.fontSize = "20px";
-            user_Icon.style.marginRight = "16px";
-            let CurrentUserId = document.getElementById('Chat_UserId');
-    
-            const email_items = document.querySelectorAll(`[data-email="${email}"]`);
-            email_items.forEach((item) => {
-                let userName = item.nextElementSibling.innerHTML;
-                CurrentUserId.value = userName;// sets unsername in hidden input value temporarly
-                user_Icon.textContent = userName;
+                    .catch((error) => console.error("Error fetching messages by email:", error));
+
+
+
+                // Attach checkbox selection functionality
+                emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
+
+                // Attach delete functionality
+                emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
+
+                // Open chat on click (excluding the delete icon and checkbox)
+                emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
+                emailItem.querySelector(".last-message").onclick = () => fetchMessagesByEmail(email);
+
+
+
+                // Append the email item to the message list
+                all_users_name.appendChild(emailItem);
+
             });
-     
-            if (user_Icon.textContent == '') {
-                user_Icon.textContent = CurrentUserId.value; // set Current username value if unavailable
+        })
+        .catch((error) => console.error("Error fetching messages:", error));
+
+    const editAdminMessage = (id, oldMessage) => {
+        // Open the modal
+        const modal = document.getElementById("admin_contact_reply_editMessageModal");
+        const editMessageInput = document.getElementById("admin_contact_reply_editMessageInput");
+        const editMessageFile = document.getElementById("admin_contact_reply_editMessageFile");
+        const editMessageForm = document.getElementById("admin_contact_reply_editMessageForm");
+
+        // Populate the existing message
+        editMessageInput.value = oldMessage;
+        editMessageFile.value = ""; // Reset file input
+        modal.style.display = "block";
+
+        // Handle the form submission
+        editMessageForm.onsubmit = (e) => {
+            e.preventDefault();
+
+            const newMessage = editMessageInput.value.trim();
+            const newFile = editMessageFile.files[0];
+            if (!newMessage && !newFile) {
+                alert("Message or file is required.");
+                return;
             }
-            userChat_Icons.appendChild(user_Icon);
-        };        
+
+            const formData = new FormData();
+            formData.append("reply_message", newMessage);
+            if (newFile) {
+                formData.append("file", newFile);
+            }
+
+            fetch(`/api/admin/reply/${id}/edit_delete/`, {
+                method: "PUT",
+                headers: {
+                    "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+                },
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.message) {
+                        alert(data.message);
+                        modal.style.display = "none"; // Close the modal
+                        fetchMessagesByEmail(document.getElementById("admin_contact_reply_email").value);
+                    } else {
+                        alert("Error editing message.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error editing message:", error);
+                    alert("Error editing message.");
+                });
+        };
+    };
+
+    // Close the modal when clicking the close button or outside the modal
+    document.getElementById("admin_contact_reply_closeEditModal").onclick = () => {
+        document.getElementById("admin_contact_reply_editMessageModal").style.display = "none";
+    };
+
+    window.onclick = (event) => {
+        const modal = document.getElementById("admin_contact_reply_editMessageModal");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+
+
+    const deleteAdminMessage = (id) => {
+        if (confirm("Are you sure you want to delete this message?")) {
+            fetch(`/api/admin/reply/${id}/edit_delete/`, {
+                method: "DELETE",
+                headers: {
+                    "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.message) {
+                        alert(data.message);
+                        fetchMessagesByEmail(document.getElementById("admin_contact_reply_email").value);
+                    } else {
+                        alert("Error deleting message.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error deleting message:", error);
+                    alert("Error deleting message.");
+                });
+        }
+    };
+    // Fetch Username and set current username
+    const fetchUserName = (email) => {
+        const user_Icon = document.createElement("span");
+        user_Icon.className = "user-Icon";
+        user_Icon.style.cursor = "pointer";
+        user_Icon.style.fontSize = "20px";
+        user_Icon.style.marginRight = "16px";
+        let CurrentUserId = document.getElementById('Chat_UserId');
+
+        const email_items = document.querySelectorAll(`[data-email="${email}"]`);
+        email_items.forEach((item) => {
+            let userName = item.nextElementSibling.innerHTML;
+            CurrentUserId.value = userName;// sets unsername in hidden input value temporarly
+            user_Icon.textContent = userName;
+        });
+
+        if (user_Icon.textContent == '') {
+            user_Icon.textContent = CurrentUserId.value; // set Current username value if unavailable
+        }
+        userChat_Icons.appendChild(user_Icon);
+    };
     const fetchMessagesByEmail = (email) => {
-        
-        
+
+
         fetch(`/api/mark-read/${email}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRFToken": admin_chats_csrfToken 
+                "X-CSRFToken": admin_chats_csrfToken
             }
         })
-        .then((response) => {
-            if (!response.ok) {
-                console.log("Failed to mark messages as read");
-            }
-            console.log("Messages marked as read.");
-        })
-        .catch((error) => console.error("Error marking messages as read:", error));
-    
+            .then((response) => {
+                if (!response.ok) {
+                    console.log("Failed to mark messages as read");
+                }
+                console.log("Messages marked as read.");
+            })
+            .catch((error) => console.error("Error marking messages as read:", error));
+
         fetch(`/api/admin/chat/${email}/`)
             .then((response) => response.json())
             .then((messages) => {
@@ -308,41 +310,49 @@ function admin_chat_view() {
                 specfic_user_chats.innerHTML = "";
                 backButton.style.display = "block";
                 basketIcon.style.display = "none"; // Hide the basket icon in chat view
-                fetchUserName(email);   
-                
-            const starContainer = document.createElement("div");
-            starContainer.className = "star-container";
-            starContainer.style.display = "flex";
-            starContainer.style.alignItems = "center";
-            starContainer.style.marginBottom = "10px";
-           
+                fetchUserName(email);
+                /* On Clicking Individual User, Reset Previous Users Form and Response Message */
+                let current_Email = document.getElementById('admin_contact_reply_email').value;
+                if(current_Email!==email){
+                const responseMessage = document.getElementById("admin_contact_reply_response_message");
+                responseMessage.innerText='';
+                const admin_contact_reply_form = document.getElementById('admin_contact_reply_form');
+                admin_contact_reply_form.reset(); //Reset Previous Users Forms
+                }
 
-            const starIcon = document.createElement("span");
-            
-            starIcon.className = "star-icon";
-            starIcon.style.cursor = "pointer";
-            starIcon.style.fontSize = "24px";
-            starIcon.style.marginRight = "8px";
-           
-            starIcon.onclick = () => toggleStarChat(email, starIcon);
+                const starContainer = document.createElement("div");
+                starContainer.className = "star-container";
+                starContainer.style.display = "flex";
+                starContainer.style.alignItems = "center";
+                starContainer.style.marginBottom = "10px";
 
-            const starLabel = document.createElement("span");
-            
-            starLabel.style.fontSize = "16px";
 
-            starContainer.appendChild(starIcon);
-            starContainer.appendChild(starLabel);
-            userChat_Icons.appendChild(starContainer);
-            //specfic_user_chats.appendChild(starContainer);
+                const starIcon = document.createElement("span");
+
+                starIcon.className = "star-icon";
+                starIcon.style.cursor = "pointer";
+                starIcon.style.fontSize = "24px";
+                starIcon.style.marginRight = "8px";
+
+                starIcon.onclick = () => toggleStarChat(email, starIcon);
+
+                const starLabel = document.createElement("span");
+
+                starLabel.style.fontSize = "16px";
+
+                starContainer.appendChild(starIcon);
+                starContainer.appendChild(starLabel);
+                userChat_Icons.appendChild(starContainer);
+                //specfic_user_chats.appendChild(starContainer);
 
                 messages.forEach((message) => {
-                    
+
                     const messageItem = document.createElement("div");
                     messageItem.className = message.type === "user" ? "chat-user-message" : "chat-admin-message";
                     if (message.type === "user") {
                         // Create a star icon element const starIcon = document.createElement("span");
                         starIcon.innerHTML = message.starred ? "⭐" : "☆"; // Filled or empty star
-                        
+
                     }
                     let content = (message.type === 'user') ? `<img src="https://img.freepik.com/premium-vector/avatar-profile-icon-flat-style-female-user-profile-vector-illustration-isolated-background-women-profile-sign-business-concept_157943-38866.jpg"
                     class='userProfiles' alt='userProfiles'>` : `<img src="https://img.freepik.com/premium-vector/personas-icon_1076610-12224.jpg" class='adminProfiles' alt='adminProfiles'>`;
@@ -357,44 +367,55 @@ function admin_chat_view() {
                             content += `<a href="${message.file}" target="_blank" style="margin-top: 10px; display: inline-block;">Download File</a>`;
                         }
                     }
-                    
+
                     content += `<small>${new Date(message.created_at).toLocaleString()}</small>`;
-                   
-                    
+
+
                     messageItem.innerHTML = content;
-                     // Add action icons for admin messages
-                if (message.type === "admin") {
-                    const actions = document.createElement("div");
-                    actions.className = "message-actions";
+                    // Add action icons for admin messages
+                    if (message.type === "admin") {
+                        const actions = document.createElement("div");
+                        actions.className = "message-actions";
 
-                    // Edit icon
-                    const editIcon = document.createElement("span");
-                    editIcon.innerHTML = "✏️"; // Edit icon
-                    editIcon.title = "Edit Message";
-                    editIcon.onclick = () => editAdminMessage(message.id, message.message);
+                        // Edit icon
+                        const editIcon = document.createElement("span");
+                        editIcon.innerHTML = "✏️"; // Edit icon
+                        editIcon.title = "Edit Message";
+                        editIcon.onclick = () => editAdminMessage(message.id, message.message);
 
-                    // Delete icon
-                    const deleteIcon = document.createElement("span");
-                    deleteIcon.innerHTML = "🗑️"; // Delete icon
-                    deleteIcon.title = "Delete Message";
-                    deleteIcon.onclick = () => deleteAdminMessage(message.id);
+                        // Delete icon
+                        const deleteIcon = document.createElement("span");
+                        deleteIcon.innerHTML = "🗑️"; // Delete icon
+                        deleteIcon.title = "Delete Message";
+                        deleteIcon.onclick = () => deleteAdminMessage(message.id);
 
-                    actions.appendChild(editIcon);
-                    actions.appendChild(deleteIcon);
-                    messageItem.appendChild(actions);
-                }
+                        actions.appendChild(editIcon);
+                        actions.appendChild(deleteIcon);
+                        messageItem.appendChild(actions);
+                    }
                     specfic_user_chats.appendChild(messageItem);
                 });
+                /** Delete The User Related Notification Messages in Notification Popup*/
+                let userName = email.substring(0, email.indexOf("@"));
+                let notification_msg = document.getElementById(`${userName}`);
+                if (notification_msg !== null) {
+                    notification_msg.remove();
+                }
+                /** Fetch Notification popup Messages Per click */
+                const notificationSection = document.getElementById("notification-section");
+                let setCount = notificationSection.childElementCount; 
+                const notificationCount = document.getElementById("notification-count");
+                notificationCount.textContent = setCount;//Sets Actual Count of Notifications
 
                 openReplyForm(email);
-                specfic_user_chats_autoScroll();    
+                specfic_user_chats_autoScroll();
                 function specfic_user_chats_autoScroll() {
                     specfic_user_chats.scrollTop = specfic_user_chats.scrollHeight;
-                }    
+                }
             })
             .catch((error) => console.error("Error fetching messages by email:", error));
     };
-    function user_NotificationsMsg(emailid){
+    function user_NotificationsMsg(emailid) {
         user_notifications();
         fetchMessagesByEmail(emailid)
         const notificationPopup_chat = document.getElementById("notification-popup");
@@ -408,21 +429,27 @@ function admin_chat_view() {
         const notificationCount = document.getElementById("notification-count");
         const notificationSection = document.getElementById("notification-section");
         const noNotificationsMsg = document.getElementById("no-notifications");
-        notificationSection.innerHTML =""
+        let current_Count = document.querySelector('#notification-count').innerText;
+        notificationSection.innerHTML = ""
         // Fetch notifications when the page loads
         fetch("/api/latest-unread-notifications/")
             .then(response => response.json())
             .then(notifications => {
-                if (notifications.length === 0) {
+                if (current_Count==='0' && notifications.length === 0) {
                     noNotificationsMsg.style.display = "block";
                     notificationCount.textContent = "0";
+                    document.getElementById("notification_img").style.opacity = "0.4";
+                    document.getElementById("notification-count").style.backgroundColor = "#cdc8c8";
                 } else {
                     noNotificationsMsg.style.display = "none";
-                    notificationCount.textContent = notifications.length;
+                    notificationCount.textContent = current_Count === '0'? current_Count=notifications.length : current_Count;
+
 
                     // Populate notifications (they will be in descending order based on API response)
                     notifications.forEach(notification => {
                         const notificationItem = document.createElement("div");
+                        let userName = notification.email.substring(0, notification.email.indexOf("@"));
+						notificationItem.setAttribute("id", userName);
                         notificationItem.className = "notification-item";
                         notificationItem.innerHTML = `
                             <strong>${notification.name}</strong>
@@ -434,47 +461,47 @@ function admin_chat_view() {
                     });
                 }
             })
-            .catch(error => console.error("Error fetching notifications:", error)); 
+            .catch(error => console.error("Error fetching notifications:", error));
     }
     user_notifications();
-    function display_notificationPopup(){
+    function display_notificationPopup() {
         const notificationBell = document.getElementById("notification-bell");
         const notificationPopup = document.getElementById("notification-popup");
         // Toggle the notification popup on bell icon click
         notificationBell.addEventListener("click", () => {
             if (notificationPopup.style.display === "none") {
                 notificationPopup.style.display = "block"; // Show the popup
-            }  else if (notificationPopup.style.display === "block") {
+            } else if (notificationPopup.style.display === "block") {
                 notificationPopup.style.display = "none"; // Show the popup
             } else {
                 notificationPopup.style.display = "block"; // Hide the popup
             }
         });
-   }
-   display_notificationPopup();
+    }
+    display_notificationPopup();
     // Function to toggle the star status of a chat
-const toggleStarChat = (email, starIcon) => {
-    const isStarred = starIcon.innerHTML === "⭐";
-    fetch("/api/admin/messages/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json" ,
-            "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
-        },
-        body: JSON.stringify({
-            email: email,
-            starred: !isStarred,
-        }),
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                starIcon.innerHTML = isStarred ? "☆" : "⭐";
-               
-            }
+    const toggleStarChat = (email, starIcon) => {
+        const isStarred = starIcon.innerHTML === "⭐";
+        fetch("/api/admin/messages/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+            },
+            body: JSON.stringify({
+                email: email,
+                starred: !isStarred,
+            }),
         })
-        .catch((error) => console.error("Error toggling star status:", error));
-};
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    starIcon.innerHTML = isStarred ? "☆" : "⭐";
+
+                }
+            })
+            .catch((error) => console.error("Error toggling star status:", error));
+    };
     const deleteContact = (email) => {
         if (confirm(`Are you sure you want to delete all data for ${email}?`)) {
             fetch(`/api/admin/delete-contact/${email}/`, {
@@ -566,61 +593,61 @@ const toggleStarChat = (email, starIcon) => {
         replyForm.style.display = "none";
 
         fetch("/api/admin/messages/")
-    .then((response) => response.json())
-    .then((data) => {
-        // Convert the object to an array of emails, sorted by created_at
-        const sortedEmails = Object.entries(data); 
+            .then((response) => response.json())
+            .then((data) => {
+                // Convert the object to an array of emails, sorted by created_at
+                const sortedEmails = Object.entries(data);
 
-        sortedEmails.forEach(([email, messages]) => {
-            let user_name;  
+                sortedEmails.forEach(([email, messages]) => {
+                    let user_name;
 
-            messages.forEach((message) => {
-                user_name = message.name;
-            });
-            const emailItem = document.createElement("div");
-            emailItem.className = "email-item";
-            emailItem.innerHTML = `
+                    messages.forEach((message) => {
+                        user_name = message.name;
+                    });
+                    const emailItem = document.createElement("div");
+                    emailItem.className = "email-item";
+                    emailItem.innerHTML = `
                 <input type="checkbox" class="email-checkbox" data-email="${email}">
                 <span class="email-text">${user_name}</span>
                 <span class="last-message"></span>
                 <span class="delete-icon" title="Delete Email">🗑️</span>
             `;
-            const lastMessageElement = emailItem.querySelector(".last-message");
+                    const lastMessageElement = emailItem.querySelector(".last-message");
 
-            fetch(`/api/admin/chat/${email}/`)
-            .then((response) => response.json())
-            .then((messages) => {
-                const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
-               
-                const lastMessageContent = lastMessage?.file
-                ? "File Attached" // If a file exists, display "File Attached"
-                : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
-                lastMessageElement.innerText = `${lastMessageContent}`;
-                if (lastMessageContent.length > 5) {
-                    lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
-                }
-             })
-            .catch((error) => console.error("Error fetching messages by email:", error));
-            
-            
+                    fetch(`/api/admin/chat/${email}/`)
+                        .then((response) => response.json())
+                        .then((messages) => {
+                            const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
 
-            // Attach checkbox selection functionality
-            emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
+                            const lastMessageContent = lastMessage?.file
+                                ? "File Attached" // If a file exists, display "File Attached"
+                                : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
+                            lastMessageElement.innerText = `${lastMessageContent}`;
+                            if (lastMessageContent.length > 5) {
+                                lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
+                            }
+                        })
+                        .catch((error) => console.error("Error fetching messages by email:", error));
 
-            // Attach delete functionality
-            emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
 
-            // Open chat on click (excluding the delete icon and checkbox)
-            emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
 
-            // Append the email item to the message list
-            
-            all_users_name.appendChild(emailItem);
+                    // Attach checkbox selection functionality
+                    emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
 
-        
-    });
-    })
-    .catch((error) => console.error("Error fetching messages:", error));
+                    // Attach delete functionality
+                    emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
+
+                    // Open chat on click (excluding the delete icon and checkbox)
+                    emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
+
+                    // Append the email item to the message list
+
+                    all_users_name.appendChild(emailItem);
+
+
+                });
+            })
+            .catch((error) => console.error("Error fetching messages:", error));
 
     };
 
@@ -669,7 +696,7 @@ const toggleStarChat = (email, starIcon) => {
                 responseMessage.innerText = data.message;
                 responseMessage.style.color = "green";
                 adminreplyMessage.value = ""; // Reset replyMessage input
-                fileInput.value = ""; 
+                fileInput.value = "";
                 fetchMessagesByEmail(email);
             } else {
                 responseMessage.innerText = "Error sending reply.";
@@ -857,7 +884,7 @@ function populateYearDropdown() {
     });
 }
 // Event listener for year selection
-function dynamic_lottery_sales_bar_chart () {
+function dynamic_lottery_sales_bar_chart() {
     // Populate year dropdown on page load
     populateYearDropdown();
 
@@ -877,13 +904,13 @@ function fetchStatistics(month, year) {
             year: year
         },
         success: function (data) {
-           
+
             $("#active_users").text(`${data.active_users} / ${data.total_users}`);
             $("#won_lottery").text(data.won_lottery);
             $("#lost_lottery").text(data.lost_lottery);
-            $("#won_percentage").text(data.won_percentage.toFixed(2)+ " %");
-            $("#current_won_percentage").text(data.current_won_percentage.toFixed(2)+ " %");
-            $("#lost_percentage").text(data.lost_percentage.toFixed(2)+ " %");
+            $("#won_percentage").text(data.won_percentage.toFixed(2) + " %");
+            $("#current_won_percentage").text(data.current_won_percentage.toFixed(2) + " %");
+            $("#lost_percentage").text(data.lost_percentage.toFixed(2) + " %");
         },
         error: function (error) {
             console.error('Error fetching data:', error);
@@ -907,17 +934,17 @@ function lottery_sales_count() {
     fetchStatistics(currentMonth, currentYear);
 }
 // Fetch leaderboard data using AJAX
-    function user_leaderboard () {
-      $.ajax({
+function user_leaderboard() {
+    $.ajax({
         url: '/api/leaderboard/', // Replace with your Django API endpoint
         method: 'GET',
         success: function (data) {
-          const leaderboard = $('#leaderboard');
-          leaderboard.empty(); // Clear existing data
+            const leaderboard = $('#leaderboard');
+            leaderboard.empty(); // Clear existing data
 
-          // Populate leaderboard with fetched data
-          data.forEach((item) => {
-            leaderboard.append(`
+            // Populate leaderboard with fetched data
+            data.forEach((item) => {
+                leaderboard.append(`
               <div class="leaderboard-item">
                 <div class="user-info">
                   <img src="${item.image || 'https://via.placeholder.com/50'}" alt="User Image">
@@ -932,154 +959,168 @@ function lottery_sales_count() {
                 </div>
               </div>
             `);
-          });
+            });
         },
         error: function (xhr, status, error) {
-          console.error('Error fetching leaderboard data:', error);
+            console.error('Error fetching leaderboard data:', error);
         }
-      });
-    }
-  
-    async function fetchReports() {
-        const response = await fetch('/reports/');
-        return await response.json();
-    }
+    });
+}
 
-    async function fetchRegionalSales() {
-        const response = await fetch('/regional-sales/');
-        return await response.json();
-    }
+async function fetchReports() {
+    const response = await fetch('/reports/');
+    return await response.json();
+}
 
-    async function renderCharts() {
-        const reports = await fetchReports();
-        const regionalSales = await fetchRegionalSales();
+async function fetchRegionalSales() {
+    const response = await fetch('/regional-sales/');
+    return await response.json();
+}
 
-        // Extract the most recent values for displaying in the metrics
-        const lastReport = reports[reports.length - 1];
-        const totalSalesData = regionalSales[0];  // Assuming the first region's data for demonstration
 
-        // Dynamically display the Won and Lost Lottery amounts
-        document.getElementById('overview_wonLottery').textContent = `$${lastReport.win_lottery.toLocaleString()}`;
-        document.getElementById('overview_lostLottery').textContent = `$${lastReport.lost_lottery.toLocaleString()}`;
+async function renderCharts() {
+    const reports = await fetchReports();
+    const regionalSales = await fetchRegionalSales();
 
-        // Dynamically display the Total Sales, Average, and Return amounts
-        document.getElementById('overview_totalSales').textContent = `$${totalSalesData.total_sales.toLocaleString()}`;
-        document.getElementById('overview_averageSales').textContent = `$${totalSalesData.average.toLocaleString()}`;
-        document.getElementById('overview_returnSales').textContent = `$${totalSalesData.return_value.toLocaleString()}`;
+    // Extract the most recent values for displaying in the metrics
+    const lastReport = reports[reports.length - 1];
+    const totalSalesData = regionalSales[0];  // Assuming the first region's data for demonstration
 
-        // Prepare data for charts
-        const years = reports.map(report => report.year);
-        const winLottery = reports.map(report => report.win_lottery);
-        const lostLottery = reports.map(report => report.lost_lottery);
+    // Dynamically display the Won and Lost Lottery amounts
+    document.getElementById('overview_wonLottery').textContent = `£${lastReport.win_lottery.toLocaleString()}`;
+    document.getElementById('overview_lostLottery').textContent = `£${lastReport.lost_lottery.toLocaleString()}`;
 
-        const regions = regionalSales.map(sale => sale.region);
-        const totalSales = regionalSales.map(sale => sale.total_sales);
-        const averages = regionalSales.map(sale => sale.average);
+    // Dynamically display the Total Sales, Average, and Return amounts
+    document.getElementById('overview_totalSales').textContent = `£${totalSalesData.total_sales.toLocaleString()}`;
+    document.getElementById('overview_averageSales').textContent = `£${totalSalesData.average.toLocaleString()}`;
+    document.getElementById('overview_returnSales').textContent = `£${totalSalesData.return_value.toLocaleString()}`;
 
-        // Reports Chart
-        new Chart(document.getElementById('overview_reportsChart'), {
-            type: 'bar',
-            data: {
-                labels: years,
-                datasets: [
-                    {
-                        label: 'Win Lottery',
-                        data: winLottery,
-                        backgroundColor: 'orange'
-                    },
-                    {
-                        label: 'Lost Lottery',
-                        data: lostLottery,
-                        backgroundColor: 'red'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'top' }
+    // Prepare data for charts
+    const years = reports.map(report => report.year);
+    const winLottery = reports.map(report => report.win_lottery);
+    const lostLottery = reports.map(report => report.lost_lottery);
+
+    const regions = regionalSales.map(sale => sale.region);
+    const totalSales = regionalSales.map(sale => sale.total_sales);
+    const averages = regionalSales.map(sale => sale.average);
+
+    // Reports Chart
+    new Chart(document.getElementById('overview_reportsChart'), {
+        type: 'bar',
+        data: {
+            labels: years,
+            datasets: [
+                {
+                    label: 'Win Lottery',
+                    data: winLottery,
+                    backgroundColor: 'orange'
+                },
+                {
+                    label: 'Lost Lottery',
+                    data: lostLottery,
+                    backgroundColor: 'red'
                 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' }
             }
-        });
+        }
+    });
 
-        // Regional Sales Chart
-        new Chart(document.getElementById('overview_regionalChart'), {
-            type: 'bar',
-            data: {
-                labels: regions,
-                datasets: [
-                    {
-                        label: 'Total Sales',
-                        data: totalSales,
-                        backgroundColor: 'orange'
-                    },
-                    {
-                        label: 'Average',
-                        data: averages,
-                        backgroundColor: 'red'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                indexAxis: 'y',  // Horizontal bars
-                plugins: {
-                    legend: { position: 'top' }
+    // Regional Sales Chart
+    new Chart(document.getElementById('overview_regionalChart'), {
+        type: 'bar',
+        data: {
+            labels: regions,
+            datasets: [
+                {
+                    label: 'Total Sales',
+                    data: totalSales,
+                    backgroundColor: 'orange'
+                },
+                {
+                    label: 'Average',
+                    data: averages,
+                    backgroundColor: 'red'
                 }
+            ]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',  // Horizontal bars
+            plugins: {
+                legend: { position: 'top' }
             }
-        });
-    }
-
+        }
+    });
+}
 
 function lottery_won_and_lost_total_calculation() {
-fetch('/api/lottery-summary/')
-.then(response => response.json())
-.then(data => {
-const ids = {
-'overview_sales_count_won-lottery-amount': data.won_lottery_amount,
-'overview_sales_count_lost-lottery-amount': data.lost_lottery_amount,
-'overview_active_users_count': data.active_users,
-'overview_active_lotteries_count': data.active_lotteries,
-'overview_sales_amount': data.sales_amount
-};
+    fetch('/api/lottery-summary/')
+        .then(response => response.json())
+        .then(data => {
+            const ids = {
+                'overview_sales_count_won-lottery-amount': data.won_lottery_amount,
+                'overview_sales_count_lost-lottery-amount': data.lost_lottery_amount,
+                'overview_active_users_count': data.active_users,
+                'overview_active_lotteries_count': data.active_lotteries,
+                'overview_sales_amount': '£' + data.sales_amount
+            };
 
-Object.entries(ids).forEach(([id, value]) => {
-const element = document.getElementById(id);
-if (element) element.innerText = value;
-});
-})
-.catch(error => console.error('Error fetching data:', error));
+            Object.entries(ids).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.innerText = value;
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
 }
-        
-        
+function toggleSidebar() {
+    const sidebar = document.querySelector(".custom_admin_dashboard_sidebar");
+    const hamburger = document.getElementById("hamburger-menu");
+
+
+    // Toggle sidebar visibility
+    sidebar.classList.toggle("show");
+
+
+    // Change the icon based on sidebar visibility
+    if (sidebar.classList.contains("show")) {
+        hamburger.innerHTML = "✖"; // Change to cross icon
+    } else {
+        hamburger.innerHTML = "☰"; // Change back to hamburger
+    }
+}
 function initializeDashboard() {
     try {
-       
-            if (typeof api_navbar_access_tabsView_url === 'undefined' || typeof api_dashboard_preview_admin_view_url === 'undefined') {
-                
-                return;
-            }
-            try {
-                fetch(api_navbar_access_tabsView_url, {
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`
-                    }
-                })
+
+        if (typeof api_navbar_access_tabsView_url === 'undefined' || typeof api_dashboard_preview_admin_view_url === 'undefined') {
+
+            return;
+        }
+        try {
+            fetch(api_navbar_access_tabsView_url, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     try {
                         const sidebar = document.querySelector(".custom_admin_dashboard_sidebar nav ul");
                         sidebar.innerHTML = ""; // Clear existing tabs
-                
+
                         data.forEach(tab => {
                             const li = document.createElement("li");
                             let active = tab.identifier === null ? "active" : "";
-                
+
                             let imageHtml = "";
                             if (tab.nav_bar_image_url) {
                                 imageHtml = `<img src="${tab.nav_bar_image_url}" alt="${tab.name}" class="custom_admin_dashboard_nav_bar_images" style="width: 20px; height: 20px; margin-left: 15px;">`;
                             }
-                
+
                             li.innerHTML = `
                                 <a href="${tab.resolved_url}" class="sidebars ${active}" id="${tab.identifier}_navbar" onclick="showSpecificDiv('${tab.identifier}')">
                                     ${imageHtml}</br> ${tab.name}
@@ -1087,7 +1128,7 @@ function initializeDashboard() {
                             `;
                             sidebar.appendChild(li);
                         });
-                
+
                         $(".sidebars").click(function () {
                             $(".sidebars").removeClass('active');
                             $(this).addClass('active');
@@ -1097,128 +1138,157 @@ function initializeDashboard() {
                     }
                 })
                 .catch(error => console.error("Error fetching tabs:", error));
-                
-                fetch(api_dashboard_preview_admin_view_url)
-                    .then(response => response.json())
-                    .then(({ data, tabs, table_data }) => {
-                        try {
-                            const dashboard = document.querySelector('.custom_admin_dashboard_overview_count');
-                            const Statistics_count_dashboard = document.querySelector('.custom_admin_dashboard_overview_statistics_count');
-                            const tableContainer = document.querySelector('.custom_admin_dashboard_user_table');
-                            const custom_admin_dashboard_conversion_rate_Container = document.querySelector('.custom_admin_dashboard_conversion_rate');
 
-                            tabs.forEach(tab => {
-                                try {
-                                    if (tab.type === 'count') {
-                                        const container = document.createElement('div');
-                                        container.className = 'custom_admin_dashboard_card';
-                                        container.innerHTML = `
+            fetch(api_dashboard_preview_admin_view_url)
+                .then(response => response.json())
+                .then(({ data, tabs, table_data }) => {
+                    try {
+                        const dashboard = document.querySelector('.custom_admin_dashboard_overview_count');
+                        const Statistics_count_dashboard = document.querySelector('.custom_admin_dashboard_overview_statistics_count');
+                        const tableContainer = document.querySelector('.custom_admin_dashboard_user_table');
+                        const custom_admin_dashboard_conversion_rate_Container = document.querySelector('.custom_admin_dashboard_conversion_rate');
+
+                        tabs.forEach(tab => {
+                            try {
+                                if (tab.type === 'count') {
+                                    const container = document.createElement('div');
+                                    container.className = 'custom_admin_dashboard_card';
+                                    container.innerHTML = `
                                             <h2>${tab.name}</h2>
                                             <p id="${tab.identifier}">${data[tab.identifier] || 0}</p>
                                         `;
-                                        dashboard.appendChild(container);
-                                    }else if (tab.type === 'Statistics_count') {
-                                        const container = document.createElement('div');
-                                        container.className = 'custom_admin_dashboard_card';
-                                        const lottery_sales_dynamic_count_filter= document.getElementById("lottery_sales_dynamic_count_filter");
-                                        lottery_sales_dynamic_count_filter.style.display = "block";
-                                        container.innerHTML = `
+                                    dashboard.appendChild(container);
+                                }
+                                else if (tab.type === 'overview_notification_bell') {
+                                    document.getElementById("notification-bell-container").hidden = false;
+                                }
+                                else if (tab.type === 'Statistics_count') {
+                                    const container = document.createElement('div');
+                                    container.className = 'custom_admin_dashboard_card';
+                                    const lottery_sales_dynamic_count_filter = document.getElementById("lottery_sales_dynamic_count_filter");
+                                    lottery_sales_dynamic_count_filter.style.display = "block";
+                                    container.innerHTML = `
                                             <h2>${tab.name}</h2>
                                             <p id="${tab.identifier}"></p>
                                         `;
-                                        Statistics_count_dashboard.appendChild(container);
-                                        lottery_sales_count();
-                                    }else if (tab.type === 'overview_counts') {
-                                        
-                                        const custom_admin_dashboard_overview_lottery_won_lost_count= document.getElementById("custom_admin_dashboard_overview_lottery_won_lost_count");
-                                        const lottery_won_lost_container = document.createElement('div');
-                                        lottery_won_lost_container.className = 'overview_sales_count_card';
-                                        const imageHtml = tab.image_url 
+                                    Statistics_count_dashboard.appendChild(container);
+                                    lottery_sales_count();
+                                } else if (tab.type === 'overview_counts') {
+
+                                    const custom_admin_dashboard_overview_lottery_won_lost_count = document.getElementById("custom_admin_dashboard_overview_lottery_won_lost_count");
+                                    const lottery_won_lost_container = document.createElement('div');
+                                    lottery_won_lost_container.className = 'overview_sales_count_card';
+                                    const imageHtml = tab.image_url
                                         ? `<img src="${tab.image_url}" alt="${tab.name}" class="dashboard-preview-image" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">`
                                         : '';
-                                        lottery_won_lost_container.innerHTML = `
+                                    lottery_won_lost_container.innerHTML = `
                                                  
                                                 <p>${imageHtml} ${tab.name}</p>
                                                 <h2 id="${tab.identifier}"></h2>
                                                
                                            
                                         `;
-                                        custom_admin_dashboard_overview_lottery_won_lost_count.appendChild(lottery_won_lost_container);
-                                        lottery_won_and_lost_total_calculation();
-                                    }else if (tab.type === 'lottery_sales_overview') {
-                                        const custom_admin_dashboard_bar_chart_filter= document.getElementById("custom_admin_dashboard_bar_chart_filter");
-                                        custom_admin_dashboard_bar_chart_filter.style.display = "block";    
-                                        dynamic_lottery_sales_bar_chart();
+                                    custom_admin_dashboard_overview_lottery_won_lost_count.appendChild(lottery_won_lost_container);
+                                    lottery_won_and_lost_total_calculation();
+                                } else if (tab.type === 'lottery_sales_overview') {
+                                    const custom_admin_dashboard_bar_chart_filter = document.getElementById("custom_admin_dashboard_bar_chart_filter");
+                                    custom_admin_dashboard_bar_chart_filter.style.display = "block";
+                                    dynamic_lottery_sales_bar_chart();
 
-                                    }else if (tab.type === 'lottery_sales_overview_regional_reports') {
-                                        const lottery_sales_overview_regional_reports= document.getElementById("regional_sales_overview_dashboard");
-                                        lottery_sales_overview_regional_reports.style.display = "flex";    
-                                        renderCharts();
-                                    }else if (tab.type === 'user_leaderboard') {
-                                        const leaderboard_container= document.getElementById("leaderboard");
-                                        leaderboard_container.style.display = "block";  
-                                        const leaderboard_title =  document.getElementById("leaderboard_title");
-                                        leaderboard_title.className = 'custom_admin_dashboard_leaderboard_title';
-                                        leaderboard_title.textContent = tab.name;    
-                                        user_leaderboard();
-                                    }else if (tab.type === 'table') {
-                                        let rows = [];  // All user rows from the server
-                                        let currentIndex = 3;  // Start after showing the first 3 users
-                                        const rowsPerPage = 3;
-                                        function user_management_table() {
-                                            const container = document.querySelector(".custom_admin_dashboard_user_table");
-                                        
-                                            // Create search input container
-                                            const searchContainer = document.createElement("div");
-                                            searchContainer.style.display = "flex";
-                                            searchContainer.style.alignItems = "center";
-                                            searchContainer.style.gap = "10px";
+                                } else if (tab.type === 'lottery_sales_overview_regional_reports') {
+                                    const lottery_sales_overview_regional_reports = document.getElementById("regional_sales_overview_dashboard");
+                                    lottery_sales_overview_regional_reports.style.display = "flex";
+                                    renderCharts();
+                                } else if (tab.type === 'user_leaderboard') {
+                                    const leaderboard_container = document.getElementById("leaderboard");
+                                    leaderboard_container.style.display = "block";
+                                    const leaderboard_title = document.getElementById("leaderboard_title");
+                                    leaderboard_title.className = 'custom_admin_dashboard_leaderboard_title';
+                                    leaderboard_title.textContent = tab.name;
+                                    user_leaderboard();
+                                } else if (tab.type === 'table') {
+                                    let rows = [];  // All user rows from the server
+                                    let currentIndex = 3;  // Start after showing the first 3 users
+                                    const rowsPerPage = 3;
+                                    function user_management_table() {
+                                        const container = document.querySelector(".custom_admin_dashboard_user_table");
 
-                                            // Create search input
-                                            const searchInput = document.createElement('input');
-                                            searchInput.type = "text";
-                                            searchInput.id = "searchUserInput";
-                                            searchInput.placeholder = "Search by username,email,ip,kyc status...";
-                                            searchInput.onkeyup = searchUsers;
-                                            searchContainer.appendChild(searchInput);
+                                        // Create search input container
+                                        const searchContainer = document.createElement("div");
+                                        searchContainer.style.display = "flex";
+                                        searchContainer.style.alignItems = "center";
+                                        searchContainer.style.gap = "10px";
 
-                                            // Create filter dropdown
-                                            const filterContainer = document.createElement("div");
-                                            filterContainer.style.position = "relative";
+                                        // Create search input
+                                        const searchInput = document.createElement('input');
+                                        searchInput.type = "text";
+                                        searchInput.id = "searchUserInput";
+                                        searchInput.placeholder = "Search by username,email,ip,kyc status...";
+                                        searchInput.onkeyup = searchUsers;
+                                        searchContainer.appendChild(searchInput);
 
-                                            // Filter button (icon)
-                                            const filterButton = document.createElement("button");
-                                            filterButton.id = "filterButton";
-                                            filterButton.textContent = "🔽"; // Dropdown icon
-                                            filterButton.onclick = toggleFilterDropdown;
-                                            filterContainer.appendChild(filterButton);
+                                        // Create filter dropdown
+                                        const filterContainer = document.createElement("div");
+                                        filterContainer.style.position = "relative";
 
-                                            // Dropdown menu
-                                            const filterDropdown = document.createElement("div");
-                                            filterDropdown.id = "filterDropdown";
-                                            filterDropdown.style.display = "none";
-                                            // filterDropdown.style.position = "absolute";
-                                            filterDropdown.style.background = "#fff";
-                                            filterDropdown.style.border = "1px solid #ccc";
-                                            filterDropdown.style.padding = "5px";
-                                            filterDropdown.style.boxShadow = "0px 4px 6px rgba(0,0,0,0.1)";
+                                        // Filter button (icon)
+                                        const filterButton = document.createElement("button");
+                                        filterButton.id = "filterButton";
+                                        filterButton.textContent = "🔽"; // Dropdown icon
+                                        filterButton.onclick = toggleFilterDropdown;
+                                        filterContainer.appendChild(filterButton);
 
-                                            // Dropdown options
-                                            ["All Users", "Blocked Users"].forEach(option => {
-                                                const div = document.createElement("div");
-                                                div.textContent = option;
-                                                div.style.cursor = "pointer";
-                                                div.onclick = () => applyFilter(option);
-                                                filterDropdown.appendChild(div);
-                                            });
+                                        // Dropdown menu
+                                        const filterDropdown = document.createElement("div");
+                                        filterDropdown.id = "filterDropdown";
+                                        filterDropdown.style.display = "none";
+                                        // filterDropdown.style.position = "absolute";
+                                        filterDropdown.style.background = "#fff";
+                                        filterDropdown.style.border = "1px solid #ccc";
+                                        filterDropdown.style.padding = "5px";
+                                        filterDropdown.style.boxShadow = "0px 4px 6px rgba(0,0,0,0.1)";
 
-                                            filterContainer.appendChild(filterDropdown);
-                                            searchContainer.appendChild(filterContainer);
-                                            container.appendChild(searchContainer);
-                                            // Create table
-                                            const table = document.createElement('table');
-                                            table.className = "custom_admin_dashboard_custom_table";
-                                            table.innerHTML = `
+                                        // Dropdown options
+                                        ["All Users", "Blocked Users"].forEach(option => {
+                                            const div = document.createElement("div");
+                                            div.id = option.replace(/\s+/g, ''); // Assign ID (removes spaces)
+                                            div.textContent = option;
+                                            div.style.cursor = "pointer";
+                                            div.style.padding = "5px";
+
+                                            // Hover effect
+                                            div.onmouseover = () => {
+                                                if (div.style.background !== "rgb(0, 123, 255)") { // If not selected
+                                                    div.style.background = "#f0f0f0"; // Light gray hover
+                                                }
+                                            };
+                                            div.onmouseout = () => {
+                                                if (selectedFilter !== option) {
+                                                    div.style.background = "white"; // Reset if not selected
+                                                }
+                                            };
+
+                                            div.onclick = () => applyFilter(option);
+                                            filterDropdown.appendChild(div);
+                                        });
+
+                                        filterContainer.appendChild(filterDropdown);
+                                        searchContainer.appendChild(filterContainer);
+
+                                        const user_management_title_textElement = document.createElement("span"); // Create a span element
+                                        user_management_title_textElement.textContent = "User Management"; // Set text content
+
+                                        // Apply styles for size increase and bottom space
+                                        user_management_title_textElement.style.fontSize = "24px"; // Increase font size
+                                        user_management_title_textElement.style.display = "block"; // Make it block-level for spacing
+                                        user_management_title_textElement.style.marginBottom = "20px"; // Add bottom space
+
+                                        container.appendChild(user_management_title_textElement); // Append it to the container
+                                        container.appendChild(searchContainer);
+                                        // Create table
+                                        const table = document.createElement('table');
+                                        table.className = "custom_admin_dashboard_custom_table";
+                                        table.innerHTML = `
                                                 <thead>
                                                     <tr>
                                                         <th>Account Status</th>
@@ -1231,88 +1301,89 @@ function initializeDashboard() {
                                                 </thead>
                                                 <tbody id="userTableBody"></tbody>
                                             `;
-                                            container.appendChild(table);
-                                            // Create user count display
-                                            const userCountContainer = document.createElement('div');
-                                            userCountContainer.id = "userCountContainer";
-                                            userCountContainer.style.marginTop = "10px";
-                                            container.appendChild(userCountContainer);
+                                        container.appendChild(table);
+                                        // Create user count display
+                                        const userCountContainer = document.createElement('div');
+                                        userCountContainer.id = "userCountContainer";
+                                        userCountContainer.style.marginTop = "10px";
+                                        container.appendChild(userCountContainer);
 
-                                            const user_management_button = document.createElement('button');
-                                            user_management_button.id = "user_management_button_id";
-                                            user_management_button.className = "user_management_button_class";
-                                            user_management_button.textContent = "user management";
-                                            user_management_button.onclick = user_management_button_function;
-                                            container.appendChild(user_management_button);
-                                            
-                                            createViewMoreLessButtons(container);
-                                            // Fetch and render initial data
-                                            fetchAndRenderUsers();                                       
-                                            // Set up menu event listeners
-                                            setupMenuEventListeners();
+                                        const user_management_button = document.createElement('button');
+                                        user_management_button.id = "user_management_button_id";
+                                        user_management_button.className = "user_management_button_class";
+                                        user_management_button.textContent = "user management";
+                                        user_management_button.onclick = user_management_button_function;
+                                        container.appendChild(user_management_button);
+
+                                        createViewMoreLessButtons(container);
+                                        // Fetch and render initial data
+                                        fetchAndRenderUsers();
+                                        // Set up menu event listeners
+                                        setupMenuEventListeners();
+                                    }
+                                    function user_management_button_function() {
+                                        showSpecificDiv('custom_admin_dashboard_user_list_table');
+                                        $(".sidebars").removeClass('active');
+                                        document.getElementById("user_management_button_id").style.display = "none";
+                                        $("#custom_admin_dashboard_user_list_table_navbar").addClass('active');
+                                    }
+
+                                    function createViewMoreLessButtons(container) {
+                                        const viewMoreButton = document.createElement('button');
+                                        viewMoreButton.id = "viewMoreButton";
+                                        viewMoreButton.className = "view-more-button";
+                                        viewMoreButton.textContent = "View More";
+                                        viewMoreButton.style.display = "none";
+                                        viewMoreButton.onclick = viewMoreRows;
+                                        container.appendChild(viewMoreButton);
+
+                                        const viewLessButton = document.createElement('button');
+                                        viewLessButton.id = "viewLessButton";
+                                        viewLessButton.className = "view-less-button";
+                                        viewLessButton.textContent = "View Less";
+                                        viewLessButton.style.display = "none";
+                                        viewLessButton.onclick = viewLessRows;
+                                        container.appendChild(viewLessButton);
+                                    }
+
+                                    function fetchAndRenderUsers() {
+                                        fetch(api_dashboard_preview_admin_view_url)
+                                            .then(response => response.json())
+                                            .then(({ table_data }) => {
+                                                rows = table_data.users_table;
+                                                currentIndex = 3;
+                                                renderInitialRows();
+                                                updateUserCount();
+                                                toggleViewMoreLessButtons(rows.filter(row => selectedFilter === "Blocked Users" ? row.is_blocked : true));
+                                            })
+                                            .catch(error => console.error("Error fetching users:", error));
+                                    }
+
+                                    function renderInitialRows() {
+                                        const tbody = document.getElementById('userTableBody');
+                                        tbody.innerHTML = '';
+                                        currentIndex = 3;
+
+                                        let filteredRows = rows;
+
+                                        // Apply filter: Show only blocked users if selected
+                                        if (selectedFilter === "Blocked Users") {
+                                            filteredRows = rows.filter(row => row.is_blocked);
                                         }
-                                        function user_management_button_function(){
-                                            showSpecificDiv('custom_admin_dashboard_user_list_table');
-                                            $(".sidebars").removeClass('active');
-                                            $("#custom_admin_dashboard_user_list_table_navbar").addClass('active');
-                                        }
-                                        
-                                        function createViewMoreLessButtons(container) {
-                                            const viewMoreButton = document.createElement('button');
-                                            viewMoreButton.id = "viewMoreButton";
-                                            viewMoreButton.className = "view-more-button";
-                                            viewMoreButton.textContent = "View More";
-                                            viewMoreButton.style.display = "none";
-                                            viewMoreButton.onclick = viewMoreRows;
-                                            container.appendChild(viewMoreButton);
-                                        
-                                            const viewLessButton = document.createElement('button');
-                                            viewLessButton.id = "viewLessButton";
-                                            viewLessButton.className = "view-less-button";
-                                            viewLessButton.textContent = "View Less";
-                                            viewLessButton.style.display = "none";
-                                            viewLessButton.onclick = viewLessRows;
-                                            container.appendChild(viewLessButton);
-                                        }
-                                        
-                                        function fetchAndRenderUsers() {
-                                            fetch(api_dashboard_preview_admin_view_url)
-                                                .then(response => response.json())
-                                                .then(({ table_data }) => {
-                                                    rows = table_data.users_table;
-                                                    currentIndex = 3;
-                                                    renderInitialRows();
-                                                    updateUserCount();
-                                                    toggleViewMoreLessButtons();
-                                                })
-                                                .catch(error => console.error("Error fetching users:", error));
-                                        }
-                                        
-                                        function renderInitialRows() {
-                                            const tbody = document.getElementById('userTableBody');
-                                            tbody.innerHTML = '';
-                                            currentIndex = 3;
-                                        
-                                            let filteredRows = rows;
-                                        
-                                            // Apply filter: Show only blocked users if selected
-                                            if (selectedFilter === "Blocked Users") {
-                                                filteredRows = rows.filter(row => row.is_blocked);
-                                            }
-                                        
-                                            filteredRows.slice(0, 3).forEach(row => appendRow(row));
-                                            updateUserCount();
-                                        }
-                                        
-                                        function renderRows(startIndex, endIndex, filteredRows) {
-                                            const tbody = document.getElementById('userTableBody');
-                                            filteredRows.slice(startIndex, endIndex).forEach(row => appendRow(row));
-                                        }
-                                        
-                                        function appendRow(row) {
-                                            const tbody = document.getElementById('userTableBody');
-                                            const tr = document.createElement('tr');
-                                            tr.innerHTML = `
+
+                                        filteredRows.slice(0, 3).forEach(row => appendRow(row));
+                                        updateUserCount();
+                                    }
+
+                                    function renderRows(startIndex, endIndex, filteredRows) {
+                                        const tbody = document.getElementById('userTableBody');
+                                        filteredRows.slice(startIndex, endIndex).forEach(row => appendRow(row));
+                                    }
+
+                                    function appendRow(row) {
+                                        const tbody = document.getElementById('userTableBody');
+                                        const tr = document.createElement('tr');
+                                        tr.innerHTML = `
                                                 <td>
                                                     <select class="user_kyc_waiting_list-kyc-statusselect " data-user-id="${row.user?.id}" data-status="${row.kyc_status}">
                                                         <option value="waiting" ${row.kyc_status === 'waiting' ? 'selected' : ''}>Waiting</option>
@@ -1321,195 +1392,221 @@ function initializeDashboard() {
                                                         <option value="pending" ${row.kyc_status === 'pending' ? 'selected' : ''}>Pending</option>
                                                     </select>
                                                 </td>
-                                                <td class="view-user-list" data-user-id="${row.user?.id}">👤${row.user?.username || 'N/A'}</td>
+                                                <td class="view-user-list" data-user-id="${row.user?.id}">
+                                                ${row.profile_image_url
+                                                ? `<img src="${row.profile_image_url}" alt="Profile Image" class="profile-image">`
+                                                : ''
+                                            }
+	                                            ${row.user?.username || 'N/A'}
+                                                </td>
                                                 <td>${row.user?.email || 'N/A'}</td>
                                                 <td>
-                                                            ${
-                                                                row.kyc_image_url
-                                                                    ? `<a href="#" class="view-kyc-image" data-imageurl="${row.kyc_image_url}" data-username="${row.user?.username || 'N/A'}" data-email="${row.user?.email || 'N/A'}" data-kycstatus="${row.kyc_status || 'N/A'}">View KYC Image</a>`
-                                                                    : 'KYC not submitted'
-                                                            }
+                                                            ${row.kyc_image_url
+                                                ? `<a href="#" class="view-kyc-image" data-imageurl="${row.kyc_image_url}" data-username="${row.user?.username || 'N/A'}" data-email="${row.user?.email || 'N/A'}" data-kycstatus="${row.kyc_status || 'N/A'}">View KYC Image</a>`
+                                                : 'KYC not submitted'
+                                            }
                                                         </td>                                                
                                                 <td>${row.ip_address || 'N/A'}</td>
                                                 <td><button class="block-user-btn" data-user-id="${row.user?.id}">${row.is_blocked ? 'Unblock User' : 'Block User'}</button></td>                                            `;
-                                            tbody.appendChild(tr);
-                                        }
-                                        
-                                        function updateUserCount() {
-                                            document.getElementById('userCountContainer').textContent = `Total Users: ${rows.length}`;
-                                        }
-                                        let selectedFilter = "All Users"; // Default filter
-                                        function toggleFilterDropdown() {
-                                            const dropdown = document.getElementById("filterDropdown");
-                                            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-                                        }
-                                        function applyFilter(option) {
-                                            selectedFilter = option;
-                                            document.getElementById("filterDropdown").style.display = "none";
-                                            currentIndex = 3; // Reset the index
-                                            searchUsers(); // Re-filter the users
-                                        }
-                                        $(document).on('click', '.block-user-btn', function () {
-                                            let button = $(this);
-                                            let userId = button.data('user-id');
-                                            let action = button.text().trim() === "Block User" ? "block" : "unblock";
-                                        
-                                            axios.post('/block-user/', 
-                                                { user_id: userId, action: action },
-                                                { headers: { 'X-CSRFToken': admin_chats_csrfToken } }  // CSRF Token header
-                                            )
+                                        tbody.appendChild(tr);
+                                    }
+
+                                    function updateUserCount() {
+                                        document.getElementById('userCountContainer').textContent = `Total Users: ${rows.length}`;
+                                    }
+                                    let selectedFilter = "All Users"; // Default filter
+                                    function toggleFilterDropdown() {
+                                        const dropdown = document.getElementById("filterDropdown");
+                                        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+                                        // Ensure the current selected option remains highlighted when dropdown opens
+                                        document.querySelectorAll("#filterDropdown div").forEach(div => {
+                                            div.style.background = "white"; // Reset all to default
+                                            div.style.color = "black";
+                                        });
+
+                                        // Keep selected filter highlighted
+                                        const selectedDiv = document.getElementById(selectedFilter.replace(/\s+/g, ''));
+                                        selectedDiv.style.background = "#007bff"; // Blue highlight
+                                        selectedDiv.style.color = "white"
+                                    }
+                                    function applyFilter(option) {
+                                        selectedFilter = option;
+                                        document.getElementById("filterDropdown").style.display = "none";
+                                        currentIndex = 3; // Reset the index
+                                        searchUsers(); // Re-filter the users
+                                        // Remove highlight from all options
+                                        document.querySelectorAll("#filterDropdown div").forEach(div => {
+                                            div.style.background = "white"; // Default background
+                                            div.style.color = "black";
+                                        });
+
+
+                                        // Highlight the selected option
+                                        const selectedDiv = document.getElementById(option.replace(/\s+/g, ''));
+                                        selectedDiv.style.background = "#007bff"; // Blue highlight
+                                        selectedDiv.style.color = "white";
+                                    }
+                                    $(document).on('click', '.block-user-btn', function () {
+                                        let button = $(this);
+                                        let userId = button.data('user-id');
+                                        let action = button.text().trim() === "Block User" ? "block" : "unblock";
+
+                                        axios.post('/block-user/',
+                                            { user_id: userId, action: action },
+                                            { headers: { 'X-CSRFToken': admin_chats_csrfToken } }  // CSRF Token header
+                                        )
                                             .then(response => {
-                                                
+
                                                 alert(response.data.message);
                                                 button.text(action === "block" ? "Unblock User" : "Block User"); // Toggle button text
                                                 fetchAndRenderUsers();
-                                                
+
                                             })
                                             .catch(error => {
                                                 alert('Error: ' + (error.response?.data?.detail || 'Something went wrong'));
                                             });
+                                    });
+
+
+                                    $(document).on('click', '.view-user-list', function () {
+                                        let userId = $(this).data('user-id');
+
+                                    });
+
+                                    function viewMoreRows() {
+                                        const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
+                                        let filteredRows = rows;
+
+                                        // Apply filter: Show only blocked users if selected
+                                        if (selectedFilter === "Blocked Users") {
+                                            filteredRows = rows.filter(row => row.is_blocked);
+                                        }
+
+                                        // Apply comprehensive search filter
+                                        const matchingRows = filteredRows.filter(row =>
+                                        (row.user?.username?.toLowerCase().includes(searchValue) ||
+                                            row.user?.email?.toLowerCase().includes(searchValue) ||
+                                            row.kyc_status?.toLowerCase().includes(searchValue) ||
+                                            row.ip_address?.toLowerCase().includes(searchValue))
+                                        );
+
+                                        const endIndex = Math.min(currentIndex + rowsPerPage, matchingRows.length);
+                                        renderRows(currentIndex, endIndex, matchingRows); // Render additional rows
+                                        currentIndex = endIndex; // Update the currentIndex
+                                        toggleViewMoreLessButtons(matchingRows); // Update the button visibility
+                                    }
+
+                                    function viewLessRows() {
+                                        const tbody = document.getElementById('userTableBody');
+                                        const rowsToRemove = Math.min(rowsPerPage, currentIndex - 3);
+                                        for (let i = 0; i < rowsToRemove; i++) {
+                                            if (tbody.lastChild) {
+                                                tbody.removeChild(tbody.lastChild);
+                                            }
+                                        }
+                                        currentIndex -= rowsToRemove;
+                                        toggleViewMoreLessButtons();
+                                    }
+
+                                    function toggleViewMoreLessButtons(filteredRows) {
+                                        const viewMoreButton = document.getElementById('viewMoreButton');
+                                        const viewLessButton = document.getElementById('viewLessButton');
+
+                                        if (filteredRows) {
+                                            viewMoreButton.style.display = currentIndex < filteredRows.length ? 'block' : 'none';
+                                            viewLessButton.style.display = currentIndex > 3 ? 'block' : 'none';
+                                        } else {
+                                            viewMoreButton.style.display = currentIndex < rows.length ? 'block' : 'none';
+                                            viewLessButton.style.display = currentIndex > 3 ? 'block' : 'none';
+                                        }
+                                    }
+
+
+                                    function searchUsers() {
+                                        const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
+                                        const tbody = document.getElementById('userTableBody');
+                                        currentIndex = 3; // Reset the currentIndex to 3
+
+                                        let filteredRows = rows;
+
+                                        // Apply filter: Show only blocked users if selected
+                                        if (selectedFilter === "Blocked Users") {
+                                            filteredRows = rows.filter(row => row.is_blocked);
+                                        }
+
+                                        // Apply comprehensive search filter
+                                        const matchingRows = filteredRows.filter(row =>
+                                        (row.user?.username?.toLowerCase().includes(searchValue) ||
+                                            row.user?.email?.toLowerCase().includes(searchValue) ||
+                                            row.kyc_status?.toLowerCase().includes(searchValue) ||
+                                            row.ip_address?.toLowerCase().includes(searchValue))
+                                        );
+
+                                        tbody.innerHTML = ''; // Clear the table body
+                                        matchingRows.slice(0, 3).forEach(row => appendRow(row)); // Render the first 3 matching rows
+                                        toggleViewMoreLessButtons(matchingRows); // Update the button visibility based on matching rows
+                                    }
+                                    function setupMenuEventListeners() {
+                                        document.addEventListener('click', function (event) {
+
+                                            if (event.target.classList.contains('view-user')) {
+                                                alert("View functionality will be implemented soon.");
+                                            }
+                                            if (event.target.classList.contains('block-user')) {
+                                                alert("Block User functionality will be implemented soon.");
+                                            }
                                         });
-                                        
-                                        
-                                        $(document).on('click', '.view-user-list', function () {
-                                            let userId = $(this).data('user-id');
-                                            
-                                        });
-                                        
-                                        function viewMoreRows() {
-                                            const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
-                                            let filteredRows = rows;
-                                        
-                                            // Apply filter: Show only blocked users if selected
-                                            if (selectedFilter === "Blocked Users") {
-                                                filteredRows = rows.filter(row => row.is_blocked);
-                                            }
-                                        
-                                            // Apply comprehensive search filter
-                                            const matchingRows = filteredRows.filter(row =>
-                                                (row.user?.username?.toLowerCase().includes(searchValue) ||
-                                                row.user?.email?.toLowerCase().includes(searchValue) ||
-                                                row.kyc_status?.toLowerCase().includes(searchValue) ||
-                                                row.ip_address?.toLowerCase().includes(searchValue))
-                                            );
-                                        
-                                            const endIndex = Math.min(currentIndex + rowsPerPage, matchingRows.length);
-                                            renderRows(currentIndex, endIndex, matchingRows); // Render additional rows
-                                            currentIndex = endIndex; // Update the currentIndex
-                                            toggleViewMoreLessButtons(matchingRows); // Update the button visibility
-                                        }
-                                        
-                                        function viewLessRows() {
-                                            const tbody = document.getElementById('userTableBody');
-                                            const rowsToRemove = Math.min(rowsPerPage, currentIndex - 3);
-                                            for (let i = 0; i < rowsToRemove; i++) {
-                                                if (tbody.lastChild) {
-                                                    tbody.removeChild(tbody.lastChild);
-                                                }
-                                            }
-                                            currentIndex -= rowsToRemove;
-                                            toggleViewMoreLessButtons();
-                                        }
-                                        
-                                        function toggleViewMoreLessButtons(filteredRows) {
-                                            const viewMoreButton = document.getElementById('viewMoreButton');
-                                            const viewLessButton = document.getElementById('viewLessButton');
-                                        
-                                            if (filteredRows) {
-                                                viewMoreButton.style.display = currentIndex < filteredRows.length ? 'block' : 'none';
-                                                viewLessButton.style.display = currentIndex > 3 ? 'block' : 'none';
-                                            } else {
-                                                viewMoreButton.style.display = currentIndex < rows.length ? 'block' : 'none';
-                                                viewLessButton.style.display = currentIndex > 3 ? 'block' : 'none';
-                                            }
-                                        }
-                                        
-                                       
-                                        function searchUsers() {
-                                            const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
-                                            const tbody = document.getElementById('userTableBody');
-                                            currentIndex = 3; // Reset the currentIndex to 3
-                                        
-                                            let filteredRows = rows;
-                                        
-                                            // Apply filter: Show only blocked users if selected
-                                            if (selectedFilter === "Blocked Users") {
-                                                filteredRows = rows.filter(row => row.is_blocked);
-                                            }
-                                        
-                                            // Apply comprehensive search filter
-                                            const matchingRows = filteredRows.filter(row =>
-                                                (row.user?.username?.toLowerCase().includes(searchValue) ||
-                                                row.user?.email?.toLowerCase().includes(searchValue) ||
-                                                row.kyc_status?.toLowerCase().includes(searchValue) ||
-                                                row.ip_address?.toLowerCase().includes(searchValue))
-                                            );
-                                        
-                                            tbody.innerHTML = ''; // Clear the table body
-                                            matchingRows.slice(0, 3).forEach(row => appendRow(row)); // Render the first 3 matching rows
-                                            toggleViewMoreLessButtons(matchingRows); // Update the button visibility based on matching rows
-                                        } 
-                                        function setupMenuEventListeners() {
-                                            document.addEventListener('click', function (event) {
-                                                
-                                                if (event.target.classList.contains('view-user')) {
-                                                    alert("View functionality will be implemented soon.");
-                                                }
-                                                if (event.target.classList.contains('block-user')) {
-                                                    alert("Block User functionality will be implemented soon.");
-                                                }
-                                            });
-                                        }
-                                        // Initialize the dashboard UI on page load
-                                        user_management_table();
-                                        
-                                    } else if (tab.type === 'lotterys') {
-                                        const pageTitle = document.getElementById('lottery_card_title');
-                                        pageTitle.textContent = tab.name;
+                                    }
+                                    // Initialize the dashboard UI on page load
+                                    user_management_table();
 
-                                        const lottery_element = document.querySelector('.custom_admin_dashboard_lottery-events-grid');
-                                        if (lottery_element) lottery_element.style.display = 'grid';
-                                        const lottery_prevPage_and_nextPage_button = document.getElementById("lottery_prevPage_and_nextPage_button");
-                                        if (lottery_prevPage_and_nextPage_button) lottery_prevPage_and_nextPage_button.style.display = 'block';
+                                } else if (tab.type === 'lotterys') {
+                                    const pageTitle = document.getElementById('lottery_card_title');
+                                    pageTitle.textContent = tab.name;
 
-                                        fetchLotteryEvents();
-                                        fetchLotteryCategories();
+                                    const lottery_element = document.querySelector('.custom_admin_dashboard_lottery-events-grid');
+                                    if (lottery_element) lottery_element.style.display = 'grid';
+                                    const lottery_prevPage_and_nextPage_button = document.getElementById("lottery_prevPage_and_nextPage_button");
+                                    if (lottery_prevPage_and_nextPage_button) lottery_prevPage_and_nextPage_button.style.display = 'block';
 
-                            
-                                        const lottery_header_filter_containers = document.getElementById("lottery_header_filter-containers");
-                                        if (lottery_header_filter_containers) {
-                                            lottery_header_filter_containers.removeAttribute("hidden");
-                                        }
-                                        const add_lottery_icon = document.querySelector('.custom_admin_dashboard_open-form-btn');
-                                        if (add_lottery_icon) {
-                                            add_lottery_icon.style.display = 'inline-block';
-                                        }
-                                        
+                                    fetchLotteryEvents();
+                                    fetchLotteryCategories();
 
 
-                                        document.getElementById('custom_admin_dashboard_openFormButton').onclick = function () {
-                                            document.getElementById('lotteryEventModal').style.display = 'block';
-                                        };
+                                    const lottery_header_filter_containers = document.getElementById("lottery_header_filter-containers");
+                                    if (lottery_header_filter_containers) {
+                                        lottery_header_filter_containers.removeAttribute("hidden");
+                                    }
+                                    const add_lottery_icon = document.querySelector('.custom_admin_dashboard_open-form-btn');
+                                    if (add_lottery_icon) {
+                                        add_lottery_icon.style.display = 'inline-block';
+                                    }
 
-                                        document.getElementById('custom_admin_dashboard_closeModal').onclick = function () {
+
+
+                                    document.getElementById('custom_admin_dashboard_openFormButton').onclick = function () {
+                                        document.getElementById('lotteryEventModal').style.display = 'block';
+                                    };
+
+                                    document.getElementById('custom_admin_dashboard_closeModal').onclick = function () {
+                                        document.getElementById('lotteryEventModal').style.display = 'none';
+                                    };
+
+                                    window.onclick = function (event) {
+                                        if (event.target == document.getElementById('lotteryEventModal')) {
                                             document.getElementById('lotteryEventModal').style.display = 'none';
-                                        };
+                                        }
+                                    };
+                                } else if (tab.type === 'rate') {
+                                    const title = document.createElement('h2');
+                                    title.className = 'custom_admin_dashboard_table_title';
+                                    title.textContent = tab.name;
 
-                                        window.onclick = function (event) {
-                                            if (event.target == document.getElementById('lotteryEventModal')) {
-                                                document.getElementById('lotteryEventModal').style.display = 'none';
-                                            }
-                                        };
-                                    } else if (tab.type === 'rate') {
-                                        const title = document.createElement('h2');
-                                        title.className = 'custom_admin_dashboard_table_title';
-                                        title.textContent = tab.name;
+                                    custom_admin_dashboard_conversion_rate_Container.appendChild(title);
 
-                                        custom_admin_dashboard_conversion_rate_Container.appendChild(title);
-
-                                        const table = document.createElement('table');
-                                        table.className = 'custom_admin_dashboard_custom_table';
-                                        table.innerHTML = `
+                                    const table = document.createElement('table');
+                                    table.className = 'custom_admin_dashboard_custom_table';
+                                    table.innerHTML = `
                                             <thead>
                                                 <tr>
                                                     <th>Card Type</th>
@@ -1529,220 +1626,220 @@ function initializeDashboard() {
                                                 `).join('') || ''}
                                             </tbody>
                                         `;
-                                        custom_admin_dashboard_conversion_rate_Container.appendChild(table);
-                                    }
-                                } catch (error) {
-                                    console.error(`Error processing tab: ${tab.name}`, error);
+                                    custom_admin_dashboard_conversion_rate_Container.appendChild(table);
                                 }
-                            });
-                        } catch (error) {
-                            console.error("Error processing dashboard data:", error);
-                        }
-                    })
-                    .catch(error => console.error("Error fetching dashboard data:", error));
-            } catch (error) {
-                console.error("Error initializing dashboard:", error);
-            }
-       
+                            } catch (error) {
+                                console.error(`Error processing tab: ${tab.name}`, error);
+                            }
+                        });
+                    } catch (error) {
+                        console.error("Error processing dashboard data:", error);
+                    }
+                })
+                .catch(error => console.error("Error fetching dashboard data:", error));
+        } catch (error) {
+            console.error("Error initializing dashboard:", error);
+        }
+
     } catch (error) {
         console.error("Error setting up DOMContentLoaded listener:", error);
     }
 }
 
 
-    try {
-        $(document).on('click', '.view-kyc-image', function(event) {
-            try {
-                event.preventDefault();
-                var imageUrl = $(this).data('imageurl');
-                var userName = $(this).data('username');
-                var userEmail = $(this).data('email');
-                var kycStatus = $(this).data('kycstatus');
-    
-                $('#custom_admin_user_kyc_waiting_list-userName').text(userName);
-                $('#custom_admin_user_kyc_waiting_list-userEmail').text(userEmail);
-                $('#custom_admin_user_kyc_waiting_list-kycStatus').text(kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1));
-                $('#custom_admin_user_kyc_waiting_list-kycImage').attr('src', imageUrl);
-                $('#custom_admin_user_kyc_waiting_list-kycModal').show();
-    
-                $('.user_kyc_waiting_list-close-btn').on('click', function() {
-                    $('#custom_admin_user_kyc_waiting_list-kycModal').hide();
-                });
-    
-                $(window).on('click', function(event) {
-                    if ($(event.target).is('#custom_admin_user_kyc_waiting_list-kycModal')) {
-                        $('#custom_admin_user_kyc_waiting_list-kycModal').hide();
-                    }
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while viewing the KYC image.');
-            }
-        });
-    
-        $(document).on('blur', '.user_kyc_waiting_list-kyc-statusselect', function () {
-            try {
-                const userId = $(this).data('user-id'); // Get the user ID from the data attribute
-                const newStatus = $(this).val(); // Get the selected status
-                // Update the background color based on the selected status
-                updateSelectColor($(this), newStatus);
-    
-                // Perform an AJAX POST request to update the KYC status
-                $.ajax({
-                    url: adminupdaetkycapprovalUrl, // The URL to handle KYC approval updates
-                    type: 'POST',
-                    data: JSON.stringify({ user_id: userId, kyc_status: newStatus }), // Send the user ID and new status
-                    contentType: 'application/json',
-                    headers: { 'X-CSRFToken': csrfToken }, // Include CSRF token for security
-                    success: function (response) {
-                        alert(`KYC status updated to ${newStatus}`); // Notify the user of success
-                    },
-                    error: function (xhr, status, error) {
-                        alert(`Failed to update KYC status: ${error}`); // Notify the user of failure
-                    }
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while updating the KYC status.');
-            }
-        });
-        
-        // Function to apply background color based on the selected option
-        function updateSelectColor(selectElement, status) {
-            const colorMap = {
-                "verified": "#28B446",   // Orange
-                "pending": "#FFAD33",    // Light Orange
-                "rejected": "red",       // Red
-                "waiting": "yellow"      // Yellow
-            };
+try {
+    $(document).on('click', '.view-kyc-image', function (event) {
+        try {
+            event.preventDefault();
+            var imageUrl = $(this).data('imageurl');
+            var userName = $(this).data('username');
+            var userEmail = $(this).data('email');
+            var kycStatus = $(this).data('kycstatus');
 
-            selectElement.css({
-                "background-color": colorMap[status] || "#f9f9f9",
-                "color": (status === "waiting" || status === "pending") ? "black" : "white"
+            $('#custom_admin_user_kyc_waiting_list-userName').text(userName);
+            $('#custom_admin_user_kyc_waiting_list-userEmail').text(userEmail);
+            $('#custom_admin_user_kyc_waiting_list-kycStatus').text(kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1));
+            $('#custom_admin_user_kyc_waiting_list-kycImage').attr('src', imageUrl);
+            $('#custom_admin_user_kyc_waiting_list-kycModal').show();
+
+            $('.user_kyc_waiting_list-close-btn').on('click', function () {
+                $('#custom_admin_user_kyc_waiting_list-kycModal').hide();
             });
+
+            $(window).on('click', function (event) {
+                if ($(event.target).is('#custom_admin_user_kyc_waiting_list-kycModal')) {
+                    $('#custom_admin_user_kyc_waiting_list-kycModal').hide();
+                }
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while viewing the KYC image.');
         }
+    });
+
+    $(document).on('change', '.user_kyc_waiting_list-kyc-statusselect', function () {
+        try {
+            const userId = $(this).data('user-id'); // Get the user ID from the data attribute
+            const newStatus = $(this).val(); // Get the selected status
+            // Update the background color based on the selected status
+            updateSelectColor($(this), newStatus);
+
+            // Perform an AJAX POST request to update the KYC status
+            $.ajax({
+                url: adminupdaetkycapprovalUrl, // The URL to handle KYC approval updates
+                type: 'POST',
+                data: JSON.stringify({ user_id: userId, kyc_status: newStatus }), // Send the user ID and new status
+                contentType: 'application/json',
+                headers: { 'X-CSRFToken': csrfToken }, // Include CSRF token for security
+                success: function (response) {
+                    alert(`KYC status updated to ${newStatus}`); // Notify the user of success
+                },
+                error: function (xhr, status, error) {
+                    alert(`Failed to update KYC status: ${error}`); // Notify the user of failure
+                }
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while updating the KYC status.');
+        }
+    });
+
+    // Function to apply background color based on the selected option
+    function updateSelectColor(selectElement, status) {
+        const colorMap = {
+            "verified": "#28B446",   // Orange
+            "pending": "#FFAD33",    // Light Orange
+            "rejected": "red",       // Red
+            "waiting": "yellow"      // Yellow
+        };
+
+        selectElement.css({
+            "background-color": colorMap[status] || "#f9f9f9",
+            "color": (status === "waiting" || status === "pending") ? "black" : "white"
+        });
+    }
 
     // Apply colors when the page loads
-    function user_management_account_status_update_color () {
+    function user_management_account_status_update_color() {
         $('.user_kyc_waiting_list-kyc-statusselect').each(function () {
             alert(1)
             updateSelectColor($(this), $(this).val());
         });
     }
-    user_management_account_status_update_color ();
-    } catch (error) {
-        console.error('Unexpected Error:', error);
-    }
+    user_management_account_status_update_color();
+} catch (error) {
+    console.error('Unexpected Error:', error);
+}
 
 // faq
 document.addEventListener("DOMContentLoaded", () => {
-        const faqItems = document.querySelectorAll('.faq-item');
-        const faqTitleMain = document.getElementById('faq-title-main');
-        const faqText = document.getElementById('faq-text');
-      
-        // Define unique content for each FAQ item
-        const faqContent = {
-          "faq1": "Yes, we use advanced SSL encryption and adhere to strict data protection policies to ensure your information is safe.",
-          "faq2": "Absolutely. Our website is mobile-friendly, and we also offer apps for iOS and Android devices for seamless gaming on the go.",
-          "faq3": "Click the 'Forgot Password' link on the login page, enter your registered email, and follow the instructions to reset your password.",
-          "faq4": "You must be at least 18 years old or meet the legal gambling age in your jurisdiction to use our platform.",
-          "faq5": "We do not charge fees for deposits. Withdrawal fees depend on the payment method you choose, which will be clearly stated during the process.",
-          "faq6": "If a game crashes, the outcome of any completed bets will remain valid, and you can resume the game where it left off. Contact support if the issue persists.",
-          "faq7": "If you wish to close your account, contact customer support for assistance. You may also use self-exclusion options in your account settings.",
-          "faq8": "Some details, like your password, can be updated directly in your account settings. For sensitive information like your registered email, contact support.",
-          "faq9": "The minimum deposit amount varies by payment method but is generally [insert amount, e.g., $10].",
-          "faq10": "Log in to your account, navigate to the “Payments” section, and add or update your preferred payment methods."
-        };
-      
-        // Display the first FAQ item by default
-        if (faqItems.length > 0) {
-          const firstFaq = faqItems[0];
-          const targetId = firstFaq.getAttribute('data-target');
-          firstFaq.classList.add('expanded');
-          firstFaq.querySelector('.icon').textContent = '-';
-          faqTitleMain.textContent = firstFaq.querySelector('.faq-title').textContent;
-          faqText.textContent = faqContent[targetId];
-        }
-      
-        // Add click event listeners to each FAQ item
-        faqItems.forEach(item => {
-          item.addEventListener('click', () => {
+    const faqItems = document.querySelectorAll('.faq-item');
+    const faqTitleMain = document.getElementById('faq-title-main');
+    const faqText = document.getElementById('faq-text');
+
+    // Define unique content for each FAQ item
+    const faqContent = {
+        "faq1": "Yes, we use advanced SSL encryption and adhere to strict data protection policies to ensure your information is safe.",
+        "faq2": "Absolutely. Our website is mobile-friendly, and we also offer apps for iOS and Android devices for seamless gaming on the go.",
+        "faq3": "Click the 'Forgot Password' link on the login page, enter your registered email, and follow the instructions to reset your password.",
+        "faq4": "You must be at least 18 years old or meet the legal gambling age in your jurisdiction to use our platform.",
+        "faq5": "We do not charge fees for deposits. Withdrawal fees depend on the payment method you choose, which will be clearly stated during the process.",
+        "faq6": "If a game crashes, the outcome of any completed bets will remain valid, and you can resume the game where it left off. Contact support if the issue persists.",
+        "faq7": "If you wish to close your account, contact customer support for assistance. You may also use self-exclusion options in your account settings.",
+        "faq8": "Some details, like your password, can be updated directly in your account settings. For sensitive information like your registered email, contact support.",
+        "faq9": "The minimum deposit amount varies by payment method but is generally [insert amount, e.g., $10].",
+        "faq10": "Log in to your account, navigate to the “Payments” section, and add or update your preferred payment methods."
+    };
+
+    // Display the first FAQ item by default
+    if (faqItems.length > 0) {
+        const firstFaq = faqItems[0];
+        const targetId = firstFaq.getAttribute('data-target');
+        firstFaq.classList.add('expanded');
+        firstFaq.querySelector('.icon').textContent = '-';
+        faqTitleMain.textContent = firstFaq.querySelector('.faq-title').textContent;
+        faqText.textContent = faqContent[targetId];
+    }
+
+    // Add click event listeners to each FAQ item
+    faqItems.forEach(item => {
+        item.addEventListener('click', () => {
             // Collapse all FAQ items
             faqItems.forEach(faq => {
-              faq.classList.remove('expanded');
-              faq.classList.remove('faded');
-              faq.querySelector('.icon').textContent = '+';
+                faq.classList.remove('expanded');
+                faq.classList.remove('faded');
+                faq.querySelector('.icon').textContent = '+';
             });
-      
+
             // Expand the clicked FAQ item
             item.classList.add('expanded');
             item.querySelector('.icon').textContent = '-';
-      
+
             // Apply faded class to non-selected FAQ items
             faqItems.forEach(faq => {
-              if (faq !== item) {
-                faq.classList.add('faded');
-              }
+                if (faq !== item) {
+                    faq.classList.add('faded');
+                }
             });
-      
+
             // Update the main content area with unique content
             const targetId = item.getAttribute('data-target');
             faqTitleMain.textContent = item.querySelector('.faq-title').textContent;
             faqText.textContent = faqContent[targetId] || "No detailed content available for this FAQ.";
-          });
-        });
-      });
-      
-    // Wait for the DOM to load
-    document.addEventListener("DOMContentLoaded", function () {
-        const contactForm = document.getElementById("contact-form");
-        const responseMessage = document.getElementById("contact-response-message");
-    
-        // Handle form submission
-        contactForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            try {
-                const name = document.getElementById("contact-name").value;
-                const email = document.getElementById("contact-email").value;
-                const description = document.getElementById("contact-description").value;
-    
-                const response = await fetch("/api/contact/", {
-                    method: "POST",
-                    
-                    headers: {
-                        'Content-Type': 'application/json',
-                        "X-CSRFToken": contact_csrfToken
-                    },
-                    body: JSON.stringify({ name, email, description }),
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    responseMessage.innerText = data.message;
-                    responseMessage.style.color = "green";
-                    contactForm.reset(); // Clear the form after success
-                } else {
-                    const errorData = await response.json();
-                    responseMessage.innerText = errorData.email ? errorData.email[0] : "No error message found";
-                    responseMessage.style.color = "red";
-                }
-            } catch (error) {
-                console.error("Error submitting contact form:", error);
-                responseMessage.innerText = "Error: Unable to submit the form.";
-                responseMessage.style.color = "red";
-            }
         });
     });
-    /*-----------------navbar-------*/
-    
-      
-    function toggleMenu() {
-        const navbarLinks = document.querySelector('.navbar-links');
-        navbarLinks.classList.toggle('active');
-    
-        const hamburger = document.querySelector('.hamburger');
-        hamburger.classList.toggle('active');
-    }    
+});
+
+// Wait for the DOM to load
+document.addEventListener("DOMContentLoaded", function () {
+    const contactForm = document.getElementById("contact-form");
+    const responseMessage = document.getElementById("contact-response-message");
+
+    // Handle form submission
+    contactForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        try {
+            const name = document.getElementById("contact-name").value;
+            const email = document.getElementById("contact-email").value;
+            const description = document.getElementById("contact-description").value;
+
+            const response = await fetch("/api/contact/", {
+                method: "POST",
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": contact_csrfToken
+                },
+                body: JSON.stringify({ name, email, description }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                responseMessage.innerText = data.message;
+                responseMessage.style.color = "green";
+                contactForm.reset(); // Clear the form after success
+            } else {
+                const errorData = await response.json();
+                responseMessage.innerText = errorData.email ? errorData.email[0] : "No error message found";
+                responseMessage.style.color = "red";
+            }
+        } catch (error) {
+            console.error("Error submitting contact form:", error);
+            responseMessage.innerText = "Error: Unable to submit the form.";
+            responseMessage.style.color = "red";
+        }
+    });
+});
+/*-----------------navbar-------*/
+
+
+function toggleMenu() {
+    const navbarLinks = document.querySelector('.navbar-links');
+    navbarLinks.classList.toggle('active');
+
+    const hamburger = document.querySelector('.hamburger');
+    hamburger.classList.toggle('active');
+}
 /*----------addimages-----*/
 document.addEventListener('DOMContentLoaded', function () {
     const addImageButton = document.getElementById('add-image-button');
@@ -1772,7 +1869,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             reader.readAsDataURL(file);
         });
-         imagesContainer.appendChild(newImageField);
+        imagesContainer.appendChild(newImageField);
         newImageField.querySelector('.remove-image-button').addEventListener('click', function () {
             newImageField.remove();
         });
@@ -1893,200 +1990,200 @@ $.ajaxSetup({
     headers: { 'X-CSRFToken': csrftoken }
 });
 $(document).ready(function () {
-// Email validation handler
-$('#login-email').on('input', function () {
-    validateEmail($(this).val(), 'login-email-error');
-});
-
-// Password validation handler
-$('#login-password').on('input', function () {
-    validatePassword($(this).val(), 'login-password-error');
-});
-
-// Toggle password visibility
-function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
-    $(toggleButtonId).on('click', function () {
-        const passwordField = $(passwordFieldId);
-        const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-        passwordField.attr('type', type);
-        $(this).text(type === 'password' ? '🙈' : '👁️');
+    // Email validation handler
+    $('#login-email').on('input', function () {
+        validateEmail($(this).val(), 'login-email-error');
     });
-}
-togglePasswordVisibility('#login-toggle-password', '#login-password');
 
+    // Password validation handler
+    $('#login-password').on('input', function () {
+        validatePassword($(this).val(), 'login-password-error');
+    });
 
-// Function to get cookie value by name
-// function getCookie(name) {
-//     const value = '; ' + document.cookie;
-//     const parts = value.split('; ' + name + '=');
-//     if (parts.length === 2) return parts.pop().split(';').shift();
-//     return null;
-// }
-
-$.ajaxSetup({
-    headers: {
-        'X-CSRFToken': getCookie('csrftoken') // Use the getCookie function
+    // Toggle password visibility
+    function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
+        $(toggleButtonId).on('click', function () {
+            const passwordField = $(passwordFieldId);
+            const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+            passwordField.attr('type', type);
+            $(this).text(type === 'password' ? '🙈' : '👁️');
+        });
     }
-});
-// Function to set a cookie
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
-}
+    togglePasswordVisibility('#login-toggle-password', '#login-password');
 
-// Function to delete a cookie
-function deleteCookie(name) {
-    document.cookie = `${name}=; Max-Age=-99999999; path=/;`;
-}
 
-// Populate form fields if cookies exist
-function populateFormFields() {
-    const email = getCookie('email');
-    const password = getCookie('password');
+    // Function to get cookie value by name
+    // function getCookie(name) {
+    //     const value = '; ' + document.cookie;
+    //     const parts = value.split('; ' + name + '=');
+    //     if (parts.length === 2) return parts.pop().split(';').shift();
+    //     return null;
+    // }
 
-    if (email && password) {
-        $('#login-email').val(email);
-        $('#login-password').val(password);
-        $('#remember-me-checkbox').prop('checked', true);
-    } else {
-        $('#remember-me-checkbox').prop('checked', false);
+    $.ajaxSetup({
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken') // Use the getCookie function
+        }
+    });
+    // Function to set a cookie
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+        document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
     }
-}
 
-// Save cookies based on "Remember Me" checkbox
-function saveCookies() {
-    const rememberMe = $('#remember-me-checkbox').prop('checked');
-    if (rememberMe) {
-        const email = $('#login-email').val();
-        const password = $('#login-password').val();
-        setCookie('email', email, 30);
-        setCookie('password', password, 30);
-    } else {
-        deleteCookie('email');
-        deleteCookie('password');
+    // Function to delete a cookie
+    function deleteCookie(name) {
+        document.cookie = `${name}=; Max-Age=-99999999; path=/;`;
     }
-}
 
-let timerInterval;
+    // Populate form fields if cookies exist
+    function populateFormFields() {
+        const email = getCookie('email');
+        const password = getCookie('password');
 
-// Start OTP countdown timer
-function startOtpTimer(duration) {
-    const timerDisplay = $('#timer');
-    let timeRemaining = duration;
-
-    timerInterval = setInterval(() => {
-        const minutes = Math.floor(timeRemaining / 60);
-        const seconds = timeRemaining % 60;
-        timerDisplay.text(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-        timeRemaining--;
-
-        if (timeRemaining < 0) {
-            clearInterval(timerInterval);
-            $('#resend-otp-button').prop('disabled', false); // Enable the "Resend OTP" button
+        if (email && password) {
+            $('#login-email').val(email);
+            $('#login-password').val(password);
+            $('#remember-me-checkbox').prop('checked', true);
+        } else {
+            $('#remember-me-checkbox').prop('checked', false);
         }
-    }, 1000);
-}
+    }
 
-// Show OTP container and start timer
-function showOtpContainer(userId) {
-    $('#user-id').val(userId); // Set the user ID
-    $('.login-container').addClass('hidden-element'); // Hide login form
-    $('#otp-container').removeClass('hidden-element'); // Show OTP section
-    $('#resend-otp-button').prop('disabled', true); // Disable "Resend OTP" initially
-    startOtpTimer(300); // Start a 5-minute timer
-}
+    // Save cookies based on "Remember Me" checkbox
+    function saveCookies() {
+        const rememberMe = $('#remember-me-checkbox').prop('checked');
+        if (rememberMe) {
+            const email = $('#login-email').val();
+            const password = $('#login-password').val();
+            setCookie('email', email, 30);
+            setCookie('password', password, 30);
+        } else {
+            deleteCookie('email');
+            deleteCookie('password');
+        }
+    }
 
-// Handle OTP cancel button
-$('#otp-cancel-button').on('click', function () {
-    $('#otp-container').addClass('hidden-element'); // Hide OTP form
-    $('.login-container').removeClass('hidden-element'); // Show login form
-    clearInterval(timerInterval); // Stop the timer
-});
+    let timerInterval;
 
-// Handle OTP verification form submission
-$('#otp-form').submit(function (e) {
-    e.preventDefault();
-    const otpUrl = $(this).data('url'); // Fetch OTP verification URL
+    // Start OTP countdown timer
+    function startOtpTimer(duration) {
+        const timerDisplay = $('#timer');
+        let timeRemaining = duration;
 
-    $.ajax({
-        type: 'POST',
-        url: otpUrl,
-        data: JSON.stringify({
-            user_id: $('#user-id').val(),
-            otp: $('#otp-code').val()
-        }),
-        contentType: 'application/json',
-        success: function (response) {
-            alert(response.message); // Display success message
-            if (response.redirect_url) {
-                window.location.href = response.redirect_url; // Redirect on success
+        timerInterval = setInterval(() => {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.text(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+            timeRemaining--;
+
+            if (timeRemaining < 0) {
+                clearInterval(timerInterval);
+                $('#resend-otp-button').prop('disabled', false); // Enable the "Resend OTP" button
             }
-        },
-        error: function () {
-            $('#otp-error').text('Invalid or expired OTP.'); // Display error
-        }
+        }, 1000);
+    }
+
+    // Show OTP container and start timer
+    function showOtpContainer(userId) {
+        $('#user-id').val(userId); // Set the user ID
+        $('.login-container').addClass('hidden-element'); // Hide login form
+        $('#otp-container').removeClass('hidden-element'); // Show OTP section
+        $('#resend-otp-button').prop('disabled', true); // Disable "Resend OTP" initially
+        startOtpTimer(300); // Start a 5-minute timer
+    }
+
+    // Handle OTP cancel button
+    $('#otp-cancel-button').on('click', function () {
+        $('#otp-container').addClass('hidden-element'); // Hide OTP form
+        $('.login-container').removeClass('hidden-element'); // Show login form
+        clearInterval(timerInterval); // Stop the timer
     });
-});
 
-// Handle "Resend OTP" button click
-$('#resend-otp-button').on('click', function () {
-    const resendOtpUrl = '/api/resend-otp/'; // Replace with actual URL
-    const userId = $('#user-id').val();
+    // Handle OTP verification form submission
+    $('#otp-form').submit(function (e) {
+        e.preventDefault();
+        const otpUrl = $(this).data('url'); // Fetch OTP verification URL
 
-    $.ajax({
-        type: 'POST',
-        url: resendOtpUrl,
-        data: JSON.stringify({ user_id: userId }),
-        contentType: 'application/json',
-        success: function () {
-            alert('A new OTP has been sent to your email.');
-            $('#resend-otp-button').prop('disabled', true); // Disable again
-            startOtpTimer(300); // Restart 5-minute timer
-        },
-        error: function () {
-            alert('Failed to resend OTP. Please try again later.');
-        }
-    });
-});
-
-// Handle login form submission
-$('#login-form').submit(function (e) {
-    e.preventDefault();
-    const loginUrl = $(this).data('url'); // Fetch login URL
-    saveCookies(); // Save cookies before submitting
-    // Clear previous login error message
-    $('#login-error').text('');
-    
-
-    $.ajax({
-        type: 'POST',
-        url: loginUrl,
-        data: JSON.stringify({
-            email: $('#login-email').val(),
-            password: $('#login-password').val()
-        }),
-        contentType: 'application/json',
-        success: function (response) {
-            if (response.message === "OTP sent to your email.") {
-                showOtpContainer(response.user_id); // Show OTP section if required
-            } else if (response.redirect_url) {
-                window.location.href = response.redirect_url; // Redirect on success
+        $.ajax({
+            type: 'POST',
+            url: otpUrl,
+            data: JSON.stringify({
+                user_id: $('#user-id').val(),
+                otp: $('#otp-code').val()
+            }),
+            contentType: 'application/json',
+            success: function (response) {
+                alert(response.message); // Display success message
+                if (response.redirect_url) {
+                    window.location.href = response.redirect_url; // Redirect on success
+                }
+            },
+            error: function () {
+                $('#otp-error').text('Invalid or expired OTP.'); // Display error
             }
-        },
-        error: function (xhr) {
-            // Handle errors based on the server response
-            if (xhr.status === 403 && xhr.responseJSON && xhr.responseJSON.error === "You are blocked.") {
-                $('#login-error').text('You are blocked.');
-            } else {
-                $('#login-error').text('Invalid email or password.');
-            }
-        }
+        });
     });
-});
+
+    // Handle "Resend OTP" button click
+    $('#resend-otp-button').on('click', function () {
+        const resendOtpUrl = '/api/resend-otp/'; // Replace with actual URL
+        const userId = $('#user-id').val();
+
+        $.ajax({
+            type: 'POST',
+            url: resendOtpUrl,
+            data: JSON.stringify({ user_id: userId }),
+            contentType: 'application/json',
+            success: function () {
+                alert('A new OTP has been sent to your email.');
+                $('#resend-otp-button').prop('disabled', true); // Disable again
+                startOtpTimer(300); // Restart 5-minute timer
+            },
+            error: function () {
+                alert('Failed to resend OTP. Please try again later.');
+            }
+        });
+    });
+
+    // Handle login form submission
+    $('#login-form').submit(function (e) {
+        e.preventDefault();
+        const loginUrl = $(this).data('url'); // Fetch login URL
+        saveCookies(); // Save cookies before submitting
+        // Clear previous login error message
+        $('#login-error').text('');
+
+
+        $.ajax({
+            type: 'POST',
+            url: loginUrl,
+            data: JSON.stringify({
+                email: $('#login-email').val(),
+                password: $('#login-password').val()
+            }),
+            contentType: 'application/json',
+            success: function (response) {
+                if (response.message === "OTP sent to your email.") {
+                    showOtpContainer(response.user_id); // Show OTP section if required
+                } else if (response.redirect_url) {
+                    window.location.href = response.redirect_url; // Redirect on success
+                }
+            },
+            error: function (xhr) {
+                // Handle errors based on the server response
+                if (xhr.status === 403 && xhr.responseJSON && xhr.responseJSON.error === "You are blocked.") {
+                    $('#login-error').text('You are blocked.');
+                } else {
+                    $('#login-error').text('Invalid email or password.');
+                }
+            }
+        });
+    });
     // Initialize functionality
     populateFormFields();
-    handleLogout('#logout-button', '/login/'); 
+    handleLogout('#logout-button', '/login/');
 });
 
 
@@ -2186,26 +2283,48 @@ $('#signup-email').on('input', function () {
 
 
 // Password validation
-$('#signup-password').on('input', function () {
-    const password = $(this).val();
-    const errorElement = $('#signup-password-error');
 
+$(document).ready(function () {
+    var passwordInput = $("#signup-password");
 
-    if (!validatePassword(password)) {
-        errorElement.text("Password must be at least 8 characters, include letters, numbers, and a special character.")
-            .addClass('signup-error')
-            .removeClass('signup-valid');
-    } else {
-        errorElement.text("Valid password.")
-            .addClass('signup-valid')
-            .removeClass('signup-error');
+    // Show validation message box when clicking the password field
+    passwordInput.on("focus", function () {
+        $("#password-message").slideDown(200);
+    });
+
+    // Hide message box when clicking outside
+    $(document).on("click", function (event) {
+        if (!$(event.target).closest("#signup-password, #password-message").length) {
+            $("#password-message").slideUp(200);
+        }
+    });
+
+    // Password validation logic
+    passwordInput.on("input", function () {
+        var password = passwordInput.val();
+
+        // Validate conditions
+        validateRequirement(password, /[A-Z]/, "#password-uppercase");  // Uppercase letter
+        validateRequirement(password, /[a-z]/, "#password-lowercase");  // Lowercase letter
+        validateRequirement(password, /[0-9]/, "#password-number");     // Number
+        validateRequirement(password, /[\W_]/, "#password-special");    // Special character
+        validateRequirement(password.length >= 8, true, "#password-length"); // Length
+    });
+
+    // Function to validate and update UI
+    function validateRequirement(password, regex, elementId) {
+        if (password && (regex instanceof RegExp ? regex.test(password) : password)) {
+            $(elementId).removeClass("invalid").addClass("valid").html("✔ " + $(elementId).text().slice(2));
+        } else {
+            $(elementId).removeClass("valid").addClass("invalid").html("❌ " + $(elementId).text().slice(2));
+        }
     }
 });
 
 
 // Clear error message when correcting input
-$('#signup-username, #signup-email, #signup-password').on('input', function() {
-    $('#signup-form-error-message').text('').removeClass('signup-error'); 
+$('#signup-username, #signup-email, #signup-password').on('input', function () {
+    $('#signup-form-error-message').text('').removeClass('signup-error');
 });
 
 
@@ -2218,15 +2337,15 @@ $('#signup').on('submit', function (e) {
     const username = $('#signup-username').val().trim();
     const email = $('#signup-email').val().trim();
     const password = $('#signup-password').val();
-   // Check if any field is invalid
-   if (!validateUsername(username) || !validateEmail(email) || !validatePassword(password)) {
-    $('#signup-form-error-message')
-        .text('Please fix the errors before submitting.')
-        .addClass('signup-error')
-        .removeClass('signup-valid');
-    return; // Prevent form submission if validation fails
-}
-if (!isEmailValid) {
+    // Check if any field is invalid
+    if (!validateUsername(username) || !validateEmail(email) || !validatePassword(password)) {
+        $('#signup-form-error-message')
+            .text('Please fix the errors before submitting.')
+            .addClass('signup-error')
+            .removeClass('signup-valid');
+        return; // Prevent form submission if validation fails
+    }
+    if (!isEmailValid) {
         $('#signup-form-error-message')
             .text("Please fix the email validation errors before submitting.")
             .addClass('signup-error');
@@ -2234,42 +2353,82 @@ if (!isEmailValid) {
     }
 
 
-const formData = {
-    username,
-    email,
-    password,
-    profile: {
-        newsletter: $('#signup-newsletter').is(':checked')
-    }
-};
+    const formData = {
+        username,
+        email,
+        password,
+        profile: {
+            newsletter: $('#signup-newsletter').is(':checked')
+        }
+    };
 
 
-$.ajax({
-    type: "POST",
-    url: registerUrl,
-    data: JSON.stringify(formData),
-    contentType: "application/json",
-    success: function () {
-        window.location.href = userloginUrl;
-    },
-    error: function (response) {
-        const errorMessage = response.responseJSON?.detail || "An unexpected error occurred. Please try again later.";
-        $('#signup-form-error-message')
-            .text(errorMessage)
-            .addClass('signup-error')
-            .removeClass('signup-valid');
-    }
-});
+    $.ajax({
+        type: "POST",
+        url: registerUrl,
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        success: function () {
+            window.location.href = userloginUrl;
+        },
+        error: function (response) {
+            const errorMessage = response.responseJSON?.detail || "An unexpected error occurred. Please try again later.";
+            $('#signup-form-error-message')
+                .text(errorMessage)
+                .addClass('signup-error')
+                .removeClass('signup-valid');
+        }
+    });
 });
 
 //user_welcome_page.html
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 
-if (typeof kycStatusUrl !== "undefined") {
-    checkKYCStatus();
-}
+    if (typeof kycStatusUrl !== "undefined") {
+        checkKYCStatus();
+    }
 });
+if (typeof googleEmail !== "undefined" && googleEmail) {
+
+    // Check if popup was already shown in sessionStorage
+    if (sessionStorage.getItem("google_merge_alert_shown") === "true") {
+
+    }
+
+    // ✅ Show the popup
+    let popup = document.getElementById("google-popup");
+    let popupEmail = document.getElementById("google-user-email");
+
+    if (popup && popupEmail) {
+        popupEmail.textContent = googleEmail;
+        popup.style.display = "flex"; // Show popup
+        popup.style.opacity = "1"; // Fade in effect
+
+        // ✅ Hide the popup after 5 seconds
+        setTimeout(() => {
+            popup.style.opacity = "0"; // Fade out effect
+            setTimeout(() => {
+                popup.style.display = "none"; // Hide completely
+
+                // ✅ Clear Google session when the popup disappears
+                fetch("/clear-google-session/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrftoken, // Ensure CSRF token is properly passed
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "same-origin", // Ensures cookies are sent
+                })
+                    .catch(() => { }); // Silently handle errors
+
+            }, 500);
+        }, 5000);
+
+        // ✅ Store in sessionStorage to prevent showing again in this session
+        sessionStorage.setItem("google_merge_alert_shown", "true");
+    }
+}
 
 function checkKYCStatus() {
     if (typeof kycStatusUrl === "undefined") {
@@ -2282,35 +2441,35 @@ function checkKYCStatus() {
             "X-CSRFToken": csrfToken,
         },
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            console.error(data.error);
-            return;
-        }
-
-        const kycModal = document.getElementById("kycModal");
-        const skipButton = document.getElementById("skipButton");
-        const okButton = document.getElementById("okButton");
-
-        if (data.kyc_window_shown) {
-            document.getElementById("kycModalTitle").textContent = data.kyc_title;
-            document.getElementById("kycModalMessage").textContent = data.kyc_message;
-            document.getElementById("kycUploadForm").style.display = 
-                data.kyc_status === "verified" || data.kyc_status === "waiting" ? "none" : "block";
-            
-            if (data.kyc_status === "verified" || data.kyc_status === "waiting") {
-                skipButton.style.display = "none";
-                okButton.style.display = "inline-block";
-            } else {
-                skipButton.style.display = "inline-block";
-                okButton.style.display = "none";
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+                return;
             }
-            
-            kycModal.style.display = "flex";
-        }
-    })
-    .catch(error => console.error("Error fetching KYC status:", error));
+
+            const kycModal = document.getElementById("kycModal");
+            const skipButton = document.getElementById("skipButton");
+            const okButton = document.getElementById("okButton");
+
+            if (data.kyc_window_shown) {
+                document.getElementById("kycModalTitle").textContent = data.kyc_title;
+                document.getElementById("kycModalMessage").textContent = data.kyc_message;
+                document.getElementById("kycUploadForm").style.display =
+                    data.kyc_status === "verified" || data.kyc_status === "waiting" ? "none" : "block";
+
+                if (data.kyc_status === "verified" || data.kyc_status === "waiting") {
+                    skipButton.style.display = "none";
+                    okButton.style.display = "inline-block";
+                } else {
+                    skipButton.style.display = "inline-block";
+                    okButton.style.display = "none";
+                }
+
+                kycModal.style.display = "flex";
+            }
+        })
+        .catch(error => console.error("Error fetching KYC status:", error));
 }
 
 function closeKYCModal() {
@@ -2324,14 +2483,14 @@ function kycimage_validateFileSize() {
     if (imageFile && imageFile.size > 500 * 1024) {
         errorMessageElement.textContent = "File size must be less than 500KB.";
     } else {
-        errorMessageElement.textContent = ""; 
+        errorMessageElement.textContent = "";
     }
 }
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 
-const kycUploadForm = document.getElementById("kycUploadForm");
+    const kycUploadForm = document.getElementById("kycUploadForm");
     if (kycUploadForm) {
-        kycUploadForm.onsubmit = function(e) {
+        kycUploadForm.onsubmit = function (e) {
             e.preventDefault();
             const errorMessageElement = document.getElementById("error-message");
             const imageFile = document.getElementById("kycImage")?.files[0];
@@ -2347,52 +2506,52 @@ const kycUploadForm = document.getElementById("kycUploadForm");
                     },
                     body: formData,
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        alert("KYC image uploaded successfully.");
-                        closeKYCModal();
-                        if (typeof kycStatusUrl !== "undefined") {
-                            checkKYCStatus();
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            alert("KYC image uploaded successfully.");
+                            closeKYCModal();
+                            if (typeof kycStatusUrl !== "undefined") {
+                                checkKYCStatus();
+                            }
+                        } else if (data.image) {
+                            errorMessageElement.textContent = data.image[0];
+                        } else {
+                            console.error("KYC upload error:", data);
                         }
-                    } else if (data.image) {
-                        errorMessageElement.textContent = data.image[0];
-                    } else {
-                        console.error("KYC upload error:", data);
-                    }
-                })
-                .catch(error => console.error("Error uploading KYC image:", error));
+                    })
+                    .catch(error => console.error("Error uploading KYC image:", error));
             } else {
                 errorMessageElement.textContent = "File size must be less than 500KB.";
             }
         };
     } else {
-        
+
     }
 });
 
 //admin -user_list_details.html
-$(document).ready(function() {
+$(document).ready(function () {
     if (typeof userlistUrl !== 'undefined' && userlistUrl) {
-    // AJAX call to fetch user data
-    $.ajax({
-        url:userlistUrl,  // Ensure this URL matches the Django API endpoint
-        type: 'GET',
-        contentType: 'application/json',
-        success: function(response) {
-            // Check if we received data
-            if (response.length > 0) {
-                $('#user_list_table').show();
-                response.forEach(user => {
-                    let kycImageHTML = '';
-                    if (user.kyc_image_url) {
-                        // Use the dynamic link to view the image
-                        kycImageHTML = `<a href="#" class="user_list_view_kyc_image" data-image-url="${user.kyc_image_url}" data-username="${user.user.username}" data-email="${user.user.email}" data-kycstatus="${user.kyc_status}">View KYC</a>`;
-                    } else {
-                        kycImageHTML = 'KYC not submitted';
-                    }
+        // AJAX call to fetch user data
+        $.ajax({
+            url: userlistUrl,  // Ensure this URL matches the Django API endpoint
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (response) {
+                // Check if we received data
+                if (response.length > 0) {
+                    $('#user_list_table').show();
+                    response.forEach(user => {
+                        let kycImageHTML = '';
+                        if (user.kyc_image_url) {
+                            // Use the dynamic link to view the image
+                            kycImageHTML = `<a href="#" class="user_list_view_kyc_image" data-image-url="${user.kyc_image_url}" data-username="${user.user.username}" data-email="${user.user.email}" data-kycstatus="${user.kyc_status}">View KYC</a>`;
+                        } else {
+                            kycImageHTML = 'KYC not submitted';
+                        }
 
-                    $('#user_list_table tbody').append(`
+                        $('#user_list_table tbody').append(`
                         <tr>
                             <td class="user_list_td">${user.user.id}</td>
                             <td class="user_list_td">${user.user.username}</td>
@@ -2401,21 +2560,21 @@ $(document).ready(function() {
                             <td class="user_list_td">${kycImageHTML}</td>
                         </tr>
                     `);
-                });
-            } else {
-                $('#user_list_message').text('No users found.').show();
+                    });
+                } else {
+                    $('#user_list_message').text('No users found.').show();
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#user_list_message').addClass('user_list_error').text("Error fetching user data: " + error).show();
             }
-        },
-        error: function(xhr, status, error) {
-            $('#user_list_message').addClass('user_list_error').text("Error fetching user data: " + error).show();
-        }
-    });
-} else {
-        
+        });
+    } else {
+
     }
 
     // Modal behavior for viewing the KYC image
-    $(document).on('click', '.user_list_view_kyc_image', function(event) {
+    $(document).on('click', '.user_list_view_kyc_image', function (event) {
         event.preventDefault();
         var imageUrl = $(this).data('image-url');
         var userName = $(this).data('username');
@@ -2432,12 +2591,12 @@ $(document).ready(function() {
     });
 
     // Close button behavior
-    $('.user_list_close_btn').on('click', function() {
+    $('.user_list_close_btn').on('click', function () {
         $('#user_list_kyc_modal').hide(); // Hide the modal when the close button is clicked
     });
 
     // Close the modal if clicked outside the modal content
-    $(window).on('click', function(event) {
+    $(window).on('click', function (event) {
         if ($(event.target).is('#user_list_kyc_modal')) {
             $('#user_list_kyc_modal').hide();
         }
@@ -2446,19 +2605,19 @@ $(document).ready(function() {
 
 //admin -user_kyc_waiting_list_details.html
 
-$(document).ready(function() {
+$(document).ready(function () {
     function refreshTable() {
         if (typeof userkycwaitinglistUrl === 'undefined') {
             //console.warn("userkycwaitinglistUrl is not defined.");
             return; // Exit the function if the URL is not defined
         }
         $('#user_kyc_waiting_list-tbody').empty(); // Clear existing table rows
-    
+
         $.ajax({
-            url:userkycwaitinglistUrl,
+            url: userkycwaitinglistUrl,
             type: 'GET',
             contentType: 'application/json',
-            success: function(response) {
+            success: function (response) {
                 if (response.length > 0) {
                     $('#user_kyc_waiting_list-table').show();
                     response.forEach(user => {
@@ -2488,41 +2647,41 @@ $(document).ready(function() {
                     $('#user_kyc_waiting_list-message').text('No users found.').show();
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 $('#user_kyc_waiting_list-message').addClass('user_kyc_waiting_list-error').text("Error fetching user data: " + error).show();
             }
         });
     }
 
     //refreshTable();
-     // Call refreshTable only if the URL is defined
-     if (typeof userkycwaitinglistUrl !== 'undefined') {
+    // Call refreshTable only if the URL is defined
+    if (typeof userkycwaitinglistUrl !== 'undefined') {
         refreshTable();
     } else {
         //console.warn("userkycwaitinglistUrl is not defined.");
     }
 
-    $(document).on('blur', '.user_kyc_waiting_list-kyc-status-select', function() {
+    $(document).on('blur', '.user_kyc_waiting_list-kyc-status-select', function () {
         const userId = $(this).data('user-id');
         const newStatus = $(this).val();
 
         $.ajax({
-            url:adminupdaetkycapprovalUrl ,
+            url: adminupdaetkycapprovalUrl,
             type: 'POST',
             data: JSON.stringify({ user_id: userId, kyc_status: newStatus }),
             contentType: 'application/json',
             headers: { 'X-CSRFToken': csrfToken },
-            success: function(response) {
+            success: function (response) {
                 alert(`KYC status updated to ${newStatus}`);
                 refreshTable();
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert(`Failed to update KYC status: ${error}`);
             }
         });
     });
 
-    $(document).on('click', '.user_kyc_waiting_list-view-kyc-image', function(event) {
+    $(document).on('click', '.user_kyc_waiting_list-view-kyc-image', function (event) {
         event.preventDefault();
         var imageUrl = $(this).data('image-url');
         var userName = $(this).data('username');
@@ -2537,11 +2696,11 @@ $(document).ready(function() {
         $('#user_kyc_waiting_list-kycModal').show();
     });
 
-    $('.user_kyc_waiting_list-close-btn').on('click', function() {
+    $('.user_kyc_waiting_list-close-btn').on('click', function () {
         $('#user_kyc_waiting_list-kycModal').hide();
     });
 
-    $(window).on('click', function(event) {
+    $(window).on('click', function (event) {
         if ($(event.target).is('#user_kyc_waiting_list-kycModal')) {
             $('#user_kyc_waiting_list-kycModal').hide();
         }
@@ -2591,75 +2750,75 @@ $(document).ready(function () {
     togglePasswordVisibility('#toggle-password1', '#password1');
     togglePasswordVisibility('#toggle-password2', '#password2');
 });
-  
 
-   
-    $(document).ready(function () {
-        // Attach event listeners for live password validation
-        $('#password1, #password2').on('input', function () {
-            const password1 = $('#password1').val();
-            const password2 = $('#password2').val();
-    
-            // Validate password1 and show message
-            const isValid = validatePassword(password1, 'password1-validation');
-           
-    
-            // Check if password2 matches password1
-            if (password2 && password1 !== password2) {
-                $('#password2-validation').text("Passwords do not match.");
-            } else {
-                $('#password2-validation').text("");
+
+
+$(document).ready(function () {
+    // Attach event listeners for live password validation
+    $('#password1, #password2').on('input', function () {
+        const password1 = $('#password1').val();
+        const password2 = $('#password2').val();
+
+        // Validate password1 and show message
+        const isValid = validatePassword(password1, 'password1-validation');
+
+
+        // Check if password2 matches password1
+        if (password2 && password1 !== password2) {
+            $('#password2-validation').text("Passwords do not match.");
+        } else {
+            $('#password2-validation').text("");
+        }
+    });
+
+    // Handle form submission for resetting password
+    $('#reset-password-form').on('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const password1 = $('#password1').val();
+        const password2 = $('#password2').val();
+
+        // Clear previous messages
+        $('#error-message').text('');
+        $('#password1-validation').text('');
+        $('#password2-validation').text('');
+
+        // Validate password
+        const isValidPassword = validatePassword(password1, 'password1-validation');
+
+        // Check if password1 and password2 match
+        if (!isValidPassword || password1 !== password2) {
+            if (password1 !== password2) {
+                $('#password2-validation').text('Passwords do not match.');
             }
-        });
-    
-        // Handle form submission for resetting password
-        $('#reset-password-form').on('submit', function (e) {
-            e.preventDefault(); // Prevent default form submission
-    
-            const password1 = $('#password1').val();
-            const password2 = $('#password2').val();
-    
-            // Clear previous messages
-            $('#error-message').text('');
-            $('#password1-validation').text('');
-            $('#password2-validation').text('');
-    
-            // Validate password1
-            const isValidPassword = validatePassword(password1, 'password1-validation');
-          
-            // Check if password1 and password2 match
-            if (!isValidPassword || password1 !== password2) {
-                if (password1 !== password2) {
-                    $('#password2-validation').text('Passwords do not match.');
-                }
-                return; // Stop form submission if validation fails
-            }
-    
-            // Send AJAX request
-            $.ajax({
-                url: `/api/password-reset-confirm/${uidb64}/${token}/`, // Use variables passed from the backend
-                method: 'POST',
-                contentType: 'application/json',
-                headers: { 'X-CSRFToken': csrfToken },
-                data: JSON.stringify({ new_password1: password1, new_password2: password2 }),
-                success: function (data) {
-                    console.log('Password reset successful:', data);
-                    // Hide the form and display the success message
-                    $('#form-container').hide();
-                    $('#success-message').fadeIn(); // Smoothly show success message
-                },
-                error: function (xhr) {
-                    console.error('Password reset error:', xhr);
-                    // Show error message from backend response
-                    const errorData = xhr.responseJSON;
-                    $('#error-message').text(
-                        errorData?.message || 'An error occurred. Please try again.'
-                    );
-                },
-            });
+            return; // Stop form submission if validation fails
+        }
+
+        // Send AJAX request
+        $.ajax({
+            url: `/api/password-reset-confirm/${uidb64}/${token}/`, // Use variables passed from the backend
+            method: 'POST',
+            contentType: 'application/json',
+            headers: { 'X-CSRFToken': csrfToken },
+            data: JSON.stringify({ new_password1: password1, new_password2: password2 }),
+            success: function (data) {
+                console.log('Password reset successful:', data);
+                // Hide the form and display the success message
+                $('#form-container').hide();
+                $('#success-message').fadeIn(); // Smoothly show success message
+            },
+            error: function (xhr) {
+                console.error('Password reset error:', xhr);
+                // Show error message from backend response
+                const errorData = xhr.responseJSON;
+                $('#error-message').text(
+                    errorData?.message || 'An error occurred. Please try again.'
+                );
+            },
         });
     });
-    
+});
+
 
 
 
@@ -2667,7 +2826,8 @@ $(document).ready(function () {
 function validatePassword(password, errorElementId) {
     const specialCharacterPattern = /[!@#$%^&*(),.?":{}|<>]/;
     const numberPattern = /\d/g;
-    const letterPattern = /[A-Za-z]/;
+    const uppercasePattern = /[A-Z]/;  // At least one uppercase letter
+    const lowercasePattern = /[a-z]/;  // At least one lowercase letter
     const spacePattern = /\s/; // Pattern to detect spaces
     const digitCount = (password.match(numberPattern) || []).length;
 
@@ -2679,10 +2839,14 @@ function validatePassword(password, errorElementId) {
     } else if (spacePattern.test(password)) {
         errorElement.text('Your password must not contain spaces.');
         return false;
-    } else if (!letterPattern.test(password)) {
-        errorElement.text('Your password must contain at least one letter.');
+    } else if (!uppercasePattern.test(password)) {
+        errorElement.text('Your password must contain at least one uppercase letter.');
         return false;
-    } else if (!specialCharacterPattern.test(password)) {
+    } else if (!lowercasePattern.test(password)) {
+        errorElement.text('Your password must contain at least one lowercase letter.');
+        return false;
+    }
+    else if (!specialCharacterPattern.test(password)) {
         errorElement.text('Your password must contain at least one special character.');
         return false;
     } else if (digitCount < 4) {
@@ -2702,7 +2866,7 @@ function validateUsername(username, errorElementId) {
     errorElement.text('');
     return true;
 }
-  // Email validation function
+// Email validation function
 function validateEmail(email, errorElementId) {
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const errorElement = $('#' + errorElementId);
@@ -2726,7 +2890,7 @@ function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
 
 
 // admin_signup.html
-$(document).ready(function() {
+$(document).ready(function () {
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -2741,105 +2905,105 @@ $(document).ready(function() {
         }
         return cookieValue;
     }
-    
+
     const csrftoken = getCookie('csrftoken');
-    
+
     $.ajaxSetup({
         headers: { 'X-CSRFToken': csrftoken }
     });
 
-$('#admin_signup_username_id').on('blur', function() {
-    const admin_username = $(this).val();
-    if (!validateUsername(admin_username)) return;
+    $('#admin_signup_username_id').on('blur', function () {
+        const admin_username = $(this).val();
+        if (!validateUsername(admin_username)) return;
 
-    $.ajax({
-        type: 'POST',
-        url: adminapiAdminSignupUrl, // Replace with your actual API endpoint
-        data: JSON.stringify({ 'admin_username': admin_username }),
-        contentType: 'application/json',
-        success: function(response) {
-            $('#admin_signup_username_error').text('');
-        },
-        error: function(response) {
-            const error = response.responseJSON.admin_username;
-            $('#admin_signup_username_error').text(error ? error[0] : '');
-        }
+        $.ajax({
+            type: 'POST',
+            url: adminapiAdminSignupUrl, // Replace with your actual API endpoint
+            data: JSON.stringify({ 'admin_username': admin_username }),
+            contentType: 'application/json',
+            success: function (response) {
+                $('#admin_signup_username_error').text('');
+            },
+            error: function (response) {
+                const error = response.responseJSON.admin_username;
+                $('#admin_signup_username_error').text(error ? error[0] : '');
+            }
+        });
     });
-});
 
-$('#admin_signup_email_id').on('blur', function() {
-    const admin_email = $(this).val();
-    if (!validateEmail(admin_email)) return;
+    $('#admin_signup_email_id').on('blur', function () {
+        const admin_email = $(this).val();
+        if (!validateEmail(admin_email)) return;
 
-    $.ajax({
-        type: 'POST',
-        url: adminapiAdminSignupUrl, // Replace with your actual API endpoint
-        data: JSON.stringify({ 'admin_email': admin_email }),
-        contentType: 'application/json',
-        success: function(response) {
-            $('#admin_signup_email_error').text('');
-        },
-        error: function(response) {
-            const error = response.responseJSON.admin_email;
-            $('#admin_signup_email_error').text(error ? error[0] : '');
-        }
+        $.ajax({
+            type: 'POST',
+            url: adminapiAdminSignupUrl, // Replace with your actual API endpoint
+            data: JSON.stringify({ 'admin_email': admin_email }),
+            contentType: 'application/json',
+            success: function (response) {
+                $('#admin_signup_email_error').text('');
+            },
+            error: function (response) {
+                const error = response.responseJSON.admin_email;
+                $('#admin_signup_email_error').text(error ? error[0] : '');
+            }
+        });
     });
-});
 
 
 
-    $('#admin_signup_username_id').on('input', function() {
+    $('#admin_signup_username_id').on('input', function () {
         validateUsername($(this).val(), 'admin_signup_username_error');
     });
 
-    $('#admin_signup_email_id').on('input', function() {
+    $('#admin_signup_email_id').on('input', function () {
         validateEmail($(this).val(), 'admin_signup_email_error');
     });
 
     $('#admin_signup_password_id').on('input', function () {
         validatePassword($(this).val(), 'admin_signup_password_error');
     });
-    
 
 
-togglePasswordVisibility('#admin_signup_toggle_password', '#admin_signup_password_id');
 
-$('#admin_signup_form').submit(function(e) {
-    e.preventDefault();
-    const username = $('#admin_signup_username_id').val();
-    const email = $('#admin_signup_email_id').val();
-    const password = $('#admin_signup_password_id').val();
+    togglePasswordVisibility('#admin_signup_toggle_password', '#admin_signup_password_id');
 
-    if (validateUsername(username,'admin_signup_username_error') && validateEmail(email,'admin_signup_email_error') && validatePassword(password, 'admin_signup_password_error')) {
-        $.ajax({
-            type: 'POST',
-            url: adminapiAdminSignupUrl, // Replace with your actual API endpoint
-            data: JSON.stringify({ admin_username: username, admin_email: email, admin_password: password }),
-            contentType: 'application/json',
-            success: function(response) {
-                window.location.href = adminapiAdminloginupUrl; // Replace with your actual login URL
-            },
-            error: function(response) {
-                $('#admin_signup_username_error').text('');
-                $('#admin_signup_email_error').text('');
-                $('#admin_signup_password_error').text('');
-                
-                const errors = response.responseJSON;
-                if (errors.admin_username) {
-                    $('#admin_signup_username_error').text(errors.admin_username[0]);
+    $('#admin_signup_form').submit(function (e) {
+        e.preventDefault();
+        const username = $('#admin_signup_username_id').val();
+        const email = $('#admin_signup_email_id').val();
+        const password = $('#admin_signup_password_id').val();
+
+        if (validateUsername(username, 'admin_signup_username_error') && validateEmail(email, 'admin_signup_email_error') && validatePassword(password, 'admin_signup_password_error')) {
+            $.ajax({
+                type: 'POST',
+                url: adminapiAdminSignupUrl, // Replace with your actual API endpoint
+                data: JSON.stringify({ admin_username: username, admin_email: email, admin_password: password }),
+                contentType: 'application/json',
+                success: function (response) {
+                    window.location.href = adminapiAdminloginupUrl; // Replace with your actual login URL
+                },
+                error: function (response) {
+                    $('#admin_signup_username_error').text('');
+                    $('#admin_signup_email_error').text('');
+                    $('#admin_signup_password_error').text('');
+
+                    const errors = response.responseJSON;
+                    if (errors.admin_username) {
+                        $('#admin_signup_username_error').text(errors.admin_username[0]);
+                    }
+                    if (errors.admin_email) {
+                        $('#admin_signup_email_error').text(errors.admin_email[0]);
+                    }
                 }
-                if (errors.admin_email) {
-                    $('#admin_signup_email_error').text(errors.admin_email[0]);
-                }
-            }
-        });
-    }
-});
+            });
+        }
+    });
 });
 
 
 //custom_admin_login.html
-$(document).ready(function() {
+$(document).ready(function () {
     // Function to get CSRF token from cookie
     function getCookie(name) {
         let cookieValue = null;
@@ -2855,44 +3019,44 @@ $(document).ready(function() {
         }
         return cookieValue;
     }
-    
+
     const csrftoken = getCookie('csrftoken');
-    
+
     // Set up AJAX with CSRF token
     $.ajaxSetup({
         headers: {
             'X-CSRFToken': csrftoken
         }
     });
-    
-    
+
+
     // Toggle password visibility
-   
+
     togglePasswordVisibility('#custom_admin_login_toggle_password', '#custom_admin_login_password_id');
 
-    
-    $(document).ready(function() {
-        $('#custom_admin_login_email_id').on('input', function() {
+
+    $(document).ready(function () {
+        $('#custom_admin_login_email_id').on('input', function () {
             validateEmail($(this).val(), 'custom_admin_login_email_error');
         });
         $('#custom_admin_login_password_id').on('input', function () {
             validatePassword($(this).val(), 'custom_admin_login_password_error');
         });
-    
+
         // Form submission with AJAX
-        $('#custom_admin_login_form').submit(function(e) {
+        $('#custom_admin_login_form').submit(function (e) {
             e.preventDefault();
             const admin_email = $('#custom_admin_login_email_id').val();
             const admin_password = $('#custom_admin_login_password_id').val();
-            if (validateEmail(admin_email,'custom_admin_login_email_error') && validatePassword(admin_password,'custom_admin_login_password_error')) {
-                
-    
+            if (validateEmail(admin_email, 'custom_admin_login_email_error') && validatePassword(admin_password, 'custom_admin_login_password_error')) {
+
+
                 $.ajax({
                     type: 'POST',
                     url: api_admin_login_url,
                     data: JSON.stringify({ admin_email, admin_password }),
                     contentType: 'application/json',
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             $('#custom_admin_login_errorMessage').text('');
                             //alert('Login successful');
@@ -2901,7 +3065,7 @@ $(document).ready(function() {
                             $('#custom_admin_login_errorMessage').text(response.message);
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         const response = xhr.responseJSON;
                         $('#custom_admin_login_errorMessage').text(response && response.message ? response.message : 'Incorrect email or password.');
                     }
@@ -2909,7 +3073,7 @@ $(document).ready(function() {
             }
         });
     });
-    });
+});
 
 //lottery_events_add.html
 
@@ -2950,6 +3114,9 @@ function fetchLotteryEvents(searchTerm = '', categoryId = '') {
         .then(data => {
             const numberOfPages = Math.ceil(data.length / LotteryPerPage);
             const lastPage = numberOfPages;
+            const btnPerPage = 4; // Set Buttons Per Page
+            let count = 1; // Initialize Button Numbers for Display  
+            let countPerRows = btnPerPage; // Change Buttons Dynamically per Page
             let currentPage = 1;
             let buttons = []; // Empty array for increment 
             const container = document.getElementById('lottery-events-container');
@@ -2959,30 +3126,26 @@ function fetchLotteryEvents(searchTerm = '', categoryId = '') {
             const show_Lotterycards = () => {
                 try {
                     const firstCardsInPage = (currentPage - 1) * LotteryPerPage;
-        let slice = data.slice(firstCardsInPage, firstCardsInPage + LotteryPerPage);
-        slice.forEach(event => {
-            const eventDiv = document.createElement('div');
-            eventDiv.classList.add('lottery-event-card');
-            eventDiv.dataset.id = event.id;
+                    //pagination starts here
+                    let slice = data.slice(firstCardsInPage, firstCardsInPage + LotteryPerPage);
+                    slice.forEach(event => {
+                        const eventDiv = document.createElement('div');
+                        eventDiv.classList.add('lottery-event-card');
+                        eventDiv.dataset.id = event.id;
 
-            // Handle additional images
-            let additionalImagesHtml = '';
-            if (event.additional_images && event.additional_images.length > 0) {
-                additionalImagesHtml = '<div class="additional-images"><h4>Additional Images:</h4>';
-                event.additional_images.forEach((image, index) => {
-                    additionalImagesHtml += `
-                        <div class="additional-image-item" data-image-id="${image.id}" style="display: ${index === 0 ? 'block' : 'none'}">
+                        // Handle additional images
+                        let additionalImagesHtml = '';
+                        if (event.additional_images && event.additional_images.length > 0) {
+                            additionalImagesHtml = '<div class="additional-images"><h4>Additional Images:</h4>';
+                            event.additional_images.forEach((image, index) => {
+                                additionalImagesHtml += `
+                        <div class="additional-image-item" data-image-id="${image.id}">
                             <img src="${image.image}" alt="Additional Image" class="lottery-events-additional-image"/>
                             <button class="remove-image-btn" onclick="removeAdditionalImage(${image.id}, ${event.id})">Remove</button>
                         </div>`;
-                });
-                additionalImagesHtml += `
-                    <div class="additional-images-navigation">
-                        <button class="prev-image-btn" style="display: none;">Previous</button>
-                        <button class="next-image-btn" ${event.additional_images.length === 1 ? 'style="display: none;"' : ''}>Next</button>
-                    </div>
-                </div>`;
-            }
+                            });
+                            additionalImagesHtml += '</div>';
+                        }
 
 
                         eventDiv.innerHTML = `
@@ -3097,163 +3260,179 @@ function fetchLotteryEvents(searchTerm = '', categoryId = '') {
                 `;
 
                         container.appendChild(eventDiv);
-                        if (event.additional_images && event.additional_images.length > 0) {
-                            addImageNavigationListeners(eventDiv.querySelector('.additional-images'));
-                        }
                     });
                 } catch (error) {
                     console.error("Error Loading Paginations:", error);
                 }
             };
-            const addImageNavigationListeners = (container) => {
-                const prevButton = container.querySelector('.prev-image-btn');
-                const nextButton = container.querySelector('.next-image-btn');
-                const images = container.querySelectorAll('.additional-image-item');
-            
-                let currentImageIndex = 0;
-            
-                const updateNavigationButtons = () => {
-                    // Hide Previous button if on the first image
-                    prevButton.style.display = currentImageIndex === 0 ? 'none' : 'block';
-                    // Hide Next button if on the last image
-                    nextButton.style.display = currentImageIndex === images.length - 1 ? 'none' : 'block';
-                };
-            
-                const showCurrentImage = () => {
-                    images.forEach((image, i) => {
-                        image.style.display = i === currentImageIndex ? 'block' : 'none';
-                    });
-                    updateNavigationButtons();
-                };
-            
-                // Initial setup
-                showCurrentImage();
-            
-                prevButton.addEventListener('click', () => {
-                    if (currentImageIndex > 0) {
-                        currentImageIndex--;
-                        showCurrentImage();
-                    }
-                });
-            
-                nextButton.addEventListener('click', () => {
-                    if (currentImageIndex < images.length - 1) {
-                        currentImageIndex++;
-                        showCurrentImage();
-                    }
-                });
-            };
-            
-            
-            
+
             /* Setting the button element */
             /* Display the actual page numbers */
-            const addPageButtons = () => {
+
+            const addPageButtons = (count, countPerRows) => {
                 const pageSpan = document.getElementById("pageButtons");
-                for (let page = 1; page <= numberOfPages; page++) {
+                /* When Total Number of Page Button less than Default Pagination count  */
+                if (countPerRows > numberOfPages) {
+                    countPerRows = numberOfPages;
+                }
+                /* Display Buttons Numbers and Iterate The counts  */
+                for (let page = count; page <= countPerRows; page++) {
                     let button = document.createElement("button"); // Call the button
                     button.innerHTML = page;
-                    button.setAttribute('id',`page${page}`);
+                    button.setAttribute('id', `page${page}`);
                     button.className = "btn button-orange";
                     button.addEventListener("click", () => goToPage(page));
                     pageSpan.appendChild(button);
                     buttons[page] = button; // Map the entities to the array
                 }
-                
+
             };
-            
+
             const clearRows = () => {
                 container.innerHTML = ""; // clear existing events
             }
             function goToPage(pageIndex = 0) {
-                
                 currentPage = pageIndex;
                 clearRows();
                 show_Lotterycards();
             }
             /* Condition the syntax of changing pages */
-            const changePage = (num = 0) => {
+            const changePage = (num = 0, action) => {
                 const nextPage = currentPage + num;
                 if (nextPage < 1) {
                     goToPage(1);
-                    console.log("This is the first page."+nextPage)
+                    console.log("This is the first page." + nextPage)
                 }
                 else if (nextPage > lastPage) {
                     goToPage(lastPage);
-                    console.log("This is the last page."+lastPage);
-                } else {
-                    let buttonElement=[];
-                    buttonElement = document.querySelectorAll('.button-orange');
-                    buttons = document.getElementsByClassName('button-orange');
-                    buttonElement.forEach(element => {
-                       let id = element.id.slice(4, 5);
-                      if(id === nextPage.toString()){
-                       $('.button-orange').removeClass('active');
-                       $(`#page${id}`).addClass('active');
-                      }
-                    });
-                    goToPage(nextPage);
+                    console.log("This is the last page." + lastPage);
+                } else { /*Main Function Executes Here */
+
+                    /*Executes Next Page */
+                    if (currentPage % btnPerPage == 0 && action == 'next') {
+                        const pageButtons = document.getElementById("pageButtons");
+                        pageButtons.innerHTML = '';
+                        count += btnPerPage;
+                        countPerRows += btnPerPage;
+                        addPageButtons(count, countPerRows);
+                        /*Activate Current Next Buttons */
+                        let buttonElement = [];
+                        buttonElement = document.querySelectorAll('.button-orange');
+                        buttonElement.forEach(element => {
+                            let elementLen = element.id.length;
+                            let id = element.id.slice(4, elementLen);
+                            if (id === nextPage.toString()) {
+                                $('.button-orange').removeClass('active');
+                                $(`#page${id}`).addClass('active');
+                            }
+                        });
+                        goToPage(nextPage);
+                        button_orange();
+
+                    }
+                    /*Executes Previous Page */
+                    else if (nextPage % btnPerPage == 0 && action == 'previous') {
+                        const pageButtons = document.getElementById("pageButtons");
+                        pageButtons.innerHTML = '';
+                        count -= btnPerPage;
+                        countPerRows -= btnPerPage;
+                        addPageButtons(count, countPerRows);
+                        /*Activate Current Previous Buttons */
+                        let buttonElement = [];
+                        buttonElement = document.querySelectorAll('.button-orange');
+                        buttonElement.forEach(element => {
+                            let elementLen = element.id.length;
+                            let id = element.id.slice(4, elementLen);
+                            if (id === nextPage.toString()) {
+                                $('.button-orange').removeClass('active');
+                                $(`#page${id}`).addClass('active');
+                            }
+                        });
+                        goToPage(nextPage);
+                        button_orange();
+                    }
+                    else { /* Activate Current Buttons */
+                        let buttonElement = [];
+                        buttonElement = document.querySelectorAll('.button-orange');
+                        buttonElement.forEach(element => {
+                            let elementLen = element.id.length;
+                            let id = element.id.slice(4, elementLen);
+                            if (id === nextPage.toString()) {
+                                $('.button-orange').removeClass('active');
+                                $(`#page${id}`).addClass('active');
+                            }
+                        });
+                        goToPage(nextPage);
+
+                    }
+
                 }
             };
-
-            const nextPage = () => changePage(1);
-            const previousPage = () => changePage(-1);
+            /* Change page By Arrow Buttons */
+            const nextPage = () => changePage(1, 'next');
+            const previousPage = () => changePage(-1, 'previous');
 
             const addClickListener = (id = "", callback = () => undefined) =>
                 document.getElementById(id).addEventListener("click", callback);
 
             /* Calling Function Globally */
-            addPageButtons();
+            addPageButtons(count, countPerRows);
             addClickListener("nextPageButton", nextPage);
             addClickListener("prevPageButton", previousPage);
             show_Lotterycards();
 
             /* On click Active class */
-            $(".button-orange").click(function () {
-                $(".button-orange").removeClass('active');
-                $(this).addClass('active');
-            });
+            const button_orange = () => {
+                $(".button-orange").click(function () {
+                    $(".button-orange").removeClass('active');
+                    $(this).addClass('active');
+                });
+            }
+
+
+            button_orange();
 
             /*By default Set Active First Button */
             $(".button-orange:first").addClass("active");
         })
         .catch(error => console.error('Error fetching events:', error));
-} 
+}
+
 // Remove a specific additional image
 function removeAdditionalImage(imageIndex, eventId) {
-const imageItem = document.querySelector(`[data-image-id="${imageIndex}"]`);
+    const imageItem = document.querySelector(`[data-image-id="${imageIndex}"]`);
 
-if (confirm("Are you sure you want to delete this image?")) {
-    const url = `/lottery-events/${eventId}/additional-images/${imageIndex}/delete/`;
+    if (confirm("Are you sure you want to delete this image?")) {
+        const url = `/lottery-events/${eventId}/additional-images/${imageIndex}/delete/`;
 
-    fetch(url, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRFToken': lottery_events_add_csrftoken, // Include CSRF token for security
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json(); // Assuming the API returns a JSON response
-        } else {
-            throw new Error(`Failed to delete image: ${response.status}`);
-        }
-    })
-    .then(data => {
-        // Remove the image from the UI
-        imageItem.remove();
-        alert(data.message || 'Image deleted successfully');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while deleting the image.');
-    });
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': lottery_events_add_csrftoken, // Include CSRF token for security
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json(); // Assuming the API returns a JSON response
+                } else {
+                    throw new Error(`Failed to delete image: ${response.status}`);
+                }
+            })
+            .then(data => {
+                // Remove the image from the UI
+                imageItem.remove();
+                alert(data.message || 'Image deleted successfully');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the image.');
+            });
+    }
 }
-}
-    // Enable edit mode for a specific lottery event card
-   // Calculate and update dynamic fields
-   function lottery_events_updateDynamicFields(card) {
+// Enable edit mode for a specific lottery event card
+// Calculate and update dynamic fields
+function lottery_events_updateDynamicFields(card) {
     const totalBudgetInput = card.querySelector('.lottery_events_add_edit_total_budget');
     const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
     const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
@@ -3277,7 +3456,7 @@ if (confirm("Are you sure you want to delete this image?")) {
     const totalAmount = totalBudget + revenueValue;
 
     // Calculate total tickets
-    const totalTickets = perTicketPrice > 0 ? Math.floor(totalAmount / perTicketPrice) : 0;
+    const totalTickets = perTicketPrice > 0 ? Math.ceil(totalAmount / perTicketPrice) : 0;
 
     // Update input fields dynamically
     totalAmountInput.value = totalAmount.toFixed(2);
@@ -3310,15 +3489,15 @@ function lottery_events_enableEditMode(button) {
     // Create a select element for categories
     const categorySelect = document.createElement('select');
     categorySelect.classList.add('lottery_events_add_edit_category');
-    
+
     // Fetch categories from backend
     fetch('/api/categories/')
-    
+
         .then(response => response.json())
         .then(categories => {
             categories.forEach(category => {
                 const option = document.createElement('option');
-                
+
                 option.value = category.id;
                 option.textContent = category.name;
 
@@ -3336,12 +3515,12 @@ function lottery_events_enableEditMode(button) {
     // Replace static category with the dropdown
     categoryField.replaceWith(categorySelect);
 
-     // Show the "Add Another Image" button and make it visible
+    // Show the "Add Another Image" button and make it visible
     const addImageButton = card.querySelector('.add-image-button');
     addImageButton.style.display = 'block';
 
     // Add functionality to dynamically add a new image field
-    addImageButton.addEventListener('click', function() {
+    addImageButton.addEventListener('click', function () {
         const imagesContainer = card.querySelector('.additional-images-container');
         const newImageField = document.createElement('div');
         newImageField.className = 'additional-image-item';
@@ -3362,7 +3541,7 @@ function lottery_events_enableEditMode(button) {
     // Add any existing remove buttons to the new fields
     const removeButtons = card.querySelectorAll('.remove-image-button');
     removeButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             button.parentElement.remove();
         });
     });
@@ -3398,66 +3577,66 @@ function lottery_events_enableEditMode(button) {
 // Attach listeners when the page loads
 
 // Clear all error messages
-    function lottery_events_edit_clearErrorMessages(card) {
-        card.querySelectorAll('.lottery_events_add_error_message').forEach(error => {
-            error.style.display = 'none';
-        });
+function lottery_events_edit_clearErrorMessages(card) {
+    card.querySelectorAll('.lottery_events_add_error_message').forEach(error => {
+        error.style.display = 'none';
+    });
+}
+
+// Reset fields to their original values on cancel
+function lottery_events_edit_resetFields(card) {
+    // Reset all input fields to their original values
+    card.querySelectorAll('.lottery_events_add_edit_title[type="text"], .lottery_events_add_edit_price[type="number"], .lottery_events_add_edit_total_tickets[type="number"], .lottery_events_add_edit_total_budget[type="number"], .lottery_events_add_edit_total_amount[type="number"], .lottery_events_add_edit_per_ticket_price[type="number"], .lottery_events_add_edit_draw_date[type="datetime-local"], textarea').forEach(input => {
+        input.value = input.getAttribute('data-original-value');
+    });
+
+    // Reset checkbox to its original state
+    const checkbox = card.querySelector('.lottery_events_add_edit_is_active');
+    if (checkbox) {
+        checkbox.checked = checkbox.getAttribute('data-original-checked') === 'true';
     }
 
-    // Reset fields to their original values on cancel
-    function lottery_events_edit_resetFields(card) {
-        // Reset all input fields to their original values
-        card.querySelectorAll('.lottery_events_add_edit_title[type="text"], .lottery_events_add_edit_price[type="number"], .lottery_events_add_edit_total_tickets[type="number"], .lottery_events_add_edit_total_budget[type="number"], .lottery_events_add_edit_total_amount[type="number"], .lottery_events_add_edit_per_ticket_price[type="number"], .lottery_events_add_edit_draw_date[type="datetime-local"], textarea').forEach(input => {
-            input.value = input.getAttribute('data-original-value');
-        });
-    
-        // Reset checkbox to its original state
-        const checkbox = card.querySelector('.lottery_events_add_edit_is_active');
-        if (checkbox) {
-            checkbox.checked = checkbox.getAttribute('data-original-checked') === 'true';
-        }
-    
-        // Reset revenue type and its associated fields
-        const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
-        const fixedRevenueField = card.querySelector('.lottery_events_add_fixed_revenue');
-        const percentageRevenueField = card.querySelector('.lottery_events_add_percentage_revenue');
-        const originalRevenueType = revenueTypeSelect.getAttribute('data-original-value');
-    
-        // Reset the revenue type dropdown to its original value
-        revenueTypeSelect.value = originalRevenueType;
-    
-        // Show/hide fields based on the original revenue type
-        if (originalRevenueType === 'fixed') {
-            fixedRevenueField.style.display = 'block';
-            percentageRevenueField.style.display = 'none';
-        } else if (originalRevenueType === 'percentage') {
-            fixedRevenueField.style.display = 'none';
-            percentageRevenueField.style.display = 'block';
-        }
-    
-        // Reset the value of Fixed Revenue or Percentage Revenue to the original value
-        const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
-        const percentageRevenueInput = card.querySelector('.lottery_events_add_edit_percentage_revenue');
-    
-        fixedRevenueInput.value = fixedRevenueInput.getAttribute('data-original-value');
-        percentageRevenueInput.value = percentageRevenueInput.getAttribute('data-original-value');
-    }
-    
+    // Reset revenue type and its associated fields
+    const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+    const fixedRevenueField = card.querySelector('.lottery_events_add_fixed_revenue');
+    const percentageRevenueField = card.querySelector('.lottery_events_add_percentage_revenue');
+    const originalRevenueType = revenueTypeSelect.getAttribute('data-original-value');
 
-    // Cancel edit mode and revert to initial state
-    function lottery_events_cancelEdit(button) {
-        const card = button.closest('.lottery-event-card');
-        lottery_events_edit_resetFields(card); // Reset fields to original values
-        lottery_events_edit_clearErrorMessages(card); // Clear error messages when canceling
-    
-        // Hide the select dropdown and show the static text
-        const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
-        const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
-        revenueTypeSelect.style.display = 'none';
-        revenueTypeSpan.style.display = 'block';
-    
-        card.classList.remove('lottery_events_add_edit_mode'); // Exit edit mode
-          // Hide the "Add Another Image" button
+    // Reset the revenue type dropdown to its original value
+    revenueTypeSelect.value = originalRevenueType;
+
+    // Show/hide fields based on the original revenue type
+    if (originalRevenueType === 'fixed') {
+        fixedRevenueField.style.display = 'block';
+        percentageRevenueField.style.display = 'none';
+    } else if (originalRevenueType === 'percentage') {
+        fixedRevenueField.style.display = 'none';
+        percentageRevenueField.style.display = 'block';
+    }
+
+    // Reset the value of Fixed Revenue or Percentage Revenue to the original value
+    const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
+    const percentageRevenueInput = card.querySelector('.lottery_events_add_edit_percentage_revenue');
+
+    fixedRevenueInput.value = fixedRevenueInput.getAttribute('data-original-value');
+    percentageRevenueInput.value = percentageRevenueInput.getAttribute('data-original-value');
+}
+
+
+// Cancel edit mode and revert to initial state
+function lottery_events_cancelEdit(button) {
+    const card = button.closest('.lottery-event-card');
+    lottery_events_edit_resetFields(card); // Reset fields to original values
+    lottery_events_edit_clearErrorMessages(card); // Clear error messages when canceling
+
+    // Hide the select dropdown and show the static text
+    const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+    const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
+    revenueTypeSelect.style.display = 'none';
+    revenueTypeSpan.style.display = 'block';
+
+    card.classList.remove('lottery_events_add_edit_mode'); // Exit edit mode
+    // Hide the "Add Another Image" button
     const addImageButton = card.querySelector('.add-image-button');
     if (addImageButton) {
         addImageButton.style.display = 'none';
@@ -3468,98 +3647,98 @@ function lottery_events_enableEditMode(button) {
     if (additionalImagesContainer) {
         additionalImagesContainer.innerHTML = ''; // Clear all dynamically added image fields
     }
-}  
-   
-    // Validate required fields and show error messages below each field
-    function lottery_events_edit_validateFields(card) {
-        let isValid = true;
-    
-        const title = card.querySelector('.lottery_events_add_edit_title').value.trim();  
-        const description = card.querySelector('.lottery_events_add_edit_description').value.trim();
-        const price = card.querySelector('.lottery_events_add_edit_price').value.trim();
-        const drawDate = card.querySelector('.lottery_events_add_edit_draw_date').value.trim();
-        const totalTickets = card.querySelector('.lottery_events_add_edit_total_tickets').value.trim();
-        const totalBudget = card.querySelector('.lottery_events_add_edit_total_budget').value.trim();
-        const perTicketPrice = card.querySelector('.lottery_events_add_edit_per_ticket_price').value.trim();
-        const revenueType = card.querySelector('.lottery_events_add_edit_revenue_type').value.trim();
-        const maxLimit = card.querySelector('.lottery_events_add_edit_maxlimit').value.trim();
-        const miniLimit = card.querySelector('.lottery_events_add_edit_minilimit').value.trim();
-        const freePostalDescription = card.querySelector('.lottery_events_add_edit_freepostal').value.trim();
-        const competitionDetails = card.querySelector('.lottery_events_add_edit_competitiondetails').value.trim();
-    
-        let revenueValue = null;
-    
-        if (revenueType === 'fixed') {
-            revenueValue = card.querySelector('.lottery_events_add_edit_fixed_revenue').value.trim();
-        } else if (revenueType === 'percentage') {
-            revenueValue = card.querySelector('.lottery_events_add_edit_percentage_revenue').value.trim();
-        }
-    
-        // Display specific error messages if fields are empty
-        if (!title) {
-            card.querySelector('.lottery_edit_title_error').style.display = 'block';
-            isValid = false;
-            card.querySelector('.lottery_edit_title_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_title_error').style.display = 'none';
-        }
-    
-        if (!description) {
-            card.querySelector('.lottery_edit_description_error').style.display = 'block';
-            isValid = false;
-            card.querySelector('.lottery_edit_description_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_description_error').style.display = 'none';
-        }
-    
-        if (!price || isNaN(price) || price <= 0) {
-            card.querySelector('.lottery_edit_price_error').style.display = 'block';
-            isValid = false;
-            card.querySelector('.lottery_edit_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_price_error').style.display = 'none';
-        }
-    
-        if (!drawDate) {
-            card.querySelector('.lottery_edit_draw_date_error').style.display = 'block';
-            isValid = false;
-            card.querySelector('.lottery_edit_draw_date_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_draw_date_error').style.display = 'none';
-        }
-    
-        if (!totalTickets || isNaN(totalTickets) || totalTickets <= 0) {
-            card.querySelector('.lottery_edit_total_tickets_error').style.display = 'block';
-            isValid = false;
-            card.querySelector('.lottery_edit_total_tickets_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_total_tickets_error').style.display = 'none';
-        }
-    
-        if (!totalBudget || isNaN(totalBudget) || totalBudget <= 0) {
-            card.querySelector('.lottery_edit_total_budget_error').style.display = 'block';
-            isValid = false;
-            card.querySelector('.lottery_edit_total_budget_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_total_budget_error').style.display = 'none';
-        }
-    
-        if (!revenueValue || isNaN(revenueValue) || revenueValue < 0) {
-            card.querySelector(`.lottery_edit_revenue_error`).style.display = 'block';
-            isValid = false;
-            card.querySelector(`.lottery_edit_revenue_error`).scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector(`.lottery_edit_revenue_error`).style.display = 'none';
-        }
-    
-        if (!perTicketPrice || isNaN(perTicketPrice) || perTicketPrice <= 0) {
-            card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'block';
-            isValid = false;
-            card.querySelector('.lottery_edit_per_ticket_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'none';
-        }
-        // Mini Limit validation
+}
+
+// Validate required fields and show error messages below each field
+function lottery_events_edit_validateFields(card) {
+    let isValid = true;
+
+    const title = card.querySelector('.lottery_events_add_edit_title').value.trim();
+    const description = card.querySelector('.lottery_events_add_edit_description').value.trim();
+    const price = card.querySelector('.lottery_events_add_edit_price').value.trim();
+    const drawDate = card.querySelector('.lottery_events_add_edit_draw_date').value.trim();
+    const totalTickets = card.querySelector('.lottery_events_add_edit_total_tickets').value.trim();
+    const totalBudget = card.querySelector('.lottery_events_add_edit_total_budget').value.trim();
+    const perTicketPrice = card.querySelector('.lottery_events_add_edit_per_ticket_price').value.trim();
+    const revenueType = card.querySelector('.lottery_events_add_edit_revenue_type').value.trim();
+    const maxLimit = card.querySelector('.lottery_events_add_edit_maxlimit').value.trim();
+    const miniLimit = card.querySelector('.lottery_events_add_edit_minilimit').value.trim();
+    const freePostalDescription = card.querySelector('.lottery_events_add_edit_freepostal').value.trim();
+    const competitionDetails = card.querySelector('.lottery_events_add_edit_competitiondetails').value.trim();
+
+    let revenueValue = null;
+
+    if (revenueType === 'fixed') {
+        revenueValue = card.querySelector('.lottery_events_add_edit_fixed_revenue').value.trim();
+    } else if (revenueType === 'percentage') {
+        revenueValue = card.querySelector('.lottery_events_add_edit_percentage_revenue').value.trim();
+    }
+
+    // Display specific error messages if fields are empty
+    if (!title) {
+        card.querySelector('.lottery_edit_title_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_title_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_title_error').style.display = 'none';
+    }
+
+    if (!description) {
+        card.querySelector('.lottery_edit_description_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_description_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_description_error').style.display = 'none';
+    }
+
+    if (!price || isNaN(price) || price <= 0) {
+        card.querySelector('.lottery_edit_price_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_price_error').style.display = 'none';
+    }
+
+    if (!drawDate) {
+        card.querySelector('.lottery_edit_draw_date_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_draw_date_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_draw_date_error').style.display = 'none';
+    }
+
+    if (!totalTickets || isNaN(totalTickets) || totalTickets <= 0) {
+        card.querySelector('.lottery_edit_total_tickets_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_total_tickets_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_total_tickets_error').style.display = 'none';
+    }
+
+    if (!totalBudget || isNaN(totalBudget) || totalBudget <= 0) {
+        card.querySelector('.lottery_edit_total_budget_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_total_budget_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_total_budget_error').style.display = 'none';
+    }
+
+    if (!revenueValue || isNaN(revenueValue) || revenueValue < 0) {
+        card.querySelector(`.lottery_edit_revenue_error`).style.display = 'block';
+        isValid = false;
+        card.querySelector(`.lottery_edit_revenue_error`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector(`.lottery_edit_revenue_error`).style.display = 'none';
+    }
+
+    if (!perTicketPrice || isNaN(perTicketPrice) || perTicketPrice <= 0) {
+        card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'block';
+        isValid = false;
+        card.querySelector('.lottery_edit_per_ticket_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'none';
+    }
+    // Mini Limit validation
     if (!miniLimit || miniLimit <= 0) {
         card.querySelector('.lottery_edit_minilimit_error').textContent = 'Mini Limit must be greater than 0.';
         card.querySelector('.lottery_edit_minilimit_error').style.display = 'block';
@@ -3571,7 +3750,7 @@ function lottery_events_enableEditMode(button) {
     } else {
         card.querySelector('.lottery_edit_minilimit_error').style.display = 'none';
     }
-    
+
     // Max Limit validation
     if (!maxLimit || maxLimit <= 0) {
         card.querySelector('.lottery_edit_maxlimit_error').textContent = 'Max Limit must be greater than 0.';
@@ -3584,440 +3763,440 @@ function lottery_events_enableEditMode(button) {
     } else {
         card.querySelector('.lottery_edit_maxlimit_error').style.display = 'none';
     }
-    
-        // Free Postal Description validation
-        if (!freePostalDescription) {
-            card.querySelector('.lottery_edit_freepostal_error').style.display = 'block';
-            isValid = false;
-        } else {
-            card.querySelector('.lottery_edit_freepostal_error').style.display = 'none';
-        }
-    
-        // Competition Details validation
-        if (!competitionDetails) {
-            card.querySelector('.lottery_edit_competitiondetails_error').style.display = 'block';
-            isValid = false;
-        } else {
-            card.querySelector('.lottery_edit_competitiondetails_error').style.display = 'none';
-        }
-        return isValid;
+
+    // Free Postal Description validation
+    if (!freePostalDescription) {
+        card.querySelector('.lottery_edit_freepostal_error').style.display = 'block';
+        isValid = false;
+    } else {
+        card.querySelector('.lottery_edit_freepostal_error').style.display = 'none';
     }
-    
-        // Save changes made to a lottery event
-        function lottery_events_edit_saveChanges(button) {
-            const card = button.closest('.lottery-event-card');
-    
-            // Validate required fields
-            if (!lottery_events_edit_validateFields(card)) {
-                return;
-            }    
-            const id = card.dataset.id; 
-            const categorySelect = card.querySelector('.lottery_events_add_edit_category');
-            const categoryId = categorySelect.value; 
-            const title = card.querySelector('.lottery_events_add_edit_title').value;
-            const description = card.querySelector('.lottery_events_add_edit_description').value;
-            const price = card.querySelector('.lottery_events_add_edit_price').value;
-            const drawDate = card.querySelector('.lottery_events_add_edit_draw_date').value;
-            const isActive = card.querySelector('.lottery_events_add_edit_is_active').checked;
-            const totalTickets = card.querySelector('.lottery_events_add_edit_total_tickets').value;
-            const imageFile = card.querySelector('.lottery_events_add_edit_image').files[0];                   
-               // const slug = card.querySelector('.lottery_events_add_edit_slug').value;
-                const miniLimit = card.querySelector('.lottery_events_add_edit_minilimit').value;
-                const maxLimit = card.querySelector('.lottery_events_add_edit_maxlimit').value;
-                const freePostalDescription = card.querySelector('.lottery_events_add_edit_freepostal').value;
-                const competitionDetails = card.querySelector('.lottery_events_add_edit_competitiondetails').value;
-    
-                const formData = new FormData();
-                const totalBudget = card.querySelector('.lottery_events_add_edit_total_budget').value;
-            const totalAmount = card.querySelector('.lottery_events_add_edit_total_amount').value;
-            const perTicketPrice = card.querySelector('.lottery_events_add_edit_per_ticket_price').value;
-            const revenueType = card.querySelector('.lottery_events_add_edit_revenue_type').value;
-            let revenueValue = 0;
-    
+
+    // Competition Details validation
+    if (!competitionDetails) {
+        card.querySelector('.lottery_edit_competitiondetails_error').style.display = 'block';
+        isValid = false;
+    } else {
+        card.querySelector('.lottery_edit_competitiondetails_error').style.display = 'none';
+    }
+    return isValid;
+}
+
+// Save changes made to a lottery event
+function lottery_events_edit_saveChanges(button) {
+    const card = button.closest('.lottery-event-card');
+
+    // Validate required fields
+    if (!lottery_events_edit_validateFields(card)) {
+        return;
+    }
+    const id = card.dataset.id;
+    const categorySelect = card.querySelector('.lottery_events_add_edit_category');
+    const categoryId = categorySelect.value;
+    const title = card.querySelector('.lottery_events_add_edit_title').value;
+    const description = card.querySelector('.lottery_events_add_edit_description').value;
+    const price = card.querySelector('.lottery_events_add_edit_price').value;
+    const drawDate = card.querySelector('.lottery_events_add_edit_draw_date').value;
+    const isActive = card.querySelector('.lottery_events_add_edit_is_active').checked;
+    const totalTickets = card.querySelector('.lottery_events_add_edit_total_tickets').value;
+    const imageFile = card.querySelector('.lottery_events_add_edit_image').files[0];
+    // const slug = card.querySelector('.lottery_events_add_edit_slug').value;
+    const miniLimit = card.querySelector('.lottery_events_add_edit_minilimit').value;
+    const maxLimit = card.querySelector('.lottery_events_add_edit_maxlimit').value;
+    const freePostalDescription = card.querySelector('.lottery_events_add_edit_freepostal').value;
+    const competitionDetails = card.querySelector('.lottery_events_add_edit_competitiondetails').value;
+
+    const formData = new FormData();
+    const totalBudget = card.querySelector('.lottery_events_add_edit_total_budget').value;
+    const totalAmount = card.querySelector('.lottery_events_add_edit_total_amount').value;
+    const perTicketPrice = card.querySelector('.lottery_events_add_edit_per_ticket_price').value;
+    const revenueType = card.querySelector('.lottery_events_add_edit_revenue_type').value;
+    let revenueValue = 0;
+
     if (revenueType === 'fixed') {
         revenueValue = card.querySelector('.lottery_events_add_edit_fixed_revenue').value;
     } else if (revenueType === 'percentage') {
         revenueValue = card.querySelector('.lottery_events_add_edit_percentage_revenue').value;
     }
-    
-        const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
-        const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
-        
+
+    const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
+    const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
+
     // Get all additional image files
     const additionalImages = card.querySelectorAll('input[name="additional_images[]"]');
     const additionalImageFiles = Array.from(additionalImages).map(input => input.files[0]);
-    
-    
-            formData.append('total_budget', totalBudget);
-            formData.append('revenue_type', revenueType);
-            formData.append('revenue_value', revenueValue);
-            formData.append('total_amount', totalAmount);
-            formData.append('per_ticket_price', perTicketPrice);
-            formData.append('category', categoryId);     
-            formData.append('title', title);
-            formData.append('description', description);
-            formData.append('price', price);
-            formData.append('draw_date', drawDate);
-            formData.append('is_active', isActive);
-            formData.append('total_tickets', totalTickets);
-            if (imageFile) {
-                formData.append('image', imageFile);
-            }
-           // formData.append('slug', slug);
-            formData.append('mini_limit', miniLimit);
-            formData.append('max_limit', maxLimit);
-            formData.append('free_postal_description', freePostalDescription);
-            formData.append('competition_details', competitionDetails);
-         // Append additional images to the formData
-         additionalImageFiles.forEach((imageFile, index) => {
-            formData.append('additional_images[]', imageFile);
-        });
-            const url = apiEditDeleteLotteryEventsUrl.replace('0', id);
-    
-                fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'X-CSRFToken':lottery_events_add_csrftoken,
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.id) {
-                    // Update card fields with new values
-                    card.querySelector('.lottery_events_add_title').textContent = title;
-                    card.querySelector('.lottery_events_add_description').textContent = description;
-                    card.querySelector('.lottery_events_add_price').textContent = `£${price}`;
-                    card.querySelector('.lottery_events_add_draw_date').textContent = drawDate;
-                    card.querySelector('.lottery_events_add_is_active').textContent = isActive ? 'Active' : 'Inactive';
-                    card.querySelector('.lottery_events_add_total_tickets').textContent = totalTickets;
-    
-                        // Update the new fields dynamically
-                        card.querySelector('.lottery_events_add_total_budget').textContent = totalBudget;
-                        card.querySelector('.lottery_events_add_revenue_type').textContent = revenueType;
-                        card.querySelector('.lottery_events_add_total_amount').textContent = totalAmount;
-                        card.querySelector('.lottery_events_add_per_ticket_price').textContent = perTicketPrice;
-                        if (revenueTypeSelect.value === 'fixed') {
-                            card.querySelector('.lottery_events_add_fixed_revenue span').textContent = revenueValue;
-                        } else if (revenueTypeSelect.value === 'percentage') {
-                            card.querySelector('.lottery_events_add_percentage_revenue span').textContent = revenueValue;
-                        }
+
+
+    formData.append('total_budget', totalBudget);
+    formData.append('revenue_type', revenueType);
+    formData.append('revenue_value', revenueValue);
+    formData.append('total_amount', totalAmount);
+    formData.append('per_ticket_price', perTicketPrice);
+    formData.append('category', categoryId);
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('price', price);
+    formData.append('draw_date', drawDate);
+    formData.append('is_active', isActive);
+    formData.append('total_tickets', totalTickets);
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+    // formData.append('slug', slug);
+    formData.append('mini_limit', miniLimit);
+    formData.append('max_limit', maxLimit);
+    formData.append('free_postal_description', freePostalDescription);
+    formData.append('competition_details', competitionDetails);
+    // Append additional images to the formData
+    additionalImageFiles.forEach((imageFile, index) => {
+        formData.append('additional_images[]', imageFile);
+    });
+    const url = apiEditDeleteLotteryEventsUrl.replace('0', id);
+
+    fetch(url, {
+        method: 'PUT',
+        headers: {
+            'X-CSRFToken': lottery_events_add_csrftoken,
+        },
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                // Update card fields with new values
+                card.querySelector('.lottery_events_add_title').textContent = title;
+                card.querySelector('.lottery_events_add_description').textContent = description;
+                card.querySelector('.lottery_events_add_price').textContent = `£${price}`;
+                card.querySelector('.lottery_events_add_draw_date').textContent = drawDate;
+                card.querySelector('.lottery_events_add_is_active').textContent = isActive ? 'Active' : 'Inactive';
+                card.querySelector('.lottery_events_add_total_tickets').textContent = totalTickets;
+
+                // Update the new fields dynamically
+                card.querySelector('.lottery_events_add_total_budget').textContent = totalBudget;
+                card.querySelector('.lottery_events_add_revenue_type').textContent = revenueType;
+                card.querySelector('.lottery_events_add_total_amount').textContent = totalAmount;
+                card.querySelector('.lottery_events_add_per_ticket_price').textContent = perTicketPrice;
+                if (revenueTypeSelect.value === 'fixed') {
+                    card.querySelector('.lottery_events_add_fixed_revenue span').textContent = revenueValue;
+                } else if (revenueTypeSelect.value === 'percentage') {
+                    card.querySelector('.lottery_events_add_percentage_revenue span').textContent = revenueValue;
+                }
                 // Update additional fields dynamically
-              //  card.querySelector('.lottery_events_add_slug').textContent = slug;
+                //  card.querySelector('.lottery_events_add_slug').textContent = slug;
                 card.querySelector('.lottery_events_add_minilimit').textContent = miniLimit;
                 card.querySelector('.lottery_events_add_maxlimit').textContent = maxLimit;
                 card.querySelector('.lottery_events_add_freepostal').textContent = freePostalDescription;
                 card.querySelector('.lottery_events_add_competitiondetails').textContent = competitionDetails;
-    
-    
-    
-                    // Update image preview if a new one was uploaded
-                    if (data.image && card.querySelector('.lottery_events_add_current_image')) {
-                        card.querySelector('.lottery_events_add_current_image').src = data.image;
-                    } else if (data.image) {
-                        const imgElement = document.createElement('img');
-                        imgElement.src = data.image;
-                        imgElement.className = 'lottery_events_add_current_image';
-                        card.insertBefore(imgElement, card.querySelector('.lottery_events_add_edit_image'));
-                    }
-                    revenueTypeSpan.textContent = revenueTypeSelect.value;
-                    revenueTypeSelect.style.display = 'none';
-                    revenueTypeSpan.style.display = 'block';
-                    // Exit edit mode
-                    card.classList.remove('lottery_events_add_edit_mode');
-                    lottery_events_edit_clearErrorMessages(card); // Clear errors after saving
-                    alert('Lottery Event Updated Successfully');
+
+
+
+                // Update image preview if a new one was uploaded
+                if (data.image && card.querySelector('.lottery_events_add_current_image')) {
+                    card.querySelector('.lottery_events_add_current_image').src = data.image;
+                } else if (data.image) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = data.image;
+                    imgElement.className = 'lottery_events_add_current_image';
+                    card.insertBefore(imgElement, card.querySelector('.lottery_events_add_edit_image'));
+                }
+                revenueTypeSpan.textContent = revenueTypeSelect.value;
+                revenueTypeSelect.style.display = 'none';
+                revenueTypeSpan.style.display = 'block';
+                // Exit edit mode
+                card.classList.remove('lottery_events_add_edit_mode');
+                lottery_events_edit_clearErrorMessages(card); // Clear errors after saving
+                alert('Lottery Event Updated Successfully');
+                fetchLotteryEvents();
+            } else {
+                alert('Error updating event');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Delete a lottery event
+function deleteLotteryEvent(id) {
+    if (confirm('Are you sure you want to delete this event?')) {
+        const url = apiEditDeleteLotteryEventsUrl.replace('0', id);
+
+        fetch(url, {
+
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': lottery_events_add_csrftoken,
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Lottery Event Deleted Successfully');
                     fetchLotteryEvents();
                 } else {
-                    alert('Error updating event');
+                    alert('Error deleting event');
                 }
             })
             .catch(error => console.error('Error:', error));
-        }
-    
-        // Delete a lottery event
-        function deleteLotteryEvent(id) {
-            if (confirm('Are you sure you want to delete this event?')) {
-                const url = apiEditDeleteLotteryEventsUrl.replace('0', id);
-    
-                fetch(url, {    
-            
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRFToken': lottery_events_add_csrftoken,
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Lottery Event Deleted Successfully');
-                        fetchLotteryEvents(); 
-                    } else {
-                        alert('Error deleting event');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+    }
+}
+function fetchLotteryCategories() {
+    fetch(get_lottery_categories_url)
+        .then(response => response.json())
+        .then(data => {
+            const categorySelect = document.getElementById('lottery_events_add_category');
+            categorySelect.innerHTML = '<option value="">Select Category</option>'; // Clear existing options
+            data.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching categories:', error));
+}
+
+// Add new lottery event
+function submitAddLotteryEvent() {
+    // Clear previous error messages
+    clear_lottery_events_add_inputs_errors();
+
+    let form = document.getElementById('addLotteryEventForm');
+    let formData = new FormData(form);
+
+
+    // Collect all dynamic image fields
+    const additionalImagesInputs = document.querySelectorAll('input[name="additional_images[]"]'); // Ensure the name attribute is correctly set for multiple images
+    additionalImagesInputs.forEach(input => {
+        if (input.files) {
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append('additional_images', input.files[i]);
             }
         }
-        function fetchLotteryCategories() {
-            fetch(get_lottery_categories_url)
-                .then(response => response.json())
-                .then(data => {
-                    const categorySelect = document.getElementById('lottery_events_add_category');
-                    categorySelect.innerHTML = '<option value="">Select Category</option>'; // Clear existing options
-                    data.forEach(category => {
-                        const option = document.createElement('option');
-                        option.value = category.id;
-                        option.textContent = category.name;
-                        categorySelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching categories:', error));
+    });
+
+    // Validation flags
+    let isValid = true;
+    var category = document.getElementById('lottery_events_add_category').value;
+    // Get form field values
+    var totalBudget = document.getElementById('lottery_events_add_totalBudget').value;
+    var totalBudgetValidationMessage = document.getElementById('lottery_events_add_budget_validation');
+    var title = document.getElementsByName('title')[0].value;
+    var description = document.getElementsByName('description')[0].value;
+    var price = document.getElementsByName('price')[0].value;
+    var drawDate = document.getElementsByName('draw_date')[0].value;
+    var image = document.getElementsByName('image')[0].files[0];
+    var isActive = document.getElementsByName('is_active')[0].checked;
+    var perTicketPrice = document.getElementById('lottery_events_add_perTicketPrice').value;
+    var freepostaldescription = document.getElementsByName('free_postal_description')[0].value;
+    // Get form field values      
+    var slug = document.getElementsByName('slug')[0].value;
+    var miniLimit = document.getElementsByName('mini_limit')[0].value;
+    var maxLimit = document.getElementsByName('max_limit')[0].value;
+    var competitionDetails = document.getElementsByName('competition_details')[0].value;
+    const revenueType = document.getElementById('lottery_events_add_revenueType').value;
+    const fixedRevenue = document.getElementById('lottery_events_add_fixedRevenue').value;
+    const percentageRevenue = document.getElementById('lottery_events_add_percentageRevenue').value;
+
+
+    // Helper function to show validation errors
+    function showValidationError(elementId, errorMessage) {
+        const errorElement = document.getElementById(elementId);
+        if (errorElement) {
+            errorElement.textContent = errorMessage;
+            errorElement.style.color = 'red'; // Optional: Add visual styling for errors
+            errorElement.scrollIntoView({ behavior: 'smooth' }); // Smooth scroll to the error element
+            isValid = false; // Ensure isValid is set to false
+        } else {
+            console.error(`Element with ID "${elementId}" not found.`);
         }
-      
-        // Add new lottery event
-        function submitAddLotteryEvent() {
-            // Clear previous error messages
-            clear_lottery_events_add_inputs_errors();
-        
-            let form = document.getElementById('addLotteryEventForm');
-            let formData = new FormData(form);
-        
-            
-        // Collect all dynamic image fields
-        const additionalImagesInputs = document.querySelectorAll('input[name="additional_images[]"]'); // Ensure the name attribute is correctly set for multiple images
-        additionalImagesInputs.forEach(input => {
-            if (input.files) {
-                for (let i = 0; i < input.files.length; i++) {
-                    formData.append('additional_images', input.files[i]);
-                }
-            }
-        });
-      
-            // Validation flags
-            let isValid = true;
-            var category = document.getElementById('lottery_events_add_category').value;       
-            // Get form field values
-            var totalBudget = document.getElementById('lottery_events_add_totalBudget').value;
-            var totalBudgetValidationMessage = document.getElementById('lottery_events_add_budget_validation');
-            var title = document.getElementsByName('title')[0].value;
-            var description = document.getElementsByName('description')[0].value;
-            var price = document.getElementsByName('price')[0].value;
-            var drawDate = document.getElementsByName('draw_date')[0].value;
-            var image = document.getElementsByName('image')[0].files[0];
-            var isActive = document.getElementsByName('is_active')[0].checked;
-            var perTicketPrice = document.getElementById('lottery_events_add_perTicketPrice').value;
-            var freepostaldescription = document.getElementsByName('free_postal_description')[0].value;           
-            // Get form field values      
-            var slug = document.getElementsByName('slug')[0].value;
-            var miniLimit = document.getElementsByName('mini_limit')[0].value;
-            var maxLimit = document.getElementsByName('max_limit')[0].value;
-            var competitionDetails = document.getElementsByName('competition_details')[0].value;
-            const revenueType = document.getElementById('lottery_events_add_revenueType').value;
-            const fixedRevenue = document.getElementById('lottery_events_add_fixedRevenue').value;
-            const percentageRevenue = document.getElementById('lottery_events_add_percentageRevenue').value;
-        
-    
-   // Helper function to show validation errors
-function showValidationError(elementId, errorMessage) {
-const errorElement = document.getElementById(elementId);
-if (errorElement) {
-    errorElement.textContent = errorMessage;
-    errorElement.style.color = 'red'; // Optional: Add visual styling for errors
-    errorElement.scrollIntoView({ behavior: 'smooth' }); // Smooth scroll to the error element
-    isValid = false; // Ensure isValid is set to false
-} else {
-    console.error(`Element with ID "${elementId}" not found.`);
-}
-}
+    }
 
-// Helper function to clear validation errors
-function clearValidationError(elementId) {
-const errorElement = document.getElementById(elementId);
-if (errorElement) {
-    errorElement.textContent = ''; // Clear the error message
-}
-}
+    // Helper function to clear validation errors
+    function clearValidationError(elementId) {
+        const errorElement = document.getElementById(elementId);
+        if (errorElement) {
+            errorElement.textContent = ''; // Clear the error message
+        }
+    }
 
 
-// Validate Slug
-if (slug && !/^[a-z0-9-]+$/.test(slug)  ) {
-showValidationError('lottery_events_add_slug_validation', 'Slug must contain only lowercase letters, numbers, and hyphens.');
-} else {
-clearValidationError('lottery_events_add_slug_validation');
-}
+    // Validate Slug
+    if (slug && !/^[a-z0-9-]+$/.test(slug)) {
+        showValidationError('lottery_events_add_slug_validation', 'Slug must contain only lowercase letters, numbers, and hyphens.');
+    } else {
+        clearValidationError('lottery_events_add_slug_validation');
+    }
 
-// Validate Minimum Tickets
-if (!miniLimit || miniLimit <= 0) {
-showValidationError('lottery_events_add_minilimit_validation', 'Minimum Tickets must be greater than zero.');
-} else {
-clearValidationError('lottery_events_add_minilimit_validation');
-}
+    // Validate Minimum Tickets
+    if (!miniLimit || miniLimit <= 0) {
+        showValidationError('lottery_events_add_minilimit_validation', 'Minimum Tickets must be greater than zero.');
+    } else {
+        clearValidationError('lottery_events_add_minilimit_validation');
+    }
 
-// Validate Maximum Tickets
-if (!maxLimit || maxLimit <= 0 || parseInt(maxLimit) < parseInt(miniLimit)) {
-showValidationError('lottery_events_add_maxlimit_validation', 'Maximum Tickets must be greater than zero and not less than Minimum Tickets.');
-} else {
-clearValidationError('lottery_events_add_maxlimit_validation');
-}
+    // Validate Maximum Tickets
+    if (!maxLimit || maxLimit <= 0 || parseInt(maxLimit) < parseInt(miniLimit)) {
+        showValidationError('lottery_events_add_maxlimit_validation', 'Maximum Tickets must be greater than zero and not less than Minimum Tickets.');
+    } else {
+        clearValidationError('lottery_events_add_maxlimit_validation');
+    }
 
-// Validate Competition Details
-if (competitionDetails.trim() === '') {
-showValidationError('lottery_events_add_competitiondetails_validation', 'Competition Details cannot be empty.');
-} else {
-clearValidationError('lottery_events_add_competitiondetails_validation');
-}
+    // Validate Competition Details
+    if (competitionDetails.trim() === '') {
+        showValidationError('lottery_events_add_competitiondetails_validation', 'Competition Details cannot be empty.');
+    } else {
+        clearValidationError('lottery_events_add_competitiondetails_validation');
+    }
 
-// Validate Total Budget
-if (totalBudget === '' || totalBudget <= 0) {
-showValidationError('lottery_events_add_budget_validation', 'Total Budget cannot be empty or zero.');
-} else {
-clearValidationError('lottery_events_add_budget_validation');
-}
+    // Validate Total Budget
+    if (totalBudget === '' || totalBudget <= 0) {
+        showValidationError('lottery_events_add_budget_validation', 'Total Budget cannot be empty or zero.');
+    } else {
+        clearValidationError('lottery_events_add_budget_validation');
+    }
 
-// Validate Category
-if (category === '') {
-showValidationError('lottery_events_add_category_validation', 'Category is required.');
-} else {
-clearValidationError('lottery_events_add_category_validation');
-}
+    // Validate Category
+    if (category === '') {
+        showValidationError('lottery_events_add_category_validation', 'Category is required.');
+    } else {
+        clearValidationError('lottery_events_add_category_validation');
+    }
 
-// Validate Title
-if (title === '') {
-showValidationError('lottery_events_add_title_validation', 'Title is required.');
-} else {
-clearValidationError('lottery_events_add_title_validation');
-}
+    // Validate Title
+    if (title === '') {
+        showValidationError('lottery_events_add_title_validation', 'Title is required.');
+    } else {
+        clearValidationError('lottery_events_add_title_validation');
+    }
 
-// Validate Description
-if (description === '') {
-showValidationError('lottery_events_add_description_validation', 'Description is required.');
-} else {
-clearValidationError('lottery_events_add_description_validation');
-}
+    // Validate Description
+    if (description === '') {
+        showValidationError('lottery_events_add_description_validation', 'Description is required.');
+    } else {
+        clearValidationError('lottery_events_add_description_validation');
+    }
 
-// Validate Price
-if (price === '' || price <= 0) {
-showValidationError('lottery_events_add_price_validation', 'Price must be greater than zero.');
-} else {
-clearValidationError('lottery_events_add_price_validation');
-}
+    // Validate Price
+    if (price === '' || price <= 0) {
+        showValidationError('lottery_events_add_price_validation', 'Price must be greater than zero.');
+    } else {
+        clearValidationError('lottery_events_add_price_validation');
+    }
 
-// Validate Draw Date
-if (drawDate === '') {
-showValidationError('lottery_events_add_drawdate_validation', 'Draw Date is required.');
-} else {
-clearValidationError('lottery_events_add_drawdate_validation');
-}
+    // Validate Draw Date
+    if (drawDate === '') {
+        showValidationError('lottery_events_add_drawdate_validation', 'Draw Date is required.');
+    } else {
+        clearValidationError('lottery_events_add_drawdate_validation');
+    }
 
-// Validate Image
-if (!image) {
-showValidationError('lottery_events_add_image_validation', 'Image is required.');
-} else {
-clearValidationError('lottery_events_add_image_validation');
-}
+    // Validate Image
+    if (!image) {
+        showValidationError('lottery_events_add_image_validation', 'Image is required.');
+    } else {
+        clearValidationError('lottery_events_add_image_validation');
+    }
 
-// Validate Per Ticket Price
-if (perTicketPrice === '' || perTicketPrice <= 0) {
-showValidationError('lottery_events_add_per_ticket_validation', 'Per Ticket Price must be greater than zero.');
-} else {
-clearValidationError('lottery_events_add_per_ticket_validation');
-}
+    // Validate Per Ticket Price
+    if (perTicketPrice === '' || perTicketPrice <= 0) {
+        showValidationError('lottery_events_add_per_ticket_validation', 'Per Ticket Price must be greater than zero.');
+    } else {
+        clearValidationError('lottery_events_add_per_ticket_validation');
+    }
 
-// Validate Fixed Revenue
-if (revenueType === 'fixed') {
-if (fixedRevenue === '' || fixedRevenue <= 0) {
-    showValidationError('lottery_events_add_fixed_revenue_validation', 'Fixed Revenue Amount must be greater than zero.');
-} else {
-    clearValidationError('lottery_events_add_fixed_revenue_validation');
-}
-}
+    // Validate Fixed Revenue
+    if (revenueType === 'fixed') {
+        if (fixedRevenue === '' || fixedRevenue <= 0) {
+            showValidationError('lottery_events_add_fixed_revenue_validation', 'Fixed Revenue Amount must be greater than zero.');
+        } else {
+            clearValidationError('lottery_events_add_fixed_revenue_validation');
+        }
+    }
 
-// Validate Percentage Revenue
-if (revenueType === 'percentage') {
-if (percentageRevenue === '' || percentageRevenue <= 0) {
-    showValidationError('lottery_events_add_percentage_revenue_validation', 'Percentage Revenue Amount must be greater than zero.');
-} else {
-    clearValidationError('lottery_events_add_percentage_revenue_validation');
-}
-}      // If all fields are valid, proceed with form submission
-            if (isValid) {
-                // Dynamically add calculated fields to formData
-                const totalAmount = document.getElementById('lottery_events_add_totalAmount').value;
-                const totalTickets = document.getElementById('lottery_events_add_totalTickets').value;
-                const revenueValue = revenueType === 'fixed' ? fixedRevenue : percentageRevenue;
-        
-                formData.append('total_amount', totalAmount);
-                formData.append('total_tickets', totalTickets);
-                formData.append('revenue_value', revenueValue);
-                formData.append('category', category);
-          
-            fetch(api_lottery_events_add_url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': lottery_events_add_csrftoken,
-                    },
-                    body: formData
-            })
+    // Validate Percentage Revenue
+    if (revenueType === 'percentage') {
+        if (percentageRevenue === '' || percentageRevenue <= 0) {
+            showValidationError('lottery_events_add_percentage_revenue_validation', 'Percentage Revenue Amount must be greater than zero.');
+        } else {
+            clearValidationError('lottery_events_add_percentage_revenue_validation');
+        }
+    }      // If all fields are valid, proceed with form submission
+    if (isValid) {
+        // Dynamically add calculated fields to formData
+        const totalAmount = document.getElementById('lottery_events_add_totalAmount').value;
+        const totalTickets = document.getElementById('lottery_events_add_totalTickets').value;
+        const revenueValue = revenueType === 'fixed' ? fixedRevenue : percentageRevenue;
+
+        formData.append('total_amount', totalAmount);
+        formData.append('total_tickets', totalTickets);
+        formData.append('revenue_value', revenueValue);
+        formData.append('category', category);
+
+        fetch(api_lottery_events_add_url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': lottery_events_add_csrftoken,
+            },
+            body: formData
+        })
             .then(response => response.json())
             .then(data => {
-                    if (data.id) {
-                        alert('Lottery Event Added Successfully');
-                        fetchLotteryEvents();  // Reload the events after adding
-                        form.reset();  // Clear the form
-                        document.getElementById('additional-images-container').innerHTML = ''; // Clear additional image fields
-                        document.getElementById('lotteryEventModal').style.display = 'none';
-                    } else {
-                        // Display validation errors
-                        validate_lottery_events_add_inputs(data);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            }
-        }
-         
-    
-    // Function to clear previous validation error messages
-    function clear_lottery_events_add_inputs_errors() {
-        document.getElementById('lottery_events_add_title_validation').textContent = '';
-        document.getElementById('lottery_events_add_description_validation').textContent = '';
-        document.getElementById('lottery_events_add_price_validation').textContent = '';
-        document.getElementById('lottery_events_add_drawdate_validation').textContent = '';
-        document.getElementById('lottery_events_add_image_validation').textContent = '';
-        document.getElementById('lottery_events_add_isactive_validation').textContent = '';
-        document.getElementById('lottery_events_add_budget_validation').textContent = '';
-        document.getElementById('lottery_events_add_per_ticket_validation').textContent = '';
-        document.getElementById('lottery_events_add_minilimit_validation').textContent = '';
-        document.getElementById('lottery_events_add_maxlimit_validation').textContent = '';
-        document.getElementById('lottery_events_add_freepostal_validation').textcontent = '';
-        document.getElementById('lottery_events_add_competitiondetails_validation').textContent = '';
-        document.getElementById('lottery_events_add_slug_validation').textContent = '';
+                if (data.id) {
+                    alert('Lottery Event Added Successfully');
+                    fetchLotteryEvents();  // Reload the events after adding
+                    form.reset();  // Clear the form
+                    document.getElementById('additional-images-container').innerHTML = ''; // Clear additional image fields
+                    document.getElementById('lotteryEventModal').style.display = 'none';
+                } else {
+                    // Display validation errors
+                    validate_lottery_events_add_inputs(data);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
 
-    }
-    
-    
-    
-    // Function to show validation errors near each field
-    function validate_lottery_events_add_inputs(errors) {
-        if (errors.title) document.getElementById('lottery_events_add_title_validation').textContent = errors.title.join(', ');
-        if (errors.description) document.getElementById('lottery_events_add_description_validation').textContent = errors.description.join(', ');
-        if (errors.price) document.getElementById('lottery_events_add_price_validation').textContent = errors.price.join(', ');
-        if (errors.draw_date) document.getElementById('lottery_events_add_drawdate_validation').textContent = errors.draw_date.join(', ');
-        if (errors.image) document.getElementById('lottery_events_add_image_validation').textContent = errors.image.join(', ');
-        if (errors.is_active) document.getElementById('lottery_events_add_isactive_validation').textContent = errors.is_active.join(', ');
-        if (errors.slug) document.getElementById('lottery_events_add_slug_validation').textContent = errors.slug.join(', ');
-        if (errors.min_limit) document.getElementById('lottery_events_add_minilimit_validation').textContent = errors.min_limit.join(', ');
-        if (errors.max_limit) document.getElementById('lottery_events_add_maxlimit_validation').textContent = errors.max_limit.join(', ');
-        if (errors.competition_details) document.getElementById('lottery_events_add_competitiondetails_validation').textContent = errors.competition_details.join(', ');
-        if (errors.free_postal_description) document.getElementById('lottery_events_add_freepostal_validation').textContent = errors.free_postal_description.join(', ');    
-    }
-    
+
+// Function to clear previous validation error messages
+function clear_lottery_events_add_inputs_errors() {
+    document.getElementById('lottery_events_add_title_validation').textContent = '';
+    document.getElementById('lottery_events_add_description_validation').textContent = '';
+    document.getElementById('lottery_events_add_price_validation').textContent = '';
+    document.getElementById('lottery_events_add_drawdate_validation').textContent = '';
+    document.getElementById('lottery_events_add_image_validation').textContent = '';
+    document.getElementById('lottery_events_add_isactive_validation').textContent = '';
+    document.getElementById('lottery_events_add_budget_validation').textContent = '';
+    document.getElementById('lottery_events_add_per_ticket_validation').textContent = '';
+    document.getElementById('lottery_events_add_minilimit_validation').textContent = '';
+    document.getElementById('lottery_events_add_maxlimit_validation').textContent = '';
+    document.getElementById('lottery_events_add_freepostal_validation').textcontent = '';
+    document.getElementById('lottery_events_add_competitiondetails_validation').textContent = '';
+    document.getElementById('lottery_events_add_slug_validation').textContent = '';
+
+}
+
+
+
+// Function to show validation errors near each field
+function validate_lottery_events_add_inputs(errors) {
+    if (errors.title) document.getElementById('lottery_events_add_title_validation').textContent = errors.title.join(', ');
+    if (errors.description) document.getElementById('lottery_events_add_description_validation').textContent = errors.description.join(', ');
+    if (errors.price) document.getElementById('lottery_events_add_price_validation').textContent = errors.price.join(', ');
+    if (errors.draw_date) document.getElementById('lottery_events_add_drawdate_validation').textContent = errors.draw_date.join(', ');
+    if (errors.image) document.getElementById('lottery_events_add_image_validation').textContent = errors.image.join(', ');
+    if (errors.is_active) document.getElementById('lottery_events_add_isactive_validation').textContent = errors.is_active.join(', ');
+    if (errors.slug) document.getElementById('lottery_events_add_slug_validation').textContent = errors.slug.join(', ');
+    if (errors.min_limit) document.getElementById('lottery_events_add_minilimit_validation').textContent = errors.min_limit.join(', ');
+    if (errors.max_limit) document.getElementById('lottery_events_add_maxlimit_validation').textContent = errors.max_limit.join(', ');
+    if (errors.competition_details) document.getElementById('lottery_events_add_competitiondetails_validation').textContent = errors.competition_details.join(', ');
+    if (errors.free_postal_description) document.getElementById('lottery_events_add_freepostal_validation').textContent = errors.free_postal_description.join(', ');
+}
+
 
 // Function to fetch lottery events data from the API
 function lottery_events_fetch() {
     try {
-        
+
         if (typeof api_get_lottery_events_url === 'undefined' || !api_get_lottery_events_url) {
-            
+
             return; // Exit the function if the variable is not defined
         }
 
@@ -4092,38 +4271,86 @@ function updateCartCount() {
         })
         .catch(error => console.error('Error fetching cart count:', error));
 }
-
 function header_navbar_fetchCategories() {
+    if (typeof api_get_categories_url === "undefined") {
+        console.error("API URL for fetching categories is not defined.");
+        return;
+    }
+
     fetch(api_get_categories_url)
         .then(response => response.json())
         .then(data => {
             header_navbar_displayCategories(data);
+            adjustDropdownPosition();
         })
         .catch(error => console.error('Error fetching categories:', error));
 }
 
 function header_navbar_displayCategories(categories) {
     const dropdownMenu = document.getElementById('categories_dropdown_competitions');
+    dropdownMenu.innerHTML = ''; // Clear previous categories
+
     categories.forEach(category => {
         const categoryLink = document.createElement('a');
-        categoryLink.href = `/category_lottery_events/${category.name}/`;
+        categoryLink.href = `/category_lottery_events/${encodeURIComponent(category.name)}/`;
         categoryLink.classList.add('dropdown-item_competitions');
         categoryLink.textContent = category.name;
         dropdownMenu.appendChild(categoryLink);
     });
-}	
+}
+
+function adjustDropdownPosition() {
+    const dropdown = document.getElementById('categories_dropdown_competitions');
+    dropdown.style.left = '0';
+    dropdown.style.transform = 'none';
+    dropdown.style.width = 'auto';
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const dropdownButton = document.querySelector('.dropbtn_competitions');
+    const dropdownContent = document.querySelector('.dropdown-content_competitions');
+
+    if (dropdownButton && dropdownContent) {
+        dropdownButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Toggle dropdown visibility
+            if (dropdownContent.classList.contains('show-dropdown')) {
+                dropdownContent.classList.remove('show-dropdown');
+                dropdownButton.setAttribute("aria-expanded", "false");
+            } else {
+                dropdownContent.classList.add('show-dropdown');
+                dropdownButton.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdownButton.contains(e.target) && !dropdownContent.contains(e.target)) {
+                dropdownContent.classList.remove('show-dropdown');
+                dropdownButton.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+});
+
+
+// Run functions on page load and resize event
+document.addEventListener('DOMContentLoaded', header_navbar_fetchCategories);
+window.addEventListener('resize', adjustDropdownPosition);
+
+
 
 function scrollToFirstCategory() {
     const firstCategory = document.querySelector('.category_section'); // Get the first category section
     const categoriesTabs = document.querySelector('.categories-tabs'); // Get the categories tabs section
-    const adjustheight=20;
+    const adjustheight = 20;
     if (firstCategory) {
         // Scroll to position where the first category is just below the categories-tabs
         window.scrollTo({
-            top: firstCategory.offsetTop - categoriesTabs.offsetHeight-adjustheight,
+            top: firstCategory.offsetTop - categoriesTabs.offsetHeight - adjustheight,
             behavior: 'smooth'
         });
-        console.log('Scrolling to position:', firstCategory.offsetTop - categoriesTabs.offsetHeight-adjustheight);
+        console.log('Scrolling to position:', firstCategory.offsetTop - categoriesTabs.offsetHeight - adjustheight);
     }
 }
 // function populateCategoryTabs(categories) {
@@ -4160,52 +4387,52 @@ function scrollToFirstCategory() {
 // }
 // Update populateCategoryTabs to include data attributes
 function populateCategoryTabs(categories) {
-const tabsContainer = document.getElementById('categories_tabs');
-tabsContainer.innerHTML = '';
+    const tabsContainer = document.getElementById('categories_tabs');
+    tabsContainer.innerHTML = '';
 
-categories.forEach((category, index) => {
-const tab = document.createElement('button');
-tab.classList.add('category-tab');
-tab.textContent = category.name;
-tab.dataset.categoryId = category.id; // Link tab with category ID
-if (index === 0) tab.classList.add('active');
-const indicator = document.createElement('div');
-indicator.classList.add('tab-indicator');
-tab.appendChild(indicator);
-tab.onclick = function() {
-document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-tab.classList.add('active');
-const categorySection = document.getElementById(`category_${category.id}`);
-if (categorySection) categorySection.scrollIntoView({ behavior: 'smooth' });
-};
-tabsContainer.appendChild(tab);
-});
+    categories.forEach((category, index) => {
+        const tab = document.createElement('button');
+        tab.classList.add('category-tab');
+        tab.textContent = category.name;
+        tab.dataset.categoryId = category.id; // Link tab with category ID
+        if (index === 0) tab.classList.add('active');
+        const indicator = document.createElement('div');
+        indicator.classList.add('tab-indicator');
+        tab.appendChild(indicator);
+        tab.onclick = function () {
+            document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const categorySection = document.getElementById(`category_${category.id}`);
+            if (categorySection) categorySection.scrollIntoView({ behavior: 'smooth' });
+        };
+        tabsContainer.appendChild(tab);
+    });
 }
 function setupScrollHandler() {
-const navbar = document.querySelector('header');
-const navbarHeight = navbar ? navbar.offsetHeight : 0;
-const sections = document.querySelectorAll('.category_section');
+    const navbar = document.querySelector('header');
+    const navbarHeight = navbar ? navbar.offsetHeight : 0;
+    const sections = document.querySelectorAll('.category_section');
 
-const observerOptions = {
-root: null,
-rootMargin: `-${navbarHeight}px 0px 0px 0px`,
-threshold: 0.5 // Adjust if needed (0.5 means 50% visible)
-};
+    const observerOptions = {
+        root: null,
+        rootMargin: `-${navbarHeight}px 0px 0px 0px`,
+        threshold: 0.5 // Adjust if needed (0.5 means 50% visible)
+    };
 
-const observer = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-const categoryId = entry.target.id.split('_')[1];
-document.querySelectorAll('.category-tab').forEach(tab => {
-const isActive = tab.dataset.categoryId === categoryId;
-tab.classList.toggle('active', isActive);
-tab.querySelector('.tab-indicator').style.display = isActive ? 'block' : 'none';
-});
-}
-});
-}, observerOptions);
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const categoryId = entry.target.id.split('_')[1];
+                document.querySelectorAll('.category-tab').forEach(tab => {
+                    const isActive = tab.dataset.categoryId === categoryId;
+                    tab.classList.toggle('active', isActive);
+                    tab.querySelector('.tab-indicator').style.display = isActive ? 'block' : 'none';
+                });
+            }
+        });
+    }, observerOptions);
 
-sections.forEach(section => observer.observe(section));
+    sections.forEach(section => observer.observe(section));
 }
 
 // Function to display the lottery events
@@ -4224,7 +4451,7 @@ function displayLotteryEvents(events) {
     events.forEach(event => {
         if (event.category && event.category.id) {
             const categoryId = event.category.id;
-            const categoryName = event.category.name || 'Unknown Category'; 
+            const categoryName = event.category.name || 'Unknown Category';
             const categoryLogo = event.category.category_logo || ''; // Get the category logo 
             if (!categoriesMap[categoryId]) {
                 categoriesMap[categoryId] = { id: categoryId, name: categoryName, logo: categoryLogo };
@@ -4248,15 +4475,15 @@ function displayLotteryEvents(events) {
            ${category.logo ? `<img src="${category.logo}" alt="${category.name} Logo" class="category_icon">` : ''}
             <h2>${category.name}</h2>
         </div>`;
-    
+
         const viewAllButton = document.createElement('button');
         viewAllButton.classList.add('view_all_button');
         // Set inner HTML with image inside the button
-viewAllButton.innerHTML = `
+        viewAllButton.innerHTML = `
 View all 
 <img src="/media/lottery_images/arrow (1).png" alt="Arrow Icon1">
 `;
-       
+
         viewAllButton.onclick = function () {
             window.location.href = `/category_lottery_events/${category.name}/`;
         };
@@ -4286,21 +4513,20 @@ View all
                 `<div class="lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
                     <i class="fas fa-heart ${favoriteClass}"></i>
                 </div>`;
-                const enterNowButton = `
+            const enterNowButton = `
             <a href="/lottery_detail/${event.slug}/" class="lottery_events_enter_button">
             ${category.logo ? `<img src="${category.logo}" alt="${category.name} Logo" class="lottery_events_enter_enter_icon">` : ''}
           Enter Now
         <img src="/media/lottery_images/arrow (2).png" alt="Arrow Icon">
     </a>`;
-            
+
 
             eventElement.innerHTML = `
                 ${favoriteIcon}
                 <div class="lottery_events_event_header">${drawDateString}</div>
                 ${event.image ? `<img src="${event.image}" alt="${event.title}" class="similar_category_lottery_event_img" />` : ''}
-                  
                 <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
-                <h3>${event.title}</h3>
+                   <h3 class="lottery_title">${event.title}</h3>
                <div class="lt-p"> <p> ${event.description}</p><div>
                
                 <div class="lottery_events_per_ticket_price"> £${event.per_ticket_price}</div>
@@ -4585,9 +4811,11 @@ function displayCategoryLotteryEvents(events) {
                 ${favoriteIcon}
                 <div class="category_lottery_event_header">${drawDateString}</div>
                 ${event.image ? `<img src="${event.image}" alt="${event.title}" class="category_lottery_image" />` : ''}
+                 <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
                 <h3 class="category_lottery_title">${event.title}</h3>
-                <p class="category_lottery_description"><strong>Description:</strong> ${event.description}</p>
+                <p class="category_lottery_description"> ${event.description}</p>
                 <div class="category_lottery_ticket_price">£${event.per_ticket_price}</div>
+                <div class="category_lottery_events_soldpercentage">SOLD: ${event.sold_percentage}%</div>
                 <div class="category_lottery_sold_percentage">
                     <div class="category_lottery_sold_bar" style="width: ${event.sold_percentage}%"></div>
                 </div>
@@ -4624,7 +4852,7 @@ function displayCategoryLotteryEvents(events) {
 
 //cart.html
 
-function addToCart(event,redirectToCart = false) {
+function addToCart(event, redirectToCart = false) {
     event.preventDefault();
     const eventSlug = event.target.getAttribute('data-event-slug');
     const ticketCount = document.getElementById('lot-detail-ticket-count').value;
@@ -4635,45 +4863,45 @@ function addToCart(event,redirectToCart = false) {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCSRFToken(),
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
             event_slug: eventSlug,
             quantity: ticketCount,
         }),
     })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return response.json().then(error => {
-                throw new Error(error.message);
-            });
-        }
-    })
-    .then(data => {
-        if (data.success) {
-            if (redirectToCart) {
-                // Redirect to cart page after adding to cart
-                window.location.href = cartUrl;
+        .then(response => {
+            if (response.ok) {
+                return response.json();
             } else {
-                // Show success modal
-                showModal(data.message);
+                return response.json().then(error => {
+                    throw new Error(error.message);
+                });
             }
-        }
-    })
-    .catch(error => {
-        showModal(error.message); // Show error modal
-        console.error('Error adding to cart:', error);
-    });
+        })
+        .then(data => {
+            if (data.success) {
+                if (redirectToCart) {
+                    // Redirect to cart page after adding to cart
+                    window.location.href = cartUrl;
+                } else {
+                    // Show success modal
+                    showModal(data.message);
+                }
+            }
+        })
+        .catch(error => {
+            showModal(error.message); // Show error modal
+            console.error('Error adding to cart:', error);
+        });
 }
 // Show modal function
 function showModal(message) {
     const modal = document.getElementById('cart-modal');
     const modalMessage = document.getElementById('cart-modal-message');
-    
+
     modalMessage.textContent = message;
     modal.classList.remove('hiddencart');
     modal.style.display = 'flex';
-    
+
     // Close modal when clicking the close button (X)
     const closeButton = document.querySelector('.cart-modal-close');
     closeButton.addEventListener('click', () => {
@@ -4720,10 +4948,10 @@ function attachAddToCartListeners() {
     });
     const buyNowButton = document.getElementById('buy-now-button');
     if (buyNowButton) {
-        buyNowButton.addEventListener('click', function(event) {
+        buyNowButton.addEventListener('click', function (event) {
             addToCart(event, true); // Pass true to redirect to cart
         });
-    } 
+    }
 }
 
 // Call functions on page load
@@ -4757,7 +4985,7 @@ function displayCartItems(cart) {
     if (Object.keys(cart).length === 0) {
         container.innerHTML = '<p>Your cart is empty.</p>';
         totalElement.textContent = '0.00';
-        subtotalElement.textContent='0.00';
+        subtotalElement.textContent = '0.00';
         return;
     }
 
@@ -4791,16 +5019,16 @@ function displayCartItems(cart) {
         <button class="remove_from_cart_button" data-event-slug="${eventSlug}"></button>
         <span class="max-limit-message"></span> <!-- Message span -->
     `;
-    
+
 
         container.appendChild(cartItem);
     }
 
     totalElement.textContent = `£${total.toFixed(2)}`;
-    subtotalElement.textContent=`£${total.toFixed(2)}`;
+    subtotalElement.textContent = `£${total.toFixed(2)}`;
     const removeButtons = document.querySelectorAll('.remove_from_cart_button');
-   removeButtons.forEach(button => {
-       button.addEventListener('click', removeFromCart);
+    removeButtons.forEach(button => {
+        button.addEventListener('click', removeFromCart);
     });
 
     // Attach event listeners for quantity and total inputs
@@ -4832,58 +5060,58 @@ function displayCartItems(cart) {
     });
 
     // // Add focus-out event listener for total inputs
-    
+
     const totalInputs = container.querySelectorAll('.total-input');
 
-totalInputs.forEach(input => {
-    input.addEventListener('blur', event => {
-        const eventSlug = event.target.getAttribute('data-event-slug');
-        const newTotal = parseFloat(event.target.value);
-        const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
-        const maxLimit = parseInt(cart[eventSlug].max_limit);
-        const maxTotal = perTicketPrice * maxLimit;
+    totalInputs.forEach(input => {
+        input.addEventListener('blur', event => {
+            const eventSlug = event.target.getAttribute('data-event-slug');
+            const newTotal = parseFloat(event.target.value);
+            const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
+            const maxLimit = parseInt(cart[eventSlug].max_limit);
+            const maxTotal = perTicketPrice * maxLimit;
 
-        const parentElement = event.target.closest('.cart_item');
-        const messageSpan = parentElement.querySelector('.max-limit-message');
-        const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
+            const parentElement = event.target.closest('.cart_item');
+            const messageSpan = parentElement.querySelector('.max-limit-message');
+            const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
 
-        
-        
 
-        if (newTotal > maxTotal) {
-            event.target.value = maxTotal.toFixed(2); // Reset to max total
-            messageSpan.textContent = `Total exceeds max allowable amount (£${maxTotal.toFixed(2)}).`;
-            messageSpan.style.color = 'red';
-            messageSpan.style.fontSize = '16px';
-            messageSpan.style.display = 'inline';
 
-            // Set quantity to max limit and update cart
-            const maxQuantity = maxLimit;
-            quantityInputs.value = maxQuantity;
-            updateCartQuantityFromTotal(cart, eventSlug, maxQuantity);
-            return;
-        } else {
-            // Clear error message and update quantity dynamically
-            messageSpan.textContent = '';
-            const calculatedQuantity = Math.floor(newTotal / perTicketPrice); // Calculate based on valid total
 
-            if (calculatedQuantity >= 1) {
-                quantityInputs.value = calculatedQuantity; // Update quantity input
-                cart[eventSlug].quantity = calculatedQuantity; // Update cart object
+            if (newTotal > maxTotal) {
+                event.target.value = maxTotal.toFixed(2); // Reset to max total
+                messageSpan.textContent = `Total exceeds max allowable amount (£${maxTotal.toFixed(2)}).`;
+                messageSpan.style.color = 'red';
+                messageSpan.style.fontSize = '16px';
+                messageSpan.style.display = 'inline';
 
-                // Update cart cookie
-                fetch('/api/update-cart/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCSRFToken(),
-                    },
-                    body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
-                }).then(() => fetchCartItems()); // Refresh cart display
+                // Set quantity to max limit and update cart
+                const maxQuantity = maxLimit;
+                quantityInputs.value = maxQuantity;
+                updateCartQuantityFromTotal(cart, eventSlug, maxQuantity);
+                return;
+            } else {
+                // Clear error message and update quantity dynamically
+                messageSpan.textContent = '';
+                const calculatedQuantity = Math.floor(newTotal / perTicketPrice); // Calculate based on valid total
+
+                if (calculatedQuantity >= 1) {
+                    quantityInputs.value = calculatedQuantity; // Update quantity input
+                    cart[eventSlug].quantity = calculatedQuantity; // Update cart object
+
+                    // Update cart cookie
+                    fetch('/api/update-cart/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken(),
+                        },
+                        body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
+                    }).then(() => fetchCartItems()); // Refresh cart display
+                }
             }
-        }
+        });
     });
-});
 
 }
 
@@ -4941,7 +5169,7 @@ function updateCartQuantityFromTotal(cart, eventSlug, newQuantity) {
     const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
     const maxLimit = parseInt(cart[eventSlug].max_limit);
     const newTotal = newQuantity * perTicketPrice;
-    
+
     // Handle error if maxTotal exceeds maxLimit
     if (newTotal > maxTotal) {
         messageSpan.textContent = `Error: Max total amount exceeds the limit of ${maxTotal.toFixed(2)}!`;
@@ -5007,194 +5235,194 @@ function proceedToCheckout() {
 //lottery_detail.html
 function fetchLotteryEventDetails(eventSlug) {
     fetch(`/api/lottery_detail/${eventSlug}/`)
-    .then(response => response.json())
-    .then(data => {
-        if (!data) {
-            console.error("No data received from API.");
-            return;
-        }
-
-        // DOM Elements
-        const eventImage = document.getElementById("lot-detail-event-image");
-        const additionalImagesContainer = document.getElementById("additional-images-containerpopup");
-        const popup = document.getElementById("lot-detail-image-popup");
-        const popupImage = document.getElementById("lot-detail-popup-image");
-        const closePopup = document.getElementById("lot-detail-close-popup");
-        const prevImageBtn = document.getElementById("lot-detail-prev-image");
-        const nextImageBtn = document.getElementById("lot-detail-next-image");
-        const competitionDetailsList = document.getElementById("lot-detail-competition-list");
-        const ticketInput = document.getElementById("lot-detail-ticket-count");
-        const amountInput = document.getElementById("lot-detail-total-amount");
-        const errorMessage = document.getElementById("ticket-error-message");
-
-        const perTicketPrice = parseFloat(data.per_ticket_price) || 0;
-        const miniLimit = parseInt(data.mini_limit);
-        const maxLimit = parseInt(data.max_limit);
-
-        let currentIndex = 0;
-
-        // Populate Event Details
-        document.getElementById("lot-detail-event-title").textContent = data.title || "N/A";
-        document.getElementById("lot-detail-event-description").textContent = data.description || "N/A";
-        document.getElementById("lot-detail-event-price").textContent = `Prize: £${data.price || 0}`;
-        document.getElementById("lot-detail-event-per-ticket-price").textContent = `Per ticket price: £${data.per_ticket_price || 0}`;
-        document.getElementById("event-sold-percentage").textContent = `Sold: ${data.sold_percentage || 0}%`;
-        document.getElementById("lot-detail-ticket-max-limit").textContent = maxLimit;
-
-        // Format and display draw date
-        document.getElementById("lot-detail-event-draw-datetime").textContent = lottery_events_formatDrawDate(data.draw_date);
-
-        // Update Primary Event Image
-        if (data.image) {
-            eventImage.src = data.image;
-        }
-
-        // Populate Additional Images & Popup
-        if (Array.isArray(data.additional_images) && data.additional_images.length > 0) {
-            data.additional_images.forEach((img, index) => {
-                const imgElement = document.createElement("img");
-                imgElement.src = img.image;
-                imgElement.alt = "Additional Image";
-                imgElement.classList.add("lot-detail-additional-image");
-                additionalImagesContainer.appendChild(imgElement);
-
-                // Add click event to show popup
-                imgElement.addEventListener("click", () => showPopup(index));
-            });
-
-            const additionalImages = document.querySelectorAll(".lot-detail-additional-image");
-
-            function showPopup(index) {
-                currentIndex = index;
-                popupImage.src = additionalImages[currentIndex].src;
-                document.getElementById("lot-detail-current-image-index").textContent = currentIndex + 1;
-                document.getElementById("lot-detail-total-images").textContent = additionalImages.length;
-                popup.classList.remove("hidden");
+        .then(response => response.json())
+        .then(data => {
+            if (!data) {
+                console.error("No data received from API.");
+                return;
             }
 
-            closePopup.addEventListener("click", () => popup.classList.add("hidden"));
-            popup.addEventListener("click", (e) => e.target === popup && popup.classList.add("hidden"));
+            // DOM Elements
+            const eventImage = document.getElementById("lot-detail-event-image");
+            const additionalImagesContainer = document.getElementById("additional-images-containerpopup");
+            const popup = document.getElementById("lot-detail-image-popup");
+            const popupImage = document.getElementById("lot-detail-popup-image");
+            const closePopup = document.getElementById("lot-detail-close-popup");
+            const prevImageBtn = document.getElementById("lot-detail-prev-image");
+            const nextImageBtn = document.getElementById("lot-detail-next-image");
+            const competitionDetailsList = document.getElementById("lot-detail-competition-list");
+            const ticketInput = document.getElementById("lot-detail-ticket-count");
+            const amountInput = document.getElementById("lot-detail-total-amount");
+            const errorMessage = document.getElementById("ticket-error-message");
 
-            nextImageBtn.addEventListener("click", () => {
-                currentIndex = (currentIndex + 1) % additionalImages.length;
-                showPopup(currentIndex);
-            });
+            const perTicketPrice = parseFloat(data.per_ticket_price) || 0;
+            const miniLimit = parseInt(data.mini_limit);
+            const maxLimit = parseInt(data.max_limit);
 
-            prevImageBtn.addEventListener("click", () => {
-                currentIndex = (currentIndex - 1 + additionalImages.length) % additionalImages.length;
-                showPopup(currentIndex);
-            });
-        }
+            let currentIndex = 0;
 
-        // Populate Competition Details
-        if (data.competition_details && data.competition_details.trim() !== "") {
-            const details = data.competition_details.split("\n").filter(detail => detail.trim() !== "");
-            details.forEach(detail => {
-                const listItem = document.createElement("li");
-                listItem.textContent = detail.trim();
-                competitionDetailsList.appendChild(listItem);
-            });
-        } else {
-            competitionDetailsList.textContent = "No competition details available.";
-        }
+            // Populate Event Details
+            document.getElementById("lot-detail-event-title").textContent = data.title || "N/A";
+            document.getElementById("lot-detail-event-description").textContent = data.description || "N/A";
+            document.getElementById("lot-detail-event-price").textContent = `Prize: £${data.price || 0}`;
+            document.getElementById("lot-detail-event-per-ticket-price").textContent = `Per ticket price: £${data.per_ticket_price || 0}`;
+            document.getElementById("event-sold-percentage").textContent = `Sold: ${data.sold_percentage || 0}%`;
+            document.getElementById("lot-detail-ticket-max-limit").textContent = maxLimit;
 
-        // Initialize Ticket and Amount Fields
-        ticketInput.value = miniLimit;
-        amountInput.value = (miniLimit * perTicketPrice).toFixed(2);
+            // Format and display draw date
+            document.getElementById("lot-detail-event-draw-datetime").textContent = lottery_events_formatDrawDate(data.draw_date);
 
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = "block";
-        }
+            // Update Primary Event Image
+            if (data.image) {
+                eventImage.src = data.image;
+            }
 
-        function clearError() {
-            errorMessage.textContent = "";
-            errorMessage.style.display = "none";
-        }
+            // Populate Additional Images & Popup
+            if (Array.isArray(data.additional_images) && data.additional_images.length > 0) {
+                data.additional_images.forEach((img, index) => {
+                    const imgElement = document.createElement("img");
+                    imgElement.src = img.image;
+                    imgElement.alt = "Additional Image";
+                    imgElement.classList.add("lot-detail-additional-image");
+                    additionalImagesContainer.appendChild(imgElement);
 
-        function updateAmount() {
-            let ticketCount = parseInt(ticketInput.value);
+                    // Add click event to show popup
+                    imgElement.addEventListener("click", () => showPopup(index));
+                });
 
-            if (isNaN(ticketCount)) return;
-            if (ticketCount < miniLimit || ticketCount > maxLimit) {
-                showError(`Enter a quantity between ${miniLimit} and ${maxLimit}.`);
+                const additionalImages = document.querySelectorAll(".lot-detail-additional-image");
+
+                function showPopup(index) {
+                    currentIndex = index;
+                    popupImage.src = additionalImages[currentIndex].src;
+                    document.getElementById("lot-detail-current-image-index").textContent = currentIndex + 1;
+                    document.getElementById("lot-detail-total-images").textContent = additionalImages.length;
+                    popup.classList.remove("hidden");
+                }
+
+                closePopup.addEventListener("click", () => popup.classList.add("hidden"));
+                popup.addEventListener("click", (e) => e.target === popup && popup.classList.add("hidden"));
+
+                nextImageBtn.addEventListener("click", () => {
+                    currentIndex = (currentIndex + 1) % additionalImages.length;
+                    showPopup(currentIndex);
+                });
+
+                prevImageBtn.addEventListener("click", () => {
+                    currentIndex = (currentIndex - 1 + additionalImages.length) % additionalImages.length;
+                    showPopup(currentIndex);
+                });
+            }
+
+            // Populate Competition Details
+            if (data.competition_details && data.competition_details.trim() !== "") {
+                const details = data.competition_details.split("\n").filter(detail => detail.trim() !== "");
+                details.forEach(detail => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = detail.trim();
+                    competitionDetailsList.appendChild(listItem);
+                });
             } else {
-                clearError();
+                competitionDetailsList.textContent = "No competition details available.";
+            }
+
+            // Initialize Ticket and Amount Fields
+            ticketInput.value = miniLimit;
+            amountInput.value = (miniLimit * perTicketPrice).toFixed(2);
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = "block";
+            }
+
+            function clearError() {
+                errorMessage.textContent = "";
+                errorMessage.style.display = "none";
+            }
+
+            function updateAmount() {
+                let ticketCount = parseInt(ticketInput.value);
+
+                if (isNaN(ticketCount)) return;
+                if (ticketCount < miniLimit || ticketCount > maxLimit) {
+                    showError(`Enter a quantity between ${miniLimit} and ${maxLimit}.`);
+                } else {
+                    clearError();
+                    amountInput.value = (ticketCount * perTicketPrice).toFixed(2);
+                }
+            }
+
+            function updateTicketCount() {
+                let enteredAmount = parseFloat(amountInput.value);
+                if (isNaN(enteredAmount)) return;
+
+                let calculatedTickets = Math.floor(enteredAmount / perTicketPrice);
+                if (calculatedTickets < miniLimit || calculatedTickets > maxLimit) {
+                    showError(`Enter an amount corresponding to ${miniLimit} to ${maxLimit} tickets.`);
+                } else {
+                    clearError();
+                    ticketInput.value = calculatedTickets;
+                }
+            }
+
+            function adjustTicketInput() {
+                let ticketCount = parseInt(ticketInput.value);
+                if (isNaN(ticketCount)) return;
+
+                ticketCount = Math.max(miniLimit, Math.min(ticketCount, maxLimit));
+                ticketInput.value = ticketCount;
                 amountInput.value = (ticketCount * perTicketPrice).toFixed(2);
             }
-        }
 
-        function updateTicketCount() {
-            let enteredAmount = parseFloat(amountInput.value);
-            if (isNaN(enteredAmount)) return;
-
-            let calculatedTickets = Math.floor(enteredAmount / perTicketPrice);
-            if (calculatedTickets < miniLimit || calculatedTickets > maxLimit) {
-                showError(`Enter an amount corresponding to ${miniLimit} to ${maxLimit} tickets.`);
-            } else {
-                clearError();
+            function adjustAmountInput() {
+                let calculatedTickets = Math.floor(parseFloat(amountInput.value) / perTicketPrice);
+                calculatedTickets = Math.max(miniLimit, Math.min(calculatedTickets, maxLimit));
                 ticketInput.value = calculatedTickets;
+                amountInput.value = (calculatedTickets * perTicketPrice).toFixed(2);
             }
-        }
 
-        function adjustTicketInput() {
-            let ticketCount = parseInt(ticketInput.value);
-            if (isNaN(ticketCount)) return;
+            // Increment / Decrement Ticket Count
+            document.getElementById("lot-detail-increment-ticket").addEventListener("click", () => {
+                clearError();
+                let currentValue = parseInt(ticketInput.value) || miniLimit;
 
-            ticketCount = Math.max(miniLimit, Math.min(ticketCount, maxLimit));
-            ticketInput.value = ticketCount;
-            amountInput.value = (ticketCount * perTicketPrice).toFixed(2);
-        }
+                if (currentValue < maxLimit) {
+                    ticketInput.value = currentValue + 1;
+                    amountInput.value = ((currentValue + 1) * perTicketPrice).toFixed(2);
+                } else {
+                    showError(`Maximum ticket limit reached (${maxLimit}).`);
+                }
+            });
 
-        function adjustAmountInput() {
-            let calculatedTickets = Math.floor(parseFloat(amountInput.value) / perTicketPrice);
-            calculatedTickets = Math.max(miniLimit, Math.min(calculatedTickets, maxLimit));
-            ticketInput.value = calculatedTickets;
-            amountInput.value = (calculatedTickets * perTicketPrice).toFixed(2);
-        }
+            document.getElementById("lot-detail-decrement-ticket").addEventListener("click", () => {
+                clearError();
+                let currentValue = parseInt(ticketInput.value) || miniLimit;
+                if (currentValue > miniLimit) {
+                    ticketInput.value = currentValue - 1;
+                    amountInput.value = ((currentValue - 1) * perTicketPrice).toFixed(2);
+                } else {
+                    showError(`Minimum ticket limit reached (${miniLimit}).`);
+                }
+            });
 
-        // Increment / Decrement Ticket Count
-        document.getElementById("lot-detail-increment-ticket").addEventListener("click", () => {
-            clearError();
-            let currentValue = parseInt(ticketInput.value) || miniLimit;
-            
-            if (currentValue < maxLimit) {
-                ticketInput.value = currentValue + 1;
-                amountInput.value = ((currentValue + 1) * perTicketPrice).toFixed(2);
-            } else {
-                showError(`Maximum ticket limit reached (${maxLimit}).`);
-            }
-        });
+            // Event Listeners
+            ticketInput.addEventListener("input", updateAmount);
+            ticketInput.addEventListener("blur", adjustTicketInput);
+            amountInput.addEventListener("input", updateTicketCount);
+            amountInput.addEventListener("blur", adjustAmountInput);
 
-        document.getElementById("lot-detail-decrement-ticket").addEventListener("click", () => {
-            clearError();
-            let currentValue = parseInt(ticketInput.value) || miniLimit;
-            if (currentValue > miniLimit) {
-                ticketInput.value = currentValue - 1;
-                amountInput.value = ((currentValue - 1) * perTicketPrice).toFixed(2);
-            } else {
-                showError(`Minimum ticket limit reached (${miniLimit}).`);
-            }
-        });
+            // Allow only valid inputs
+            ticketInput.addEventListener("keypress", (event) => {
+                if (!/\d/.test(event.key)) event.preventDefault();
+            });
 
-        // Event Listeners
-        ticketInput.addEventListener("input", updateAmount);
-        ticketInput.addEventListener("blur", adjustTicketInput);
-        amountInput.addEventListener("input", updateTicketCount);
-        amountInput.addEventListener("blur", adjustAmountInput);
+            amountInput.addEventListener("keypress", (event) => {
+                if (!/\d/.test(event.key) && event.key !== "." && event.key !== "Backspace") {
+                    event.preventDefault();
+                }
+            });
 
-    // Allow only valid inputs
-    ticketInput.addEventListener("keypress", (event) => {
-        if (!/\d/.test(event.key)) event.preventDefault();
-    });
-
-    amountInput.addEventListener("keypress", (event) => {
-        if (!/\d/.test(event.key) && event.key !== "." && event.key !== "Backspace") {
-            event.preventDefault();
-        }
-    });
-
-}).catch(error => console.error("Error fetching data:", error));
+        }).catch(error => console.error("Error fetching data:", error));
 }
 function fetchSimilarLotteryEvents(eventSlug) {
     fetch(`/api/similar_lottery_events/${eventSlug}/`)
@@ -5226,6 +5454,7 @@ function fetchSimilarLotteryEvents(eventSlug) {
                 eventElement.innerHTML = `
                     <div class="similar_category_lottery_event_draw_date">${lottery_events_formatDrawDate(event.draw_date)}</div>
                     ${event.image ? `<img src="${event.image}" alt="${event.title}" class="similar_category_lottery_event_img" />` : ''}
+                     <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
                     <h3 class="similar_category_lottery_title">${event.title}</h3>
                     <p class="similar_category_lottery_description">${event.description}</p>
                     <div class="similar_category_lottery_per_ticket_price">£${event.per_ticket_price}</div>
@@ -5256,7 +5485,7 @@ function setupScrollButtons(eventCount) {
     const container = document.getElementById('similar-lottery-events-container');
     const leftBtn = document.getElementById('scroll-left');
     const rightBtn = document.getElementById('scroll-right');
-    
+
     const screenWidth = window.innerWidth;
 
 
@@ -5287,7 +5516,7 @@ function setupScrollButtons(eventCount) {
 
         leftBtn.addEventListener('click', () => {
             container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            
+
         });
 
 
@@ -5306,7 +5535,7 @@ function setupScrollButtons(eventCount) {
     }
 }
 // Handle window resize events
-window.addEventListener('resize', function() {
+window.addEventListener('resize', function () {
     const container = document.getElementById('similar-lottery-events-container');
     const eventCount = container.children.length;
     setupScrollButtons(eventCount);
@@ -5347,7 +5576,7 @@ function displayFavorites(favorites) {
             <div class="lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
                 <i class="fas fa-heart ${favoriteClass}"></i> 
             </div>`;
-    
+
         // Create the content for each favorite event
         const favoriteContent = `
             ${favoriteIcon}
@@ -5384,19 +5613,19 @@ function toggleFavorite(eventSlug) {
         },
         body: JSON.stringify({ event_slug: eventSlug }),
     })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        updateFavoritesCount()
-        fetchFavorites(); // Refresh the favorites list
-        lottery_events_fetch();
-        fetchCategoryLotteryEvents();
-        // Toggle the class on the icon based on the response
-        if (data.success) {
-            favoriteIcon.classList.toggle('favorited'); // Add or remove 'favorited' class
-        }
-    })
-    .catch(error => console.error('Error toggling favorite:', error));
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            updateFavoritesCount()
+            fetchFavorites(); // Refresh the favorites list
+            lottery_events_fetch();
+            fetchCategoryLotteryEvents();
+            // Toggle the class on the icon based on the response
+            if (data.success) {
+                favoriteIcon.classList.toggle('favorited'); // Add or remove 'favorited' class
+            }
+        })
+        .catch(error => console.error('Error toggling favorite:', error));
 }
 /*Userdashboard*/
 document.addEventListener("DOMContentLoaded", function () {
@@ -5418,7 +5647,7 @@ function scrollToHowToPlay() {
 function scrollToSubscription() {
     document.getElementById("db_Subscription").scrollIntoView({ behavior: "smooth" });
 }
-function testimonials(){
+function testimonials() {
 
     let index = 0;
     const slides = document.querySelectorAll(".testimonial-slide");
@@ -5518,7 +5747,7 @@ $(document).ready(function () {
 });
 
 /** Loader Start**/
-$(document).ready(function() {
+$(document).ready(function () {
     // console.log("Loader.js is loaded!");
     // Create the preloader HTML dynamically
     let preloaderHTML = `
@@ -5536,9 +5765,9 @@ $(document).ready(function() {
     // Ensure loader is visible initially
     $("#preloader").show();
 });
-$(window).on('load', function() {
+$(window).on('load', function () {
     // console.log("Page fully loaded! Hiding loader...");
-    setTimeout(function() {
+    setTimeout(function () {
         // Fade out the preloader once the page is fully loaded
         $("#preloader").fadeOut(500);
     }, 1000); // Delay 1 second for a smoother transition

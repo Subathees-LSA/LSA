@@ -13,9 +13,13 @@
         const add_to_carturl = "{% url 'add_to_cart' %}";
         const cartUrl = "{% url 'cart' %}";
         const add_csrftoken = "{{ csrf_token }}";
+        const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
         window.onload = function() {
             fetchLotteryEventDetails(eventSlug);
-            fetchSimilarLotteryEvents(eventSlug);    
+            fetchSimilarLotteryEvents(eventSlug);  
+            header_navbar_fetchCategories(); 
+            updateCartCount(); 
+            updateFavoritesCount(); 
             };
     </script>
     <script src="{% static 'js/custom.js' %}"></script>

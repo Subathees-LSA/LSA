@@ -54,11 +54,12 @@ def user_kyc_waiting_list_details(request):
     return render(request, 'user_kyc_waiting_list_details.html')
 
 def user_welcome_page(request):
+    email = request.session.get("google_user_email", None)
     # Check if user is authenticated and exists in User table
     if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
         return redirect('/login/')  # Redirects unauthenticated users or those not in User table
     
-    return render(request, 'user_welcome_page.html')
+    return render(request, 'user_welcome_page.html',{'email':email})
 
 #try exceptionssssss
 def user_logout(request):

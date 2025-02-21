@@ -37,5 +37,6 @@ urlpatterns = [
     path('api/verify-otp/', VerifyOTPView.as_view(), name='api_verify-otp'),
     path('api/resend-otp/', ResendOTPView.as_view(), name='resend_otp'),
     path('auth/complete/google-oauth2/', google_auth_complete, name='google_auth_complete'),
+    path("clear-google-session/", clear_google_session, name="clear-google-session"),
 
 ]

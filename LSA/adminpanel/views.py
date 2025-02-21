@@ -57,6 +57,9 @@ from django.db.models import Sum
 from django.utils import timezone
 from datetime import datetime
 import random
+from .models import SocialLink
+from django.shortcuts import render
+from .models import Location
 
 def create_dummy_contacts():
     dummy_contacts = []
@@ -1186,6 +1189,17 @@ class SimilarLotteryEvents(APIView):
         similar_events = LotteryEvent.objects.filter(category=category).exclude(slug=slug)
         serializer = LotteryEventSerializeradd_get(similar_events, many=True)
         return Response(serializer.data)
+
+def footer_view(request):
+    social_links = SocialLink.objects.all()
+
+    print(social_links)
+    return render(request, 'footer.html', {'social_links': social_links})
+
+# locations
+def locations_view(request):
+    locations = Location.objects.all()  # Get all locations from the database
+    return render(request, 'footer.html', {'locations': locations})
 
  
 
