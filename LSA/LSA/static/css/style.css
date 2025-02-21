@@ -844,7 +844,6 @@
             max-width: 300px;
             /* Optional: to prevent overly wide cards */
         }
-
         .custom_admin_dashboard_custom_table {
             width: 100%;
             border-collapse: separate;
@@ -854,10 +853,12 @@
             /* Ensures proper alignment */
         }
 
+
         .custom_admin_dashboard_custom_table thead {
             display: table;
             width: 100%;
         }
+
 
         .custom_admin_dashboard_custom_table th {
             left: 0;
@@ -869,6 +870,7 @@
             /* Ensures equal column width */
         }
 
+
         /* Adjust alignment for first 3 headers */
         .custom_admin_dashboard_custom_table th:nth-child(1),
         .custom_admin_dashboard_custom_table td:nth-child(1) {
@@ -876,11 +878,13 @@
             /* Center aligns first column */
         }
 
+
         .custom_admin_dashboard_custom_table th:nth-child(2),
         .custom_admin_dashboard_custom_table td:nth-child(2) {
             text-align: center;
             /* Right aligns second column */
         }
+
 
         .custom_admin_dashboard_custom_table th:nth-child(3),
         .custom_admin_dashboard_custom_table td:nth-child(3) {
@@ -888,11 +892,13 @@
             /* Right aligns third column */
         }
 
+
         .custom_admin_dashboard_custom_table th:nth-child(4),
         .custom_admin_dashboard_custom_table td:nth-child(4) {
             text-align: center;
             /* Right aligns third column */
         }
+
 
         .custom_admin_dashboard_custom_table th:nth-child(5),
         .custom_admin_dashboard_custom_table td:nth-child(5) {
@@ -900,16 +906,19 @@
             /* Right aligns third column */
         }
 
+
         .custom_admin_dashboard_custom_table th:nth-child(6),
         .custom_admin_dashboard_custom_table td:nth-child(6) {
             text-align: center;
             /* Right aligns third column */
         }
 
+
         .custom_admin_dashboard_custom_table tbody {
             display: block;
             width: 100%;
         }
+
 
         .custom_admin_dashboard_custom_table tbody tr {
             background: white;
@@ -924,6 +933,7 @@
             /* Adds spacing between rows */
         }
 
+
         .custom_admin_dashboard_custom_table tbody td {
             padding: 20px;
             color: #858585;
@@ -933,9 +943,6 @@
             width: calc(100% / 6);
             /* Matches th width */
         }
-
-
-
         .custom_admin_dashboard_table_title {
             font-size: 1.5em;
             margin: 20px 0 10px;
@@ -943,6 +950,101 @@
             text-align: left;
         }
 
+        @media (max-width: 1024px) {
+            .custom_admin_dashboard_custom_table {
+                display: block;
+                overflow-x: auto; /* Enables horizontal scrolling */
+                white-space: nowrap; /* Prevents content wrapping */
+                border-collapse: collapse; /* Ensures proper table spacing */
+                width: 100%;
+                table-layout: fixed; /* Ensures even column widths */
+            }
+        
+        
+            .custom_admin_dashboard_custom_table th, 
+            .custom_admin_dashboard_custom_table td {
+                padding: 12px;
+                font-size: 14px;
+                text-align: center;
+                word-wrap: break-word; /* Prevents text overflow */
+            }
+        
+        
+            .custom_admin_dashboard_custom_table thead {
+                background-color: #f8f9fa;
+            }
+        }
+        
+        
+        /* 📌 For mobile screens */
+        @media (max-width: 768px) {
+            .custom_admin_dashboard_custom_table {
+                width: 100%;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+        
+        
+            .custom_admin_dashboard_custom_table th, 
+            .custom_admin_dashboard_custom_table td {
+                font-size: 12px;
+                padding: 10px;
+                text-align: center;
+                word-wrap: break-word;
+            }
+        
+        
+            .custom_admin_dashboard_custom_table thead {
+                background-color: #f1f3f5;
+            }
+        
+        
+            /* Adjusting column width for better spacing */
+            .custom_admin_dashboard_custom_table th,
+            .custom_admin_dashboard_custom_table td {
+                min-width: 150px; /* Ensures proper alignment */
+            }
+        }
+        
+        
+        /* 📌 For extra small screens (phones) */
+        @media (max-width: 480px) {
+            .custom_admin_dashboard_custom_table {
+                width: 100%;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+        
+        
+            .custom_admin_dashboard_custom_table th, 
+            .custom_admin_dashboard_custom_table td {
+                font-size: 11px;
+                padding: 8px;
+                text-align: center;
+        
+        
+                word-wrap: break-word;
+            }
+        
+        
+            .custom_admin_dashboard_custom_table thead {
+                background-color: #ececec;
+            }
+        
+        
+            /* Making sure the table is readable on small devices */
+            .custom_admin_dashboard_custom_table th,
+            .custom_admin_dashboard_custom_table td {
+                min-width: 140px; /* Adjusted for readability */
+            }
+        }
+/*end of user tb*/        
         .additional-image-field {
             margin-bottom: 10px;
         }

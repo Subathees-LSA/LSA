@@ -13,8 +13,9 @@
         window.onload = function () {
             fetchCartItems();
             updateCartCount();
+            updateCartCount_cartpage();
             header_navbar_fetchCategories();
-          updateFavoritesCount();
+            updateFavoritesCount();
         }; 
     </script>
     <script src="{% static 'js/custom.js' %}"></script>
@@ -28,7 +29,7 @@
      <div id="cart">
          <h1 class="cartheading">Shopping bag</h1>
         <p class="belowheading">
-        <span class="availableitem"  id="cart-item-count">0</span><span class="availableitem" id="availableitems">items</span></span>
+        <span class="availableitem"  id="cart-item-count-cartpage">0</span><span class="availableitem" id="availableitems">items</span></span>
         <span class="availableitemp">in your bag.</span>
         </span>  
         <div class="cart-container">

@@ -4271,6 +4271,15 @@ function updateCartCount() {
         })
         .catch(error => console.error('Error fetching cart count:', error));
 }
+function updateCartCount_cartpage() {
+    fetch('/api/get-cart/') // Fetch the updated cart data from your backend API
+        .then(response => response.json())
+        .then(data => {
+            const cartCount = Object.keys(data).length; // Count the unique items in the cart
+            document.getElementById('cart-item-count-cartpage').innerText = cartCount; // Update the cart count display
+        })
+        .catch(error => console.error('Error fetching cart count:', error));
+}
 function header_navbar_fetchCategories() {
     if (typeof api_get_categories_url === "undefined") {
         console.error("API URL for fetching categories is not defined.");
@@ -5218,6 +5227,7 @@ function removeFromCart(event) {
                 alert('Item removed from cart!');
                 fetchCartItems();
                 updateCartCount();
+                updateCartCount_cartpage();
             } else {
                 alert('Failed to remove item. Please try again.');
             }
