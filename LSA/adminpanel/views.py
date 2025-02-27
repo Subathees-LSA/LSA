@@ -639,7 +639,6 @@ class api_admin_login(APIView):
        
 
 class api_get_lottery_events(APIView):  
-
     def get(self, request):
         try:
             user_agent = request.headers.get('User-Agent', '')
@@ -652,7 +651,7 @@ class api_get_lottery_events(APIView):
             category_id = request.query_params.get('category', '')
     
             # Fetch all lottery events from the database
-            lottery_events = LotteryEvent.objects.all()
+            lottery_events = LotteryEvent.objects.all().order_by('-id')  # Latest by ID
              # Filter by search term if provided
             if search_query:
                 lottery_events = lottery_events.filter(title__istartswith=search_query)
@@ -974,6 +973,8 @@ def get_favorites(request):
             'price': str(event.price),
             'per_ticket_price': str(event.per_ticket_price),
             'sold_percentage': event.sold_percentage,
+            'total_tickets':event.total_tickets, 
+            'sold_tickets':event.sold_tickets,
             'draw_date': event.draw_date,
             'image': event.image.url if event.image else None,
             'enter_now_button': f"/lottery_detail/{event.slug}/",
