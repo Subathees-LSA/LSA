@@ -10,6 +10,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .admin-dashboard-report-container {
             width: 656px;
@@ -44,7 +45,8 @@
         @media screen and (max-width: 768px) {
             .custom_admin_dashboard_sidebar {
                 display: none;
-                position: fixed;
+                position:absolute;
+                
                 top: 0;
                 left: 0;
                 width: 250px;
@@ -333,7 +335,85 @@
         .additional-images-container::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+        @media (max-width: 768px) {
+    #user_specfic_chat {
+        display: none;
+    }
+}
+
     </style>
+    <style>
+        /* Navigate previous, Next Buttons*/
+        .navigate_btn{
+        position:absolute;
+        top:84%;
+        }
+        .prev{
+            position:relative;
+            right:27px;
+        }
+                /* Next & previous buttons */
+        .prev, .next {
+          cursor: pointer;
+          width: auto;
+          padding: 10px;
+          margin-top: -22px;
+          color: #000fff;
+          font-weight: bold;
+          font-size: 2em;
+          transition: 0.6s ease;
+          border-radius: 0 3px 3px 0;
+          user-select: none;
+        }
+        
+        /* Position the "next button" to the right */
+        .next {
+            position: relative;
+            left:175px;
+          border-radius: 3px 0 0 3px;
+        }
+        
+        /* On hover, add a black background color with a little bit see-through */
+        .prev:hover, .next:hover {
+            color: #fff;
+          background-color:rgba(237, 100, 9, 0.86);
+        }
+        
+        .remove-image-btn{
+       
+        font-size:1.2em;
+        padding:0 !important;
+        }
+    </style>
+    <style>
+        
+@media screen and (max-width: 600px) {
+            .custom_admin_dashboard_container {
+            zoom:42% !important;
+            width: 100%;
+            }
+            .custom_admin_dashboard_main {
+                flex: 1;
+                padding: 12px;
+                width: 98%;
+            }
+            }
+             #noUserMessage {
+            display: none;
+            color: red;
+            text-align: center;
+            font-weight: bold;
+        }
+</style>
+<style>
+ 
+
+/* Table row and cell styling */
+.custom_admin_dashboard_custom_table td {
+    max-width:12em;
+}
+
+</style>
 
     <script>
         const api_navbar_access_tabsView_url = "{% url 'api_navbar_access_tabsView' %}";
@@ -531,7 +611,6 @@
 
                 <div class="admin_contact_reply_container" id="admin_reply_chat_bot"
                     style=" display: none;opacity: 0;position: absolute;">
-                    <button id="admin_contact_reply_back_button" style="display: none;">Back</button>
                     <h1 class="admin_contact_reply_heading">Contact Messages</h1>
                     <span class="search-container">
                         <input type="text" id="searchEmail" placeholder="Search by email..." oninput="filterEmails()">
@@ -551,6 +630,7 @@
                             <input type="email" id="admin_contact_reply_email" name="email" placeholder="User Email"
                                 hidden>
                             <input type="text" id="Chat_UserId" name="Chat_UserId" placeholder="Username" hidden>
+                            <h3 id="user_email"></h3>
 
                             <div id="specfic_user_chats">
                                 <!-- Dynamic specfic_user_chats content loaded via JavaScript -->

@@ -8,15 +8,20 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}" defer></script>
     <script>
-        const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
+        const category_id = "{{ category_id }}";
+          const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
         window.onload = function () {
             header_navbar_fetchCategories();
+            updateCartCount(); 
+          updateFavoritesCount();
+          setupDropdown(".dropbtn_competitions", ".dropdown-content_competitions");
+        
         }; 
     </script>
-    {% include 'header.html' %}
 </head>
 
 <body class="privacy-body">
+    {% include 'header.html' %}
     <div class="privacy-container">
         <h1>Privacy & Security</h1>
         <div class="privacy-profile-section">

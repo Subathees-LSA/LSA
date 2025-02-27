@@ -110,7 +110,7 @@ function admin_chat_view() {
     basketIcon.style.marginBottom = "10px";
     basketIcon.onclick = () => deleteSelectedContacts();
 
-    document.querySelector(".admin_contact_reply_container").prepend(backButton);
+    
     document.querySelector(".delete_Container").prepend(basketIcon);
 
 
@@ -133,7 +133,7 @@ function admin_chat_view() {
                 emailItem.className = "email-item";
                 emailItem.innerHTML = `
                 <input type="checkbox" class="email-checkbox" data-email="${email}">
-                <span class="email-text">${user_name}</span>
+                <span class="email-text">${email}</span>
                 <span class="last-message"></span>
                 <span class="delete-icon" title="Delete Email">🗑️</span>
             `;
@@ -286,6 +286,53 @@ function admin_chat_view() {
         userChat_Icons.appendChild(user_Icon);
     };
     const fetchMessagesByEmail = (email) => {
+        const all_users_searchEmail = document.getElementById("searchEmail");
+        
+        function hide_and_unhide_user_chat_on_mobile() {
+            const all_users_name = document.getElementById("all_users_name");
+            const user_specfic_chat = document.getElementById("user_specfic_chat");
+        
+            if (window.matchMedia("(max-width: 768px)").matches) {
+                
+                all_users_name.style.display = "none";
+                all_users_searchEmail.style.display = "none";
+                user_specfic_chat.style.display = "block";
+            } else {
+              
+                all_users_name.style.display = "block"; // Show on larger screens
+                user_specfic_chat.style.display = "block"; // Ensure chat is visible
+                all_users_searchEmail.style.display = "block";
+            }
+        }
+        
+        // Run function on page load
+        hide_and_unhide_user_chat_on_mobile();
+        
+        // Run function on window resize
+        window.addEventListener("resize", hide_and_unhide_user_chat_on_mobile);
+        
+        // Handle back button behavior on mobile
+        window.addEventListener("popstate", function () {
+            if (window.innerWidth <= 768) { // Only for mobile view
+                document.getElementById("all_users_name").style.display = "block";
+                document.getElementById("user_specfic_chat").style.display = "none";
+                all_users_searchEmail.style.display = "block";
+            }
+        });
+        
+        // When navigating to chat, push state to history
+        function showUserChat() {
+            if (window.innerWidth <= 768) { // Only for mobile
+                document.getElementById("all_users_name").style.display = "none";
+                all_users_searchEmail.style.display = "none";
+                document.getElementById("user_specfic_chat").style.display = "block";
+                history.pushState(null, null, location.href); // Push a new state so back button works
+            }
+        }
+        showUserChat()
+        
+        
+
 
 
         fetch(`/api/mark-read/${email}/`, {
@@ -309,8 +356,9 @@ function admin_chat_view() {
                 userChat_Icons.innerHTML = "";
                 specfic_user_chats.innerHTML = "";
                 backButton.style.display = "block";
-                basketIcon.style.display = "none"; // Hide the basket icon in chat view
-                fetchUserName(email);
+               
+               
+                document.getElementById("user_email").innerText = email;
                 /* On Clicking Individual User, Reset Previous Users Form and Response Message */
                 let current_Email = document.getElementById('admin_contact_reply_email').value;
                 if(current_Email!==email){
@@ -423,6 +471,7 @@ function admin_chat_view() {
         showSpecificDiv('admin_reply_chat_bot');
         $(".sidebars").removeClass('active');
         $("#admin_reply_chat_bot_navbar").addClass('active');
+        hidetoggleSidebar();
     }
 
     function user_notifications() {
@@ -452,7 +501,7 @@ function admin_chat_view() {
 						notificationItem.setAttribute("id", userName);
                         notificationItem.className = "notification-item";
                         notificationItem.innerHTML = `
-                            <strong>${notification.name}</strong>
+                            <strong>${notification.email}</strong>
                             <p>${notification.description}</p>
                             <small>${new Date(notification.created_at).toLocaleString()}</small>
                         `;
@@ -521,6 +570,7 @@ function admin_chat_view() {
                         }
                         else {
                             document.getElementById('Chat_UserId').value = '';
+                            document.getElementById("user_email").innerText = "";
                             showEmailList();
                         }
                     } else {
@@ -569,6 +619,8 @@ function admin_chat_view() {
                     if (selectedEmails.includes(current_Email)) {
                         selectedEmails = []; // Clear the selected emails
                         document.getElementById('Chat_UserId').value = ''; //Empty the username
+                        
+                        document.getElementById("user_email").innerText = "";
                         showEmailList();// Refresh the email list
                     }
                     else {
@@ -608,7 +660,7 @@ function admin_chat_view() {
                     emailItem.className = "email-item";
                     emailItem.innerHTML = `
                 <input type="checkbox" class="email-checkbox" data-email="${email}">
-                <span class="email-text">${user_name}</span>
+                <span class="email-text">${email}</span>
                 <span class="last-message"></span>
                 <span class="delete-icon" title="Delete Email">🗑️</span>
             `;
@@ -730,6 +782,7 @@ function showSpecificDiv(id) {
     // Select the section and the specific div by id
     const section = document.querySelector(".custom_admin_dashboard_dashboard");
     const specificDiv = document.getElementById(id);
+    toggleSidebar() 
 
     if (specificDiv) {
         // Hide all children of the section using opacity and z-index
@@ -749,6 +802,12 @@ function showSpecificDiv(id) {
     } else {
         console.error(`Element with id "${id}" not found.`);
     }
+    const nav_bar_user_management_button = document.getElementById("user_management_button_id");
+    if (id === "custom_admin_dashboard_user_list_table") {
+        nav_bar_user_management_button.style.display = "none";
+
+    }
+
 }
 let salesChart; // Store chart instance for dynamic updates
 // Function to fetch and display sales data
@@ -1093,6 +1152,22 @@ function toggleSidebar() {
         hamburger.innerHTML = "☰"; // Change back to hamburger
     }
 }
+function hidetoggleSidebar() {
+    const sidebar = document.querySelector(".custom_admin_dashboard_sidebar");
+    const hamburger = document.getElementById("hamburger-menu");
+
+
+    // Toggle sidebar visibility
+    sidebar.classList.remove("show");
+
+
+    // Change the icon based on sidebar visibility
+    if (sidebar.classList.contains("show")) {
+        hamburger.innerHTML = "✖"; // Change to cross icon
+    } else {
+        hamburger.innerHTML = "☰"; // Change back to hamburger
+    }
+}
 function initializeDashboard() {
     try {
 
@@ -1302,6 +1377,11 @@ function initializeDashboard() {
                                                 <tbody id="userTableBody"></tbody>
                                             `;
                                         container.appendChild(table);
+                                        const noUserMessage = document.createElement('h3');
+                                        noUserMessage.id = "noUserMessage";
+                                        noUserMessage.className = "noUserMessage_class";
+                                        noUserMessage.textContent = "user not found";
+                                        container.appendChild(noUserMessage);
                                         // Create user count display
                                         const userCountContainer = document.createElement('div');
                                         userCountContainer.id = "userCountContainer";
@@ -1317,15 +1397,16 @@ function initializeDashboard() {
 
                                         createViewMoreLessButtons(container);
                                         // Fetch and render initial data
-                                        fetchAndRenderUsers();
+                                        fetchAndRenderUsers(true);
                                         // Set up menu event listeners
                                         setupMenuEventListeners();
                                     }
                                     function user_management_button_function() {
                                         showSpecificDiv('custom_admin_dashboard_user_list_table');
                                         $(".sidebars").removeClass('active');
-                                        document.getElementById("user_management_button_id").style.display = "none";
                                         $("#custom_admin_dashboard_user_list_table_navbar").addClass('active');
+                                        hidetoggleSidebar();
+                                        
                                     }
 
                                     function createViewMoreLessButtons(container) {
@@ -1346,13 +1427,17 @@ function initializeDashboard() {
                                         container.appendChild(viewLessButton);
                                     }
 
-                                    function fetchAndRenderUsers() {
+                                    function fetchAndRenderUsers(renderInitialuser = false) {
                                         fetch(api_dashboard_preview_admin_view_url)
                                             .then(response => response.json())
                                             .then(({ table_data }) => {
                                                 rows = table_data.users_table;
                                                 currentIndex = 3;
-                                                renderInitialRows();
+                                                if (renderInitialuser) {
+                                                    
+                                                    renderInitialRows(); 
+                                                }
+                                               
                                                 updateUserCount();
                                                 toggleViewMoreLessButtons(rows.filter(row => selectedFilter === "Blocked Users" ? row.is_blocked : true));
                                             })
@@ -1493,6 +1578,7 @@ function initializeDashboard() {
                                         const endIndex = Math.min(currentIndex + rowsPerPage, matchingRows.length);
                                         renderRows(currentIndex, endIndex, matchingRows); // Render additional rows
                                         currentIndex = endIndex; // Update the currentIndex
+                                      
                                         toggleViewMoreLessButtons(matchingRows); // Update the button visibility
                                     }
 
@@ -1522,30 +1608,39 @@ function initializeDashboard() {
                                     }
 
 
-                                    function searchUsers() {
-                                        const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
-                                        const tbody = document.getElementById('userTableBody');
-                                        currentIndex = 3; // Reset the currentIndex to 3
+                                  function searchUsers() {
+                                    const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
+                                    const tbody = document.getElementById('userTableBody');
+                                    const noUserMessage = document.getElementById('noUserMessage'); // Element for "User not found"
+                                    
+                                    currentIndex = 3; // Reset the currentIndex to 3
 
-                                        let filteredRows = rows;
+                                    let filteredRows = rows;
 
-                                        // Apply filter: Show only blocked users if selected
-                                        if (selectedFilter === "Blocked Users") {
-                                            filteredRows = rows.filter(row => row.is_blocked);
-                                        }
+                                    // Apply filter: Show only blocked users if selected
+                                    if (selectedFilter === "Blocked Users") {
+                                        filteredRows = rows.filter(row => row.is_blocked);
+                                    }
 
-                                        // Apply comprehensive search filter
-                                        const matchingRows = filteredRows.filter(row =>
+                                    // Apply comprehensive search filter
+                                    const matchingRows = filteredRows.filter(row =>
                                         (row.user?.username?.toLowerCase().includes(searchValue) ||
-                                            row.user?.email?.toLowerCase().includes(searchValue) ||
-                                            row.kyc_status?.toLowerCase().includes(searchValue) ||
-                                            row.ip_address?.toLowerCase().includes(searchValue))
-                                        );
+                                        row.user?.email?.toLowerCase().includes(searchValue) ||
+                                        row.kyc_status?.toLowerCase().includes(searchValue) ||
+                                        row.ip_address?.toLowerCase().includes(searchValue))
+                                    );
 
-                                        tbody.innerHTML = ''; // Clear the table body
+                                    tbody.innerHTML = ''; // Clear the table body
+
+                                    if (matchingRows.length === 0) {
+                                        noUserMessage.style.display = 'block'; // Show "User not found" message
+                                    } else {
+                                        noUserMessage.style.display = 'none'; // Hide the message if users are found
                                         matchingRows.slice(0, 3).forEach(row => appendRow(row)); // Render the first 3 matching rows
                                         toggleViewMoreLessButtons(matchingRows); // Update the button visibility based on matching rows
                                     }
+                                }
+
                                     function setupMenuEventListeners() {
                                         document.addEventListener('click', function (event) {
 
@@ -2661,7 +2756,7 @@ $(document).ready(function () {
         //console.warn("userkycwaitinglistUrl is not defined.");
     }
 
-    $(document).on('blur', '.user_kyc_waiting_list-kyc-status-select', function () {
+    $(document).on('change', '.user_kyc_waiting_list-kyc-status-select', function () {
         const userId = $(this).data('user-id');
         const newStatus = $(this).val();
 
@@ -3072,8 +3167,53 @@ $(document).ready(function () {
                 });
             }
         });
+        // Remember Me Functionality
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+        document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+    }
+
+    function deleteCookie(name) {
+        document.cookie = `${name}=; Max-Age=-99999999; path=/;`;
+    }
+
+    function populateFormFields() {
+        const email = getCookie('admin_email');
+        const password = getCookie('admin_password');
+
+        if (email && password) {
+            $('#custom_admin_login_email_id').val(email);
+            $('#custom_admin_login_password_id').val(password);
+            $('#remember-me-checkbox-admin').prop('checked', true);
+        } else {
+            $('#remember-me-checkbox-admin').prop('checked', false);
+        }
+    }
+
+    function saveCookies() {
+        const rememberMe = $('#remember-me-checkbox-admin').prop('checked');
+        if (rememberMe) {
+            const email = $('#custom_admin_login_email_id').val();
+            const password = $('#custom_admin_login_password_id').val();
+            setCookie('admin_email', email, 30);
+            setCookie('admin_password', password, 30);
+        } else {
+            deleteCookie('admin_email');
+            deleteCookie('admin_password');
+        }
+    }
+
+    // Populate form fields on page load
+    populateFormFields();
+
+    // Save credentials when form is submitted
+    $('#custom_admin_login_form').submit(function() {
+        saveCookies();
     });
 });
+});
+
 
 //lottery_events_add.html
 
@@ -3144,7 +3284,12 @@ function fetchLotteryEvents(searchTerm = '', categoryId = '') {
                             <button class="remove-image-btn" onclick="removeAdditionalImage(${image.id}, ${event.id})">Remove</button>
                         </div>`;
                             });
-                            additionalImagesHtml += '</div>';
+                            additionalImagesHtml += `
+                            <div class="navigate_btn">
+                            <a class="prev" ${event.additional_images.length === 1 ? 'style="display: none;"' : ''}>❮</a>
+                            <a class="next" ${event.additional_images.length === 1 ? 'style="display: none;"' : ''}>❯</a>
+                            </div>
+                            </div>`;
                         }
 
 
@@ -3170,7 +3315,10 @@ function fetchLotteryEvents(searchTerm = '', categoryId = '') {
                         <input type="datetime-local" class="lottery_events_add_edit_draw_date" value="${new Date(event.draw_date).toISOString().slice(0, 16)}" data-original-value="${new Date(event.draw_date).toISOString().slice(0, 16)}" required>
                         <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
                     </p>
-                    <p>Category: <strong>${event.category.name}</strong></p>
+                   <p id="category_Details">Category: <strong class="category_Name" >${event.category.name}</strong>
+                    <span class="lottery_events_set_category" hidden>${event.category.name}</span>
+                    </p>
+
                     <p>
                         Status: <span class="lottery_events_add_is_active">${event.is_active ? 'Active' : 'Inactive'}</span>
                         <input type="checkbox" class="lottery_events_add_edit_is_active" ${event.is_active ? 'checked' : ''} data-original-checked="${event.is_active}">
@@ -3260,12 +3408,49 @@ function fetchLotteryEvents(searchTerm = '', categoryId = '') {
                 `;
 
                         container.appendChild(eventDiv);
+                        if (event.additional_images && event.additional_images.length > 1) {
+                            addImageNavigations(eventDiv.querySelector('.additional-images'));
+                        }
                     });
                 } catch (error) {
                     console.error("Error Loading Paginations:", error);
                 }
             };
-
+            // addtional image scroll button
+            const addImageNavigations = (container) => {
+                const prevButton = container.querySelector('.prev');
+                const nextButton = container.querySelector('.next');
+                
+                let slideIndex = 1;
+                showSlides(slideIndex);
+                
+                function plusSlides(n) {
+                  showSlides(slideIndex += n);
+                }
+                prevButton.addEventListener('click', () => {
+                    plusSlides(-1);
+                });
+            
+            
+                nextButton.addEventListener('click', () => {
+                    plusSlides(1);
+                });
+            
+                function showSlides(n) {
+                  let i;
+                  const slides = container.querySelectorAll('.additional-image-item');
+                  if (n > slides.length) {slideIndex = 1}    
+                  if (n < 1) {slideIndex = slides.length}
+            
+            
+                  for (i = 0; i < slides.length; i++) {
+                    slides[i].style.opacity = "0.8"; 
+                  }
+                  slides[slideIndex-1].style.opacity = "1";
+                  slides[slideIndex-1].style.textAlign = "center";
+                  slides[slideIndex-1].scrollIntoView(true);               
+                }
+            };
             /* Setting the button element */
             /* Display the actual page numbers */
 
@@ -3482,7 +3667,7 @@ function lottery_events_enableEditMode(button) {
     const card = button.closest('.lottery-event-card');
     card.classList.add('lottery_events_add_edit_mode');
     // Replace category name with select dropdown
-    const categoryField = card.querySelector('p strong'); // Replace category element
+    const categoryField = card.querySelector('.category_Name'); 
     const originalCategory = categoryField.textContent;
 
 
@@ -3618,8 +3803,14 @@ function lottery_events_edit_resetFields(card) {
     const fixedRevenueInput = card.querySelector('.lottery_events_add_edit_fixed_revenue');
     const percentageRevenueInput = card.querySelector('.lottery_events_add_edit_percentage_revenue');
 
+    const miniLimit = card.querySelector('.lottery_events_add_edit_minilimit');
+    const maxLimit = card.querySelector('.lottery_events_add_edit_maxlimit');
+
     fixedRevenueInput.value = fixedRevenueInput.getAttribute('data-original-value');
     percentageRevenueInput.value = percentageRevenueInput.getAttribute('data-original-value');
+
+    miniLimit.value = miniLimit.getAttribute('data-original-value');
+    maxLimit.value = maxLimit.getAttribute('data-original-value');
 }
 
 
@@ -3632,10 +3823,19 @@ function lottery_events_cancelEdit(button) {
     // Hide the select dropdown and show the static text
     const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
     const revenueTypeSpan = card.querySelector('.lottery_events_add_revenue_type');
+    const originalRevenueType = revenueTypeSelect.getAttribute('data-original-value');
     revenueTypeSelect.style.display = 'none';
+    revenueTypeSelect.value = originalRevenueType;
     revenueTypeSpan.style.display = 'block';
 
-    card.classList.remove('lottery_events_add_edit_mode'); // Exit edit mode
+     // Reset Category Field 
+     const categorySelect = card.querySelector('.lottery_events_add_edit_category');
+     const category_Name = card.querySelector('.lottery_events_set_category'); // Replace category element
+     const category_Details= card.querySelector('#category_Details');
+     category_Details.innerHTML=`Category: <strong class="category_Name" >${category_Name.textContent}</strong>
+     <span class="lottery_events_set_category" hidden>${category_Name.textContent}</span>`; 
+     categorySelect.replaceWith(category_Details);
+     card.classList.remove('lottery_events_add_edit_mode'); // Exit edit mode
     // Hide the "Add Another Image" button
     const addImageButton = card.querySelector('.add-image-button');
     if (addImageButton) {
@@ -3643,10 +3843,10 @@ function lottery_events_cancelEdit(button) {
     }
 
     // Optionally remove dynamically added image fields
-    const additionalImagesContainer = card.querySelector('.additional-images-container');
-    if (additionalImagesContainer) {
-        additionalImagesContainer.innerHTML = ''; // Clear all dynamically added image fields
-    }
+    // const additionalImagesContainer = card.querySelector('.additional-images-container');
+    // if (additionalImagesContainer) {
+    //     additionalImagesContainer.innerHTML = ''; // Clear all dynamically added image fields
+    // }
 }
 
 // Validate required fields and show error messages below each field
@@ -3906,7 +4106,6 @@ function lottery_events_edit_saveChanges(button) {
                 card.classList.remove('lottery_events_add_edit_mode');
                 lottery_events_edit_clearErrorMessages(card); // Clear errors after saving
                 alert('Lottery Event Updated Successfully');
-                fetchLotteryEvents();
             } else {
                 alert('Error updating event');
             }
@@ -4287,66 +4486,90 @@ function header_navbar_fetchCategories() {
     }
 
     fetch(api_get_categories_url)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (!Array.isArray(data)) {
+                throw new Error("Invalid data format: Expected an array.");
+            }
             header_navbar_displayCategories(data);
             adjustDropdownPosition();
         })
-        .catch(error => console.error('Error fetching categories:', error));
+        .catch(error => {
+            console.error("Error fetching categories:", error);
+            displayFetchError();
+        });
 }
 
 function header_navbar_displayCategories(categories) {
-    const dropdownMenu = document.getElementById('categories_dropdown_competitions');
-    dropdownMenu.innerHTML = ''; // Clear previous categories
+    const dropdownMenu = document.getElementById("categories_dropdown_competitions");
+    if (!dropdownMenu) return; // Prevent errors if the element is missing
+
+    dropdownMenu.innerHTML = ""; // Clear previous categories
+
+    if (categories.length === 0) {
+        dropdownMenu.innerHTML = '<div class="dropdown-item_competitions">No categories available</div>';
+        return;
+    }
 
     categories.forEach(category => {
-        const categoryLink = document.createElement('a');
+        const categoryLink = document.createElement("a");
         categoryLink.href = `/category_lottery_events/${encodeURIComponent(category.name)}/`;
-        categoryLink.classList.add('dropdown-item_competitions');
+        categoryLink.classList.add("dropdown-item_competitions");
         categoryLink.textContent = category.name;
         dropdownMenu.appendChild(categoryLink);
     });
 }
 
 function adjustDropdownPosition() {
-    const dropdown = document.getElementById('categories_dropdown_competitions');
-    dropdown.style.left = '0';
-    dropdown.style.transform = 'none';
-    dropdown.style.width = 'auto';
+    const dropdown = document.getElementById("categories_dropdown_competitions");
+    if (!dropdown) return;
+    
+    dropdown.style.left = "0";
+    dropdown.style.transform = "none";
+    dropdown.style.width = "auto";
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const dropdownButton = document.querySelector('.dropbtn_competitions');
-    const dropdownContent = document.querySelector('.dropdown-content_competitions');
 
-    if (dropdownButton && dropdownContent) {
-        dropdownButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-
-            // Toggle dropdown visibility
-            if (dropdownContent.classList.contains('show-dropdown')) {
-                dropdownContent.classList.remove('show-dropdown');
-                dropdownButton.setAttribute("aria-expanded", "false");
-            } else {
-                dropdownContent.classList.add('show-dropdown');
-                dropdownButton.setAttribute("aria-expanded", "true");
-            }
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!dropdownButton.contains(e.target) && !dropdownContent.contains(e.target)) {
-                dropdownContent.classList.remove('show-dropdown');
-                dropdownButton.setAttribute("aria-expanded", "false");
-            }
-        });
-    }
-});
-
+// Show an error message in the dropdown
+function displayFetchError() {
+    const dropdownMenu = document.getElementById("categories_dropdown_competitions");
+    if (!dropdownMenu) return;
+    
+    dropdownMenu.innerHTML = '<div class="dropdown-item_competitions" style="color:red;">Error loading categories</div>';
+}
 
 // Run functions on page load and resize event
-document.addEventListener('DOMContentLoaded', header_navbar_fetchCategories);
-window.addEventListener('resize', adjustDropdownPosition);
+document.addEventListener("DOMContentLoaded", header_navbar_fetchCategories);
+window.addEventListener("resize", adjustDropdownPosition);
+/*function for navbar dropdown menu*/
+function setupDropdown(dropdownBtnSelector, dropdownContentSelector) {
+    const dropdownBtn = document.querySelector(dropdownBtnSelector);
+    const dropdownContent = document.querySelector(dropdownContentSelector);
 
+    if (!dropdownBtn || !dropdownContent) {
+        // console.error("Dropdown button or content not found.");
+        return;
+    }
+
+    dropdownBtn.addEventListener("click", function (event) {
+        event.stopPropagation(); // Prevents event from bubbling up
+        dropdownContent.classList.toggle("show-dropdown");
+    });
+
+    // Close the dropdown when clicking outside
+    document.addEventListener("click", function (event) {
+        if (!dropdownBtn.contains(event.target) && !dropdownContent.contains(event.target)) {
+            dropdownContent.classList.remove("show-dropdown");
+        }
+    });
+}
+
+// Call the function after ensuring elements exist
+setupDropdown(".dropbtn_competitions", ".dropdown-content_competitions");
 
 
 function scrollToFirstCategory() {
@@ -5554,64 +5777,95 @@ window.addEventListener('resize', function () {
 
 
 //favorite.html
-
 // Function to fetch the list of favorite events from the server
 function fetchFavorites() {
     fetch('/api/get_favorites/')
         .then(response => response.json())
         .then(data => {
-            displayFavorites(data.favorites);
+            allFavorites = data.favorites; // Store all favorites
+            displayFavorites(); // Display the first batch
         })
         .catch(error => console.error('Error fetching favorites:', error));
 }
 
 
-// Function to display the favorites
-function displayFavorites(favorites) {
+// Function to display the favorites (initially 4)
+function displayFavorites() {
     const container = document.getElementById('favorites_container');
-    container.innerHTML = ''; // Clear the container before rendering
+    container.innerHTML = ''; // Clear existing content
 
-    if (favorites.length === 0) {
+
+    // // Determine how many events to show
+    // let favoritesToShow = allFavorites.slice(0, displayedCount);
+    const isMobile = window.innerWidth <= 768;
+
+
+    let favoritesToShow = isMobile ? allFavorites : allFavorites.slice(0, displayedCount);
+
+
+    if (favoritesToShow.length === 0) {
         container.innerHTML = '<p>No favorites added yet.</p>';
         return;
     }
 
-    favorites.forEach(event => {
+
+    favoritesToShow.forEach(event => {
         const favoriteElement = document.createElement('div');
         favoriteElement.classList.add('favorite_event');
-        // Format the draw date using the lottery_events_formatDrawDate function
+
+
         const formattedDrawDate = lottery_events_formatDrawDate(event.draw_date);
         const favoriteClass = event.is_favorite ? 'favorited' : '';
-        const favoriteIcon = `
-            <div class="lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
-                <i class="fas fa-heart ${favoriteClass}"></i> 
-            </div>`;
 
-        // Create the content for each favorite event
-        const favoriteContent = `
-            ${favoriteIcon}
-            <p>${formattedDrawDate}</p>
-            <h3>${event.title}</h3>
-            <p><strong>Description:</strong> ${event.description}</p>
-            <div class="lottery_events_price">Prize: £${event.price}</div>
-            <div class="lottery_events_per_ticket_price">Per ticket price: £${event.per_ticket_price}</div>
-            <div class="lottery_events_sold_percentage">
-                <div class="lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
+
+        // Construct event HTML
+        favoriteElement.innerHTML = `
+            <div class="favorite_lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
+                <i class="fas fa-heart ${favoriteClass}"></i> 
             </div>
-            <p>SOLD: ${event.sold_percentage}%</p>
-            
-            ${event.image ? `<img src="${event.image}" alt="${event.title}" style="width: 150px; height: 100px; object-fit: cover;" />` : ''}
-            <a href="${event.enter_now_button}" class="lottery_events_enter_button">Enter now</a>
-            
+            <p class="favorite_lottery_events_event_header">${formattedDrawDate}</p>
+            ${event.image ? `<img src="${event.image}" alt="${event.title}" class="favorite_lottery_image"/>` : ''}
+            <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
+            <h3 class="favorite_lottery_events_event">
+                <p class="favorite_lottery_events_event_title">${event.title}</p>
+            </h3>
+            <p class="favorite_lt-p">${event.description}</p>
+            <div class="favorite_lottery_events_per_ticket_price">£${event.per_ticket_price}</div>
+              <div class="favorite_lottery_events_soldpercentage">SOLD: ${event.sold_percentage}%</div>
+            <div class="favorite_lottery_events_sold_percentage">
+                <div class="favorite_lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
+            </div>
+            <div class="favorite_lottery_events_ticket_info">${event.total_tickets - event.sold_tickets} tickets remaining</div>
+       <a href="${event.enter_now_button}" class="favorite_lottery_events_enter_button">
+                Enter Now <img src="/media/lottery_images/arrow (2).png" alt="Arrow Icon">
+            </a>
         `;
 
-        // Set the inner HTML for the favorite element
-        favoriteElement.innerHTML = favoriteContent;
 
-        // Append the favorite element to the container
         container.appendChild(favoriteElement);
     });
+
+
+    
+    // Modified load more button logic
+    const loadMoreBtn = document.getElementById('load_more_button');
+    if (!isMobile && allFavorites.length > displayedCount) {
+        loadMoreBtn.style.display = 'block';
+    } else {
+        loadMoreBtn.style.display = 'none';
+    }
 }
+
+
+// Function to load more events
+function loadMoreFavorites() {
+    displayedCount += 4; // Increase the count by 4
+    displayFavorites(); // Refresh display
+}
+
+
+// Add resize listener to handle window size changes
+window.addEventListener('resize', displayFavorites);
 
 function toggleFavorite(eventSlug) {
     const favoriteIcon = document.querySelector(`#favorite-icon-${eventSlug}`);
