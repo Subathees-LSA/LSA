@@ -1285,6 +1285,8 @@ function initializeDashboard() {
                                     let rows = [];  // All user rows from the server
                                     let currentIndex = 3;  // Start after showing the first 3 users
                                     const rowsPerPage = 3;
+                                    let selectedFilter = "All Users"; // Default filter
+
                                     function user_management_table() {
                                         const container = document.querySelector(".custom_admin_dashboard_user_table");
 
@@ -1298,57 +1300,36 @@ function initializeDashboard() {
                                         const searchInput = document.createElement('input');
                                         searchInput.type = "text";
                                         searchInput.id = "searchUserInput";
-                                        searchInput.placeholder = "Search by username,email,ip,kyc status...";
+                                        searchInput.placeholder = "Search by username, email, ip, kyc status...";
                                         searchInput.onkeyup = searchUsers;
                                         searchContainer.appendChild(searchInput);
 
-                                        // Create filter dropdown
-                                        const filterContainer = document.createElement("div");
-                                        filterContainer.style.position = "relative";
-
-                                        // Filter button (icon)
-                                        const filterButton = document.createElement("button");
-                                        filterButton.id = "filterButton";
-                                        filterButton.textContent = "🔽"; // Dropdown icon
-                                        filterButton.onclick = toggleFilterDropdown;
-                                        filterContainer.appendChild(filterButton);
-
-                                        // Dropdown menu
-                                        const filterDropdown = document.createElement("div");
+                                        // Create filter dropdown (select element)
+                                        const filterDropdown = document.createElement('select');
                                         filterDropdown.id = "filterDropdown";
-                                        filterDropdown.style.display = "none";
-                                        // filterDropdown.style.position = "absolute";
-                                        filterDropdown.style.background = "#fff";
-                                        filterDropdown.style.border = "1px solid #ccc";
                                         filterDropdown.style.padding = "5px";
-                                        filterDropdown.style.boxShadow = "0px 4px 6px rgba(0,0,0,0.1)";
+                                        filterDropdown.style.borderRadius = "4px";
+                                        filterDropdown.style.border = "1px solid #ccc";
 
-                                        // Dropdown options
-                                        ["All Users", "Blocked Users"].forEach(option => {
-                                            const div = document.createElement("div");
-                                            div.id = option.replace(/\s+/g, ''); // Assign ID (removes spaces)
-                                            div.textContent = option;
-                                            div.style.cursor = "pointer";
-                                            div.style.padding = "5px";
-
-                                            // Hover effect
-                                            div.onmouseover = () => {
-                                                if (div.style.background !== "rgb(0, 123, 255)") { // If not selected
-                                                    div.style.background = "#f0f0f0"; // Light gray hover
-                                                }
-                                            };
-                                            div.onmouseout = () => {
-                                                if (selectedFilter !== option) {
-                                                    div.style.background = "white"; // Reset if not selected
-                                                }
-                                            };
-
-                                            div.onclick = () => applyFilter(option);
-                                            filterDropdown.appendChild(div);
+                                        // Add options to the dropdown
+                                        const options = ["All Users", "Blocked Users"];
+                                        options.forEach(option => {
+                                            const optionElement = document.createElement('option');
+                                            optionElement.value = option;
+                                            optionElement.textContent = option;
+                                            filterDropdown.appendChild(optionElement);
                                         });
 
-                                        filterContainer.appendChild(filterDropdown);
-                                        searchContainer.appendChild(filterContainer);
+                                        // Set default selected option
+                                        filterDropdown.value = selectedFilter;
+
+                                        // Add event listener to handle filter changes
+                                        filterDropdown.addEventListener('change', (event) => {
+                                            selectedFilter = event.target.value;
+                                            searchUsers(); // Re-filter the users
+                                        });
+
+                                        searchContainer.appendChild(filterDropdown);
 
                                         const user_management_title_textElement = document.createElement("span"); // Create a span element
                                         user_management_title_textElement.textContent = "User Management"; // Set text content
@@ -1360,28 +1341,31 @@ function initializeDashboard() {
 
                                         container.appendChild(user_management_title_textElement); // Append it to the container
                                         container.appendChild(searchContainer);
+
                                         // Create table
                                         const table = document.createElement('table');
                                         table.className = "custom_admin_dashboard_custom_table";
                                         table.innerHTML = `
-                                                <thead>
-                                                    <tr>
-                                                        <th>Account Status</th>
-                                                        <th>Name</th>
-                                                        <th>Email</th>
-                                                        <th>KYC Image</th>
-                                                        <th>IP Address</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="userTableBody"></tbody>
-                                            `;
+                                            <thead>
+                                                <tr>
+                                                    <th>Account Status</th>
+                                                    <th>Name</th>
+                                                    <th>Email</th>
+                                                    <th>KYC Image</th>
+                                                    <th>IP Address</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="userTableBody"></tbody>
+                                        `;
                                         container.appendChild(table);
+
                                         const noUserMessage = document.createElement('h3');
                                         noUserMessage.id = "noUserMessage";
                                         noUserMessage.className = "noUserMessage_class";
                                         noUserMessage.textContent = "user not found";
                                         container.appendChild(noUserMessage);
+
                                         // Create user count display
                                         const userCountContainer = document.createElement('div');
                                         userCountContainer.id = "userCountContainer";
@@ -1401,6 +1385,7 @@ function initializeDashboard() {
                                         // Set up menu event listeners
                                         setupMenuEventListeners();
                                     }
+
                                     function user_management_button_function() {
                                         showSpecificDiv('custom_admin_dashboard_user_list_table');
                                         $(".sidebars").removeClass('active');
@@ -1499,7 +1484,7 @@ function initializeDashboard() {
                                     function updateUserCount() {
                                         document.getElementById('userCountContainer').textContent = `Total Users: ${rows.length}`;
                                     }
-                                    let selectedFilter = "All Users"; // Default filter
+                                 
                                     function toggleFilterDropdown() {
                                         const dropdown = document.getElementById("filterDropdown");
                                         dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
@@ -1607,40 +1592,38 @@ function initializeDashboard() {
                                         }
                                     }
 
+                                    function searchUsers() {
+                                        const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
+                                        const tbody = document.getElementById('userTableBody');
+                                        const noUserMessage = document.getElementById('noUserMessage'); // Element for "User not found"
 
-                                  function searchUsers() {
-                                    const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
-                                    const tbody = document.getElementById('userTableBody');
-                                    const noUserMessage = document.getElementById('noUserMessage'); // Element for "User not found"
-                                    
-                                    currentIndex = 3; // Reset the currentIndex to 3
+                                        currentIndex = 3; // Reset the currentIndex to 3
 
-                                    let filteredRows = rows;
+                                        let filteredRows = rows;
 
-                                    // Apply filter: Show only blocked users if selected
-                                    if (selectedFilter === "Blocked Users") {
-                                        filteredRows = rows.filter(row => row.is_blocked);
+                                        // Apply filter: Show only blocked users if selected
+                                        if (selectedFilter === "Blocked Users") {
+                                            filteredRows = rows.filter(row => row.is_blocked);
+                                        }
+
+                                        // Apply comprehensive search filter
+                                        const matchingRows = filteredRows.filter(row =>
+                                            (row.user?.username?.toLowerCase().includes(searchValue) ||
+                                            row.user?.email?.toLowerCase().includes(searchValue) ||
+                                            row.kyc_status?.toLowerCase().includes(searchValue) ||
+                                            row.ip_address?.toLowerCase().includes(searchValue))
+                                        );
+
+                                        tbody.innerHTML = ''; // Clear the table body
+
+                                        if (matchingRows.length === 0) {
+                                            noUserMessage.style.display = 'block'; // Show "User not found" message
+                                        } else {
+                                            noUserMessage.style.display = 'none'; // Hide the message if users are found
+                                            matchingRows.slice(0, 3).forEach(row => appendRow(row)); // Render the first 3 matching rows
+                                            toggleViewMoreLessButtons(matchingRows); // Update the button visibility based on matching rows
+                                        }
                                     }
-
-                                    // Apply comprehensive search filter
-                                    const matchingRows = filteredRows.filter(row =>
-                                        (row.user?.username?.toLowerCase().includes(searchValue) ||
-                                        row.user?.email?.toLowerCase().includes(searchValue) ||
-                                        row.kyc_status?.toLowerCase().includes(searchValue) ||
-                                        row.ip_address?.toLowerCase().includes(searchValue))
-                                    );
-
-                                    tbody.innerHTML = ''; // Clear the table body
-
-                                    if (matchingRows.length === 0) {
-                                        noUserMessage.style.display = 'block'; // Show "User not found" message
-                                    } else {
-                                        noUserMessage.style.display = 'none'; // Hide the message if users are found
-                                        matchingRows.slice(0, 3).forEach(row => appendRow(row)); // Render the first 3 matching rows
-                                        toggleViewMoreLessButtons(matchingRows); // Update the button visibility based on matching rows
-                                    }
-                                }
-
                                     function setupMenuEventListeners() {
                                         document.addEventListener('click', function (event) {
 
