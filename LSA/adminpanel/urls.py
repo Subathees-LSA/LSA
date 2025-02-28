@@ -41,9 +41,7 @@ urlpatterns = [
     path('faq/', faq_page, name='faq_page'), 
     path('terms/', terms_page, name='terms_page'), 
     path('api/contact/', ContactCreateView.as_view(), name='contact-create'),
-    
     path('about-us/', about_us, name='about_us'),  
-
     path('api/admin/messages/', ContactListView.as_view(), name='contact-list'),
     path('api/admin/reply/', AdminReplyView.as_view(), name='admin-reply'),
     path('contact-reply/', admin_contact_reply_page, name='admin-contact-reply'),
@@ -55,7 +53,6 @@ urlpatterns = [
     path('api/admin/chat/<str:email>/', ChatMessagesView.as_view(), name='chat-messages'),
     path('api/admin/delete-contact/<str:email>/', DeleteContactView.as_view(), name='delete-contact'),
     path('api/user/chat/', UserChatView.as_view(), name='api_user_chat'),
-    
     path('api/admin/reply/<int:reply_id>/edit_delete/', EditdeleteAdminReplyView.as_view(), name='edit_delete-admin-reply'),
     path('api/banner/', BannerView.as_view(), name='api_banner'),
     path('api/previous-winners/', PreviousWinnersimgAPIView.as_view(), name='api_get_previous_winners'),
