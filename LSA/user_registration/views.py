@@ -124,7 +124,7 @@ class LoginView(APIView):
                         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                         return Response({
                             "message": "Login successful.",
-                            "redirect_url": reverse('user_welcome_page')  # Add the redirect URL for 2FA disabled
+                            "redirect_url": reverse('lottery_events')  # Add the redirect URL for 2FA disabled
                         }, status=status.HTTP_200_OK)
                 else:
                     return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)

@@ -2465,7 +2465,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (typeof kycStatusUrl !== "undefined") {
         checkKYCStatus();
+        
     }
+    handleKYCForm();
+    lottery_events_fetch();
 });
 if (typeof googleEmail !== "undefined" && googleEmail) {
 
@@ -2564,8 +2567,52 @@ function kycimage_validateFileSize() {
         errorMessageElement.textContent = "";
     }
 }
-document.addEventListener("DOMContentLoaded", function () {
+// document.addEventListener("DOMContentLoaded", function () {
 
+//     const kycUploadForm = document.getElementById("kycUploadForm");
+//     if (kycUploadForm) {
+//         kycUploadForm.onsubmit = function (e) {
+//             e.preventDefault();
+//             const errorMessageElement = document.getElementById("error-message");
+//             const imageFile = document.getElementById("kycImage")?.files[0];
+
+//             if (imageFile && imageFile.size <= 500 * 1024) {
+//                 const formData = new FormData();
+//                 formData.append("image", imageFile);
+
+//                 fetch(kycUploadUrl, {
+//                     method: "POST",
+//                     headers: {
+//                         "X-CSRFToken": csrfToken,
+//                     },
+//                     body: formData,
+//                 })
+//                     .then(response => response.json())
+//                     .then(data => {
+//                         if (data.status === "success") {
+//                             alert("KYC image uploaded successfully.");
+//                             closeKYCModal();
+//                             if (typeof kycStatusUrl !== "undefined") {
+//                                 checkKYCStatus();
+//                             }
+//                         } else if (data.image) {
+//                             errorMessageElement.textContent = data.image[0];
+//                         } else {
+//                             console.error("KYC upload error:", data);
+//                         }
+//                     })
+//                     .catch(error => console.error("Error uploading KYC image:", error));
+//             } else {
+//                 errorMessageElement.textContent = "File size must be less than 500KB.";
+//             }
+//         };
+//     } else {
+
+//     }
+// });
+
+
+function handleKYCForm() {
     const kycUploadForm = document.getElementById("kycUploadForm");
     if (kycUploadForm) {
         kycUploadForm.onsubmit = function (e) {
@@ -2603,10 +2650,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 errorMessageElement.textContent = "File size must be less than 500KB.";
             }
         };
-    } else {
-
     }
-});
+}
+
+
 
 //admin -user_list_details.html
 $(document).ready(function () {
@@ -4386,6 +4433,8 @@ function lottery_events_fetch() {
             .then(response => response.json())
             .then(data => {
                 displayLotteryEvents(data);
+                checkKYCStatus();
+                handleKYCForm();
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
@@ -5190,13 +5239,17 @@ function fetchCartItems() {
         });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    fetchCartItems();
+    
+});
 function displayCartItems(cart) {
     const container = document.getElementById('cart_items_container');
     const totalElement = document.getElementById('cart_total');
     const subtotalElement = document.getElementById('totalsub');
     container.innerHTML = ''; // Clear existing items
     let total = 0;
-
+    
     if (Object.keys(cart).length === 0) {
         container.innerHTML = '<p>Your cart is empty.</p>';
         totalElement.textContent = '0.00';
@@ -5205,48 +5258,55 @@ function displayCartItems(cart) {
     }
 
     for (const [eventSlug, item] of Object.entries(cart)) {
+        
         const itemTotal = parseFloat(item.per_ticket_price) * item.quantity;
+        // Skip items with zero quantity
+        if (item.quantity === 0) {
+            continue;
+        }
         total += itemTotal;
-
+        
         const cartItem = document.createElement('div');
         cartItem.classList.add('cart_item');
 
-        cartItem.innerHTML = `
-        ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-image" />` : ''}
+        const purchasedQuantity = item.purchased_quantity || 0;
+        const remainingTickets = item.max_limit - purchasedQuantity;
         
-        <div class="item-details">
-            <h3>${item.title}</h3>
-            <p class="cartprice">Per Ticket Price  £${item.per_ticket_price}</p> <!-- Price under title -->
-        </div>
-    
-        <div class="quantity-controls">
-            <p>Quantity:</p>
-            <button class="quantity-decrease" data-event-slug="${eventSlug}">-</button>
-            <input type="number" min="1" max="${item.max_limit}" value="${item.quantity}" class="quantity-input" data-event-slug="${eventSlug}" />
-            <button class="quantity-increase" data-event-slug="${eventSlug}">+</button>
-        </div>
-    
-        <div class="total-section">
-            <p>Total Amount:</p>
-            <input type="number" min="${item.per_ticket_price}" step="${item.per_ticket_price}" value="${itemTotal.toFixed(2)}" class="total-input" data-event-slug="${eventSlug}" />
-        </div>
-    
-        <button class="remove_from_cart_button" data-event-slug="${eventSlug}"></button>
-        <span class="max-limit-message"></span> <!-- Message span -->
-    `;
-
+        // Ensure the quantity does not exceed the remaining tickets
+        const adjustedQuantity = Math.min(item.quantity, remainingTickets);
+        
+        cartItem.innerHTML = `
+            ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-image" />` : ''}
+            <div class="item-details">
+                <h3>${item.title}</h3>
+                <p class="cartprice">Per Ticket Price £${item.per_ticket_price}</p>
+                <p class="remaining-tickets">Remaining Tickets: ${remainingTickets}</p>
+            </div>
+            <div class="quantity-controls">
+                <p>Quantity:</p>
+                <button class="quantity-decrease" data-event-slug="${eventSlug}">-</button>
+                <input type="number" min="1" max="${remainingTickets}" value="${adjustedQuantity}" class="quantity-input" data-event-slug="${eventSlug}" />
+                <button class="quantity-increase" data-event-slug="${eventSlug}">+</button>
+            </div>
+            <div class="total-section">
+                <p>Total Amount:</p>
+                <input type="number" min="${item.per_ticket_price}" step="${item.per_ticket_price}" value="${(adjustedQuantity * item.per_ticket_price).toFixed(2)}" class="total-input" data-event-slug="${eventSlug}" readonly/>
+            </div>
+            <button class="remove_from_cart_button" data-event-slug="${eventSlug}"></button>
+            <span class="max-limit-message"></span>
+        `;
 
         container.appendChild(cartItem);
     }
 
     totalElement.textContent = `£${total.toFixed(2)}`;
     subtotalElement.textContent = `£${total.toFixed(2)}`;
+
     const removeButtons = document.querySelectorAll('.remove_from_cart_button');
     removeButtons.forEach(button => {
         button.addEventListener('click', removeFromCart);
     });
 
-    // Attach event listeners for quantity and total inputs
     attachCartEventListeners(cart);
 
     // Add focus-out event listener for quantity inputs
@@ -5275,62 +5335,79 @@ function displayCartItems(cart) {
     });
 
     // // Add focus-out event listener for total inputs
-
+    
     const totalInputs = container.querySelectorAll('.total-input');
 
-    totalInputs.forEach(input => {
-        input.addEventListener('blur', event => {
-            const eventSlug = event.target.getAttribute('data-event-slug');
-            const newTotal = parseFloat(event.target.value);
-            const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
-            const maxLimit = parseInt(cart[eventSlug].max_limit);
-            const maxTotal = perTicketPrice * maxLimit;
+totalInputs.forEach(input => {
+    input.addEventListener('blur', event => {
+        const eventSlug = event.target.getAttribute('data-event-slug');
+        const newTotal = parseFloat(event.target.value);
+        const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
+        const maxLimit = parseInt(cart[eventSlug].max_limit);
+        const maxTotal = perTicketPrice * maxLimit;
 
-            const parentElement = event.target.closest('.cart_item');
-            const messageSpan = parentElement.querySelector('.max-limit-message');
-            const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
+        const parentElement = event.target.closest('.cart_item');
+        const messageSpan = parentElement.querySelector('.max-limit-message');
+        const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
 
+        
+        
 
+        if (newTotal > maxTotal) {
+            event.target.value = maxTotal.toFixed(2); // Reset to max total
+            messageSpan.textContent = `Total exceeds max allowable amount (£${maxTotal.toFixed(2)}).`;
+            messageSpan.style.color = 'red';
+            messageSpan.style.fontSize = '16px';
+            messageSpan.style.display = 'inline';
 
+            // Set quantity to max limit and update cart
+            const maxQuantity = maxLimit;
+            quantityInputs.value = maxQuantity;
+            updateCartQuantityFromTotal(cart, eventSlug, maxQuantity);
+            return;
+        } else {
+            // Clear error message and update quantity dynamically
+            messageSpan.textContent = '';
+            const calculatedQuantity = Math.floor(newTotal / perTicketPrice); // Calculate based on valid total
 
-            if (newTotal > maxTotal) {
-                event.target.value = maxTotal.toFixed(2); // Reset to max total
-                messageSpan.textContent = `Total exceeds max allowable amount (£${maxTotal.toFixed(2)}).`;
-                messageSpan.style.color = 'red';
-                messageSpan.style.fontSize = '16px';
-                messageSpan.style.display = 'inline';
+            if (calculatedQuantity >= 1) {
+                quantityInputs.value = calculatedQuantity; // Update quantity input
+                cart[eventSlug].quantity = calculatedQuantity; // Update cart object
 
-                // Set quantity to max limit and update cart
-                const maxQuantity = maxLimit;
-                quantityInputs.value = maxQuantity;
-                updateCartQuantityFromTotal(cart, eventSlug, maxQuantity);
-                return;
-            } else {
-                // Clear error message and update quantity dynamically
-                messageSpan.textContent = '';
-                const calculatedQuantity = Math.floor(newTotal / perTicketPrice); // Calculate based on valid total
-
-                if (calculatedQuantity >= 1) {
-                    quantityInputs.value = calculatedQuantity; // Update quantity input
-                    cart[eventSlug].quantity = calculatedQuantity; // Update cart object
-
-                    // Update cart cookie
-                    fetch('/api/update-cart/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken(),
-                        },
-                        body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
-                    }).then(() => fetchCartItems()); // Refresh cart display
-                }
+                // Update cart cookie
+                fetch('/api/update-cart/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken(),
+                    },
+                    body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
+                }).then(() => fetchCartItems()); // Refresh cart display
             }
-        });
+        }
     });
+});
 
 }
 
 function attachCartEventListeners(cart) {
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    quantityInputs.forEach(input => {
+        input.addEventListener('change', (event) => {
+            const eventSlug = event.target.getAttribute('data-event-slug');
+            const remainingTickets = cart[eventSlug].max_limit - (cart[eventSlug].purchased_quantity || 0);
+            const newQuantity = parseInt(event.target.value);
+
+            if (newQuantity > remainingTickets) {
+                event.target.value = remainingTickets;
+                cart[eventSlug].quantity = remainingTickets;
+                updateCart(cart);
+            } else {
+                cart[eventSlug].quantity = newQuantity;
+                updateCart(cart);
+            }
+        });
+    });
     const increaseButtons = document.querySelectorAll('.quantity-increase');
     const decreaseButtons = document.querySelectorAll('.quantity-decrease');
 
@@ -5347,28 +5424,27 @@ function updateCartQuantity(event, cart, delta) {
     const eventSlug = event.target.getAttribute('data-event-slug');
     const currentQuantity = parseInt(cart[eventSlug].quantity);
     const maxLimit = parseInt(cart[eventSlug].max_limit);
+    const purchasedQuantity = parseInt(cart[eventSlug].purchased_quantity || 0);
+    const remainingTickets = maxLimit - purchasedQuantity;
     const newQuantity = currentQuantity + delta;
-
+    
     const parentElement = event.target.closest('.cart_item');
     const messageSpan = parentElement.querySelector('.max-limit-message');
 
-    if (newQuantity > maxLimit) {
-        // Show max limit message
+    if (newQuantity > remainingTickets) {
         if (messageSpan) {
-            messageSpan.textContent = `Max limit of ${maxLimit} reached.`;
-            messageSpan.style.color = "red"; // Highlight in red
-            messageSpan.style.fontSize = "16px"; // Adjust font size
+            messageSpan.textContent = `Max limit of ${remainingTickets} reached.`;
+            messageSpan.style.color = "red";
+            messageSpan.style.fontSize = "16px";
         }
         return;
     } else if (messageSpan) {
-        // Clear message if within limit
         messageSpan.textContent = '';
     }
 
     if (newQuantity >= 1) {
         cart[eventSlug].quantity = newQuantity;
 
-        // Update cart cookie
         fetch('/api/update-cart/', {
             method: 'POST',
             headers: {
@@ -5379,7 +5455,6 @@ function updateCartQuantity(event, cart, delta) {
         }).then(() => fetchCartItems());
     }
 }
-
 function updateCartQuantityFromTotal(cart, eventSlug, newQuantity) {
     const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
     const maxLimit = parseInt(cart[eventSlug].max_limit);
@@ -5443,9 +5518,64 @@ function removeFromCart(event) {
         });
 }
 
-function proceedToCheckout() {
-    alert('Proceeding to checkout...');
+function getCartData() {
+    let cart = {};
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        const eventSlug = input.getAttribute('data-event-slug');
+        const quantity = parseInt(input.value, 10);
+        if (quantity > 0) {
+            cart[eventSlug] = quantity;
+        }
+    });
+    return cart;
 }
+function proceedToCheckout() {
+    const cartData = getCartData();
+    if (Object.keys(cartData).length === 0) {
+        alert('Your cart is empty.');
+        return;
+    }
+
+    // First, check if the user is authenticated
+    fetch(`/check-user-authentication/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+'X-CSRFToken': getCookie('csrftoken'),
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            // Redirect to login page if user is not authenticated
+            window.location.href = data.redirect_url;
+        } else {
+            // If user is authenticated, proceed to create checkout session
+            fetch(`/create-checkout-session/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ cart: cartData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.checkout_url) {
+                    
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Error creating checkout session');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 
 
 //lottery_detail.html
@@ -6020,3 +6150,122 @@ $(window).on('load', function () {
     }, 1000); // Delay 1 second for a smoother transition
 });
 
+//my-orders.html
+$(document).ready(function () {
+    function fetchOrders(filter) {
+        $.ajax({
+            url: `/api/my-orders/?filter=${filter}`,
+            type: "GET",
+            dataType: "json",
+            headers: { "X-CSRFToken": my_orders_csrfToken }, // Use a global csrfToken variable
+            success: function (data) {
+                let container = $("#myorders-container");
+                container.empty();
+
+                if (Object.keys(data).length === 0) {
+                    container.html("<p>No orders yet.</p>");
+                    return;
+                }
+
+                $.each(data, function (sessionId, group) {
+                    let orderHTML = `
+                        <div class="myorder-group">
+                            <h4>Order ID: <strong>${group.payment_id}</strong></h4>
+                            <span class="myorder-status-badge ${group.payment_status === 'completed' ? 'myorder-completed' : 'myorder-canceled'}">
+                                ${group.payment_status.charAt(0).toUpperCase() + group.payment_status.slice(1)}
+                            </span>
+                            <p><i class="fa fa-calendar"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleDateString() : 'N/A'}
+                                &nbsp; <i class="fa fa-clock"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleTimeString() : 'N/A'}</p>
+                            <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>
+
+                            <table class="myorder-table">
+                                <thead>
+                                    <tr>
+                                        <th>Quantity</th>
+                                        <th>Lottery</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                    $.each(group.payments.slice(0, 2), function (index, payment) {
+                        orderHTML += `
+                            <tr>
+                                <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
+                                <td>${payment.lottery_event_title}</td>
+                            </tr>`;
+                    });
+
+                    orderHTML += `</tbody></table>`;
+
+                    if (group.payments.length > 2) {
+                        orderHTML += `<p>${group.payments.length - 2} More items</p>`;
+                    }
+
+                    orderHTML += `
+                        <div class="myorder-button-container">
+                            <button class="myorder-button myorder-details-button" onclick="showModal('${sessionId}')">Details</button>
+                         <button class="myorder-button myorder-help-button" onclick="#">Get Help</button>
+                            </div>
+
+                        <div id="myorder-modal-${sessionId}" class="myorder-modal">
+                            <div class="myorder-modal-content">
+                                <span class="myorder-close" onclick="closeModal('${sessionId}')">&times;</span>
+                                <h4>Order ID: <strong>${group.payment_id}</strong></h4>
+                                <p>Status: ${group.payment_status.charAt(0).toUpperCase() + group.payment_status.slice(1)}</p>
+                                <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>
+                                <table class="myorder-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Quantity</th>
+                                            <th>Lottery</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+                    $.each(group.payments, function (index, payment) {
+                        orderHTML += `
+                                        <tr>
+                                            <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
+                                            <td>${payment.lottery_event_title}</td>
+                                            <td>£${parseFloat(payment.amount).toFixed(2)}</td>
+                                        </tr>`;
+                    });
+
+                    orderHTML += `</tbody></table></div></div></div>`;
+
+                    container.append(orderHTML);
+                });
+            },
+            error: function () {
+                $("#orders-container").html("<p>Error loading orders.</p>");
+            }
+        });
+    }
+
+    // Initial load
+    fetchOrders("all");
+
+    // Event listener for filter change
+    $("#myorder-filter").change(function () {
+        let selectedFilter = $(this).val();
+        fetchOrders(selectedFilter);
+    });
+
+//     // Global functions for modal handling
+    window.showModal = function (sessionId) {
+        $("#myorder-modal-" + sessionId).show();
+    }
+
+    window.closeModal = function (sessionId) {
+        $("#myorder-modal-" + sessionId).hide();
+    }
+    // Close modal when clicking outside of it
+    $(document).on("click", function (event) {
+        $(".myorder-modal").each(function () {
+            if ($(event.target).closest(".myorder-modal-content").length === 0 && $(event.target).hasClass("myorder-modal")) {
+                $(this).hide();
+            }
+        });
+    });
+});

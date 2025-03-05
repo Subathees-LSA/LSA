@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'user_dashboard',
     'adminpanel',
     'social_django',
+    'PaymentServices',
 ]
 
 

@@ -1,0 +1,249 @@
+{% comment %} {% load static %}
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>My-Order</title>
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+     <script src="{% static 'js/custom.js' %}"></script>
+     
+ </head>
+ <body >
+     {% include 'header.html' %} 
+       <h3 style="text-align:center">My Order<h3>
+     <br><br><br><br><br><br><br><br><br><br><br><br>
+     <br>
+{% include 'footer.html' %}
+ </body>
+ </html>
+  {% endcomment %}
+  {% load static %}
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script>
+        var my_orders_csrfToken = "{{ csrf_token }}"; // Store CSRF token globally
+    </script>
+    
+</head>
+<style>
+    /* General Styles */
+{% comment %} body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+} {% endcomment %}
+.myorders-filters {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.myorder-heading{
+    text-align: center;
+    color: #333;
+    margin-top: 20px;
+}
+
+/* Orders Container */
+.myorder-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* Order Group Styling */
+.myorder-group {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 5px solid #ff6600;
+    position: relative;
+}
+
+/* Order Title */
+.myorder-group h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+/* Order Meta */
+.myorder-group p {
+    font-size: 14px;
+    color: #666;
+    margin: 2px 0;
+}
+
+/* Status Badge */
+.myorder-status-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 15px;
+}
+
+/* Status Colors */
+.myorder-completed {
+    background-color: #28a745;
+    color: white;
+}
+
+.myorder-pending {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* Order Table */
+.myorder-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.myorder-table th, .myorder-table td {
+    border: none;
+    padding: 10px;
+    text-align: left;
+}
+
+.myorder-table th {
+    background: #f9f9f9;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.myorder-table td {
+    font-size: 14px;
+}
+
+/* Quantity Box */
+.myorder-quantity-box {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Button Container */
+.myorder-button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+/* Button Styles */
+.myorder-button {
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    width: 45%;
+}
+
+.myorder-details-button {
+    background-color: #ff6600;
+    color: white;
+    border: none;
+}
+
+.myorder-help-button {
+    background: white;
+    color: #ff6600;
+    border: 2px solid #ff6600;
+}
+
+/* Modal Styles */
+.myorder-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.myorder-modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.myorder-close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .myorders-filters {
+        top: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    .myorder-container {
+        max-width: 90%;
+    }
+
+    .myorder-modal-content {
+        width: 80%;
+    }
+
+    .myorder-button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+</style>
+<body>
+    {% include 'header.html' %}
+    <h3 class="myorder-heading">My Orders</h3>
+    <select id="myorder-filter" class="myorders-filters">
+        <option value="all">All</option>
+        <option value="1month">Last 1 Month</option>
+        <option value="6month">Last 6 Months</option>
+        <option value="1year">Last 1 Year</option>
+    </select>
+    <div class="myorder-container" id="myorders-container">
+        <p>Loading orders...</p>
+    </div>
+
+    {% include 'footer.html' %}
+    
+</body>
+</html>
