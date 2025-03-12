@@ -5,6 +5,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import redirect
+from social_core.exceptions import AuthForbidden
 
 User = get_user_model()
 
@@ -70,3 +71,15 @@ def link_to_existing_user(backend, user, response, *args, **kwargs):
                     sociallogin.user = existing_user  # Assign the existing user
                     sociallogin.connect(request=None, user=existing_user)  # Link accounts
                 return {'user': existing_user} 
+            
+
+
+def block_user_check(backend, user, response, *args, **kwargs):
+    request = kwargs.get('request')  # Extract the request object
+    if backend.name == 'google-oauth2' and hasattr(user, 'userprofile') and user.userprofile.is_blocked:
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        messages.error(request, "Access to your account is restricted.")
+        return redirect('user_login')
+
+

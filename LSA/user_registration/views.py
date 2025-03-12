@@ -99,7 +99,8 @@ class LoginView(APIView):
             try:
                 user = User.objects.get(email=email)
                 user_profile = UserProfile.objects.filter(user=user).first()
-                if user_profile and user_profile.is_blocked:
+                is_blocked = user_profile.is_blocked if user_profile else False  # ✅ Get block status
+                if is_blocked:
                     return Response({
                         "error": "You are blocked."
                     }, status=status.HTTP_403_FORBIDDEN)

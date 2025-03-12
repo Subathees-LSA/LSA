@@ -15,5 +15,6 @@ class PaymentLottery(models.Model):
     stripe_session_id = models.CharField(max_length=255, null=True, blank=True)  # Store Stripe session ID
     payment_at = models.DateTimeField(null=True, blank=True) 
     payment_intent = models.CharField(max_length=255, null=True, blank=True)
+    receipt_url = models.CharField(max_length=512, null=True, blank=True)
     def __str__(self):
         return f"{self.user.username} -{self.payment_intent}- {self.lottery_event.title} - {self.quantity} tickets - {self.amount} GBP"

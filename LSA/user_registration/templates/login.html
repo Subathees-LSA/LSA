@@ -10,6 +10,14 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}" defer></script>
 
+    <script>
+        var isBlockedUser = false; // Default to false
+    
+        function updateBlockedStatus(isBlocked) {
+            isBlockedUser = isBlocked;
+            updateFAQLink(); // Call function to update FAQ link
+        }
+    </script>
 
 </head>
 
@@ -48,7 +56,10 @@
                             Password</h3>
                         <input type="password" id="login-password" class="login-input-password" placeholder="Password"
                             required>
-                        <span id="login-toggle-password" class="login-toggle-password">🙈</span>
+                        <span id="login-toggle-password" class="login-toggle-password">
+                            <img src="/media/images/eye.png" alt="Show Password" class="toggle-eye-icon" >
+
+                        </span>
                         {% comment %} <span id="login-password-error" class="login-error-text"></span> {% endcomment %}
                         <span id="login-error" class="login-error-text"></span>
                         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -112,6 +123,52 @@
             <button id="otp-cancel-button" class="otp-cancel-button">Cancel</button>
         </div>
     </div>
+
+
+<!-- Block User Modal for manually login-->
+<div id="login_blocked-modal" class="modal_login_blocked">
+    <div class="login_blocked-content">
+        <span class="login_blocked-close">&times;</span>
+        <h2>Account Blocked</h2>
+        <p>
+            Access to your account is restricted. Kindly contact 
+            <a href="mailto:gurutech2620@gmail.com" class="blocked_user_modal_hyperlink">gurutech2620@gmail.com</a> 
+            for further details.
+        </p>
+        <p>
+            Check our <a href="{% url 'faq_page' %}?blocked=true" class="blocked_user_modal_hyperlink">FAQ</a> 
+            for more information.
+        </p>
+    </div>
+</div>
+
+<!-- Block User Modal for  via google login-->
+
+{% if messages %}
+<div id="customModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePopupgoogle()">&times;</span>
+        <h2>Account Blocked</h2>
+        <p id="popupText">
+            {% for message in messages %}
+                {{ message }} Kindly contact 
+                <a href="mailto:gurutech2620@gmail.com" class="blocked_user_modal_hyperlink">gurutech2620@gmail.com</a> 
+                for further details.
+            {% endfor %}
+        </p>
+       
+        <p>
+            Check our <a href="{% url 'faq_page' %}?blocked=true"  class="blocked_user_modal_hyperlink">FAQ</a> 
+            for more information.
+        </p>
+    </div>
+</div>
+{% endif %}
+
+    
+
+ 
+
 </body>
 
 </html>

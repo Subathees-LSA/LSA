@@ -6,4 +6,4 @@ class PaymentLotterySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PaymentLottery
-        fields = ['id', 'payment_intent', 'lottery_event_title', 'quantity', 'amount', 'payment_status', 'payment_at', 'stripe_session_id']
+        fields = ['id', 'payment_intent', 'lottery_event_title', 'quantity', 'amount', 'payment_status', 'payment_at', 'stripe_session_id',"receipt_url"]

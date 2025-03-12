@@ -22,59 +22,82 @@
     
     <style>
         body {
-          /* background-color: #0b0d17; */
-          background-color: #000;
-          color: #ffffff;
+          background-color: #ffffff; /* White Background */
+          color: #000000; /* Black Font Color */
           display: flex;
           justify-content: center;
           align-items: center;
           height: 100vh;
+          font-family: 'Poppins', sans-serif;
+          text-align: center;
         }
   
         .success-container {
-          text-align: center;
-          /* background-color: #1c1f2a; */
+          background-color: #f8f9fa; /* Light Gray Background */
           padding: 2rem;
           border-radius: 1rem;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+          max-width: 400px;
+          width: 90%;
+          animation: fadeIn 1.5s ease-in-out;
         }
-  
-        .success-icon {
-          font-size: 4rem;
-          color: #28a745;
+
+        .success-image {
+          max-width: 100%;
+          height: auto;
+          margin-bottom: 1rem;
+          animation: fadeIn 1.5s ease-in-out;
         }
   
         .success-text {
-          font-size: 1.5rem;
+          font-size: 1.8rem;
+          font-weight: bold;
           margin: 1rem 0;
+          color: #000; /* Ensure the text is black */
         }
   
         .btn-custom {
-          background-color: #9568ff;
-          border-color: #9568ff;
+          background-color: #28a745; /* Green Button */
+          border-color: #28a745;
           font-size: 1rem;
-          padding: 0.5rem 1.5rem;
+          padding: 0.6rem 1.5rem;
           border-radius: 0.5rem;
           color: white;
           font-weight: bold;
-          margin: 0.5rem;
+          margin-top: 1rem;
+          display: inline-block;
+          transition: all 0.3s ease-in-out;
         }
   
         .btn-custom:hover {
-          background-color: #6f4bcc;
-          border-color: #6f4bcc;
+          background-color: #218838;
+          border-color: #218838;
           color: white;
+          transform: scale(1.05);
         }
-      </style>
-    </head>
-      <div class="success-container">
-        <i class="fas fa-check-circle success-icon"></i>
-        <div class="success-text">Success!</div>
-        <p>Thanks for Shopping with us.</p>
-        
-        
-       </div>
-       <script>
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="success-container">
+        <img src="/media/lottery_images/success.png" alt="Success" class="success-image">
+        <div class="success-text">Payment Successful!</div>
+        <p>Thank you for shopping with us. Redirecting to My Orders...</p>
+        <a href="/my-orders/" class="btn btn-custom">Go to My Orders</a>
+    </div>
+
+    <script>
         // Prevent the user from going back to the success page
         history.pushState(null, document.title, location.href);
         window.addEventListener('popstate', function (event) {

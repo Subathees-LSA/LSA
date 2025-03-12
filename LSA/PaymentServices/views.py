@@ -71,6 +71,142 @@ def create_checkout_session(request):
     return Response({"checkout_url": session.url})
 
 
+# @csrf_exempt
+# def stripe_webhook(request):
+#     payload = request.body
+#     sig_header = request.headers.get("Stripe-Signature")
+#     endpoint_secret = settings.WEBHOOK_ENDPOINT_SECRET
+    
+#     try:
+#         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+#     except (ValueError, stripe.error.SignatureVerificationError):
+#         return JsonResponse({"error": "Invalid webhook signature"}, status=400)
+   
+#     if event["type"] == "checkout.session.completed":
+#         session = event["data"]["object"]
+#         customer_email = session.get("customer_email")
+#         stripe_session_id = session.get("id")
+#         payment_intent = session.get("payment_intent")
+        
+        
+#         payment_intent_extracted = payment_intent.partition("_")[2] if "_" in payment_intent else payment_intent
+        
+#         user = User.objects.get(email=customer_email)
+        
+        
+#         line_items = stripe.checkout.Session.list_line_items(stripe_session_id)
+
+#         for item in line_items["data"]:
+#             event_title = item["description"]
+#             quantity = item["quantity"]
+#             amount = item["amount_total"] / 100
+
+
+#             event = LotteryEvent.objects.get(title=event_title)
+
+#             PaymentLottery.objects.create(
+#                 user=user,
+#                 lottery_event=event,
+#                 quantity=quantity,
+#                 amount=amount,
+#                 payment_status='completed',
+#                 stripe_session_id=stripe_session_id,
+#                 payment_at=timezone.now(), 
+#                 #payment_intent=payment_intent,
+#                 payment_intent=payment_intent_extracted,
+#             )
+
+            
+#             event.sold_tickets += quantity
+#             event.save()
+         
+#         return JsonResponse({"message": "Payment processed successfully"}, status=200)
+        
+    
+#     return JsonResponse({"message": "Unhandled event"}, status=400)
+
+# @csrf_exempt
+# def stripe_webhook(request):
+#     payload = request.body
+
+#     sig_header = request.headers.get("Stripe-Signature")
+#     endpoint_secret = settings.WEBHOOK_ENDPOINT_SECRET
+    
+#     try:
+#         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+#     except (ValueError, stripe.error.SignatureVerificationError):
+#         return JsonResponse({"error": "Invalid webhook signature"}, status=400)
+   
+#     if event["type"] == "checkout.session.completed":
+#         session = event["data"]["object"]
+#         customer_email = session.get("customer_email")
+#         stripe_session_id = session.get("id")
+#         payment_intent = session.get("payment_intent")
+        
+#         # Extract payment intent ID
+#         payment_intent_extracted = payment_intent.partition("_")[2] if "_" in payment_intent else payment_intent
+        
+#         # Retrieve the user
+#         user = User.objects.get(email=customer_email)
+        
+#         # Retrieve line items from the session
+#         line_items = stripe.checkout.Session.list_line_items(stripe_session_id)
+
+#         # Initialize receipt_url as None
+#         receipt_url = None
+
+#         # Try to get receipt_url from the checkout session
+#         checkout_session = stripe.checkout.Session.retrieve(stripe_session_id)
+#         receipt_url = checkout_session.get("payment_link")  # Extract receipt_url from the checkout session
+
+#         # Fallback to payment_intent if receipt_url is not available
+#         if not receipt_url:
+#             try:
+#                 # Retrieve the payment intent object
+#                 payment_intent_obj = stripe.PaymentIntent.retrieve(payment_intent)
+                
+#                 # Get the latest charge ID from the payment intent
+#                 latest_charge_id = payment_intent_obj.get("latest_charge")
+                
+#                 if latest_charge_id:
+#                     # Retrieve the charge object
+#                     charge = stripe.Charge.retrieve(latest_charge_id)
+#                     receipt_url = charge.get("receipt_url")  # Extract receipt_url from the charge
+#             except Exception as e:
+#                 print(f"Error retrieving receipt_url from payment_intent: {e}")
+
+#         # Process each line item
+#         for item in line_items["data"]:
+#             event_title = item["description"]
+#             quantity = item["quantity"]
+#             amount = item["amount_total"] / 100
+
+#             # Retrieve the lottery event
+#             event = LotteryEvent.objects.get(title=event_title)
+
+#             # Create PaymentLottery entry
+#             PaymentLottery.objects.create(
+#                 user=user,
+#                 lottery_event=event,
+#                 quantity=quantity,
+#                 amount=amount,
+#                 payment_status='completed',
+#                 stripe_session_id=stripe_session_id,
+#                 payment_at=timezone.now(), 
+#                 payment_intent=payment_intent_extracted,
+#                 receipt_url=receipt_url,  # Save the receipt_url
+#             )
+
+#             # Update sold tickets for the event
+#             event.sold_tickets += quantity
+#             event.save()
+         
+#         return JsonResponse({"message": "Payment processed successfully"}, status=200)
+        
+    
+#     return JsonResponse({"message": "Unhandled event"}, status=400)
+
+
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body
@@ -88,13 +224,24 @@ def stripe_webhook(request):
         stripe_session_id = session.get("id")
         payment_intent = session.get("payment_intent")
         
-        
         payment_intent_extracted = payment_intent.partition("_")[2] if "_" in payment_intent else payment_intent
         
         user = User.objects.get(email=customer_email)
         
-        
         line_items = stripe.checkout.Session.list_line_items(stripe_session_id)
+
+        receipt_url = None
+
+        try:
+            payment_intent_obj = stripe.PaymentIntent.retrieve(payment_intent)
+            
+            latest_charge_id = payment_intent_obj.get("latest_charge")
+            
+            if latest_charge_id:
+                charge = stripe.Charge.retrieve(latest_charge_id)
+                receipt_url = charge.get("receipt_url")  # Extract receipt_url from the charge
+        except Exception as e:
+            print(f"Error retrieving receipt_url from payment_intent: {e}")
 
         for item in line_items["data"]:
             event_title = item["description"]
@@ -112,11 +259,10 @@ def stripe_webhook(request):
                 payment_status='completed',
                 stripe_session_id=stripe_session_id,
                 payment_at=timezone.now(), 
-                #payment_intent=payment_intent,
                 payment_intent=payment_intent_extracted,
+                receipt_url=receipt_url,
             )
 
-            
             event.sold_tickets += quantity
             event.save()
          
@@ -124,7 +270,6 @@ def stripe_webhook(request):
         
     
     return JsonResponse({"message": "Unhandled event"}, status=400)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -150,7 +295,8 @@ def my_order_api(request):
         "payments": [], 
         "total_amount": 0, 
         "payment_at": None, 
-        "payment_status": None
+        "payment_status": None,
+        "receipt_url": None
     })
 
     for payment in user_payments:
@@ -159,9 +305,14 @@ def my_order_api(request):
             grouped_payments[session_id]["payment_id"] = payment.payment_intent
             grouped_payments[session_id]["payment_at"] = payment.payment_at
             grouped_payments[session_id]["payment_status"] = payment.payment_status
-
+            grouped_payments[session_id]["receipt_url"] = payment.receipt_url
         grouped_payments[session_id]["payments"].append(PaymentLotterySerializer(payment).data)
         grouped_payments[session_id]["total_amount"] += float(payment.amount)
 
     return Response(grouped_payments, status=status.HTTP_200_OK)
 
+
+from django.shortcuts import render
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
