@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         const checkusernameUrl = "{% url 'check_username' %}";
@@ -59,7 +61,9 @@
                 </h3>
                 <div class="signup-form-group-custom">
                     <input class="signup-input" type="password" id="signup-password" placeholder="Password (min 8 characters)" required>
-                    <span id="signup-toggle-password" class="signup-toggle-password">🙈</span>
+                    <span id="signup-toggle-password" class="signup-toggle-password">
+                        <img src="media/images/eye.png" alt="Show Password" class="toggle-eye-icon" >
+                    </span>
                     <span id="signup-password-error" class="signup-error-custom"></span><br>
                 </div>
 

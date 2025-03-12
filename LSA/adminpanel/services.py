@@ -53,10 +53,11 @@ from django.http import HttpResponseServerError
 
 def lottery_events(request):
     try:
+        email = request.session.get("google_user_email", None)
         events = LotteryEvent.objects.all()  # Fetch lottery events
         testimonials = Testimonial.objects.all()  # Fetch testimonials
 
-        return render(request, 'lottery_events.html', {"events": events, "testimonials": testimonials})
+        return render(request, 'lottery_events.html', {"events": events, "testimonials": testimonials,"email":email  })
     except Exception as e:
         return HttpResponseServerError(f"Error rendering lottery events page: {str(e)}")
 

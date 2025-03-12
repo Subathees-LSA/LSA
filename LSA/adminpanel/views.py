@@ -60,6 +60,8 @@ import random
 from .models import SocialLink
 from django.shortcuts import render
 from .models import Location
+from PaymentServices.models import PaymentLottery
+from django.db import models
 
 def create_dummy_contacts():
     dummy_contacts = []
@@ -804,9 +806,8 @@ class DeleteLotteryEventImageView(APIView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def add_to_cart(request):
-    print(request.data);
     event_slug = request.data.get('event_slug')
-    quantity = int(request.data.get('quantity', 1))  
+    quantity = int(request.data.get('quantity', 1))
 
     if not event_slug:
         return Response({"success": False, "message": "Event ID is required."}, status=400)
@@ -816,38 +817,50 @@ def add_to_cart(request):
         max_limit = event.max_limit
         event_title = event.title
 
-        
+        user = request.user if request.user.is_authenticated else None
+
+        purchased_quantity = 0
+        if user:
+            purchased_quantity = PaymentLottery.objects.filter(
+                user=user,
+                lottery_event=event,
+                payment_status='completed'
+            ).aggregate(total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+
         cart = json.loads(request.COOKIES.get('cart', '{}'))
-
-        
         current_quantity = int(cart.get(event_slug, {}).get('quantity', 0))
+        
         new_total_quantity = current_quantity + quantity
-
-    
-        if new_total_quantity > max_limit:
-            remaining_quantity = max_limit - current_quantity
+        
+        remaining_tickets = max_limit - purchased_quantity 
+        
+        if new_total_quantity > remaining_tickets:
+            set_remaining_ticket=remaining_tickets-current_quantity
+            if set_remaining_ticket < 0:
+               set_remaining_ticket = 0  # Ensure 'a' is never negative
             return Response({
                 "success": False,
                 "message": (
-                    f"Cannot add {quantity} tickets for '{event_title}'. Only {remaining_quantity} more tickets "
-                    f"can be added. Current quantity in cart: {current_quantity}. Max limit is {max_limit}."
+                    f"max limit reached . only {set_remaining_ticket} remaining tickets can be added"
+                    # f"Cannot add {quantity} tickets for '{event_title}'. Only {remaining_tickets} more tickets "
+                    # f"can be added. Current quantity in cart: {current_quantity}. Max limit is {max_limit}."
                 ),
                 "event_title": event_title,
                 "current_quantity": current_quantity,
-                "remaining_quantity": remaining_quantity,
+                "remaining_tickets": set_remaining_ticket,
                 "max_limit": max_limit
             }, status=400)
 
-        
+        # Update cart
         cart[event_slug] = {
             "title": event_title,
             "per_ticket_price": str(event.per_ticket_price),
-            "quantity": new_total_quantity, 
+            "quantity": new_total_quantity,
             "image": event.image.url if event.image else None,
-            "max_limit": max_limit
+            "max_limit": max_limit,
+            "remaining_tickets": remaining_tickets - quantity  # Update remaining tickets
         }
 
-        
         response = JsonResponse({
             "success": True,
             "message": (
@@ -856,51 +869,51 @@ def add_to_cart(request):
             ),
             "event_title": event_title,
             "tickets_added": quantity,
-            "current_quantity": new_total_quantity
+            "current_quantity": new_total_quantity,
+            "remaining_tickets": max_limit-purchased_quantity - new_total_quantity
         })
-        response.set_cookie('cart', json.dumps(cart), max_age=60 * 60 * 24 * 30)  
+        response.set_cookie('cart', json.dumps(cart), max_age=60 * 60 * 24 * 30)
         return response
 
     except LotteryEvent.DoesNotExist:
-        return Response({"success": False, "message": "Event not found."}, status=404)
-
+        return Response({"success": False, "message": "Event not found."}, status=404)   
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_cart(request):
-    
     cart = json.loads(request.COOKIES.get('cart', '{}'))
-    print("Original cart from cookies:", cart)
     updated_cart = {}
 
+    user = request.user if request.user.is_authenticated else None
     
     for event_slug, item in cart.items():
         try:
             event = LotteryEvent.objects.get(slug=event_slug)
-            print(f"Processing event: {event_slug}, Draw date: {event.draw_date}")
-            if event.draw_date > now():
-                updated_cart[event_slug] = item  # Include valid events
-                print(f"Event {event_slug} is valid and included in the updated cart.")
-            else:
-                print(f"Event {event_slug} is expired and removed from the cart.")
+            # Check if the event draw date is still in the future
+            # if event.draw_date > timezone.now():
+            if event.draw_date > timezone.now() and event.total_tickets > event.sold_tickets:
+                # Calculate the purchased quantity for logged-in users
+                purchased_quantity = 0
+                if user:
+                    purchased_quantity = PaymentLottery.objects.filter(
+                        user=user,
+                        lottery_event=event,
+                        payment_status='completed'
+                    ).aggregate(total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+
+                # Check if the user has already purchased the maximum number of tickets for this event
+                if purchased_quantity >= event.max_limit:
+                    continue  # Skip this event from the cart if max limit is reached
+
+                item['purchased_quantity'] = purchased_quantity
+                updated_cart[event_slug] = item
         except LotteryEvent.DoesNotExist:
-            print(f"Event {event_slug} does not exist and is removed from the cart.")
+            pass
 
-    print("Updated cart after filtering expired events:", updated_cart)
-
-    
+    # Set the updated cart in the cookie
     response = Response(updated_cart)
-
     
-    response.set_cookie(
-        'cart',
-        json.dumps(updated_cart),
-        max_age=7 * 24 * 60 * 60,  
-        httponly=True,  
-        secure=False,   
-        
-    )
-    print("Cart cookie updated with:", json.dumps(updated_cart))
+    response.set_cookie('cart', json.dumps(updated_cart), max_age=7 * 24 * 60 * 60, httponly=True, secure=False)
     return response
 
 
@@ -928,22 +941,70 @@ def remove_from_cart(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def update_cart(request):
-    print(request.data);
     event_slug = request.data.get('event_slug')
     quantity = int(request.data.get('quantity', 1))
 
-    cart = json.loads(request.COOKIES.get('cart', '{}'))
+    if not event_slug:
+        return Response({"success": False, "message": "Event slug is required."}, status=400)
 
-    if event_slug in cart:
-        max_limit = cart[event_slug].get('max_limit', 1)
-        if quantity <= max_limit:
-            cart[event_slug]['quantity'] = quantity
+    try:
+        event = LotteryEvent.objects.get(slug=event_slug)
+        max_limit = event.max_limit
 
-            response = JsonResponse({"success": True, "message": "Cart updated."})
-            response.set_cookie('cart', json.dumps(cart), max_age=60*60*24*30)  
+        # Check if user is logged in
+        user = request.user if request.user.is_authenticated else None
+
+        # Calculate total purchased tickets by the user for this event
+        purchased_quantity = 0
+        if user:
+            purchased_quantity = PaymentLottery.objects.filter(
+                user=user,
+                lottery_event=event,
+                payment_status='completed'
+            ).aggregate(total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+
+        cart = json.loads(request.COOKIES.get('cart', '{}'))
+
+        if event_slug in cart:
+            current_quantity = int(cart[event_slug].get('quantity', 0))
+            new_total_quantity = quantity
+
+            # Check if the new total quantity exceeds the max limit considering purchased tickets
+            if new_total_quantity + purchased_quantity > max_limit:
+                remaining_quantity = max_limit - (new_total_quantity + purchased_quantity)
+                return Response({
+                    "success": False,
+                    "message": (
+                        f"Cannot update to {quantity} tickets for '{event.title}'. Only {remaining_quantity} more tickets "
+                        f"can be added. Max limit is {max_limit}."
+                    ),
+                    "event_title": event.title,
+                    "current_quantity": current_quantity,
+                    "remaining_quantity": remaining_quantity,
+                    "max_limit": max_limit
+                }, status=400)
+
+            # Update cart
+            cart[event_slug]['quantity'] = new_total_quantity
+
+            response = JsonResponse({
+                "success": True,
+                "message": (
+                    f"'{event.title}' updated in cart. {quantity} tickets successfully updated. "
+                    f"Current quantity in cart: {new_total_quantity}."
+                ),
+                "event_title": event.title,
+                "tickets_updated": quantity,
+                "current_quantity": new_total_quantity
+            })
+            response.set_cookie('cart', json.dumps(cart), max_age=60 * 60 * 24 * 30)
             return response
 
-    return Response({"success": False, "message": "Failed to update cart."}, status=400)
+        return Response({"success": False, "message": "Event not found in cart."}, status=404)
+
+    except LotteryEvent.DoesNotExist:
+        return Response({"success": False, "message": "Event not found."}, status=404)
+
 
 
 class LotteryDetail(APIView):

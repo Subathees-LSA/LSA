@@ -17,7 +17,10 @@
         let isShowingAll_previous_winner = false; // Tracks whether "View All Winners" is currently expanded
         const winnersUrl_mainpage = "{% url 'api_get_previous_winners' %}"; 
         const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
-        
+         const csrfToken = "{{ csrf_token }}";
+        const kycStatusUrl = "{% url 'kyc-status' %}";
+        const kycUploadUrl = "{% url 'kyc-upload' %}";
+        const googleEmail = "{{ email|default:'' }}"; 
         window.onload = function() {
           updateCartCount(); 
           updateFavoritesCount();
@@ -46,9 +49,12 @@
      
     {% comment %} <h1 class="lottery_events_title">Lottery Events</h1> {% endcomment %}
 <br>
+<div class="categories-tabs-wrapper">
     <div class="categories-tabs" id="categories_tabs">
-        <!-- Tabs will be dynamically added here -->
+        <!-- Tabs will be dynamically inserted here -->
     </div>
+    <button id="scroll-right-arrow" class="scroll-arrow">➜</button>
+</div>
     <div class="categories-container" id="categories_container">
         <!-- Categories will be dynamically added here -->
     </div>
@@ -182,6 +188,69 @@
         <img src="/media/lottery_images/chatbot.png" alt="Chatbot" class="chatbot-img">
     </div>
 </div>
-    {% include 'footer.html' %}     
-</body>
+    {% include 'footer.html' %} 
+ <div id="kycModal" class="user_welcome_page_kyc-modal" style="display: none;">
+        <div class="user_welcome_page_kyc-modal-content">
+            <span class="user_welcome_page_close-modal" id="skipButton" onclick="closeKYCModal()">Skip</span>
+            <h2 id="kycModalTitle">KYC Verification</h2>
+            <p id="kycModalMessage">Please upload a valid ID image for verification.</p>
+            <form id="kycUploadForm">
+                <input type="file" id="kycImage" accept="image/*" onchange="kycimage_validateFileSize()" required />
+                <p id="error-message" class="user_welcome_page_errormessage"></p>
+                <button type="submit" class="user_welcome_page_submit-button">Upload KYC</button>
+            </form>
+            <button class="user_welcome_page_ok-button" id="okButton" onclick="closeKYCModal()">OK</button>
+        </div>
+    </div>
+    <div id="google-popup" class="google-popup">
+        <p>We found that this account already exists (<span id="google-user-email"></span>). We are linking it to your existing account.</p>
+    </div>    
+</body> 
+{% comment %} <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const kycUploadForm = document.getElementById("kycUploadForm");
+        if (kycUploadForm) {
+            kycUploadForm.onsubmit = function (e) {
+                e.preventDefault();
+                const errorMessageElement = document.getElementById("error-message");
+                const imageFile = document.getElementById("kycImage")?.files[0];
+    
+                if (imageFile && imageFile.size <= 500 * 1024) {
+                    const formData = new FormData();
+                    formData.append("image", imageFile);
+    
+                    fetch(kycUploadUrl, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": csrfToken,
+                        },
+                        body: formData,
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                alert("KYC image uploaded successfully.");
+                                closeKYCModal();
+                                if (typeof kycStatusUrl !== "undefined") {
+                                    checkKYCStatus();
+                                }
+                            } else if (data.image) {
+                                errorMessageElement.textContent = data.image[0];
+                            } else {
+                                console.error("KYC upload error:", data);
+                            }
+                        })
+                        .catch(error => console.error("Error uploading KYC image:", error));
+                } else {
+                    errorMessageElement.textContent = "File size must be less than 500KB.";
+                }
+            };
+        } else {
+    
+        }
+    });
+    
+</script> {% endcomment %}
+
 </html>

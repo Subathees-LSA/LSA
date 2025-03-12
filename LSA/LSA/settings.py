@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'user_dashboard',
     'adminpanel',
     'social_django',
+    'PaymentServices',
 ]
 
 
@@ -65,6 +66,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.get_username',
     'user_registration.pipeline.link_to_existing_user',  
     'social_core.pipeline.user.create_user',
+    'user_registration.pipeline.block_user_check', #block user
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'user_registration.pipeline.save_user_profile',

@@ -1815,6 +1815,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const faqTitleMain = document.getElementById('faq-title-main');
     const faqText = document.getElementById('faq-text');
 
+    // Read 'blocked' from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        let isBlocked = urlParams.get("blocked") === "true" ? "true" : sessionStorage.getItem("isBlocked") || "false";
     // Define unique content for each FAQ item
     const faqContent = {
         "faq1": "Yes, we use advanced SSL encryption and adhere to strict data protection policies to ensure your information is safe.",
@@ -1826,17 +1829,22 @@ document.addEventListener("DOMContentLoaded", () => {
         "faq7": "If you wish to close your account, contact customer support for assistance. You may also use self-exclusion options in your account settings.",
         "faq8": "Some details, like your password, can be updated directly in your account settings. For sensitive information like your registered email, contact support.",
         "faq9": "The minimum deposit amount varies by payment method but is generally [insert amount, e.g., $10].",
-        "faq10": "Log in to your account, navigate to the “Payments” section, and add or update your preferred payment methods."
+        "faq10": "Log in to your account, navigate to the “Payments” section, and add or update your preferred payment methods.",
+        "faq11": "Your account may be blocked due to suspicious activity, multiple failed logins, or policy violations. Unauthorized automation or unpaid dues can also restrict access. If this is a mistake, contact gurutech2620@gmail.com for help."
     };
 
-    // Display the first FAQ item by default
-    if (faqItems.length > 0) {
-        const firstFaq = faqItems[0];
-        const targetId = firstFaq.getAttribute('data-target');
-        firstFaq.classList.add('expanded');
-        firstFaq.querySelector('.icon').textContent = '-';
-        faqTitleMain.textContent = firstFaq.querySelector('.faq-title').textContent;
-        faqText.textContent = faqContent[targetId];
+
+
+    // Determine the default FAQ based on the blocked status
+    let defaultFaq = isBlocked === "true" ? "faq11" : "faq1";
+    let defaultFaqItem = document.querySelector(`[data-target="${defaultFaq}"]`);
+
+    // Display the default FAQ
+    if (defaultFaqItem) {
+        defaultFaqItem.classList.add('expanded');
+        defaultFaqItem.querySelector('.icon').textContent = '-';
+        faqTitleMain.textContent = defaultFaqItem.querySelector('.faq-title').textContent;
+        faqText.textContent = faqContent[defaultFaq];
     }
 
     // Add click event listeners to each FAQ item
@@ -1866,6 +1874,10 @@ document.addEventListener("DOMContentLoaded", () => {
             faqText.textContent = faqContent[targetId] || "No detailed content available for this FAQ.";
         });
     });
+ // Clear sessionStorage when browser is closed
+ window.addEventListener("beforeunload", () => {
+    sessionStorage.removeItem("isBlocked");
+});
 });
 
 // Wait for the DOM to load
@@ -2078,15 +2090,25 @@ $(document).ready(function () {
         validatePassword($(this).val(), 'login-password-error');
     });
 
-    // Toggle password visibility
-    function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
-        $(toggleButtonId).on('click', function () {
-            const passwordField = $(passwordFieldId);
-            const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-            passwordField.attr('type', type);
-            $(this).text(type === 'password' ? '🙈' : '👁️');
-        });
-    }
+    // // Toggle password visibility
+    // function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
+    //     $(toggleButtonId).on('click', function () {
+    //         const passwordField = $(passwordFieldId);
+    //         // const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+    //         // passwordField.attr('type', type);
+    //         // $(this).text(type === 'password' ? '🙈' : '👁️');
+
+    //         const icon = $(this).find("img");
+    //     const isPassword = passwordField.attr('type') === 'password';
+
+    //     // Toggle password visibility
+    //     passwordField.attr('type', isPassword ? 'text' : 'password');
+
+    //     // Toggle the eye icon between `eye.svg` and `eye-slash.svg`
+    //     const newIconSrc = isPassword ? "/media/images/eye-slash.svg" : "/media/images/eye.svg";
+    //     icon.attr("src", newIconSrc);
+    //     });
+    // }
     togglePasswordVisibility('#login-toggle-password', '#login-password');
 
 
@@ -2252,12 +2274,27 @@ $(document).ready(function () {
             error: function (xhr) {
                 // Handle errors based on the server response
                 if (xhr.status === 403 && xhr.responseJSON && xhr.responseJSON.error === "You are blocked.") {
-                    $('#login-error').text('You are blocked.');
+                    // $('#login-error').text('You are blocked.');
+                    sessionStorage.setItem("isBlocked", "true"); // Store blocked status
+                    $('#login_blocked-modal').show(); 
                 } else {
+                    sessionStorage.setItem("isBlocked", "false"); // Store unblocked status
                     $('#login-error').text('Invalid email or password.');
                 }
             }
         });
+    });
+
+       // Block User Modal Close Handling
+       $('.login_blocked-close').on('click', function () {
+        $('#login_blocked-modal').hide();
+    });
+
+    // Close modal when clicking outside
+    $(window).on('click', function (event) {
+        if ($(event.target).is('#login_blocked-modal')) {
+            $('#login_blocked-modal').hide();
+        }
     });
     // Initialize functionality
     populateFormFields();
@@ -2465,7 +2502,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (typeof kycStatusUrl !== "undefined") {
         checkKYCStatus();
+        
     }
+    handleKYCForm();
+    lottery_events_fetch();
 });
 if (typeof googleEmail !== "undefined" && googleEmail) {
 
@@ -2564,8 +2604,52 @@ function kycimage_validateFileSize() {
         errorMessageElement.textContent = "";
     }
 }
-document.addEventListener("DOMContentLoaded", function () {
+// document.addEventListener("DOMContentLoaded", function () {
 
+//     const kycUploadForm = document.getElementById("kycUploadForm");
+//     if (kycUploadForm) {
+//         kycUploadForm.onsubmit = function (e) {
+//             e.preventDefault();
+//             const errorMessageElement = document.getElementById("error-message");
+//             const imageFile = document.getElementById("kycImage")?.files[0];
+
+//             if (imageFile && imageFile.size <= 500 * 1024) {
+//                 const formData = new FormData();
+//                 formData.append("image", imageFile);
+
+//                 fetch(kycUploadUrl, {
+//                     method: "POST",
+//                     headers: {
+//                         "X-CSRFToken": csrfToken,
+//                     },
+//                     body: formData,
+//                 })
+//                     .then(response => response.json())
+//                     .then(data => {
+//                         if (data.status === "success") {
+//                             alert("KYC image uploaded successfully.");
+//                             closeKYCModal();
+//                             if (typeof kycStatusUrl !== "undefined") {
+//                                 checkKYCStatus();
+//                             }
+//                         } else if (data.image) {
+//                             errorMessageElement.textContent = data.image[0];
+//                         } else {
+//                             console.error("KYC upload error:", data);
+//                         }
+//                     })
+//                     .catch(error => console.error("Error uploading KYC image:", error));
+//             } else {
+//                 errorMessageElement.textContent = "File size must be less than 500KB.";
+//             }
+//         };
+//     } else {
+
+//     }
+// });
+
+
+function handleKYCForm() {
     const kycUploadForm = document.getElementById("kycUploadForm");
     if (kycUploadForm) {
         kycUploadForm.onsubmit = function (e) {
@@ -2603,10 +2687,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 errorMessageElement.textContent = "File size must be less than 500KB.";
             }
         };
-    } else {
-
     }
-});
+}
+
+
 
 //admin -user_list_details.html
 $(document).ready(function () {
@@ -2960,9 +3044,23 @@ function validateEmail(email, errorElementId) {
 function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
     $(toggleButtonId).on('click', function () {
         const passwordField = $(passwordFieldId);
-        const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-        passwordField.attr('type', type);
-        $(this).text(type === 'password' ? '🙈' : '👁️');
+        // const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+        // passwordField.attr('type', type);
+        // // $(this).text(type === 'password' ? '🙈' : '👁️');
+        // // Toggle the eye icon between fa-eye and fa-eye-slash
+        // $(this).find("i").toggleClass("fa-eye fa-eye-slash");
+        
+        const icon = $(this).find("img");
+        const isPassword = passwordField.attr('type') === 'password';
+
+        // Toggle password visibility
+        passwordField.attr('type', isPassword ? 'text' : 'password');
+
+        // Toggle the eye icon between `eye.svg` and `eye-slash.svg`
+        const newIconSrc = isPassword ? "/media/images/eye-slash.png" : "/media/images/eye.png";
+        icon.attr("src", newIconSrc);
+    
+    
     });
 }
 
@@ -4386,6 +4484,8 @@ function lottery_events_fetch() {
             .then(response => response.json())
             .then(data => {
                 displayLotteryEvents(data);
+                checkKYCStatus();
+                handleKYCForm();
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
@@ -4622,7 +4722,44 @@ function populateCategoryTabs(categories) {
         };
         tabsContainer.appendChild(tab);
     });
+     // Add right arrow for scrolling
+    addRightScrollArrow();
 }
+
+function addRightScrollArrow() {
+    let rightArrow = document.getElementById('scroll-right-arrow');
+    const tabsContainer = document.getElementById('categories_tabs');
+    const wrapper = tabsContainer.parentElement;
+
+    if (!rightArrow) {
+        rightArrow = document.createElement('button');
+        rightArrow.id = 'scroll-right-arrow';
+        rightArrow.innerHTML = '➜';
+        rightArrow.classList.add('scroll-arrow');
+        wrapper.appendChild(rightArrow);
+    }
+
+    
+    rightArrow.style.fontSize = 'x-large';
+    rightArrow.style.fontWeight = 'bold';
+
+    rightArrow.onclick = function () {
+        tabsContainer.scrollBy({ left: 100, behavior: 'smooth' });
+    };
+
+    function updateArrowVisibility() {
+        const isOverflowing = tabsContainer.scrollWidth > tabsContainer.clientWidth;
+        const isScrolledToEnd = tabsContainer.scrollLeft >= (tabsContainer.scrollWidth - tabsContainer.clientWidth - 1);
+        
+        // Show arrow only if scrolling is possible and not fully scrolled
+        rightArrow.style.display = (isOverflowing && !isScrolledToEnd) ? 'block' : 'none';
+    }
+
+    tabsContainer.addEventListener('scroll', updateArrowVisibility);
+    window.addEventListener('resize', updateArrowVisibility);
+    updateArrowVisibility();
+}
+
 function setupScrollHandler() {
     const navbar = document.querySelector('header');
     const navbarHeight = navbar ? navbar.offsetHeight : 0;
@@ -5190,63 +5327,74 @@ function fetchCartItems() {
         });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    fetchCartItems();
+    
+});
 function displayCartItems(cart) {
     const container = document.getElementById('cart_items_container');
     const totalElement = document.getElementById('cart_total');
     const subtotalElement = document.getElementById('totalsub');
     container.innerHTML = ''; // Clear existing items
     let total = 0;
-
+    
     if (Object.keys(cart).length === 0) {
-        container.innerHTML = '<p>Your cart is empty.</p>';
+        container.innerHTML = '<p id="empty-cart-page">Your cart is empty.</p>';
         totalElement.textContent = '0.00';
         subtotalElement.textContent = '0.00';
         return;
     }
 
     for (const [eventSlug, item] of Object.entries(cart)) {
+        
         const itemTotal = parseFloat(item.per_ticket_price) * item.quantity;
+        // Skip items with zero quantity
+        if (item.quantity === 0) {
+            continue;
+        }
         total += itemTotal;
-
+        
         const cartItem = document.createElement('div');
         cartItem.classList.add('cart_item');
 
-        cartItem.innerHTML = `
-        ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-image" />` : ''}
+        const purchasedQuantity = item.purchased_quantity || 0;
+        const remainingTickets = item.max_limit - purchasedQuantity;
         
-        <div class="item-details">
-            <h3>${item.title}</h3>
-            <p class="cartprice">Per Ticket Price  £${item.per_ticket_price}</p> <!-- Price under title -->
-        </div>
-    
-        <div class="quantity-controls">
-            <p>Quantity:</p>
-            <button class="quantity-decrease" data-event-slug="${eventSlug}">-</button>
-            <input type="number" min="1" max="${item.max_limit}" value="${item.quantity}" class="quantity-input" data-event-slug="${eventSlug}" />
-            <button class="quantity-increase" data-event-slug="${eventSlug}">+</button>
-        </div>
-    
-        <div class="total-section">
-            <p>Total Amount:</p>
-            <input type="number" min="${item.per_ticket_price}" step="${item.per_ticket_price}" value="${itemTotal.toFixed(2)}" class="total-input" data-event-slug="${eventSlug}" />
-        </div>
-    
-        <button class="remove_from_cart_button" data-event-slug="${eventSlug}"></button>
-        <span class="max-limit-message"></span> <!-- Message span -->
-    `;
-
+        // Ensure the quantity does not exceed the remaining tickets
+        const adjustedQuantity = Math.min(item.quantity, remainingTickets);
+        
+        cartItem.innerHTML = `
+            ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-image" />` : ''}
+            <div class="item-details">
+                <h3>${item.title}</h3>
+                <p class="cartprice">Per Ticket Price £${item.per_ticket_price}</p>
+                <p class="remaining-tickets">Remaining Tickets: ${remainingTickets}</p>
+            </div>
+            <div class="quantity-controls">
+                <p>Quantity:</p>
+                <button class="quantity-decrease" data-event-slug="${eventSlug}">-</button>
+                <input type="number" min="1" max="${remainingTickets}" value="${adjustedQuantity}" class="quantity-input" data-event-slug="${eventSlug}" />
+                <button class="quantity-increase" data-event-slug="${eventSlug}">+</button>
+            </div>
+            <div class="total-section">
+                <p>Total Amount : £</p>
+                <input type="number" min="${item.per_ticket_price}" step="${item.per_ticket_price}" value="${(adjustedQuantity * item.per_ticket_price).toFixed(2)}" class="total-input" data-event-slug="${eventSlug}"/>
+            </div>
+            <button class="remove_from_cart_button" data-event-slug="${eventSlug}"></button>
+            <span class="max-limit-message"></span>
+        `;
 
         container.appendChild(cartItem);
     }
 
     totalElement.textContent = `£${total.toFixed(2)}`;
     subtotalElement.textContent = `£${total.toFixed(2)}`;
+
     const removeButtons = document.querySelectorAll('.remove_from_cart_button');
     removeButtons.forEach(button => {
         button.addEventListener('click', removeFromCart);
     });
 
-    // Attach event listeners for quantity and total inputs
     attachCartEventListeners(cart);
 
     // Add focus-out event listener for quantity inputs
@@ -5265,9 +5413,20 @@ function displayCartItems(cart) {
                 messageSpan.textContent = `Exceeds max limit of ${maxLimit}. Please enter a valid quantity.`;
                 messageSpan.style.color = 'red';
                 messageSpan.style.fontSize = '16px';
-            } else if (newQuantity < 1) {
-                event.target.value = 1; // Reset to minimum limit
-            } else {
+            // } else if (newQuantity < 1) {
+            //     event.target.value = 1; // Reset to minimum limit
+        } else if (newQuantity < 1) {
+            event.target.value = 1; // Reset to minimum limit
+            const parentElement = event.target.closest('.cart_item');
+            const totalInput = parentElement.querySelector('.total-input');
+            const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
+            
+            // Update total input field when quantity changes
+            totalInput.value = (1 * perTicketPrice).toFixed(2);
+        
+            cart[eventSlug].quantity = 1;
+            updateCart_total_and_subtotal(cart);
+        }else {
                 messageSpan.textContent = ''; // Clear message
                 updateCartQuantity(event, cart, newQuantity - cart[eventSlug].quantity);
             }
@@ -5275,62 +5434,159 @@ function displayCartItems(cart) {
     });
 
     // // Add focus-out event listener for total inputs
+    
+//     const totalInputs = container.querySelectorAll('.total-input');
 
-    const totalInputs = container.querySelectorAll('.total-input');
+// totalInputs.forEach(input => {
+//     input.addEventListener('blur', event => {
+//         const eventSlug = event.target.getAttribute('data-event-slug');
+//         const newTotal = parseFloat(event.target.value);
+//         const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
+//         const maxLimit = parseInt(cart[eventSlug].max_limit);
+//         const maxTotal = perTicketPrice * maxLimit;
 
-    totalInputs.forEach(input => {
-        input.addEventListener('blur', event => {
-            const eventSlug = event.target.getAttribute('data-event-slug');
-            const newTotal = parseFloat(event.target.value);
-            const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
-            const maxLimit = parseInt(cart[eventSlug].max_limit);
-            const maxTotal = perTicketPrice * maxLimit;
+//         const parentElement = event.target.closest('.cart_item');
+//         const messageSpan = parentElement.querySelector('.max-limit-message');
+//         const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
 
-            const parentElement = event.target.closest('.cart_item');
-            const messageSpan = parentElement.querySelector('.max-limit-message');
-            const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
+        
+        
+
+//         if (newTotal > maxTotal) {
+//             event.target.value = maxTotal.toFixed(2); // Reset to max total
+//             messageSpan.textContent = `Total exceeds max allowable amount (£${maxTotal.toFixed(2)}).`;
+//             messageSpan.style.color = 'red';
+//             messageSpan.style.fontSize = '16px';
+//             messageSpan.style.display = 'inline';
+
+//             // Set quantity to max limit and update cart
+//             const maxQuantity = maxLimit;
+//             quantityInputs.value = maxQuantity;
+//             updateCartQuantityFromTotal(cart, eventSlug, maxQuantity);
+//             return;
+//         } else {
+//             // Clear error message and update quantity dynamically
+//             messageSpan.textContent = '';
+//             const calculatedQuantity = Math.floor(newTotal / perTicketPrice); // Calculate based on valid total
+
+//             if (calculatedQuantity >= 1) {
+//                 quantityInputs.value = calculatedQuantity; // Update quantity input
+//                 cart[eventSlug].quantity = calculatedQuantity; // Update cart object
+
+//                 // Update cart cookie
+//                 fetch('/api/update-cart/', {
+//                     method: 'POST',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'X-CSRFToken': getCSRFToken(),
+//                     },
+//                     body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
+//                 }).then(() => fetchCartItems()); // Refresh cart display
+//             }
+//         }
+//     });
+// });
+// // Add focus-out event listener for total inputs
+const totalInputs = container.querySelectorAll('.total-input');
 
 
+totalInputs.forEach(input => {
+    input.addEventListener('blur', event => {
+        const eventSlug = event.target.getAttribute('data-event-slug');
+        let newTotal = parseFloat(event.target.value);
+        const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
+        const maxLimit = parseInt(cart[eventSlug].max_limit);
+        const maxTotal = perTicketPrice * maxLimit;
+       
+        const purchasedQuantity = cart[eventSlug].purchased_quantity || 0;
+        const remainingTickets = maxLimit - purchasedQuantity; // Remaining tickets
+        const maxAllowedTotal = perTicketPrice * remainingTickets; // Remaining tickets total
 
+        const parentElement = event.target.closest('.cart_item');
+        const messageSpan = parentElement.querySelector('.max-limit-message');
+        const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
 
-            if (newTotal > maxTotal) {
-                event.target.value = maxTotal.toFixed(2); // Reset to max total
-                messageSpan.textContent = `Total exceeds max allowable amount (£${maxTotal.toFixed(2)}).`;
-                messageSpan.style.color = 'red';
-                messageSpan.style.fontSize = '16px';
-                messageSpan.style.display = 'inline';
+        let calculatedQuantity = Math.floor(newTotal / perTicketPrice);
 
-                // Set quantity to max limit and update cart
-                const maxQuantity = maxLimit;
-                quantityInputs.value = maxQuantity;
-                updateCartQuantityFromTotal(cart, eventSlug, maxQuantity);
-                return;
-            } else {
-                // Clear error message and update quantity dynamically
-                messageSpan.textContent = '';
-                const calculatedQuantity = Math.floor(newTotal / perTicketPrice); // Calculate based on valid total
+        // ✅ Fix: If total input is 0 or empty, set it to the remaining ticket price
+        if (isNaN(newTotal) || newTotal <= 0) {
+            calculatedQuantity = remainingTickets;
+            newTotal = remainingTickets * perTicketPrice;
+            event.target.value = newTotal.toFixed(2);  // Update the total input field
+        }
 
-                if (calculatedQuantity >= 1) {
-                    quantityInputs.value = calculatedQuantity; // Update quantity input
-                    cart[eventSlug].quantity = calculatedQuantity; // Update cart object
+      //   // ✅ Fix: Update calculated quantity based on the corrected total
+      //   calculatedQuantity = Math.floor(newTotal / perTicketPrice);
 
-                    // Update cart cookie
-                    fetch('/api/update-cart/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken(),
-                        },
-                        body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
-                    }).then(() => fetchCartItems()); // Refresh cart display
-                }
-            }
-        });
+        if (calculatedQuantity > remainingTickets) {
+            event.target.value = maxAllowedTotal.toFixed(2);
+            messageSpan.textContent = `Total of remaining ticket price: £${maxAllowedTotal.toFixed(2)}.`;
+            messageSpan.style.color = 'red';
+            messageSpan.style.fontSize = '16px';
+            messageSpan.style.display = 'inline';
+
+            quantityInputs.value = remainingTickets;
+            return;
+        }
+
+        if (calculatedQuantity > maxLimit) {
+            event.target.value = maxTotal.toFixed(2);
+            messageSpan.textContent = `Max limit reached: ${maxLimit} tickets (Total: £${maxTotal.toFixed(2)}).`;
+            messageSpan.style.color = 'red';
+            messageSpan.style.fontSize = '16px';
+            messageSpan.style.display = 'inline';
+
+            quantityInputs.value = maxLimit;
+            return;
+        }
+
+        if (calculatedQuantity >= 1) {
+            quantityInputs.value = calculatedQuantity;
+            cart[eventSlug].quantity = calculatedQuantity;
+
+            // Update cart cookie
+            fetch('/api/update-cart/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
+            }).then(() => fetchCartItems());
+        }
+    });
+});
+
+}
+function updateCart_total_and_subtotal(cart) {
+    let total = 0;
+
+    Object.values(cart).forEach(item => {
+        total += item.per_ticket_price * item.quantity;
     });
 
+    document.getElementById('cart_total').textContent = `£${total.toFixed(2)}`;
+    document.getElementById('totalsub').textContent = `£${total.toFixed(2)}`;
 }
 
 function attachCartEventListeners(cart) {
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    quantityInputs.forEach(input => {
+        input.addEventListener('change', (event) => {
+            const eventSlug = event.target.getAttribute('data-event-slug');
+            const remainingTickets = cart[eventSlug].max_limit - (cart[eventSlug].purchased_quantity || 0);
+            const newQuantity = parseInt(event.target.value);
+
+            if (newQuantity > remainingTickets) {
+                event.target.value = remainingTickets;
+                cart[eventSlug].quantity = remainingTickets;
+                updateCart(cart);
+            } else {
+                cart[eventSlug].quantity = newQuantity;
+                updateCart(cart);
+            }
+        });
+    });
     const increaseButtons = document.querySelectorAll('.quantity-increase');
     const decreaseButtons = document.querySelectorAll('.quantity-decrease');
 
@@ -5347,28 +5603,27 @@ function updateCartQuantity(event, cart, delta) {
     const eventSlug = event.target.getAttribute('data-event-slug');
     const currentQuantity = parseInt(cart[eventSlug].quantity);
     const maxLimit = parseInt(cart[eventSlug].max_limit);
+    const purchasedQuantity = parseInt(cart[eventSlug].purchased_quantity || 0);
+    const remainingTickets = maxLimit - purchasedQuantity;
     const newQuantity = currentQuantity + delta;
-
+    
     const parentElement = event.target.closest('.cart_item');
     const messageSpan = parentElement.querySelector('.max-limit-message');
 
-    if (newQuantity > maxLimit) {
-        // Show max limit message
+    if (newQuantity > remainingTickets) {
         if (messageSpan) {
-            messageSpan.textContent = `Max limit of ${maxLimit} reached.`;
-            messageSpan.style.color = "red"; // Highlight in red
-            messageSpan.style.fontSize = "16px"; // Adjust font size
+            messageSpan.textContent = `Max limit of ${remainingTickets} reached.`;
+            messageSpan.style.color = "red";
+            messageSpan.style.fontSize = "16px";
         }
         return;
     } else if (messageSpan) {
-        // Clear message if within limit
         messageSpan.textContent = '';
     }
 
     if (newQuantity >= 1) {
         cart[eventSlug].quantity = newQuantity;
 
-        // Update cart cookie
         fetch('/api/update-cart/', {
             method: 'POST',
             headers: {
@@ -5379,40 +5634,39 @@ function updateCartQuantity(event, cart, delta) {
         }).then(() => fetchCartItems());
     }
 }
+// function updateCartQuantityFromTotal(cart, eventSlug, newQuantity) {
+//     const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
+//     const maxLimit = parseInt(cart[eventSlug].max_limit);
+//     const newTotal = newQuantity * perTicketPrice;
 
-function updateCartQuantityFromTotal(cart, eventSlug, newQuantity) {
-    const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
-    const maxLimit = parseInt(cart[eventSlug].max_limit);
-    const newTotal = newQuantity * perTicketPrice;
+//     // Handle error if maxTotal exceeds maxLimit
+//     if (newTotal > maxTotal) {
+//         messageSpan.textContent = `Error: Max total amount exceeds the limit of ${maxTotal.toFixed(2)}!`;
+//         messageSpan.style.color = 'red';
+//         messageSpan.style.fontSize = '16px';
+//         messageSpan.style.display = 'inline';
+//         quantityInputs.value = 1; // Reset quantity to a default value like 1
+//         updateCartQuantityFromTotal(cart, eventSlug, 1); // Reset to a safe quantity
+//         return; // Stop execution if max total exceeds limit
+//     }
 
-    // Handle error if maxTotal exceeds maxLimit
-    if (newTotal > maxTotal) {
-        messageSpan.textContent = `Error: Max total amount exceeds the limit of ${maxTotal.toFixed(2)}!`;
-        messageSpan.style.color = 'red';
-        messageSpan.style.fontSize = '16px';
-        messageSpan.style.display = 'inline';
-        quantityInputs.value = 1; // Reset quantity to a default value like 1
-        updateCartQuantityFromTotal(cart, eventSlug, 1); // Reset to a safe quantity
-        return; // Stop execution if max total exceeds limit
-    }
+//     if (newQuantity > maxLimit) {
+//         newQuantity = maxLimit; // Enforce max limit
+//     }
 
-    if (newQuantity > maxLimit) {
-        newQuantity = maxLimit; // Enforce max limit
-    }
+//     // Update cart object
+//     cart[eventSlug].quantity = newQuantity;
 
-    // Update cart object
-    cart[eventSlug].quantity = newQuantity;
-
-    // Update cart cookie
-    fetch('/api/update-cart/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken(),
-        },
-        body: JSON.stringify({ event_slug: eventSlug, quantity: newQuantity }),
-    }).then(() => fetchCartItems()); // Refresh cart display
-}
+//     // Update cart cookie
+//     fetch('/api/update-cart/', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'X-CSRFToken': getCSRFToken(),
+//         },
+//         body: JSON.stringify({ event_slug: eventSlug, quantity: newQuantity }),
+//     }).then(() => fetchCartItems()); // Refresh cart display
+// }
 
 
 
@@ -5443,9 +5697,64 @@ function removeFromCart(event) {
         });
 }
 
-function proceedToCheckout() {
-    alert('Proceeding to checkout...');
+function getCartData() {
+    let cart = {};
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        const eventSlug = input.getAttribute('data-event-slug');
+        const quantity = parseInt(input.value, 10);
+        if (quantity > 0) {
+            cart[eventSlug] = quantity;
+        }
+    });
+    return cart;
 }
+function proceedToCheckout() {
+    const cartData = getCartData();
+    if (Object.keys(cartData).length === 0) {
+        alert('Your cart is empty.');
+        return;
+    }
+
+    // First, check if the user is authenticated
+    fetch(`/check-user-authentication/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+'X-CSRFToken': getCookie('csrftoken'),
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            // Redirect to login page if user is not authenticated
+            window.location.href = data.redirect_url;
+        } else {
+            // If user is authenticated, proceed to create checkout session
+            fetch(`/create-checkout-session/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ cart: cartData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.checkout_url) {
+                    
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Error creating checkout session');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 
 
 //lottery_detail.html
@@ -5568,18 +5877,20 @@ function fetchLotteryEventDetails(eventSlug) {
                 }
             }
 
-            function updateTicketCount() {
-                let enteredAmount = parseFloat(amountInput.value);
-                if (isNaN(enteredAmount)) return;
+           function updateTicketCount() {
+    let enteredAmount = parseFloat(amountInput.value);
+    if (isNaN(enteredAmount)) return;
 
-                let calculatedTickets = Math.floor(enteredAmount / perTicketPrice);
-                if (calculatedTickets < miniLimit || calculatedTickets > maxLimit) {
-                    showError(`Enter an amount corresponding to ${miniLimit} to ${maxLimit} tickets.`);
-                } else {
-                    clearError();
-                    ticketInput.value = calculatedTickets;
-                }
-            }
+    let calculatedTickets = Math.floor(enteredAmount / perTicketPrice);
+    let maxAmount = maxLimit * perTicketPrice;
+
+    if (calculatedTickets < miniLimit || calculatedTickets > maxLimit) {
+        showError(`Enter an amount between £${(miniLimit * perTicketPrice).toFixed(2)} and £${maxAmount.toFixed(2)}.`);
+    } else {
+        clearError();
+        ticketInput.value = calculatedTickets;
+    }
+}
 
             function adjustTicketInput() {
                 let ticketCount = parseInt(ticketInput.value);
@@ -5952,7 +6263,7 @@ function privacysecurity() {
             $('#privacy-phone-error').text("Phone number is required.");
             isValid = false;
         } else if (!phoneRegex.test(phoneNumber)) {
-            $('#privacy-phone-error').text("Enter a valid UK phone number starting with (+44)1234567890.");
+            $('#privacy-phone-error').text("Enter a valid UK phone number starting with +441234567890.");
             isValid = false;
         }
 
@@ -6018,5 +6329,198 @@ $(window).on('load', function () {
         // Fade out the preloader once the page is fully loaded
         $("#preloader").fadeOut(500);
     }, 1000); // Delay 1 second for a smoother transition
+});
+
+//my-orders.html
+$(document).ready(function () {
+    function fetchOrders(filter) {
+        $.ajax({
+            url: `/api/my-orders/?filter=${filter}`,
+            type: "GET",
+            dataType: "json",
+            headers: { "X-CSRFToken": my_orders_csrfToken }, // Use a global csrfToken variable
+            success: function (data) {
+                let container = $("#myorders-container");
+                container.empty();
+
+                if (Object.keys(data).length === 0) {
+                    container.html("<p>No orders yet.</p>");
+                    return;
+                }
+
+                $.each(data, function (sessionId, group) {
+                    let orderHTML = `
+                        <div class="myorder-group">
+                            <h4>Order ID: <strong>${group.payment_id}</strong></h4>
+                            <span class="myorder-status-badge ${group.payment_status === 'completed' ? 'myorder-completed' : 'myorder-canceled'}">
+                                ${group.payment_status.charAt(0).toUpperCase() + group.payment_status.slice(1)}
+                            </span>
+                            <p><i class="fa fa-calendar"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleDateString() : 'N/A'}
+                                &nbsp; <i class="fa fa-clock"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleTimeString() : 'N/A'}</p>
+                            <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>`
+                    // Add Receipt Link (Outside Modal)
+                if (group.receipt_url) {
+                    orderHTML += `<p><a href="${group.receipt_url}" target="_blank" class="receipt-link">View Receipt</a></p>`;
+                }
+                            orderHTML +=`<table class="myorder-table">
+                                <thead>
+                                    <tr>
+                                        <th>Quantity</th>
+                                        <th>Lottery</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                    $.each(group.payments.slice(0, 2), function (index, payment) {
+                        orderHTML += `
+                            <tr>
+                                <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
+                                <td>${payment.lottery_event_title}</td>
+                            </tr>`;
+                    });
+
+                    orderHTML += `</tbody></table>`;
+
+                    if (group.payments.length > 2) {
+                        orderHTML += `<p>${group.payments.length - 2} More items</p>`;
+                    }
+
+                    orderHTML += `
+                        <div class="myorder-button-container">
+                            <button class="myorder-button myorder-details-button" onclick="showModal('${sessionId}')">Details</button>
+                         <button class="myorder-button myorder-help-button" onclick="#">Get Help</button>
+                            </div>
+
+                        <div id="myorder-modal-${sessionId}" class="myorder-modal">
+                            <div class="myorder-modal-content">
+                                <span class="myorder-close" onclick="closeModal('${sessionId}')">&times;</span>
+                                <h4>Order ID: <strong>${group.payment_id}</strong></h4>
+                                <p>Status: ${group.payment_status.charAt(0).toUpperCase() + group.payment_status.slice(1)}</p>
+                                <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>
+                                <table class="myorder-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Quantity</th>
+                                            <th>Lottery</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+                    $.each(group.payments, function (index, payment) {
+                        orderHTML += `
+                                        <tr>
+                                            <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
+                                            <td>${payment.lottery_event_title}</td>
+                                            <td>£${parseFloat(payment.amount).toFixed(2)}</td>
+                                        </tr>`;
+                    });
+                    if (group.receipt_url) {
+                        orderHTML += `<p><a href="${group.receipt_url}" target="_blank" class="receipt-link">View Receipt</a></p>`;
+                    }
+                    orderHTML += `</tbody></table></div></div></div>`;
+
+                    container.append(orderHTML);
+                });
+            },
+            error: function () {
+                $("#orders-container").html("<p>Error loading orders.</p>");
+            }
+        });
+    }
+
+    // Initial load
+    fetchOrders("all");
+
+    // Event listener for filter change
+    $("#myorder-filter").change(function () {
+        let selectedFilter = $(this).val();
+        fetchOrders(selectedFilter);
+    });
+
+//     // Global functions for modal handling
+    window.showModal = function (sessionId) {
+        $("#myorder-modal-" + sessionId).show();
+    }
+
+    window.closeModal = function (sessionId) {
+        $("#myorder-modal-" + sessionId).hide();
+    }
+    // Close modal when clicking outside of it
+    $(document).on("click", function (event) {
+        $(".myorder-modal").each(function () {
+            if ($(event.target).closest(".myorder-modal-content").length === 0 && $(event.target).hasClass("myorder-modal")) {
+                $(this).hide();
+            }
+        });
+    });
+});
+
+
+function initializeMenuScroll() {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector(".myorder-sidebar");
+        const menu = document.querySelector(".myorder-menu");
+
+        // Create the scroll button
+        const scrollButton = document.createElement("button");
+        scrollButton.classList.add("scroll-right");
+        scrollButton.innerHTML = "▶";
+        sidebar.appendChild(scrollButton);
+
+        // Function to check if scrolling is needed
+        function checkScrollVisibility() {
+            if (menu.scrollWidth > menu.clientWidth) {
+                scrollButton.style.display = "block";
+            } else {
+                scrollButton.style.display = "none";
+            }
+        }
+
+        // Scroll event to hide button when at the end
+        scrollButton.addEventListener("click", function () {
+            menu.scrollBy({ left: 200, behavior: "smooth" });
+        });
+
+        menu.addEventListener("scroll", function () {
+            if (menu.scrollLeft + menu.clientWidth >= menu.scrollWidth) {
+                scrollButton.style.display = "none";
+            } else {
+                scrollButton.style.display = "block";
+            }
+        });
+
+        // Initial check
+        checkScrollVisibility();
+
+        // Recheck when window resizes
+        window.addEventListener("resize", checkScrollVisibility);
+    }
+}
+
+// Run function when DOM is fully loaded
+document.addEventListener("DOMContentLoaded", initializeMenuScroll);
+//Block user popup for mannual login
+$(document).ready(function () {
+    // Wait for the loader to disappear before showing the modal
+    let modal = $("#customModal");
+    let messageText = modal.find("p").text().trim();
+
+    // Show modal immediately if it has a message
+    if (modal.length && messageText !== "") {
+        modal.css("display", "flex");
+    }
+
+    // Close modal when clicking the close button
+    $(".close").click(function () {
+        modal.hide();
+    });
+
+    // Close modal when clicking outside of it
+    $(window).click(function (event) {
+        if ($(event.target).is("#customModal")) {
+            modal.hide();
+        }
+    });
 });
 
