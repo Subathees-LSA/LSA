@@ -787,15 +787,17 @@ top: 50px;
 .login-header-wrapper {
 width: 100%;
 text-align: center;
+margin-left: -15px;
 }
 
 .login-header {
 font-size: 36px;
-line-height: 46px;
-text-align: center;
-margin-left: 0; /* Remove margin-left */
-display: block;
-margin: 0 auto; /* Center horizontally */
+line-height: 16px;
+width: 100%;
+
+margin-left: 15px; /* Remove margin-left */
+
+
 }
 
 
@@ -929,7 +931,7 @@ margin-top: 10px;
 }
 
 .password-reset-header-title {
-    width: 419px;
+    width: 90%;
     color: #090914;
     font-size: 52px;
     font-family: Rajdhani;
@@ -1158,13 +1160,14 @@ position: relative;
 }
 
 .password-reset-content-header {
-width: 100%;
+width: 90%;
 left: 0;
-top: 20px;
+top: 16%;
 }
 
 .password-reset-header-title {
 font-size: 32px;
+top: 20%;
 width: 100%;
 text-align: center;
 margin-left: 20px;
@@ -1178,12 +1181,20 @@ margin-left: 20px;
 }
 
 .password-reset-container-unique {
-width: 100%;
+width: 90%;
 left: 0;
-top: 200px;
+top: 30%;
 padding: 10px;
 }
-
+.password-reset-heading {
+    text-align: center;
+    justify-content: center;
+    color: #090914;
+    font-size: 24px;
+    font-family: Rajdhani;
+    font-weight: 600;
+    line-height: 32px;
+}
 .reset-input {
 height: 40px;
 margin-top: 8px;
@@ -1940,7 +1951,7 @@ top: 20px;
 
     /* Form container */
     .confirm-containers {
-        width: 100%;
+        width: 90%;
         padding: 20px;
         box-sizing: border-box;
         position: relative;
@@ -2531,7 +2542,7 @@ top: 20px;
         padding: 0;
         display: flex;
         flex-direction: column;
-        align-items: flex-start; /* Ensure everything aligns to the left */
+        align-items: center;
         justify-content: flex-start;
         box-sizing: border-box;
     }
@@ -2551,41 +2562,42 @@ top: 20px;
 
     /* Welcome Container */
     .admin-signup-welcome-container {
-       width: 100%;
-height: auto;
-position: relative;
-text-align: center;
-top: 0;
-left: 0;
+        width: 100%;
+        height: auto;
+        position: relative;
+        text-align: center;
+        top: 0;
+        left: 0;
+        padding: 10px;
+        box-sizing: border-box;
     }
 
     .admin-signup-welcome-title {
-       font-size: 32px;
-line-height: 40px;
-width: 100%;
-margin-left: 40px;
-margin-top: 20px;
+        font-size: 32px;
+        line-height: 40px;
+        width: 100%;
+        margin-top: 20px;
     }
 
     .admin-signup-welcome-description {
         font-size: 16px;
-line-height: 24px;
-margin-top: 5;
-width: 100%;
-margin-left: 37px;
+        line-height: 24px;
+        margin-top: 5px;
+        width: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
     }
 
     /* Form Container */
     .admin-signup-container {
-        width: 118%;
+        width: 100%;
         padding: 16px;
         border-radius: 8px;
-        top: 170px;
         left: 0;
+        margin-top: -20px;
         background: white;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+       
         box-sizing: border-box;
-        margin: 0; /* Ensure no margin for left-alignment */
     }
 
     .admin-signup-title {
@@ -2599,16 +2611,19 @@ margin-left: 37px;
     .admin-signup-username-input,
     .admin-signup-email-id-input,
     .admin-signup-password-input {
-        padding: 14px;
-        font-size: 14px;
+        padding: 25px;
+        font-size: 18px;
         margin-top: 8px;
         width: 100%;
         box-sizing: border-box;
+        border-radius: 5px;
     }
 
     .admin-signup-toggle-password-class {
-        top: 10px;
-        right: 10px;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
         font-size: 18px;
     }
 
@@ -2618,7 +2633,8 @@ margin-left: 37px;
         margin-top: 4px;
         color: red;
         text-align: left; /* Align error messages to the left */
-        padding-left: 16px; /* Align error messages with the form fields */
+        padding-left: 5px;
+        box-sizing: border-box;
     }
 
     /* Submit Button */
@@ -2632,15 +2648,16 @@ margin-left: 37px;
         border: none;
         margin-top: 12px;
         cursor: pointer;
+        text-align: center;
     }
 
     /* Additional Links */
     .admin-signup-form-class p {
-        text-align: left; /* Align additional links to the left */
+        text-align: center; /* Align additional links to the left */
         font-size: 14px;
         color: #52525B;
         margin-top: 15px;
-        padding-left: 16px; /* Align the text with the form fields */
+        margin-left: 0px;
     }
 
     .admin-signup-form-class a {
@@ -2658,14 +2675,13 @@ margin-left: 37px;
         display: none;
     }
 
-    /* Ensuring entire container is aligned left */
+    /* Ensuring entire container is aligned center */
     .admin-signup-first-container {
         display: flex;
         flex-direction: column;
-        align-items: flex-start; 
-        padding: 0 16px;
+        align-items: center;
         width: 100%;
-        margin: 0;
+        padding: 10px;
         box-sizing: border-box;
     }
 }
@@ -2818,14 +2834,35 @@ margin-left: 37px;
 
         .admin-forget-password {
             color: #FF6600;
-            margin-bottom: 5%;
-            margin-top: -8%;
-            margin-left: 450px;
+          
+        
+            margin-left: 320px;
             width: 70%;
             overflow-x: none;
             font-family: Rajdhani;
-            text-decoration: none;
+            text-decoration: none;         
+    width: auto; /* Prevents it from taking extra space */
+    white-space: nowrap; /* Keeps it in the same line */
         }
+
+        .custom_admin_rememberme {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Spaces elements properly */
+    width: 100%;
+    margin-top: 20px;
+    gap: 10px; /* Adjust spacing */
+    flex-wrap: nowrap; /* Prevents wrapping */
+}
+
+.custom_admin_rememberme label {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Keeps checkbox and text together */
+    white-space: nowrap; /* Prevents text from breaking */
+}
+
+
 
         .admin-signup1 {
             color: #425466;
@@ -2869,73 +2906,283 @@ margin-left: 37px;
         }
         /* **********END OF ADMIN LOGIN DESK VIEW**************** */
 
-        /* Mobile view */
-        @media (max-width: 768px) {
+ /* Mobile view */
+@media (max-width: 768px) {
+    /* Hide unnecessary elements */
     .admin_login_background-wrapper,
-    .admin_login_orange-background ,
-    .admin_login_welcome-text-block{
-       display: none;
-    }
-
+    .admin_login_orange-background,
     .admin_login_welcome-text-block {
-    
-        margin-top: 50px;
+        display: none;
     }
-
     .admin-login-welcome-message-custom {
-            left: 32px;
-            text-align: center;
-        font-size: 36px;
-        line-height: 42px;
+    position: absolute; /* Ensures positioning respects left & top */
+    left: 50%;
+    top: 40px;
+    transform: translateX(-50%); /* Centers horizontally */
+    font-size: 24px;
+    line-height: 32px;
+    margin: 15px auto;
+    width: 90%;
+    text-align: center;
+    border: none;
+}
 
-    }
-    .admin-login-welcome-title-custom{
-        margin-left: 72px;
-    }
+.admin-login-welcome-title-custom {
+    width: 100%;
+    font-size: 42px;
+    margin: 8px auto;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .admin-login-welcome-description {
-            margin-left: 40px;
-        font-size: 14px;
-        line-height: 20px;
-    }
+.admin-login-welcome-subtitle-custom {
+    width: 100%;
+    font-size: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    line-height: 22px;
+    margin-top: 5px;
+    color: #52525B;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+.admin_login_container,
     .custom_admin_login_container {
+        position: relative;
+        left: -5px;
         width: 100%;
-        height: auto;
-        margin-top: 20px;
-        left: 0;
-        padding: 5px;
-        margin-left: -10px;
+        max-width: 100%;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+         border: none;
+    background: transparent; /* Ensures no background */
+    box-shadow: none; /* Removes any shadow effect */
+    
     }
 
-    .custom_admin_login_form_class input {
-        font-size: 14px;
-        padding: 12px;
-        width: 100%;
-        border-radius: 5px;
-    }
+   .custom_admin_login_form_class input {
+    width: calc(100% - 30px); /* Ensures no overflow */
+    max-width: 107%;
+    font-size: 18px;
+    padding: 24px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    display: block;
+    margin: 0 auto; /* Centers input */
+}
 
     .custom_admin_login_button {
-        font-size: 14px;
-        padding: 12px;
         width: 100%;
-        border-radius: 5px;
-        align-items: center;
-        margin-left: 90px;
+        font-size: 16px;
+        padding: 14px;
+        border-radius: 6px;
+        display: block;
+        margin-top: 15px;
+        background: #ff7f50;
+        color: white;
+        border: none;
+        cursor: pointer;
     }
 
-  .admin-forget-password {
-    align-self: flex-end;
-    margin-right: -150px; 
-    margin-top: -30px; 
-    font-size: 14px;
-    text-align: right; 
-}
-.admin-signup1{
+
+      
+    .admin-signup1 {
+        width: 100%;
+        font-size: 14px;
+        text-align: center;
+        margin: 10px auto;
+        display: block;
+        
+    }
+   .custom_admin_rememberme {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures equal spacing */
     width: 100%;
-    margin-left: 180px;
+    gap: 10px; /* Adjusts spacing */
+    flex-wrap: nowrap; /* Prevents line breaks */
 }
-        }
+
+.custom_admin_rememberme label {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Keeps checkbox and text close */
+    white-space: nowrap; /* Prevents text from breaking */
+}
+
+#remember-me-checkbox-admin {
+    width: 16px;
+    height: 16px;
+}
+
+.admin-forget-password {
+    color: #FF6600;
+    width: auto;
+    white-space: nowrap; /* Ensures text stays on the same line */
+    text-decoration: none;
+    margin: 0; /* Prevents unwanted spacing */
+}
+
+
+    /* Show password icon positioning */
+    .custom_admin_login_show_password {
+        position: absolute;
+        right: 45px;
+        top: 48%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 1.2em;
+    }
+}
+
+@media (max-width: 1024px) {
+    /* Hide unnecessary elements */
+    .admin_login_background-wrapper,
+    .admin_login_orange-background,
+    .admin_login_welcome-text-block ,
+    .lottery-image,
+    .small-lottery-image{
+        display: none;
+    }
+    .admin-login-welcome-message-custom {
+    position: absolute; /* Ensures positioning respects left & top */
+    left: 50%;
+    transform: translateX(-50%); /* Centers horizontally */
+    font-size: 24px;
+    line-height: 32px;
+    margin: 15px auto;
+    width: 90%;
+    text-align: center;
+    border: none;
+}
+
+.admin-login-welcome-title-custom {
+    width: 100%;
+    font-size: 42px;
+    margin: 8px auto;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-login-welcome-subtitle-custom {
+    width: 100%;
+    font-size: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    line-height: 22px;
+    margin-top: 5px;
+    color: #52525B;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin_login_container,
+    .custom_admin_login_container {
+          position: absolute; 
+        width: 100%;
+        left: 0px;
+        max-width: 100%;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+         border: none;
+    background: transparent; /* Ensures no background */
+    box-shadow: none; /* Removes any shadow effect */
+        /* left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%); */
+
+    
+    }
+
+   .custom_admin_login_form_class input {
+    width: calc(100% - 30px); /* Ensures no overflow */
+    max-width: 100%;
+    font-size: 18px;
+    padding: 24px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    display: block;
+    margin: 0 auto; /* Centers input */
+}
+
+    .custom_admin_login_button {
+        width: 100%;
+        font-size: 16px;
+        padding: 14px;
+        border-radius: 6px;
+        display: block;
+        margin-top: 15px;
+        background: #ff7f50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+
+      
+    .admin-signup1 {
+        width: 100%;
+        font-size: 14px;
+        text-align: center;
+        margin: 10px auto;
+        display: block;
+        
+    }
+   .custom_admin_rememberme {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures equal spacing */
+    width: 100%;
+    gap: 10px; /* Adjusts spacing */
+    flex-wrap: nowrap; /* Prevents line breaks */
+}
+
+.custom_admin_rememberme label {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Keeps checkbox and text close */
+    white-space: nowrap; /* Prevents text from breaking */
+}
+
+#remember-me-checkbox-admin {
+    width: 16px;
+    height: 16px;
+}
+
+.admin-forget-password {
+    color: #FF6600;
+    width: auto;
+    white-space: nowrap; /* Ensures text stays on the same line */
+    text-decoration: none;
+    margin: 0; /* Prevents unwanted spacing */
+}
+
+
+    /* Show password icon positioning */
+    .custom_admin_login_show_password {
+        position: absolute;
+        right: 45px;
+        top: 48%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 1.2em;
+    }
+}
+
 
 /* End of Admin_login */
 
@@ -3271,7 +3518,7 @@ margin-left: 37px;
     /* Making sure the table is readable on small devices */
     .custom_admin_dashboard_custom_table th,
     .custom_admin_dashboard_custom_table td {
-        min-width: 78px; /* Adjusted for readability */
+        min-width: 140px; /* Adjusted for readability */
     }
 }
 
@@ -4323,7 +4570,7 @@ margin-left: 37px;
 
         #lottery_card_title {
             color: #858585;
-            font-size: 16px;
+            font-size: 24px;
             font-family: Poppins;
             font-weight: 700;
             word-wrap: break-word
@@ -4331,12 +4578,13 @@ margin-left: 37px;
 
         .lottery_card_title2 {
             color: #858585;
-            font-size: 12px;
+            font-size: 16px;
             font-family: Poppins;
             font-weight: 700;
             word-wrap: break-word
         }
 
+        
 
         .custom_admin_dashboard_open-form-btn {
             display: flex;
@@ -4357,27 +4605,29 @@ margin-left: 37px;
             border-radius: 50px;
         }
 
-        .admin_dashbord_filter_icon {
-            height: 22px;
-            width: 22px;
-            align-items: center;
-            margin-left: -10px;
-            /* Move the icon slightly to the left */
-        }
+       .admin_dashbord_filter_icon {
+    height: 25px;
+    width: 25px;
+margin-left: 2%;
+}
 
 
-        #lottery-search-input {
-            border-radius: 50px;
-            padding: 5px;
-            margin-left: 700px;
-        }
+
+#lottery-search-input {
+    text-align: center;
+         border-radius: 50px;
+         padding: 5px;
+         float: right;
+         right: 4em;
+         position: relative;
+     }
 
         .admin-dashboard-category-filter {
             font-family: Rajdhani;
             width: 150px;
             padding: 8px;
             font-size: 16px;
-            border: 2px solid #4A90E2;
+            border: 2px solid #FF6600;
             /* Primary color */
             border-radius: 6px;
             background-color: #fff;
@@ -4389,12 +4639,13 @@ margin-left: 37px;
 
         /* Hover Effect */
         .admin-dashboard-category-filter:hover {
-            border-color: #357ABD;
+            border-color: #FF6600;
+
         }
 
         /* Focus Effect */
         .admin-dashboard-category-filter:focus {
-            border-color: #357ABD;
+            border-color: #FF6600;
             box-shadow: 0 0 5px rgba(53, 122, 189, 0.5);
         }
 
@@ -4639,14 +4890,14 @@ margin-left: 37px;
             padding: 10px 20px;
             font-size: 16px;
             color: white;
-            background-color: #007bff;
+            background-color:#FF6600;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
 
         .custom_admin_dashboard_button:hover {
-            background-color: #0056b3;
+            background-color: #FF6600;
         }
 
         #additional-images-container {
@@ -5010,8 +5261,8 @@ margin-left: 37px;
 
 #notification-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 1px;
+    right: -1px;
     background-color: red;
     color: white;
     font-size: 12px;
@@ -5747,6 +5998,8 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
 /* ************************************the above code is not arranged********************************** */
 
+/* This is the lottery event page edit,delete,addimage */
+
 /* lottery_events_add.html Styling */
 /* Grid and Card Styling */
 .lottery-events-grid {
@@ -5766,13 +6019,17 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     text-align: center;
     transition: transform 0.3s;
     position: relative;
+    align-items: center;
 }
 
 .lottery-event-card input,
 .lottery-event-card textarea {
     display: none;
-    width: 100%;
+    width: 85%;
+    padding: 12px;
+    margin-left: 7px;
     margin-bottom: 5px;
+    border-radius: 5px;
 }
 
 .lottery-event-card.lottery_events_add_edit_mode input,
@@ -5792,7 +6049,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 .lottery-event-card button {
     margin-top: 10px;
     padding: 8px 12px;
-    background-color: #007bff;
+    background-color:#FF6600;
     color: white;
     border: none;
     border-radius: 4px;
@@ -7175,8 +7432,8 @@ input[type="db-email"] {
   .item-details h3{
       margin-top: 10px;
       display: -webkit-box;
-      -webkit-line-clamp: 2; 
-      -webkit-box-orient: vertical;
+      /* -webkit-line-clamp: 2; 
+      -webkit-box-orient: vertical; */
       overflow: hidden;
       max-width: 100%;
   }
@@ -7537,9 +7794,6 @@ input[type="db-email"] {
     .total-section{
         margin-left: 0px !important;
     }
-    .remaining-tickets{
-        /* width: 200px; */
-    }
     .discount-text{
         margin-left: 40px;
     }
@@ -7682,10 +7936,7 @@ input[type="db-email"] {
     /* .max-limit-message{
         text-align: left;
     } */
-
-    .total-text {
-        /* margin-left: 20px; */
-    }
+   
 }
 /* Tab View (Tablets) */
 /* @media (max-width: 1024px) {
@@ -9034,13 +9285,7 @@ background-color: rgba(255, 102, 0, 0.05);
         position: absolute;
     }
 
-    #scroll-left {
-        /* left: 10px; */
-    }
-
-    #scroll-right {
-        /* right: 10px; */
-    }
+    
 }
 
 
@@ -10774,7 +11019,7 @@ background-color: rgba(255, 102, 0, 0.05);
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Hide scrollbar for modern browsers */
-    width:100%;
+    
 }
 
 .categories-tabs::-webkit-scrollbar {
