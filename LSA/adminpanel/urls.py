@@ -69,7 +69,9 @@ urlpatterns = [
     path('block-user/', block_user, name='block-user'), 
     path('social-links/', footer_view, name='social_links'),
     path('locations/', locations_view, name='locations'),
-
+    path("api/payment-lotteries/", PaymentLotteryListView.as_view(), name="payment-lottery-list"),
+    path("api/payment-lotteries/<str:payment_intent>/fetch-paid-amount/", FetchPaidAmountView.as_view(), name="fetch-paid-amount"),
+    path("api/payment-lotteries/<str:payment_intent>/refund/", RefundPaymentView.as_view(), name="refund-payment"),
 ]
 
 if settings.DEBUG:

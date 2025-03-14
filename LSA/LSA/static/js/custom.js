@@ -778,6 +778,442 @@ function filterEmails() {
 
 
 // custom_admin_dashboard.html
+
+// Global function to handle receipt clicks
+function handleReceiptClick(receiptUrl) {
+    // Check if the URL is missing or invalid
+    if (!receiptUrl || !isValidUrl(receiptUrl)) {
+        alert("Receipt not available");
+        return;
+    }
+
+    // Open the receipt URL in a centered window
+    const width = 800;
+    const height = 600;
+    const left = (window.innerWidth - width) / 2;
+    const top = (window.innerHeight - height) / 2;
+
+    const receiptWindow = window.open(
+        receiptUrl,
+        "Receipt",
+        `width=${width},height=${height},top=${top},left=${left}`
+    );
+
+    // Focus the new window
+    if (receiptWindow) {
+        receiptWindow.focus();
+    }
+
+    // Listen for clicks outside the window
+    let isWindowClosed = false;
+    const checkWindowClosed = setInterval(() => {
+        if (receiptWindow.closed) {
+            clearInterval(checkWindowClosed);
+            isWindowClosed = true;
+        }
+    }, 100);
+
+   
+}
+
+// Helper function to validate URLs
+function isValidUrl(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+function handleRefundClick(paymentIntent) {
+    if (!paymentIntent) {
+        alert("Payment intent not available");
+        return;
+    }
+
+    fetch(`/api/payment-lotteries/${paymentIntent}/fetch-paid-amount/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.log("API Error:", data.error);
+                alert(getFriendlyErrorMessage(data.error));
+                return;
+            }
+
+            const paidAmount = data.paid_amount;
+            const refundedAmount = data.refunded_amount; // Retrieved from Stripe
+            const paymentStatus = data.payment_status ? data.payment_status.toLowerCase() : "";
+            const lotteryDetails = data.lottery_details; // List of lottery details
+
+            // Remove existing popup if any
+            document.querySelector(".refund-popup")?.remove();
+
+            // Open the "Refund Successful - Refund Details" popup if already refunded
+            if (paymentStatus === "refunded") {
+                openRefundSuccessPopup(paymentIntent, refundedAmount, lotteryDetails);
+                return;
+            }
+
+            // Create refund popup container
+            const refundPopup = document.createElement("div");
+            refundPopup.classList.add("refund-popup");
+
+            const popupContent = document.createElement("div");
+            popupContent.classList.add("refund-popup-content");
+
+            refundPopup.addEventListener("click", (event) => {
+                if (event.target === refundPopup) {
+                    refundPopup.remove();
+                }
+            });
+
+            // 🎯 Show Lottery Event Details in a Table Format
+            let lotteryInfoHtml = `
+                <h3>Transaction Details</h3>
+                <table class="refund-table">
+                    <thead>
+                        <tr>
+                            <th>Lottery</th>
+                            <th>Quantity</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            lotteryDetails.forEach(lottery => {
+                lotteryInfoHtml += `
+                    <tr>
+                        <td>${lottery.lottery_name}</td>
+                        <td>${lottery.quantity}</td>
+                        <td>£${lottery.amount.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            lotteryInfoHtml += `</tbody></table>`;
+             
+           
+            
+
+            popupContent.innerHTML = `
+                <h3>Refund Payment</h3>
+                <p><strong>Payment Intent:</strong> ${paymentIntent}</p>
+                ${lotteryInfoHtml}
+                <p>Maximum refundable amount: £${paidAmount.toFixed(2)}</p>
+                <input type="number" id="refundAmountInput" value="${paidAmount.toFixed(2)}" placeholder="Enter refund amount" min="0" max="${paidAmount}" step="0.01">
+                <p id="refundAmountError" class="refundAmountError_error_message"></p>
+                <button id="confirmRefundButton">Confirm Refund</button>
+                
+            `;
+
+            const refundInput = popupContent.querySelector("#refundAmountInput");
+            const refundError = popupContent.querySelector("#refundAmountError");
+            const confirmRefundButton = popupContent.querySelector("#confirmRefundButton");
+
+            refundInput.addEventListener("input", () => {
+                const refundValue = parseFloat(refundInput.value);
+                if (isNaN(refundValue) || refundValue <= 0) {
+                    refundError.textContent = "Please enter a valid refund amount.";
+                    confirmRefundButton.disabled = true;
+                } else if (refundValue > paidAmount) {
+                    refundError.textContent = `Refund cannot be more than £${paidAmount.toFixed(2)} GBP.`;
+                    confirmRefundButton.disabled = true;
+                } else {
+                    refundError.textContent = "";
+                    confirmRefundButton.disabled = false;
+                }
+            });
+
+            confirmRefundButton.addEventListener("click", () => {
+                const refundValue = parseFloat(refundInput.value);
+                if (isNaN(refundValue) || refundValue <= 0 || refundValue > paidAmount) {
+                    refundError.textContent = "Invalid refund amount.";
+                    return;
+                }
+
+                fetch(`/api/payment-lotteries/${paymentIntent}/refund/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                    body: JSON.stringify({ refund_amount: refundValue }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.log("Refund API Error:", data.error);
+                            alert(getFriendlyErrorMessage(data.error));
+                            return;
+                        }
+                        //alert(`Refund successful! Refund ID: ${data.refund_id}`);
+
+                        //  Instead of just showing an alert, open the refund success popup
+                        refundPopup.remove();
+                        openRefundSuccessPopup(paymentIntent, refundValue, lotteryDetails);
+                        updatePaymentStatus(paymentIntent);
+                    })
+                    .catch(error => {
+                        console.log("Refund processing error:", error);
+                        alert("An error occurred. Please try again.");
+                    });
+            });
+
+            const cancelRefundButton = document.createElement("button");
+            cancelRefundButton.textContent = "Back to my Refund List";
+            cancelRefundButton.addEventListener("click", () => refundPopup.remove());
+
+            popupContent.appendChild(cancelRefundButton);
+            refundPopup.appendChild(popupContent);
+            document.body.appendChild(refundPopup);
+        })
+        .catch(error => {
+            console.log("Fetch API Error:", error);
+            alert("Something went wrong. Please try again.");
+        });
+}
+function openRefundSuccessPopup(paymentIntent, refundedAmount, lotteryDetails) {
+    document.querySelector(".refund-popup")?.remove();
+
+    const refundPopup = document.createElement("div");
+    refundPopup.classList.add("refund-popup");
+
+    const popupContent = document.createElement("div");
+    popupContent.classList.add("refund-popup-content");
+
+    refundPopup.addEventListener("click", (event) => {
+        if (event.target === refundPopup) {
+            refundPopup.remove();
+        }
+    });
+
+     // 🎯 Show Lottery Event Details in a Table Format
+     let lotteryInfoHtml = `
+     <h3>Transaction Details</h3>
+     <table class="refund-table">
+         <thead>
+             <tr>
+                 <th>Lottery</th>
+                 <th>Quantity</th>
+                 <th>Amount</th>
+             </tr>
+         </thead>
+         <tbody>
+ `;
+
+    lotteryDetails.forEach(lottery => {
+        lotteryInfoHtml += `
+            <tr>
+                <td>${lottery.lottery_name}</td>
+                <td>${lottery.quantity}</td>
+                <td>£${lottery.amount.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    lotteryInfoHtml += `</tbody></table>`;
+
+    popupContent.innerHTML = `
+        <h3>Refund Successful - Refund Details</h3>
+        <p><strong>Payment Intent:</strong> ${paymentIntent}</p>
+        ${lotteryInfoHtml}
+        <p><strong>Total Refunded Amount:</strong> £${refundedAmount.toFixed(2)}</p>
+        <button id="closeRefundPopup">Back to my Refund List</button>
+    `;
+
+    const closeRefundButton = popupContent.querySelector("#closeRefundPopup");
+    closeRefundButton.addEventListener("click", () => refundPopup.remove());
+
+    refundPopup.appendChild(popupContent);
+    document.body.appendChild(refundPopup);
+}
+
+
+
+function updatePaymentStatus(paymentIntent) {
+    // Find all rows with the same payment_intent
+    const statusCells = document.querySelectorAll(`td[data-payment-intent="${paymentIntent}"]`);
+
+    // Update status to "Refunded" for all matching rows
+    statusCells.forEach(statusCell => {
+        statusCell.innerHTML = `<span class="custom_admin_dashboard_transactions_management_status_refunded">refunded</span>`;
+    });
+
+    
+}
+
+
+function getFriendlyErrorMessage(errorMessage) {
+    if (errorMessage.includes("already been refunded")) {
+        return "This payment has already been refunded.";
+    }
+    if (errorMessage.includes("Payment not found")) {
+        return "Payment not found.";
+    }
+    if (errorMessage.includes("Only completed payments can be refunded")) {
+        return "Only completed payments can be refunded.";
+    }
+    if (errorMessage.includes("Invalid refund amount")) {
+        return "Invalid refund amount.";
+    }
+    return "Something went wrong. Please try again."; // Default generic error
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function custom_admin_dashboard_transactions_management_function() {
+    const custom_admin_dashboard_transactions_management_container = document.getElementById("custom_admin_dashboard_transactions_management");
+
+    if (!custom_admin_dashboard_transactions_management_container) return;
+
+    custom_admin_dashboard_transactions_management_container.innerHTML = ""; // Clear previous content
+
+    let custom_admin_dashboard_transactions_management_page = 1;
+    const custom_admin_dashboard_transactions_management_rowsPerPage = 5;
+    let custom_admin_dashboard_transactions_management_allData = [];
+
+    // Create Header
+    function custom_admin_dashboard_transactions_management_createHeader() {
+        const custom_admin_dashboard_transactions_management_header = document.createElement("div");
+        custom_admin_dashboard_transactions_management_header.classList.add("custom_admin_dashboard_transactions_management_header");
+        custom_admin_dashboard_transactions_management_header.textContent = "Transactions Management > Transaction Details";
+        return custom_admin_dashboard_transactions_management_header;
+    }
+
+    // Create Table Structure
+    function custom_admin_dashboard_transactions_management_createTable() {
+        const custom_admin_dashboard_transactions_management_table = document.createElement("table");
+        custom_admin_dashboard_transactions_management_table.classList.add("custom_admin_dashboard_transactions_management_table");
+
+        const custom_admin_dashboard_transactions_management_thead = document.createElement("thead");
+        const custom_admin_dashboard_transactions_management_headerRow = document.createElement("tr");
+        ["Payment ID", "Product", "Amount", "Date", "Status", "Email", "Quantity", "Action"].forEach(text => {
+            const th = document.createElement("th");
+            th.textContent = text;
+            custom_admin_dashboard_transactions_management_headerRow.appendChild(th);
+        });
+
+        custom_admin_dashboard_transactions_management_thead.appendChild(custom_admin_dashboard_transactions_management_headerRow);
+        custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_thead);
+
+        const custom_admin_dashboard_transactions_management_tbody = document.createElement("tbody");
+        custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body";
+        custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_tbody);
+
+        return { custom_admin_dashboard_transactions_management_table, custom_admin_dashboard_transactions_management_tbody };
+    }
+
+    // Fetch Data from API
+    function custom_admin_dashboard_transactions_management_fetchData() {
+        fetch("/api/payment-lotteries/")
+            .then(response => response.json())
+            .then(data => {
+                custom_admin_dashboard_transactions_management_allData = data;
+                custom_admin_dashboard_transactions_management_displayData();
+            })
+            .catch(error => console.error("Error fetching transactions:", error));
+    }
+
+    // Display Transactions Dynamically
+    function custom_admin_dashboard_transactions_management_displayData() {
+        const custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body");
+        custom_admin_dashboard_transactions_management_tbody.innerHTML = "";
+
+        const start = (custom_admin_dashboard_transactions_management_page - 1) * custom_admin_dashboard_transactions_management_rowsPerPage;
+        const end = start + custom_admin_dashboard_transactions_management_rowsPerPage;
+        const custom_admin_dashboard_transactions_management_paginatedData = custom_admin_dashboard_transactions_management_allData.slice(0, end);
+
+        custom_admin_dashboard_transactions_management_paginatedData.forEach(event => {
+            const row = document.createElement("tr");
+
+            // Inside the row.innerHTML in custom_admin_dashboard_transactions_management_displayData
+row.innerHTML = `
+<td>${event.payment_intent}</td>
+<td>${event.lottery_event_title}</td>
+<td>£${event.amount}</td>
+<td>${new Date(event.payment_at).toLocaleDateString()}</td>
+<td data-payment-intent="${event.payment_intent}">
+    <span class="custom_admin_dashboard_transactions_management_status_${ event.payment_status.toLowerCase()}">
+    ${event.payment_status}
+    </span>
+</td>
+<td>${event.user_email}</td>
+<td>${event.quantity}</td>
+<td>
+    <div class="custom_admin_dashboard_transactions_management_action_img_container">
+        <div class="custom_admin_dashboard_transactions_management_action_img" onclick="handleReceiptClick('${event.receipt_url}')">
+            <img src="/media/admin_files/custom_admin_dashboard_transactions_management_receipt_icon.jpg" alt="Receipt">
+            <span class="custom_admin_dashboard_transactions_management_tooltip">View Receipt</span>
+        </div>
+       <div class="custom_admin_dashboard_transactions_management_action_img" 
+                data-refund-intent="${event.payment_intent}"
+                onclick="handleRefundClick('${event.payment_intent}')">
+                <img src="/media/admin_files/custom_admin_dashboard_transactions_management_refund_icon.jpg" alt="Refund">
+                <span class="custom_admin_dashboard_transactions_management_tooltip">Initiate Refund</span>
+            </div>
+    </div>
+</td>
+`;
+
+            custom_admin_dashboard_transactions_management_tbody.appendChild(row);
+        });
+
+        custom_admin_dashboard_transactions_management_updateViewMoreButton();
+    }
+
+   
+
+    // Create and Manage "View More / View Less" Button
+    function custom_admin_dashboard_transactions_management_createViewMoreButton() {
+        const custom_admin_dashboard_transactions_management_viewMoreButton = document.createElement("button");
+        custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button";
+        custom_admin_dashboard_transactions_management_viewMoreButton.classList.add("custom_admin_dashboard_transactions_management_view_more_button");
+        custom_admin_dashboard_transactions_management_viewMoreButton.textContent = "View More";
+
+        custom_admin_dashboard_transactions_management_viewMoreButton.addEventListener("click", function () {
+            if (custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage < custom_admin_dashboard_transactions_management_allData.length) {
+                custom_admin_dashboard_transactions_management_page++;
+            } else {
+                custom_admin_dashboard_transactions_management_page = 1; // Reset to initial view
+            }
+            custom_admin_dashboard_transactions_management_displayData();
+        });
+
+        return custom_admin_dashboard_transactions_management_viewMoreButton;
+    }
+
+    function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
+        custom_admin_dashboard_transactions_management_viewMoreButton.textContent = 
+            (custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage < custom_admin_dashboard_transactions_management_allData.length) ? "View More" : "View Less";
+    }
+
+    // Initialize Table and UI
+    const custom_admin_dashboard_transactions_management_header = custom_admin_dashboard_transactions_management_createHeader();
+    const { custom_admin_dashboard_transactions_management_table } = custom_admin_dashboard_transactions_management_createTable();
+    const custom_admin_dashboard_transactions_management_viewMoreButton = custom_admin_dashboard_transactions_management_createViewMoreButton();
+
+    custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_header);
+    custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_table);
+    custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_viewMoreButton);
+
+    custom_admin_dashboard_transactions_management_fetchData();
+}
+
 function showSpecificDiv(id) {
     // Select the section and the specific div by id
     const section = document.querySelector(".custom_admin_dashboard_dashboard");
@@ -801,6 +1237,9 @@ function showSpecificDiv(id) {
         section.style.display = "block";
     } else {
         console.error(`Element with id "${id}" not found.`);
+    }
+    if (id === "custom_admin_dashboard_transactions_management") {
+        custom_admin_dashboard_transactions_management_function();
     }
     const nav_bar_user_management_button = document.getElementById("user_management_button_id");
     if (id === "custom_admin_dashboard_user_list_table") {
@@ -1138,7 +1577,7 @@ function lottery_won_and_lost_total_calculation() {
 }
 function toggleSidebar() {
     const sidebar = document.querySelector(".custom_admin_dashboard_sidebar");
-    const hamburger = document.getElementById("hamburger-menu");
+    const hamburger = document.getElementById("custom_admin_dashboard_hamburger_menu_id");
 
 
     // Toggle sidebar visibility
@@ -1154,7 +1593,7 @@ function toggleSidebar() {
 }
 function hidetoggleSidebar() {
     const sidebar = document.querySelector(".custom_admin_dashboard_sidebar");
-    const hamburger = document.getElementById("hamburger-menu");
+    const hamburger = document.getElementById("custom_admin_dashboard_hamburger_menu_id");
 
 
     // Toggle sidebar visibility
@@ -1283,12 +1722,12 @@ function initializeDashboard() {
                                     user_leaderboard();
                                 } else if (tab.type === 'table') {
                                     let rows = [];  // All user rows from the server
-                                    let currentIndex = 3;  // Start after showing the first 3 users
-                                    const rowsPerPage = 3;
+                                    let currentIndex = 10;  // Start after showing the first 3 users
+                                    const rowsPerPage = 10;
                                     let selectedFilter = "All Users"; // Default filter
+                                    const container = document.querySelector(".custom_admin_dashboard_user_table");
 
                                     function user_management_table() {
-                                        const container = document.querySelector(".custom_admin_dashboard_user_table");
 
                                         // Create search input container
                                         const searchContainer = document.createElement("div");
@@ -1417,7 +1856,7 @@ function initializeDashboard() {
                                             .then(response => response.json())
                                             .then(({ table_data }) => {
                                                 rows = table_data.users_table;
-                                                currentIndex = 3;
+                                                currentIndex = 10;
                                                 if (renderInitialuser) {
                                                     
                                                     renderInitialRows(); 
@@ -1432,7 +1871,7 @@ function initializeDashboard() {
                                     function renderInitialRows() {
                                         const tbody = document.getElementById('userTableBody');
                                         tbody.innerHTML = '';
-                                        currentIndex = 3;
+                                        currentIndex = 10;
 
                                         let filteredRows = rows;
 
@@ -1441,7 +1880,7 @@ function initializeDashboard() {
                                             filteredRows = rows.filter(row => row.is_blocked);
                                         }
 
-                                        filteredRows.slice(0, 3).forEach(row => appendRow(row));
+                                        filteredRows.slice(0, 10).forEach(row => appendRow(row));
                                         updateUserCount();
                                     }
 
@@ -1464,12 +1903,12 @@ function initializeDashboard() {
                                                 </td>
                                                 <td class="view-user-list" data-user-id="${row.user?.id}">
                                                 ${row.profile_image_url
-                                                ? `<img src="${row.profile_image_url}" alt="Profile Image" class="profile-image">`
+                                                ? `<img src="${row.profile_image_url}" alt="Profile Image" class="custom_admin_dashboard_user_management_profile_image">`
                                                 : ''
                                             }
 	                                            ${row.user?.username || 'N/A'}
                                                 </td>
-                                                <td>${row.user?.email || 'N/A'}</td>
+                                                <td class="view-user-list" >${row.user?.email || 'N/A'}</td>
                                                 <td>
                                                             ${row.kyc_image_url
                                                 ? `<a href="#" class="view-kyc-image" data-imageurl="${row.kyc_image_url}" data-username="${row.user?.username || 'N/A'}" data-email="${row.user?.email || 'N/A'}" data-kycstatus="${row.kyc_status || 'N/A'}">View KYC Image</a>`
@@ -1502,7 +1941,7 @@ function initializeDashboard() {
                                     function applyFilter(option) {
                                         selectedFilter = option;
                                         document.getElementById("filterDropdown").style.display = "none";
-                                        currentIndex = 3; // Reset the index
+                                        currentIndex = 10; // Reset the index
                                         searchUsers(); // Re-filter the users
                                         // Remove highlight from all options
                                         document.querySelectorAll("#filterDropdown div").forEach(div => {
@@ -1528,9 +1967,21 @@ function initializeDashboard() {
                                             .then(response => {
 
                                                 alert(response.data.message);
-                                                button.text(action === "block" ? "Unblock User" : "Block User"); // Toggle button text
-                                                fetchAndRenderUsers();
-
+                                    
+                                                // Update the button text
+                                                button.text(action === "block" ? "Unblock User" : "Block User");
+                                    
+                                                // Update the user's block status in the `rows` array
+                                                const userIndex = rows.findIndex(row => row.user?.id === userId);
+                                                if (userIndex !== -1) {
+                                                    rows[userIndex].is_blocked = action === "block";
+                                                }
+                                    
+                                                // Refresh the table if the "Blocked Users" filter is active
+                                                if (selectedFilter === "Blocked Users") {
+                                                    renderInitialRows(); // Re-render the initial rows
+                                                    toggleViewMoreLessButtons(rows.filter(row => row.is_blocked)); // Recalculate button visibility
+                                                }
                                             })
                                             .catch(error => {
                                                 alert('Error: ' + (error.response?.data?.detail || 'Something went wrong'));
@@ -1569,7 +2020,7 @@ function initializeDashboard() {
 
                                     function viewLessRows() {
                                         const tbody = document.getElementById('userTableBody');
-                                        const rowsToRemove = Math.min(rowsPerPage, currentIndex - 3);
+                                        const rowsToRemove = Math.min(rowsPerPage, currentIndex - 10);
                                         for (let i = 0; i < rowsToRemove; i++) {
                                             if (tbody.lastChild) {
                                                 tbody.removeChild(tbody.lastChild);
@@ -1585,10 +2036,10 @@ function initializeDashboard() {
 
                                         if (filteredRows) {
                                             viewMoreButton.style.display = currentIndex < filteredRows.length ? 'block' : 'none';
-                                            viewLessButton.style.display = currentIndex > 3 ? 'block' : 'none';
+                                            viewLessButton.style.display = currentIndex > 10 ? 'block' : 'none';
                                         } else {
                                             viewMoreButton.style.display = currentIndex < rows.length ? 'block' : 'none';
-                                            viewLessButton.style.display = currentIndex > 3 ? 'block' : 'none';
+                                            viewLessButton.style.display = currentIndex > 10 ? 'block' : 'none';
                                         }
                                     }
 
@@ -1597,7 +2048,7 @@ function initializeDashboard() {
                                         const tbody = document.getElementById('userTableBody');
                                         const noUserMessage = document.getElementById('noUserMessage'); // Element for "User not found"
 
-                                        currentIndex = 3; // Reset the currentIndex to 3
+                                        currentIndex = 10; // Reset the currentIndex to 3
 
                                         let filteredRows = rows;
 
@@ -1620,7 +2071,7 @@ function initializeDashboard() {
                                             noUserMessage.style.display = 'block'; // Show "User not found" message
                                         } else {
                                             noUserMessage.style.display = 'none'; // Hide the message if users are found
-                                            matchingRows.slice(0, 3).forEach(row => appendRow(row)); // Render the first 3 matching rows
+                                            matchingRows.slice(0, 10).forEach(row => appendRow(row)); // Render the first 3 matching rows
                                             toggleViewMoreLessButtons(matchingRows); // Update the button visibility based on matching rows
                                         }
                                     }
@@ -1949,11 +2400,14 @@ document.addEventListener('DOMContentLoaded', function () {
         imageInput.addEventListener('change', function (event) {
             const file = event.target.files[0];
             const reader = new FileReader();
-
+            const imagePreviews = newImageField.querySelector('.image-preview');
             reader.onload = function (e) {
                 const preview = document.createElement('img');
                 preview.src = e.target.result;
                 preview.className = 'image-preview';
+                if(imagePreviews){ // If image already selected replace it with new image for preview
+                    imagePreviews.replaceWith(preview);
+                }
                 newImageField.appendChild(preview);
             };
 
@@ -3326,342 +3780,244 @@ function fetchCategories() {
 }
 
 // Fetch and render lottery events
-function fetchLotteryEvents(searchTerm = '', categoryId = '') {
-    const encodedSearchTerm = encodeURIComponent(searchTerm);
-    const apiUrl = `${api_get_lottery_events_url}?search=${encodedSearchTerm}&category=${categoryId}`;
-    const LotteryPerPage = 3; // Number of rows in a page
+let currentPage = 1;
+let currentSearchTerm = '';
+let currentCategoryId = '';
+const lotteryPerPage = 3; // Set the number of lotteries per page
+
+function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
+    currentPage = page;
+
+    // Reset search and category when clearing filters
+    currentSearchTerm = searchTerm !== null ? searchTerm : currentSearchTerm;
+    currentCategoryId = categoryId !== null ? categoryId : currentCategoryId;
+
+    // Ensure "All Categories" or cleared search fetches all lotteries
+    if (currentSearchTerm === '') currentSearchTerm = '';
+    if (currentCategoryId === '') currentCategoryId = '';
+
+    const encodedSearchTerm = encodeURIComponent(currentSearchTerm);
+    const apiUrl = `${api_get_lottery_events_url}?search=${encodedSearchTerm}&category=${currentCategoryId}`;
+
     fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-            const numberOfPages = Math.ceil(data.length / LotteryPerPage);
-            const lastPage = numberOfPages;
-            const btnPerPage = 4; // Set Buttons Per Page
-            let count = 1; // Initialize Button Numbers for Display  
-            let countPerRows = btnPerPage; // Change Buttons Dynamically per Page
-            let currentPage = 1;
-            let buttons = []; // Empty array for increment 
             const container = document.getElementById('lottery-events-container');
-            container.innerHTML = '';  // Clear existing events
-            const paginateButtons = document.getElementById('pageButtons');
-            paginateButtons.innerHTML = '';  // Clear existing Paginations
-            const show_Lotterycards = () => {
-                try {
-                    const firstCardsInPage = (currentPage - 1) * LotteryPerPage;
-                    //pagination starts here
-                    let slice = data.slice(firstCardsInPage, firstCardsInPage + LotteryPerPage);
-                    slice.forEach(event => {
-                        const eventDiv = document.createElement('div');
-                        eventDiv.classList.add('lottery-event-card');
-                        eventDiv.dataset.id = event.id;
+            container.innerHTML = ''; // Clear existing events
 
-                        // Handle additional images
-                        let additionalImagesHtml = '';
-                        if (event.additional_images && event.additional_images.length > 0) {
-                            additionalImagesHtml = '<div class="additional-images"><h4>Additional Images:</h4>';
-                            event.additional_images.forEach((image, index) => {
-                                additionalImagesHtml += `
-                        <div class="additional-image-item" data-image-id="${image.id}">
-                            <img src="${image.image}" alt="Additional Image" class="lottery-events-additional-image"/>
-                            <button class="remove-image-btn" onclick="removeAdditionalImage(${image.id}, ${event.id})">Remove</button>
-                        </div>`;
-                            });
-                            additionalImagesHtml += `
-                            <div class="navigate_btn">
-                            <a class="prev" ${event.additional_images.length === 1 ? 'style="display: none;"' : ''}>❮</a>
-                            <a class="next" ${event.additional_images.length === 1 ? 'style="display: none;"' : ''}>❯</a>
-                            </div>
-                            </div>`;
-                        }
+            const totalItems = data.length;
+            const totalPages = Math.ceil(totalItems / lotteryPerPage);
+            const paginatedData = data.slice((page - 1) * lotteryPerPage, page * lotteryPerPage);
 
+            paginatedData.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.classList.add('lottery-event-card');
+                eventDiv.dataset.id = event.id;
 
-                        eventDiv.innerHTML = `
-                    <h3>
-                        <span class="lottery_events_add_title">${event.title}</span>
-                        <input type="text" class="lottery_events_add_edit_title" value="${event.title}" data-original-value="${event.title}" required>
-                        <div class="lottery_events_add_error_message lottery_edit_title_error">Title is required</div>
-                    </h3>
-
-                    <p>
-                        Description:<span class="lottery_events_add_description">${event.description}</span>
-                        <textarea class="lottery_events_add_edit_description" data-original-value="${event.description}" required>${event.description}</textarea>
-                        <div class="lottery_events_add_error_message lottery_edit_description_error">Description is required</div>
-                    </p>
-                    <p>
-                        Price: <span class="lottery_events_add_price">£${event.price}</span>
-                        <input type="number" class="lottery_events_add_edit_price" value="${event.price}" data-original-value="${event.price}" required>
-                        <div class="lottery_events_add_error_message lottery_edit_price_error">Price is required</div>
-                    </p>
-                    <p>
-                        Draw Date: <span class="lottery_events_add_draw_date">${event.draw_date}</span>
-                        <input type="datetime-local" class="lottery_events_add_edit_draw_date" value="${new Date(event.draw_date).toISOString().slice(0, 16)}" data-original-value="${new Date(event.draw_date).toISOString().slice(0, 16)}" required>
-                        <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
-                    </p>
-                   <p id="category_Details">Category: <strong class="category_Name" >${event.category.name}</strong>
-                    <span class="lottery_events_set_category" hidden>${event.category.name}</span>
-                    </p>
-
-                    <p>
-                        Status: <span class="lottery_events_add_is_active">${event.is_active ? 'Active' : 'Inactive'}</span>
-                        <input type="checkbox" class="lottery_events_add_edit_is_active" ${event.is_active ? 'checked' : ''} data-original-checked="${event.is_active}">
-                    </p>
-                    <p>
-                        Total Tickets: <span class="lottery_events_add_total_tickets">${event.total_tickets}</span>
-                        <input type="number" class="lottery_events_add_edit_total_tickets" value="${event.total_tickets}" data-original-value="${event.total_tickets}" required readonly>
-                        <div class="lottery_events_add_error_message lottery_edit_total_tickets_error">Total Tickets are required</div>
-                    </p>
-                    ${event.image ? `<img src="${event.image}" alt="${event.title}" class="lottery_events_add_current_image"/>` : ''}
-                    <input type="file" class="lottery_events_add_edit_image" accept="image/*">
-                    <p>
-                        Total Budget: <span class="lottery_events_add_total_budget">${event.total_budget}</span>
-                        <input type="number" class="lottery_events_add_edit_total_budget" value="${event.total_budget}" data-original-value="${event.total_budget}" required>
-                        <div class="lottery_events_add_error_message lottery_edit_total_budget_error">Total Budget is required</div>
-                    </p>
-                    <p>
-                    Revenue Type:
-                    <span class="lottery_events_add_revenue_type">${event.revenue_type}</span>
-                    <select class="lottery_events_add_edit_revenue_type" style=" display: none;"; data-original-value="${event.revenue_type}">
-                        <option value="fixed" ${event.revenue_type === 'fixed' ? 'selected' : ''}>Fixed</option>
-                        <option value="percentage" ${event.revenue_type === 'percentage' ? 'selected' : ''}>Percentage</option>
-                    </select>
-                    </p>
-                    <div class="lottery_events_add_revenue_fields">
-                <p class="lottery_events_add_fixed_revenue" style="display: ${event.revenue_type === 'fixed' ? 'block' : 'none'};">
-                    Fixed Revenue Amount:
-                    <span>${event.revenue_value}</span>
-                    <input type="number" class="lottery_events_add_edit_fixed_revenue" value="${event.revenue_value}" data-original-value="${event.revenue_value}">
-                </p>
-                <p class="lottery_events_add_percentage_revenue" style="display: ${event.revenue_type === 'percentage' ? 'block' : 'none'};">
-                    Percentage Revenue:
-                    <span>${event.revenue_value}</span>
-                    <input type="number" class="lottery_events_add_edit_percentage_revenue" value="${event.revenue_value}" data-original-value="${event.revenue_value}">
-                <div class="lottery_events_add_error_message lottery_edit_revenue_error">Revenue Value is required</div>
-                </p>
-                </div>
-                <p>
-                    Total Amount: <span class="lottery_events_add_total_amount">${event.total_amount}</span>
-                    <input type="number" class="lottery_events_add_edit_total_amount" value="${event.total_amount}" data-original-value="${event.total_amount}" required readonly>
-                </p>
-                <p>
-                    Per Ticket Price: <span class="lottery_events_add_per_ticket_price">${event.per_ticket_price}</span>
-                    <input type="number" class="lottery_events_add_edit_per_ticket_price" value="${event.per_ticket_price}" data-original-value="${event.per_ticket_price}" required>
-                <div class="lottery_events_add_error_message lottery_edit_per_ticket_price_error">Per Ticket Price is required</div>
-                </p>
-                 <!-- Mini Limit -->
-                <p>
-                    Mini Limit: <span class="lottery_events_add_minilimit">${event.mini_limit}</span>
-                    <input type="number" class="lottery_events_add_edit_minilimit" value="${event.mini_limit}" data-original-value="${event.mini_limit}" required>
-                    <div class="lottery_events_add_error_message lottery_edit_minilimit_error">Minimum Tickets must be greater than zero </div>
-                </p>
-
-                <!-- Max Limit -->
-                <p>
-                    Max Limit: <span class="lottery_events_add_maxlimit">${event.max_limit}</span>
-                    <input type="number" class="lottery_events_add_edit_maxlimit" value="${event.max_limit}" data-original-value="${event.max_limit}" required>
-       
-                    <div class="lottery_events_add_error_message lottery_edit_maxlimit_error">Maximum Tickets must be greater than zero and not less than Minimum Tickets</div>
-                </p>
-
-                <!-- Free Postal Description -->
-                <p>
-                    Free Postal Description: <span class="lottery_events_add_freepostal">${event.free_postal_description}</span>
-                    <textarea class="lottery_events_add_edit_freepostal" data-original-value="${event.free_postal_description}" required>${event.free_postal_description}</textarea>
-                    <div class="lottery_events_add_error_message lottery_edit_freepostal_error">Free Postal Description is required</div>
-                </p>
-
-                <!-- Competition Details -->
-                <p>
-                    Competition Details: <span class="lottery_events_add_competitiondetails">${event.competition_details}</span>
-                    <textarea class="lottery_events_add_edit_competitiondetails" data-original-value="${event.competition_details}" required>${event.competition_details}</textarea>
-                    <div class="lottery_events_add_error_message lottery_edit_competitiondetails_error">Competition Details are required</div>
-                </p>
-                <!-- Additional Images Section -->
-                <div class="additional-images-container">
-                    ${additionalImagesHtml}
-                     </div>
+               // Handle additional images
+               let additionalImagesHtml = '';
+               if (event.additional_images && event.additional_images.length > 0) {
+                   additionalImagesHtml = `
+                       <div class="additional-images">
+                           <h4>Additional Images:</h4>
+                           <div class="additional-images-scroll-container">
+                               ${event.additional_images.map((image, index) => `
+                                   <div class="additional-image-item" data-image-id="${image.id}">
+                                       <img src="${image.image}" alt="Additional Image" class="lottery-events-additional-image"/>
+                                       <button class="remove-image-btn" onclick="removeAdditionalImage(${image.id}, ${event.id})">Remove</button>
+                                   </div>
+                               `).join('')}
+                           </div>
+                       </div>
+                       <div class="add-additionalimages-container">
+                       </div>
+                   `;
+               }
 
 
-                     <button type="button" class="add-image-button" style="display:none;">Add Another Image</button>
-            
-                    <button class="lottery_events_add_edit_button" onclick="lottery_events_enableEditMode(this)">Edit</button>
-                    <button class="lottery_events_add_save_button" onclick="lottery_events_edit_saveChanges(this)">Save</button>
-                    <button class="lottery_events_add_cancel_button" onclick="lottery_events_cancelEdit(this)">Cancel</button>
-                    <button class="lottery_events_add_delete_button" onclick="deleteLotteryEvent(${event.id})">Delete</button>
-                `;
+               eventDiv.innerHTML = `
+           <h3>
+               <span class="lottery_events_add_title">${event.title}</span>
+               <input type="text" class="lottery_events_add_edit_title" value="${event.title}" data-original-value="${event.title}" required>
+               <div class="lottery_events_add_error_message lottery_edit_title_error">Title is required</div>
+           </h3>
 
-                        container.appendChild(eventDiv);
-                        if (event.additional_images && event.additional_images.length > 1) {
-                            addImageNavigations(eventDiv.querySelector('.additional-images'));
-                        }
-                    });
-                } catch (error) {
-                    console.error("Error Loading Paginations:", error);
-                }
-            };
-            // addtional image scroll button
-            const addImageNavigations = (container) => {
-                const prevButton = container.querySelector('.prev');
-                const nextButton = container.querySelector('.next');
-                
-                let slideIndex = 1;
-                showSlides(slideIndex);
-                
-                function plusSlides(n) {
-                  showSlides(slideIndex += n);
-                }
-                prevButton.addEventListener('click', () => {
-                    plusSlides(-1);
-                });
-            
-            
-                nextButton.addEventListener('click', () => {
-                    plusSlides(1);
-                });
-            
-                function showSlides(n) {
-                  let i;
-                  const slides = container.querySelectorAll('.additional-image-item');
-                  if (n > slides.length) {slideIndex = 1}    
-                  if (n < 1) {slideIndex = slides.length}
-            
-            
-                  for (i = 0; i < slides.length; i++) {
-                    slides[i].style.opacity = "0.8"; 
-                  }
-                  slides[slideIndex-1].style.opacity = "1";
-                  slides[slideIndex-1].style.textAlign = "center";
-                  slides[slideIndex-1].scrollIntoView(true);               
-                }
-            };
-            /* Setting the button element */
-            /* Display the actual page numbers */
+           <p>
+               Description:<span class="lottery_events_add_description">${event.description}</span>
+               <textarea class="lottery_events_add_edit_description" data-original-value="${event.description}" required>${event.description}</textarea>
+               <div class="lottery_events_add_error_message lottery_edit_description_error">Description is required</div>
+           </p>
+           <p style="display: none;">
+               Price: <span class="lottery_events_add_price">£${event.price}</span>
+               <input type="number" class="lottery_events_add_edit_price" value="${event.price}" data-original-value="${event.price}" value="0">
+               <div class="lottery_events_add_error_message lottery_edit_price_error">Price is required</div>
+           </p>
+           <p>
+               Draw Date: <span class="lottery_events_add_draw_date">${event.draw_date}</span>
+               <input type="datetime-local" class="lottery_events_add_edit_draw_date" value="${new Date(event.draw_date).toISOString().slice(0, 16)}" data-original-value="${new Date(event.draw_date).toISOString().slice(0, 16)}" required>
+               <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
+           </p>
+          <p id="category_Details">Category: <strong class="category_Name" >${event.category.name}</strong>
+           <span class="lottery_events_set_category" hidden>${event.category.name}</span>
+           </p>
 
-            const addPageButtons = (count, countPerRows) => {
-                const pageSpan = document.getElementById("pageButtons");
-                /* When Total Number of Page Button less than Default Pagination count  */
-                if (countPerRows > numberOfPages) {
-                    countPerRows = numberOfPages;
-                }
-                /* Display Buttons Numbers and Iterate The counts  */
-                for (let page = count; page <= countPerRows; page++) {
-                    let button = document.createElement("button"); // Call the button
-                    button.innerHTML = page;
-                    button.setAttribute('id', `page${page}`);
-                    button.className = "btn button-orange";
-                    button.addEventListener("click", () => goToPage(page));
-                    pageSpan.appendChild(button);
-                    buttons[page] = button; // Map the entities to the array
-                }
+           <p>
+               Status: <span class="lottery_events_add_is_active">${event.is_active ? 'Active' : 'Inactive'}</span>
+               <input type="checkbox" class="lottery_events_add_edit_is_active" ${event.is_active ? 'checked' : ''} data-original-checked="${event.is_active}">
+           </p>
+           <p>
+               Total Tickets: <span class="lottery_events_add_total_tickets">${event.total_tickets}</span>
+               <input type="number" class="lottery_events_add_edit_total_tickets" value="${event.total_tickets}" data-original-value="${event.total_tickets}" required readonly>
+               <div class="lottery_events_add_error_message lottery_edit_total_tickets_error">Total Tickets are required</div>
+           </p>
+           ${event.image ? `<img src="${event.image}" alt="${event.title}" class="lottery_events_add_current_image"/>` : ''}
+           <input type="file" class="lottery_events_add_edit_image" accept="image/*">
+           <p>
+               Total Budget: <span class="lottery_events_add_total_budget">${event.total_budget}</span>
+               <input type="number" class="lottery_events_add_edit_total_budget" value="${event.total_budget}" data-original-value="${event.total_budget}" required>
+               <div class="lottery_events_add_error_message lottery_edit_total_budget_error">Total Budget is required</div>
+           </p>
+           <p>
+           Revenue Type:
+           <span class="lottery_events_add_revenue_type">${event.revenue_type}</span>
+           <select class="lottery_events_add_edit_revenue_type" style=" display: none;"; data-original-value="${event.revenue_type}">
+               <option value="fixed" ${event.revenue_type === 'fixed' ? 'selected' : ''}>Fixed</option>
+               <option value="percentage" ${event.revenue_type === 'percentage' ? 'selected' : ''}>Percentage</option>
+           </select>
+           </p>
+           <div class="lottery_events_add_revenue_fields">
+       <p class="lottery_events_add_fixed_revenue" style="display: ${event.revenue_type === 'fixed' ? 'block' : 'none'};">
+           Fixed Revenue Amount:
+           <span>${event.revenue_value}</span>
+           <input type="number" class="lottery_events_add_edit_fixed_revenue" value="${event.revenue_value}" data-original-value="${event.revenue_value}">
+       </p>
+       <p class="lottery_events_add_percentage_revenue" style="display: ${event.revenue_type === 'percentage' ? 'block' : 'none'};">
+           Percentage Revenue:
+           <span>${event.revenue_value}</span>
+           <input type="number" class="lottery_events_add_edit_percentage_revenue" value="${event.revenue_value}" data-original-value="${event.revenue_value}">
+       <div class="lottery_events_add_error_message lottery_edit_revenue_error">Revenue Value is required</div>
+       </p>
+       </div>
+       <p>
+           Total Amount: <span class="lottery_events_add_total_amount">${event.total_amount}</span>
+           <input type="number" class="lottery_events_add_edit_total_amount" value="${event.total_amount}" data-original-value="${event.total_amount}" required readonly>
+       </p>
+       <p>
+           Per Ticket Price: <span class="lottery_events_add_per_ticket_price">${event.per_ticket_price}</span>
+           <input type="number" class="lottery_events_add_edit_per_ticket_price" value="${event.per_ticket_price}" data-original-value="${event.per_ticket_price}" required>
+       <div class="lottery_events_add_error_message lottery_edit_per_ticket_price_error">Per Ticket Price is required</div>
+       </p>
+        <!-- Mini Limit -->
+        <p style="display: none;">
+           Mini Limit: <span class="lottery_events_add_minilimit">${event.mini_limit}</span>
+           <input type="number" class="lottery_events_add_edit_minilimit" value="${event.mini_limit}" data-original-value="${event.mini_limit}" required>
+           <div class="lottery_events_add_error_message lottery_edit_minilimit_error">Minimum Tickets must be greater than zero </div>
+       </p>
 
-            };
+       <!-- Max Limit -->
+       <p>
+           Max Limit: <span class="lottery_events_add_maxlimit">${event.max_limit}</span>
+           <input type="number" class="lottery_events_add_edit_maxlimit" value="${event.max_limit}" data-original-value="${event.max_limit}" required>
 
-            const clearRows = () => {
-                container.innerHTML = ""; // clear existing events
-            }
-            function goToPage(pageIndex = 0) {
-                currentPage = pageIndex;
-                clearRows();
-                show_Lotterycards();
-            }
-            /* Condition the syntax of changing pages */
-            const changePage = (num = 0, action) => {
-                const nextPage = currentPage + num;
-                if (nextPage < 1) {
-                    goToPage(1);
-                    console.log("This is the first page." + nextPage)
-                }
-                else if (nextPage > lastPage) {
-                    goToPage(lastPage);
-                    console.log("This is the last page." + lastPage);
-                } else { /*Main Function Executes Here */
+           <div class="lottery_events_add_error_message lottery_edit_maxlimit_error">Maximum Tickets must be greater than zero and not less than Minimum Tickets</div>
+       </p>
 
-                    /*Executes Next Page */
-                    if (currentPage % btnPerPage == 0 && action == 'next') {
-                        const pageButtons = document.getElementById("pageButtons");
-                        pageButtons.innerHTML = '';
-                        count += btnPerPage;
-                        countPerRows += btnPerPage;
-                        addPageButtons(count, countPerRows);
-                        /*Activate Current Next Buttons */
-                        let buttonElement = [];
-                        buttonElement = document.querySelectorAll('.button-orange');
-                        buttonElement.forEach(element => {
-                            let elementLen = element.id.length;
-                            let id = element.id.slice(4, elementLen);
-                            if (id === nextPage.toString()) {
-                                $('.button-orange').removeClass('active');
-                                $(`#page${id}`).addClass('active');
-                            }
-                        });
-                        goToPage(nextPage);
-                        button_orange();
+      
 
-                    }
-                    /*Executes Previous Page */
-                    else if (nextPage % btnPerPage == 0 && action == 'previous') {
-                        const pageButtons = document.getElementById("pageButtons");
-                        pageButtons.innerHTML = '';
-                        count -= btnPerPage;
-                        countPerRows -= btnPerPage;
-                        addPageButtons(count, countPerRows);
-                        /*Activate Current Previous Buttons */
-                        let buttonElement = [];
-                        buttonElement = document.querySelectorAll('.button-orange');
-                        buttonElement.forEach(element => {
-                            let elementLen = element.id.length;
-                            let id = element.id.slice(4, elementLen);
-                            if (id === nextPage.toString()) {
-                                $('.button-orange').removeClass('active');
-                                $(`#page${id}`).addClass('active');
-                            }
-                        });
-                        goToPage(nextPage);
-                        button_orange();
-                    }
-                    else { /* Activate Current Buttons */
-                        let buttonElement = [];
-                        buttonElement = document.querySelectorAll('.button-orange');
-                        buttonElement.forEach(element => {
-                            let elementLen = element.id.length;
-                            let id = element.id.slice(4, elementLen);
-                            if (id === nextPage.toString()) {
-                                $('.button-orange').removeClass('active');
-                                $(`#page${id}`).addClass('active');
-                            }
-                        });
-                        goToPage(nextPage);
-
-                    }
-
-                }
-            };
-            /* Change page By Arrow Buttons */
-            const nextPage = () => changePage(1, 'next');
-            const previousPage = () => changePage(-1, 'previous');
-
-            const addClickListener = (id = "", callback = () => undefined) =>
-                document.getElementById(id).addEventListener("click", callback);
-
-            /* Calling Function Globally */
-            addPageButtons(count, countPerRows);
-            addClickListener("nextPageButton", nextPage);
-            addClickListener("prevPageButton", previousPage);
-            show_Lotterycards();
-
-            /* On click Active class */
-            const button_orange = () => {
-                $(".button-orange").click(function () {
-                    $(".button-orange").removeClass('active');
-                    $(this).addClass('active');
-                });
-            }
+       <!-- Competition Details -->
+       <p>
+           Competition Details: <span class="lottery_events_add_competitiondetails">${event.competition_details}</span>
+           <textarea class="lottery_events_add_edit_competitiondetails" data-original-value="${event.competition_details}" required>${event.competition_details}</textarea>
+           <div class="lottery_events_add_error_message lottery_edit_competitiondetails_error">Competition Details are required</div>
+       </p>
+       <!-- Additional Images Section -->
+       <div class="additional-images-container">
+           ${additionalImagesHtml}
+            </div>
 
 
-            button_orange();
+            <button type="button" class="add-image-button" style="display:none;">Add Another Image</button>
+   
+           <button class="lottery_events_add_edit_button" onclick="lottery_events_enableEditMode(this)">Edit</button>
+           <button class="lottery_events_add_save_button" onclick="lottery_events_edit_saveChanges(this)">Save</button>
+           <button class="lottery_events_add_cancel_button" onclick="lottery_events_cancelEdit(this)">Cancel</button>
+           <button class="lottery_events_add_delete_button" onclick="deleteLotteryEvent(${event.id})">Delete</button>
+       `;
 
-            /*By default Set Active First Button */
-            $(".button-orange:first").addClass("active");
+
+                container.appendChild(eventDiv);
+            });
+
+            updatePagination(totalPages);
         })
         .catch(error => console.error('Error fetching events:', error));
+}
+
+function updatePagination(totalPages) {
+    const paginationContainer = document.getElementById('pagination-container');
+    paginationContainer.innerHTML = '';
+
+    if (totalPages <= 1) return; // Hide pagination if only one page
+
+    let paginationHTML = `<ul class="custom_admin_dashboard_fetchLotteryEvents_pagination">`;
+
+    // Previous button
+    if (currentPage > 1) {
+        paginationHTML += `<li class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_item"><a class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_link" href="#" onclick="fetchLotteryEvents('${currentSearchTerm}', '${currentCategoryId}', ${currentPage - 1})">Previous</a></li>`;
+    }
+
+    let beforePage = currentPage - 1;
+    let afterPage = currentPage + 1;
+
+    // Show first page and dots if needed
+    if (currentPage > 2) {
+        paginationHTML += `<li class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_item"><a class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_link" href="#" onclick="fetchLotteryEvents('${currentSearchTerm}', '${currentCategoryId}', 1)">1</a></li>`;
+        if (currentPage > 3) {
+            paginationHTML += `<li class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_item custom_admin_dashboard_fetchLotteryEvents_pagination_dots">...</li>`;
+        }
+    }
+
+    // Display current, before, and after page numbers
+    for (let i = beforePage; i <= afterPage; i++) {
+        if (i > 0 && i <= totalPages) {
+            let activeClass = i === currentPage ? 'active' : '';
+            paginationHTML += `<li class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_item ${activeClass}"><a class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_link" href="#" onclick="fetchLotteryEvents('${currentSearchTerm}', '${currentCategoryId}', ${i})">${i}</a></li>`;
+        }
+    }
+
+    // Show last page and custom_admin_dashboard_fetchLotteryEvents_pagination_dots if needed
+    if (currentPage < totalPages - 1) {
+        if (currentPage < totalPages - 2) {
+            paginationHTML += `<li class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_item custom_admin_dashboard_fetchLotteryEvents_pagination_dots">...</li>`;
+        }
+        paginationHTML += `<li class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_item"><a class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_link" href="#" onclick="fetchLotteryEvents('${currentSearchTerm}', '${currentCategoryId}', ${totalPages})">${totalPages}</a></li>`;
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+        paginationHTML += `<li class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_item"><a class="custom_admin_dashboard_fetchLotteryEvents_pagination_page_link" href="#" onclick="fetchLotteryEvents('${currentSearchTerm}', '${currentCategoryId}', ${currentPage + 1})">Next</a></li>`;
+    }
+
+    paginationHTML += `</ul>`;
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+// Function to handle category selection
+function handleCategoryChange(categoryId) {
+    if (categoryId === 'all') {
+        fetchLotteryEvents('', '', 1); // Reset to show all lotteries
+    } else {
+        fetchLotteryEvents('', categoryId, 1);
+    }
+}
+
+// Function to handle search input
+function handleSearchInput(searchText) {
+    if (searchText.trim() === '') {
+        fetchLotteryEvents('', currentCategoryId, 1); // Reset search
+    } else {
+        fetchLotteryEvents(searchText, currentCategoryId, 1);
+    }
 }
 
 // Remove a specific additional image
@@ -3781,37 +4137,111 @@ function lottery_events_enableEditMode(button) {
     // Replace static category with the dropdown
     categoryField.replaceWith(categorySelect);
 
-    // Show the "Add Another Image" button and make it visible
-    const addImageButton = card.querySelector('.add-image-button');
-    addImageButton.style.display = 'block';
+    
+      // Show the "Add Another Image" button and make it visible
+      const addImageButton = card.querySelector('.add-image-button');
+      addImageButton.style.display = 'block';
+  
+      // Additional Images button Container
+      const additionalImagesContainer = card.querySelector('.add-additionalimages-container');
+      if(additionalImagesContainer){
+          //additionalImagesContainer.style.display = 'block';
+          additionalImagesContainer.style.visibility = "visible";
+  
+      additionalImagesContainer.replaceChildren();// clear all child elements
+      }
+      
+      
+      let firstClick = false;// check whether button clicked
+      let clickedCount = 0; // get count of clicks
+  
+      // Add functionality to dynamically add a new image field
+      // Add functionality to dynamically add a new image field
+    addImageButton.addEventListener('click', function() {
+        const additional_Images_Container = card.querySelector('.additional-images-container');
+        let AddImagecount = $(".add-additionalimages-container").children().length; // Count child elements  
+        clickedCount++;
+        //Create Additional Image Fileds If not available inside Container
+        const CreateAdditionalImageContainer = () =>{
+            let additionalImagesHtml = `
+            <!-- Additional Images Section -->
+            <div class="additional-images-container">
+                        <div class="additional-images">
+                             <!--<h4>Additional Images:</h4> Heading outside the scrollable container -->
+                            <div class="additional-images-scroll-container">  
+                            </div>
+                        </div>
+                        <div class="add-additionalimages-container" style="visibility: visible;"></div>
+                    </div>`;
+            additional_Images_Container.innerHTML=additionalImagesHtml;
+        } 
+        //Add Additional Images
+        const AddImageFields = () => {
+            firstClick = true;
+            //Creating New Additional Images
+            const createElements=()=>
+                {
+                    const newImageField = document.createElement('div');
+                    newImageField.className = 'additional-image-item';
+                    newImageField.innerHTML = `
+                        <input type="file" name="additional_images[]" accept="image/*">
+                        <button type="button" class="remove-image-button">Remove</button>
+                    `;
+        
+                    // Add additional Image Container
+                   if(additionalImagesContainer){
+                        additionalImagesContainer.append(newImageField);
+                    }
+                    else {
+                        card.querySelector('.add-additionalimages-container').append(newImageField);
+                        console.log('Updated to new Container ');
+                    }
+        
+                    // Attach remove functionality to the new image remove button
+                    newImageField.querySelector('.remove-image-button').addEventListener('click', function() {
+                        newImageField.remove();
+                    });
+                }
 
-    // Add functionality to dynamically add a new image field
-    addImageButton.addEventListener('click', function () {
-        const imagesContainer = card.querySelector('.additional-images-container');
-        const newImageField = document.createElement('div');
-        newImageField.className = 'additional-image-item';
-        newImageField.innerHTML = `
-            <input type="file" name="additional_images[]" accept="image/*">
-            <button type="button" class="remove-image-button">Remove</button>
-        `;
+            // check If Additional images available in cards
+        if ($(this).parent().find('.additional-images-scroll-container').length > 0) {
+             createElements();
+         } else {
+             CreateAdditionalImageContainer();
+             createElements();
+             $('.additional-images-container .additional-images h4').css('display','none');
+             console.log('Image fields created');
+         }
+         
+            
+        }
+        // Remove unnecessary DOM elements 
+        if (AddImagecount > clickedCount) {
+            let removeChild= AddImagecount-clickedCount;
+            $(".add-additionalimages-container").children().slice(`-${removeChild}`).remove(); // Select last and remove 
+        }
+        else { // Creating add image fields
+            if(AddImagecount>0 && !firstClick){
+                $(".add-additionalimages-container").children().remove();
+            }
+            console.log('removed extra fields successfully');
 
-        // Append the new image input field
-        imagesContainer.appendChild(newImageField);
-
-        // Attach remove functionality to the new image remove button
-        newImageField.querySelector('.remove-image-button').addEventListener('click', function () {
-            newImageField.remove();
-        });
+            // check if both condition are equal remove last elements
+            if(AddImagecount===clickedCount){
+                $(".add-additionalimages-container").children(':last').remove();
+            }
+            AddImageFields();
+        }
     });
-
-    // Add any existing remove buttons to the new fields
-    const removeButtons = card.querySelectorAll('.remove-image-button');
-    removeButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            button.parentElement.remove();
-        });
-    });
-
+      
+      // Add any existing remove buttons to the new fields
+      const removeButtons = card.querySelectorAll('.remove-image-button');
+      removeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+              button.parentElement.remove();
+          });
+      });
+  
 
     // Show the select dropdown and hide the static text
     const revenueTypeSelect = card.querySelector('.lottery_events_add_edit_revenue_type');
@@ -3923,6 +4353,20 @@ function lottery_events_cancelEdit(button) {
         addImageButton.style.display = 'none';
     }
 
+     // Hide the Add additional image container
+
+     const add_Additionalimages_Container =  card.querySelector('.add-additionalimages-container');
+     //const additionalimage_Item =  add_Additionalimages_Container.querySelectorAll('.additional-image-item');
+     if (add_Additionalimages_Container) {
+         //add_Additionalimages_Container.style.display = 'none';
+         add_Additionalimages_Container.style.visibility='hidden';
+         //additionalimage_Item.innerHTML='';
+         add_Additionalimages_Container.querySelectorAll('.additional-image-item').forEach(function(element) {
+             element.remove();
+         });
+         card.querySelector('.add-additionalimages-container').innerHTML=''; // clear all additional image fields
+         $(".add-additionalimages-container").children().remove();
+     }
     // Optionally remove dynamically added image fields
     // const additionalImagesContainer = card.querySelector('.additional-images-container');
     // if (additionalImagesContainer) {
@@ -3944,7 +4388,6 @@ function lottery_events_edit_validateFields(card) {
     const revenueType = card.querySelector('.lottery_events_add_edit_revenue_type').value.trim();
     const maxLimit = card.querySelector('.lottery_events_add_edit_maxlimit').value.trim();
     const miniLimit = card.querySelector('.lottery_events_add_edit_minilimit').value.trim();
-    const freePostalDescription = card.querySelector('.lottery_events_add_edit_freepostal').value.trim();
     const competitionDetails = card.querySelector('.lottery_events_add_edit_competitiondetails').value.trim();
 
     let revenueValue = null;
@@ -3972,13 +4415,13 @@ function lottery_events_edit_validateFields(card) {
         card.querySelector('.lottery_edit_description_error').style.display = 'none';
     }
 
-    if (!price || isNaN(price) || price <= 0) {
-        card.querySelector('.lottery_edit_price_error').style.display = 'block';
-        isValid = false;
-        card.querySelector('.lottery_edit_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-        card.querySelector('.lottery_edit_price_error').style.display = 'none';
-    }
+    // if (!price || isNaN(price) || price <= 0) {
+    //     card.querySelector('.lottery_edit_price_error').style.display = 'block';
+    //     isValid = false;
+    //     card.querySelector('.lottery_edit_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // } else {
+    //     card.querySelector('.lottery_edit_price_error').style.display = 'none';
+    // }
 
     if (!drawDate) {
         card.querySelector('.lottery_edit_draw_date_error').style.display = 'block';
@@ -4020,17 +4463,17 @@ function lottery_events_edit_validateFields(card) {
         card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'none';
     }
     // Mini Limit validation
-    if (!miniLimit || miniLimit <= 0) {
-        card.querySelector('.lottery_edit_minilimit_error').textContent = 'Mini Limit must be greater than 0.';
-        card.querySelector('.lottery_edit_minilimit_error').style.display = 'block';
-        isValid = false;
-    } else if (maxLimit && parseInt(miniLimit) > parseInt(maxLimit)) {
-        card.querySelector('.lottery_edit_minilimit_error').textContent = 'Mini Limit must be less than or equal to Max Limit.';
-        card.querySelector('.lottery_edit_minilimit_error').style.display = 'block';
-        isValid = false;
-    } else {
-        card.querySelector('.lottery_edit_minilimit_error').style.display = 'none';
-    }
+    // if (!miniLimit || miniLimit <= 0) {
+    //     card.querySelector('.lottery_edit_minilimit_error').textContent = 'Mini Limit must be greater than 0.';
+    //     card.querySelector('.lottery_edit_minilimit_error').style.display = 'block';
+    //     isValid = false;
+    // } else if (maxLimit && parseInt(miniLimit) > parseInt(maxLimit)) {
+    //     card.querySelector('.lottery_edit_minilimit_error').textContent = 'Mini Limit must be less than or equal to Max Limit.';
+    //     card.querySelector('.lottery_edit_minilimit_error').style.display = 'block';
+    //     isValid = false;
+    // } else {
+    //     card.querySelector('.lottery_edit_minilimit_error').style.display = 'none';
+    // }
 
     // Max Limit validation
     if (!maxLimit || maxLimit <= 0) {
@@ -4045,13 +4488,7 @@ function lottery_events_edit_validateFields(card) {
         card.querySelector('.lottery_edit_maxlimit_error').style.display = 'none';
     }
 
-    // Free Postal Description validation
-    if (!freePostalDescription) {
-        card.querySelector('.lottery_edit_freepostal_error').style.display = 'block';
-        isValid = false;
-    } else {
-        card.querySelector('.lottery_edit_freepostal_error').style.display = 'none';
-    }
+    
 
     // Competition Details validation
     if (!competitionDetails) {
@@ -4081,10 +4518,9 @@ function lottery_events_edit_saveChanges(button) {
     const isActive = card.querySelector('.lottery_events_add_edit_is_active').checked;
     const totalTickets = card.querySelector('.lottery_events_add_edit_total_tickets').value;
     const imageFile = card.querySelector('.lottery_events_add_edit_image').files[0];
-    // const slug = card.querySelector('.lottery_events_add_edit_slug').value;
+    //const slug = card.querySelector('.lottery_events_add_edit_slug').value;
     const miniLimit = card.querySelector('.lottery_events_add_edit_minilimit').value;
     const maxLimit = card.querySelector('.lottery_events_add_edit_maxlimit').value;
-    const freePostalDescription = card.querySelector('.lottery_events_add_edit_freepostal').value;
     const competitionDetails = card.querySelector('.lottery_events_add_edit_competitiondetails').value;
 
     const formData = new FormData();
@@ -4126,7 +4562,6 @@ function lottery_events_edit_saveChanges(button) {
     // formData.append('slug', slug);
     formData.append('mini_limit', miniLimit);
     formData.append('max_limit', maxLimit);
-    formData.append('free_postal_description', freePostalDescription);
     formData.append('competition_details', competitionDetails);
     // Append additional images to the formData
     additionalImageFiles.forEach((imageFile, index) => {
@@ -4166,7 +4601,6 @@ function lottery_events_edit_saveChanges(button) {
                 //  card.querySelector('.lottery_events_add_slug').textContent = slug;
                 card.querySelector('.lottery_events_add_minilimit').textContent = miniLimit;
                 card.querySelector('.lottery_events_add_maxlimit').textContent = maxLimit;
-                card.querySelector('.lottery_events_add_freepostal').textContent = freePostalDescription;
                 card.querySelector('.lottery_events_add_competitiondetails').textContent = competitionDetails;
 
 
@@ -4180,9 +4614,57 @@ function lottery_events_edit_saveChanges(button) {
                     imgElement.className = 'lottery_events_add_current_image';
                     card.insertBefore(imgElement, card.querySelector('.lottery_events_add_edit_image'));
                 }
+
+               
+                // Update additional images
+                const additionalImagesContainer = card.querySelector('.additional-images-container');
+                if (data.additional_images && data.additional_images.length > 0) {
+                    let additionalImagesHtml = `
+                        <div class="additional-images">
+                            <h4>Additional Images:</h4> <!-- Heading outside the scrollable container -->
+                            <div class="additional-images-scroll-container">
+                                ${data.additional_images.map((image, index) => `
+                                    <div class="additional-image-item" data-image-id="${image.id}">
+                                        <img src="${image.image}" alt="Additional Image" class="lottery-events-additional-image"/>
+                                        <button class="remove-image-btn" onclick="removeAdditionalImage(${image.id}, ${data.id})">Remove</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="add-additionalimages-container">
+                        </div>
+                    `;
+                    additionalImagesContainer.innerHTML = additionalImagesHtml;
+                } else {
+                    additionalImagesContainer.innerHTML = '';
+                }
+
                 revenueTypeSpan.textContent = revenueTypeSelect.value;
                 revenueTypeSelect.style.display = 'none';
                 revenueTypeSpan.style.display = 'block';
+                 // Reset Category Field
+                 const selectedText = categorySelect.options[categorySelect.selectedIndex].text;
+                 const category_Details = card.querySelector('#category_Details');
+                 category_Details.innerHTML = `Category: <strong class="category_Name" >${selectedText}</strong>
+                 <span class="lottery_events_set_category" hidden>${selectedText}</span>`;
+                 categorySelect.replaceWith(category_Details);
+                 // Hide add image buttons
+                const addImageButton = card.querySelector('.add-image-button');
+                if (addImageButton) {
+                    addImageButton.style.display = 'none';
+                } 
+               // Hide the Add additional image container
+                const add_Additionalimages_Container =  card.querySelector('.add-additionalimages-container');
+                if (add_Additionalimages_Container) {
+                    //add_Additionalimages_Container.style.display = 'none';
+                    add_Additionalimages_Container.style.visibility='hidden';
+                    //additionalimage_Item.innerHTML='';
+                    add_Additionalimages_Container.querySelectorAll('.additional-image-item').forEach(function(element) {
+                        element.remove();
+                    });
+                    card.querySelector('.add-additionalimages-container').innerHTML=''; // clear all additional image fields
+                $(".add-additionalimages-container").children().remove();
+                }
                 // Exit edit mode
                 card.classList.remove('lottery_events_add_edit_mode');
                 lottery_events_edit_clearErrorMessages(card); // Clear errors after saving
@@ -4265,9 +4747,8 @@ function submitAddLotteryEvent() {
     var image = document.getElementsByName('image')[0].files[0];
     var isActive = document.getElementsByName('is_active')[0].checked;
     var perTicketPrice = document.getElementById('lottery_events_add_perTicketPrice').value;
-    var freepostaldescription = document.getElementsByName('free_postal_description')[0].value;
     // Get form field values      
-    var slug = document.getElementsByName('slug')[0].value;
+    // var slug = document.getElementsByName('slug')[0].value;
     var miniLimit = document.getElementsByName('mini_limit')[0].value;
     var maxLimit = document.getElementsByName('max_limit')[0].value;
     var competitionDetails = document.getElementsByName('competition_details')[0].value;
@@ -4299,18 +4780,18 @@ function submitAddLotteryEvent() {
 
 
     // Validate Slug
-    if (slug && !/^[a-z0-9-]+$/.test(slug)) {
-        showValidationError('lottery_events_add_slug_validation', 'Slug must contain only lowercase letters, numbers, and hyphens.');
-    } else {
-        clearValidationError('lottery_events_add_slug_validation');
-    }
+    // if (slug && !/^[a-z0-9-]+$/.test(slug)) {
+    //     showValidationError('lottery_events_add_slug_validation', 'Slug must contain only lowercase letters, numbers, and hyphens.');
+    // } else {
+    //     clearValidationError('lottery_events_add_slug_validation');
+    // }
 
     // Validate Minimum Tickets
-    if (!miniLimit || miniLimit <= 0) {
-        showValidationError('lottery_events_add_minilimit_validation', 'Minimum Tickets must be greater than zero.');
-    } else {
-        clearValidationError('lottery_events_add_minilimit_validation');
-    }
+    // if (!miniLimit || miniLimit <= 0) {
+    //     showValidationError('lottery_events_add_minilimit_validation', 'Minimum Tickets must be greater than zero.');
+    // } else {
+    //     clearValidationError('lottery_events_add_minilimit_validation');
+    // }
 
     // Validate Maximum Tickets
     if (!maxLimit || maxLimit <= 0 || parseInt(maxLimit) < parseInt(miniLimit)) {
@@ -4355,11 +4836,11 @@ function submitAddLotteryEvent() {
     }
 
     // Validate Price
-    if (price === '' || price <= 0) {
-        showValidationError('lottery_events_add_price_validation', 'Price must be greater than zero.');
-    } else {
-        clearValidationError('lottery_events_add_price_validation');
-    }
+    // if (price === '' || price <= 0) {
+    //     showValidationError('lottery_events_add_price_validation', 'Price must be greater than zero.');
+    // } else {
+    //     clearValidationError('lottery_events_add_price_validation');
+    // }
 
     // Validate Draw Date
     if (drawDate === '') {
@@ -4447,9 +4928,8 @@ function clear_lottery_events_add_inputs_errors() {
     document.getElementById('lottery_events_add_per_ticket_validation').textContent = '';
     document.getElementById('lottery_events_add_minilimit_validation').textContent = '';
     document.getElementById('lottery_events_add_maxlimit_validation').textContent = '';
-    document.getElementById('lottery_events_add_freepostal_validation').textcontent = '';
     document.getElementById('lottery_events_add_competitiondetails_validation').textContent = '';
-    document.getElementById('lottery_events_add_slug_validation').textContent = '';
+    // document.getElementById('lottery_events_add_slug_validation').textContent = '';
 
 }
 
@@ -4463,11 +4943,10 @@ function validate_lottery_events_add_inputs(errors) {
     if (errors.draw_date) document.getElementById('lottery_events_add_drawdate_validation').textContent = errors.draw_date.join(', ');
     if (errors.image) document.getElementById('lottery_events_add_image_validation').textContent = errors.image.join(', ');
     if (errors.is_active) document.getElementById('lottery_events_add_isactive_validation').textContent = errors.is_active.join(', ');
-    if (errors.slug) document.getElementById('lottery_events_add_slug_validation').textContent = errors.slug.join(', ');
+    // if (errors.slug) document.getElementById('lottery_events_add_slug_validation').textContent = errors.slug.join(', ');
     if (errors.min_limit) document.getElementById('lottery_events_add_minilimit_validation').textContent = errors.min_limit.join(', ');
     if (errors.max_limit) document.getElementById('lottery_events_add_maxlimit_validation').textContent = errors.max_limit.join(', ');
     if (errors.competition_details) document.getElementById('lottery_events_add_competitiondetails_validation').textContent = errors.competition_details.join(', ');
-    if (errors.free_postal_description) document.getElementById('lottery_events_add_freepostal_validation').textContent = errors.free_postal_description.join(', ');
 }
 
 

@@ -1262,6 +1262,125 @@ def footer_view(request):
 def locations_view(request):
     locations = Location.objects.all()  # Get all locations from the database
     return render(request, 'footer.html', {'locations': locations})
+from django.conf import settings
 
- 
+from PaymentServices.models import *
+import stripe
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
+import stripe
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import logging
+stripe.api_key = settings.STRIPE_API_KEY
+# Set up logging
+
+# Set your Stripe API key
+class FetchPaidAmountView(APIView):
+    def get(self, request, payment_intent):
+        try:
+            # Retrieve all payments for the given payment_intent
+            payments = PaymentLottery.objects.filter(payment_intent=payment_intent)
+
+            if not payments.exists():
+                return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Extract total paid amount
+            paid_amount = sum(payment.amount for payment in payments)
+
+            # Get payment status (assuming all have the same status)
+            payment_status = payments.first().payment_status
+
+            # Retrieve all related lottery event details
+            lottery_details = [
+                {
+                    "lottery_name": payment.lottery_event.title,
+                    "amount": float(payment.amount),
+                    "quantity": payment.quantity,
+                }
+                for payment in payments
+            ]
+
+            # 🎯 Fetch the refunded amount from Stripe
+            try:
+                full_payment_intent = f"pi_{payment_intent}"
+                stripe_refunds = stripe.Refund.list(payment_intent=full_payment_intent)
+                refunded_amount = sum(refund.amount for refund in stripe_refunds.data) / 100  # Convert from cents
+            except stripe.error.StripeError as e:
+                logger.error(f"Stripe error fetching refund details: {e}")
+                refunded_amount = 0  # Default to zero if Stripe API fails
+
+            return Response({
+                "paid_amount": paid_amount,
+                "payment_status": payment_status,
+                "lottery_details": lottery_details,
+                "refunded_amount": refunded_amount,  # ✅ Added refunded amount
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class RefundPaymentView(APIView):
+    def post(self, request, payment_intent):
+        try:
+            # Find all payments with the same payment_intent
+            payments = PaymentLottery.objects.filter(payment_intent=payment_intent)
+
+            if not payments.exists():
+                return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Check if any of the payments are already refunded
+            if payments.filter(payment_status="refunded").exists():
+                return Response({"error": "This payment has already been refunded"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if all payments are eligible for refund (status should be "completed")
+            if payments.exclude(payment_status="completed").exists():
+                return Response({"error": "Only completed payments can be refunded"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get refund amount from request
+            refund_amount = request.data.get("refund_amount")
+            if not refund_amount or refund_amount <= 0:
+                return Response({"error": "Invalid refund amount"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Convert amount to cents
+            refund_amount_cents = int(refund_amount * 100)
+
+            try:
+                 # Prepend "pi_" to the payment_intent for Stripe
+                full_payment_intent = f"pi_{payment_intent}"
+                      
+                # Process refund via Stripe
+                refund = stripe.Refund.create(
+                      payment_intent=full_payment_intent, 
+                    amount=refund_amount_cents,
+                    reason="requested_by_customer",
+                )
+
+                # Update all payments with this intent to "refunded"
+                payments.update(payment_status="refunded")
+
+                return Response({"message": "Refund successful", "refund_id": refund.id}, status=status.HTTP_200_OK)
+
+            except stripe.error.InvalidRequestError as e:
+                logger.error(f"Stripe Error: {e}")
+                return Response({"error": "Invalid payment request. Please check the payment details."}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class PaymentLotteryListView(APIView):
+    def get(self, request):
+        payment_lotteries = PaymentLottery.objects.all().order_by('-payment_at')
+        serializer = AdminrefundPaymentLotterySerializer(payment_lotteries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

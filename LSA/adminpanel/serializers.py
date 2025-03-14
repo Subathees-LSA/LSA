@@ -215,3 +215,12 @@ class PreviousWinnerimgSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'image'] 
 
 
+from PaymentServices.models import *
+
+class AdminrefundPaymentLotterySerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source="user.email", read_only=True)
+    lottery_event_title = serializers.CharField(source="lottery_event.title", read_only=True)
+
+    class Meta:
+        model = PaymentLottery
+        fields = ['payment_intent', 'lottery_event_title', 'amount', 'payment_at', 'payment_status', 'user_email', 'quantity', 'receipt_url']	

@@ -4,14 +4,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
+        .lottery_cards_heading{
+            text-transform: capitalize;
+        }
         .admin-dashboard-report-container {
             width: 656px;
             height: 322px;
@@ -21,12 +25,8 @@
             border: 1px #EFF0F6 solid;
 
         }
-
-
-
-
         /* Hamburger Menu */
-        .hamburger-menu {
+        .custom_admin_dashboard_hamburger_menu {
             display: none;
             font-size: 24px;
             cursor: pointer;
@@ -41,252 +41,8 @@
         }
 
 
-        /* Mobile View - Hide Sidebar Initially */
-        @media screen and (max-width: 768px) {
-            .custom_admin_dashboard_sidebar {
-                display: none;
-                position:absolute;
-                
-                top: 0;
-                left: 0;
-                width: 250px;
 
-                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-                padding: 10px;
-                transition: 0.3s ease-in-out;
-                z-index: 999;
-            }
-
-
-            .custom_admin_dashboard_sidebar.show {
-                display: block;
-            }
-
-
-            .hamburger-menu {
-                display: block;
-            }
-
-            .admin-dashboard-small-lottery-image {
-                width: 161px;
-                height: 44px;
-                left: 82px;
-                top: 35px;
-                position: absolute;
-            }
-
-            .custom_admin_dashboard_topbar {
-                background-color: #FF6600;
-            }
-
-            .custom_admin_dashboard_sidebar {
-                width: 450px;
-                background-color: #F0EDED;
-                color: #202224;
-                padding: 0px;
-                margin-top: 100px;
-                border-radius: 30px;
-                border: none;
-                left: -30px;
-
-            }
-
-            .custom_admin_dashboard_sidebar h2 {
-                text-align: center;
-                margin-bottom: 20px;
-
-            }
-
-            .custom_admin_dashboard_sidebar nav ul {
-                list-style: none;
-                padding: 0;
-            }
-
-            .custom_admin_dashboard_sidebar nav ul li {
-                border-bottom: 0.5px #979797 solid;
-                margin: 0;
-            }
-
-            .custom_admin_dashboard_sidebar nav ul li a {
-                text-decoration: none;
-                text-align: center;
-                color: #202224;
-                border: 1px solid #979797;
-                display: block;
-                padding: 15px;
-                transition: background-color 0.3s;
-            }
-
-            .custom_admin_dashboard_logout {
-                text-decoration: none;
-                text-align: center;
-                color: #202224;
-                border: none;
-                display: block;
-                padding: 25px;
-                margin-top: -18px;
-                transition: background-color 0.3s;
-            }
-
-            .custom_admin_dashboard_logout:hover {
-                background-color: #fb6a0a;
-                color: white;
-            }
-
-            .custom_admin_dashboard_sidebar nav ul li a:hover {
-                background-color: #fb6a0a;
-                color: white;
-                border-radius: 30px;
-            }
-
-            .custom_admin_dashboard_sidebar nav ul li a:focus,
-            .custom_admin_dashboard_sidebar nav ul li a.active {
-                color: white;
-                border-radius: 3px;
-            }
-
-
-            /* ************report and analysis********** */
-            .custom_admin_dashboard_overview_count,
-            .custom_admin_dashboard_overview_statistics_count {
-                display: flex;
-                gap: 20px;
-                margin-bottom: 20px;
-                width: 100%;
-
-
-            }
-
-            .custom_admin_dashboard_card {
-                flex: 1;
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 25px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                text-align: center;
-            }
-
-            .custom_admin_dashboard_card h2 {
-                color: rgba(0, 0, 0, 0.70);
-                font-size: 14px;
-                font-family: Rajdhani;
-                font-weight: 700;
-                word-wrap: break-word;
-            }
-
-            #leaderboard_title {
-                text-align: center;
-                margin-top: -155%;
-                margin-left: 0;
-            }
-
-            .leaderboard_class {
-                margin-left: 0;
-                margin-top: 100px;
-                width: 537px;
-                height: 805px;
-                background: white;
-                border-radius: 20px;
-                border: 1px #EFF0F6 solid;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                padding: 20px;
-
-            }
-
-            #custom_admin_dashboard_bar_chart_filter {
-                display: flex;
-                justify-content: center;
-                /* Centers horizontally */
-                align-items: center;
-                /* Centers vertically if needed */
-                width: 90%;
-                /* Adjust width for better fit */
-                margin: 0 auto;
-                text-align: center;
-                /* Centers the element */
-            }
-
-            .admin-dashboard-report-container {
-                width: 90%;
-                /* Make it responsive */
-                height: auto;
-                /* Allow height to adjust */
-                padding: 15px;
-                /* Maintain proper spacing */
-                border-radius: 18px;
-                /* Softer edges */
-                margin: 15px auto;
-            }
-
-
-
-            #lottery_sales_dynamic_count_filter,
-            #custom_admin_dashboard_bar_chart_filter {
-                display: none;
-                color: #4D4D4D;
-                font-size: 14px;
-                font-family: Rajdhani, sans-serif;
-                font-weight: 700;
-                word-wrap: break-word;
-            }
-
-            #lottery_sales_dynamic_count_filter label,
-            #custom_admin_dashboard_bar_chart_filter label {
-                margin-right: 8px;
-            }
-
-            #lottery_sales_dynamic_count_filter select,
-            #custom_admin_dashboard_bar_chart_filter select {
-                padding: 4px;
-                margin-right: 12px;
-                font-size: 14px;
-                font-family: Rajdhani, sans-serif;
-                font-weight: 700;
-                color: #4D4D4D;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                cursor: pointer;
-                appearance: none;
-            }
-
-            /* Style the dropdown options */
-            #lottery_sales_dynamic_count_filter select option,
-            #custom_admin_dashboard_bar_chart_filter select option {
-                background-color: #fff;
-                color: #FF6600;
-                font-weight: 700;
-            }
-
-            /* Change color when an option is hovered */
-            #lottery_sales_dynamic_count_filter select option:hover,
-            #custom_admin_dashboard_bar_chart_filter select option:hover {
-                background-color: #FF6600;
-                color: #fff;
-            }
-
-            /* Style for button */
-            #lottery_sales_dynamic_count_filter button,
-            #custom_admin_dashboard_bar_chart_filter button {
-                padding: 6px 12px;
-                font-size: 14px;
-                font-family: Rajdhani, sans-serif;
-                font-weight: 700;
-                color: #fff;
-                background-color: #FF6600;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-
-            #lottery_sales_dynamic_count_filter button:hover,
-            #custom_admin_dashboard_bar_chart_filter button:hover {
-                background-color: #FF6600;
-            }
-
-
-        }
-
-        .profile-image {
+        .custom_admin_dashboard_user_management_profile_image {
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -295,15 +51,11 @@
             vertical-align: middle;
         }
 
+        
         .additional-images-container {
-            overflow-x: auto;
-            /* Enable horizontal scrolling */
-            white-space: nowrap;
-            /* Prevent wrapping of child elements */
-            width: 100%;
-            /* Set a fixed width or make it responsive */
-            padding: 10px;
-            /* Optional: Add some padding */
+            overflow-x: auto; /* Enable horizontal scrolling */
+            gap: 10px; /* Space between images */
+            padding-bottom: 10px; /* Optional: Add padding to avoid cutting off content */
         }
 
         .additional-images-container .additional-image-item {
@@ -335,85 +87,576 @@
         .additional-images-container::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        @media (max-width: 768px) {
-    #user_specfic_chat {
-        display: none;
-    }
-}
-
+        .lottery_events_add_edit_revenue_type{
+            left: 8em;
+            position: relative;
+        }
     </style>
     <style>
         /* Navigate previous, Next Buttons*/
-        .navigate_btn{
-        position:absolute;
-        top:84%;
+        .navigate_btn {
+            position: absolute;
+            top: 84%;
         }
-        .prev{
-            position:relative;
-            right:27px;
+
+        .prev {
+            position: absolute;
+            right: -10px;
         }
-                /* Next & previous buttons */
-        .prev, .next {
-          cursor: pointer;
-          width: auto;
-          padding: 10px;
-          margin-top: -22px;
-          color: #000fff;
-          font-weight: bold;
-          font-size: 2em;
-          transition: 0.6s ease;
-          border-radius: 0 3px 3px 0;
-          user-select: none;
+
+        /* Next & previous buttons */
+        .prev,
+        .next {
+            cursor: pointer;
+            width: auto;
+            padding: 10px;
+            margin-top: -22px;
+            color: #000fff;
+            font-weight: bold;
+            font-size: 2em;
+            transition: 0.6s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
         }
-        
+
         /* Position the "next button" to the right */
         .next {
-            position: relative;
-            left:175px;
-          border-radius: 3px 0 0 3px;
+            position: absolute;
+            left: 194px;
+            border-radius: 3px 0 0 3px;
         }
-        
+
         /* On hover, add a black background color with a little bit see-through */
-        .prev:hover, .next:hover {
+        .prev:hover,
+        .next:hover {
             color: #fff;
-          background-color:rgba(237, 100, 9, 0.86);
+            background-color: rgba(237, 100, 9, 0.86);
         }
-        
-        .remove-image-btn{
-       
-        font-size:1.2em;
-        padding:0 !important;
+
+   
+    </style>
+    <style>
+        .additional-images-container {
+            padding: 1px;
+        }
+
+        .lottery-event-card {
+            width: 96%;
+            padding: 3px;
         }
     </style>
     <style>
-        
-@media screen and (max-width: 600px) {
-            .custom_admin_dashboard_container {
-            zoom:42% !important;
-            width: 100%;
-            }
-            .custom_admin_dashboard_main {
-                flex: 1;
-                padding: 12px;
-                width: 98%;
-            }
-            }
-             #noUserMessage {
-            display: none;
-            color: red;
-            text-align: center;
-            font-weight: bold;
+        /* Navigate previous, Next Buttons*/
+        .navigate_btn {
+            position: absolute;
+            top: 84%;
         }
-</style>
-<style>
- 
 
-/* Table row and cell styling */
-.custom_admin_dashboard_custom_table td {
-    max-width:12em;
-}
+        /* .navigate_btn {
+                position: relative;
+                top: -70px;
+                right: 90px;
+            }*/
+        .prev {
+            position: relative;
+            right: 6px;
+        }
 
-</style>
+        /* Next & previous buttons */
+        .prev,
+        .next {
+            cursor: pointer;
+            width: auto;
+            padding: 10px;
+            margin-top: -22px;
+            color: #000fff;
+            font-weight: bold;
+            font-size: 2em;
+            transition: 0.6s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+        }
+
+        /* Position the "next button" to the right */
+        .next {
+            position: relative;
+            left: 175px;
+            border-radius: 3px 0 0 3px;
+        }
+
+        /* On hover, add a black background color with a little bit see-through */
+        .prev:hover,
+        .next:hover {
+            color: #fff;
+            background-color: rgba(237, 100, 9, 0.86);
+        }
+        .remove-image-btn {
+            display: block;
+            margin-top: 5px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+
+        .remove-image-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+    <style>
+        /*Applies to small devices (landscape phones, less than 768px)*/
+        @media (max-width: 767px) {
+
+            /* Set Width Size using padding size */
+            .custom_admin_dashboard_container {
+                width: 100%;
+                height: 100vh;
+                font-size: calc(100% - 0px);
+            }
+
+            .custom_admin_dashboard_topbar {
+                background-color: #ff6600;
+                padding: 10px 47px;
+            }
+
+            .admin-dashboard-small-lottery-image {
+                width: 45% !important;
+                height: auto;
+                left: 20% !important;
+                top: 2px !important;
+            }
+
+            .custom_admin_dashboard_main {
+                width: 90%;
+                padding: 1px;
+            }
+
+            /* Overview dashboard */
+            .overview_regional-metrics {
+                flex-direction: column;
+            }
+
+            .overview_sales_count_card {
+                width: 51% !important;
+                flex: auto !important;
+            }
+
+            .overview_sales_count_card p {
+                font-size: 1.6em;
+                padding-right: 4px;
+                margin-bottom: 0;
+            }
+
+            .overview_chart-container {
+                width: 89% !important;
+                padding: 10px !important;
+                margin-left: 0 !important;
+            }
+
+            .overview_dashboard {
+                gap: 6px;
+                justify-content: center !important;
+                flex-direction: column !important;
+            }
+
+            /* hamburger_menu */
+            .custom_admin_dashboard_hamburger_menu {
+                display: block;
+                top: 10px !important;
+                left: 16px;
+            }
+
+            /* Sidebar */
+            .custom_admin_dashboard_sidebar {
+                display: none;
+            }
+
+            .custom_admin_dashboard_sidebar.show {
+                display: block !important;
+                width: 93% !important;
+                position: absolute !important;
+                top: -32px !important;
+                z-index: 999 !important;
+                background-color: #f0eded !important;
+                color: #202224 !important;
+                margin-top: 110px !important;
+                border-radius: 30px !important;
+                left: 8px !important;
+                border: none;
+            }
+
+            .custom_admin_dashboard_overview_count,
+            .custom_admin_dashboard_overview_statistics_count {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /*Report & Analystic - leaderboard*/
+
+            .leaderboard_class {
+                width: 89%;
+                height: 100%;
+                margin-left: 0;
+                margin-top: 44px;
+            }
+
+            #leaderboard_title {
+                text-align: center;
+                margin-top: 0px !important;
+                margin-left: 20px;
+            }
+
+            #lottery_sales_dynamic_count_filter,
+            #custom_admin_dashboard_bar_chart_filter {
+                width: 99%;
+                text-align: center;
+            }
+
+            .admin-dashboard-report-container {
+                width: 23em !important;
+                height: 13em !important;
+            }
+
+            /*lottery pagination*/
+            .btn.btn-secondary,
+            #pageButtons {
+                font-size: 92%;
+            }
+
+            #lottery-search-input {
+                height: 4em;
+                width: 6em;
+                border-radius: 15px;
+                right:0px;
+            }
+            .custom_admin_dashboard_open-form-btn{
+                font-size:12px;
+                height: 56px;
+                border-radius: 9px;
+            }
+
+            #lottery_header_filter-containers {
+                width: 97%;
+                display: flex;
+                justify-content: space-around;
+            }
+
+
+            /* Add lotteries in mobile view */
+            .lottery-event-card {
+                background-color: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                transition: transform 0.3s;
+                position: relative;
+                align-items: center;
+                margin-left: -7px;
+            }
+
+
+
+            .lottery-event-card input,
+            .lottery-event-card textarea {
+                display: none;
+                width: 85%;
+                padding: 12px;
+                margin-left: 15px;
+                margin-bottom: 5px;
+                border-radius: 5px;
+            }
+
+            .lottery-event-card.lottery_events_add_edit_mode input,
+            .lottery-event-card.lottery_events_add_edit_mode textarea {
+                display: block;
+            }
+
+            /* **********************pagnation******************* */
+
+            /* .pagination {
+                display: flex;
+                list-style: none;
+                justify-content: center;
+                padding: 5px;
+            }
+
+            .pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_item {
+                margin: 0 5px;
+            }
+
+            .pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link {
+                padding: 8px 12px;
+                border: 1px solid #20B2AA;
+                border-radius: 5px;
+                text-decoration: none;
+                color: #20B2AA;
+                transition: background 0.3s ease-in-out;
+            }
+
+            .pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link:hover {
+                background: #FF6600;
+                color: white;
+            }
+
+            .pagination .active .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link {
+                background: #FF6600;
+                color: white;
+                font-weight: bold;
+            } */
+
+            .custom_admin_dashboard_fetchLotteryEvents_pagination {
+                font-size: 10px;
+                padding: 5px 2px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                margin: 0;
+                align-items: center;
+                /* Vertically center items */
+            }
+
+            .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_item {
+                margin: 0 2px;
+                /* Space between page items */
+                display: flex;
+                align-items: center;
+                /* Vertically center each custom_admin_dashboard_fetchLotteryEvents_pagination_page_item */
+            }
+
+            /* Adjusting the space above the first item */
+            .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_item:first-child {
+                margin-bottom: 10px;
+                /* Space above first item */
+            }
+
+            /* Adding space to the last item */
+            .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_item:last-child {
+                margin-bottom: 15px;
+                /* Space below last item */
+            }
+
+            /* Adding space to the second-last item */
+            .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_item:nth-last-child(2) {
+                margin-bottom: 15px;
+                /* Space below second-last item */
+            }
+
+            /* Ensure page links have the same look */
+            .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link {
+                padding: 2px 4px;
+                font-size: 10px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                display: inline-block;
+                /* Keeps links in line */
+                vertical-align: middle;
+            }
+
+            /* Styling for custom_admin_dashboard_fetchLotteryEvents_pagination_dots */
+            .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_dots {
+                font-size: 10px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+
+            /*Add Lottery Popup*/
+            .custom_admin_dashboard_modal-content{
+                margin: 19% auto;
+                padding: 15px;
+                width: 80%;
+            }
+            #lotteryEventModal select{
+                width:51%;
+            }
+            .lottery_events_add_edit_revenue_type {
+                left: 10em !important;
+                position: relative;
+            }
+        }
+
+        /*Applies to medium devices (All tablets, less than 1024px)*/
+        @media (max-width: 1024px) {
+
+            /* Set Width Size using padding size */
+            .custom_admin_dashboard_container {
+                width: calc(100% - 0px);
+                height: 100vh;
+                font-size: calc(100% - 0px);
+            }
+
+            .custom_admin_dashboard_topbar {
+                background-color: #ff6600;
+                padding: 10px 47px;
+            }
+
+            .admin-dashboard-small-lottery-image {
+                width: 25%;
+                left: 10%;
+                top: 0px;
+            }
+
+            .custom_admin_dashboard_main {
+                width: 90%;
+                padding: 1px;
+            }
+
+            /* Overview dashboard */
+            .overview_regional-metrics {
+                flex-direction: row;
+            }
+
+            .overview_sales_count_card {
+                width: 25%;
+                flex: auto;
+            }
+
+            .overview_sales_count_card p {
+                font-size: 1.4em;
+                padding-right: 4px;
+                margin-bottom: 0;
+            }
+
+            .overview_sales_count_card:nth-child(3) {
+                width: 24%;
+            }
+
+            .overview_chart-container {
+                width: 79%;
+                padding: 20px;
+                margin-left: 7%;
+            }
+
+            .overview_dashboard {
+                gap: 6px;
+                justify-content: center;
+                flex-direction: column;
+            }
+
+            /* hamburger_menu */
+            .custom_admin_dashboard_hamburger_menu {
+                display: block;
+                top: 10px;
+                left: 16px;
+            }
+
+            /* Sidebar */
+            .custom_admin_dashboard_sidebar {
+                display: none;
+            }
+
+            .custom_admin_dashboard_sidebar.show {
+                display: block;
+                width: 45%;
+                position: absolute;
+                top: -32px;
+                z-index: 999;
+                background-color: #f0eded;
+                color: #202224;
+                margin-top: 100px;
+                border-radius: 30px;
+                left: 8px;
+                border: none;
+            }
+
+            /*Report & Analystic - leaderboard*/
+            .custom_admin_dashboard_overview_count,
+            .custom_admin_dashboard_overview_statistics_count {
+                width: 100%;
+            }
+
+            .leaderboard_class {
+                width: 95%;
+                height: 100%;
+                margin-left: 0;
+                margin-top: 44px;
+            }
+
+            #leaderboard_title {
+                text-align: center;
+                margin-top: 0px !important;
+                margin-left: 20px;
+            }
+
+            #lottery_sales_dynamic_count_filter,
+            #custom_admin_dashboard_bar_chart_filter {
+                width: 99%;
+                text-align: center;
+            }
+
+            .admin-dashboard-report-container {
+                width: 100% !important;
+                height: 100% !important;
+                display: flex;
+                justify-content: center;
+                text-align: center;
+            }
+
+            /*lottery pagination*/
+            .btn.btn-secondary,
+            #pageButtons {
+                font-size: 92%;
+            }
+
+           
+
+            #lottery_header_filter-containers {
+                padding: 10px;
+            }
+
+            .admin_dashbord_filter_icon {
+                margin: 0;
+            }
+
+            #lottery_card_title {
+                font-size: 32px;
+                text-align: center;
+            }
+
+            .lottery_card_title2 {
+                font-size: 20px;
+                text-align: center;
+            }
+
+            /* user Management*/
+            .custom_admin_dashboard_custom_table tbody td {
+                max-width: 9em !important;
+                white-space: normal;
+            }
+            .lottery_events_add_edit_revenue_type{
+                left: 8.5em;
+                position: relative;
+            }
+        }
+
+        /* Need to Alter in Original style.css  */
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .custom_admin_dashboard_custom_table {
+            table-layout: auto !important;
+        }
+
+        .custom_admin_dashboard_custom_table tbody td {
+            max-width: 12em;
+            white-space: normal;
+        }
+
+        .custom_admin_dashboard_custom_table th,
+        .custom_admin_dashboard_custom_table td {
+            padding: 20px;
+        }
+    </style>
 
     <script>
         const api_navbar_access_tabsView_url = "{% url 'api_navbar_access_tabsView' %}";
@@ -432,14 +675,352 @@
             filterCategories();
         };
     </script>
+    <style>
+        .additional-images {
+            margin-bottom: 20px;
+            /* Adjust as needed */
+        }
+
+        .additional-images h4 {
+            margin-bottom: 10px;
+            /* Space between heading and images */
+            font-size: 16px;
+            /* Adjust as needed */
+        }
+
+        .additional-images-scroll-container {
+            display: flex;
+            overflow-x: auto;
+            /* Enable horizontal scrolling */
+            gap: 10px;
+            /* Space between images */
+            padding-bottom: 10px;
+            /* Optional: Add padding to avoid cutting off content */
+        }
+
+        .additional-image-item {
+            flex: 0 0 auto;
+            /* Prevent flex items from shrinking */
+            text-align: center;
+        }
+
+        .lottery-events-additional-image {
+            max-width: 100px;
+            /* Adjust image size as needed */
+            height: auto;
+            border-radius: 5px;
+            /* Optional: Add rounded corners */
+        }
+
+      
+    </style>
+    <style>
+        .add-additionalimages-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding-bottom: 10px;
+        }
+    </style>
+   
+    <style>
+        .custom_admin_dashboard_fetchLotteryEvents_pagination {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_item {
+            margin: 0 5px;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link {
+            padding: 8px 12px;
+            border: 1px solid #20B2AA;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #20B2AA;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link:hover {
+            background: #FF6600;
+            color: white;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .active .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link {
+            background: #FF6600;
+            color: white;
+            font-weight: bold;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_item {
+            margin: 0 5px;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link {
+            padding: 8px 12px;
+            border: 1px solid #FF6600;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #FF6600;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link:hover {
+            background: #FF6600;
+            color: white;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .active .custom_admin_dashboard_fetchLotteryEvents_pagination_page_link {
+            background: #FF6600;
+            color: white;
+            font-weight: bold;
+        }
+
+        .custom_admin_dashboard_fetchLotteryEvents_pagination .custom_admin_dashboard_fetchLotteryEvents_pagination_dots {
+            padding: 8px 12px;
+            color: #999;
+            user-select: none;
+        }
+    </style>
+    <style>
+        #lotteryEventModal textarea, .lottery_events_add_edit_mode textarea{
+             resize:none;
+             min-height: 4em;
+         }
+     
+       
+         #custom_admin_dashboard_openFormButton,#filter-icon,#category-filter{
+             padding: 10px;
+         }
+        
+     </style>
     
+        <style>
+            #noUserMessage {
+            display: none;
+            color: red;
+            text-align: center;
+            font-weight: bold;
+        }
+        </style>
+         <style>
+            /* Transactions Management page all code start */
+            .custom_admin_dashboard_transactions_management_header {
+                font-size: 20px;
+                font-weight: bold;
+                margin-bottom: 15px;
+            }
+    
+            /* Transactions Table Styling */
+            .custom_admin_dashboard_transactions_management_table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+    
+            .custom_admin_dashboard_transactions_management_table th,
+            .custom_admin_dashboard_transactions_management_table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+            }
+    
+            .custom_admin_dashboard_transactions_management_table th {
+                background-color: #f4f4f4;
+            }
+    
+            /* Status Colors */
+            .custom_admin_dashboard_transactions_management_status_pending {
+                color: orange;
+            }
+    
+            .custom_admin_dashboard_transactions_management_status_completed {
+                color: green;
+            }
+    
+            .custom_admin_dashboard_transactions_management_status_failed {
+                color: red;
+            }
+    
+            .custom_admin_dashboard_transactions_management_status_refund {
+                color: blue;
+            }
+    
+            /* Action Buttons */
+            .custom_admin_dashboard_transactions_management_action_img_container {
+                display: flex;
+                align-items: center;
+            }
+    
+            .custom_admin_dashboard_transactions_management_action_img {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                margin-right: 5px;
+                position: relative;
+            }
+    
+            .custom_admin_dashboard_transactions_management_tooltip {
+                visibility: hidden;
+                background-color: black;
+                color: white;
+                text-align: center;
+                padding: 5px;
+                border-radius: 5px;
+                position: absolute;
+                font-size: 12px;
+                top: -30px;
+                left: 50%;
+                transform: translateX(-50%);
+                white-space: nowrap;
+            }
+    
+            .custom_admin_dashboard_transactions_management_action_img:hover .custom_admin_dashboard_transactions_management_tooltip {
+                visibility: visible;
+            }
+    
+            /* View More / View Less Button */
+            .custom_admin_dashboard_transactions_management_view_more_button {
+                display: block;
+                margin: 10px auto;
+                padding: 8px 12px;
+                cursor: pointer;
+                border-radius: 5px;
+                border: none;
+                font-size: 14px;
+                background-color: orange;
+            }
+            /* Refunded and completed status style */
+            .custom_admin_dashboard_transactions_management_status_refunded {
+                background-color: blue;
+                color: white;
+                padding: 5px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            .custom_admin_dashboard_transactions_management_status_completed {
+                color: white;
+                padding: 5px;
+                border-radius: 4px;
+                font-weight: bold;
+                background-color: green; 
+                }
+                 /* Transactions Management refund style  */
+            .refund-popup-content ul {
+                text-align: left;
+                list-style-type: none;
+                padding: 0;
+            }
+    
+            .refund-popup-content ul li {
+                margin-bottom: 5px;
+            }
+    
+            .refundAmountError_error_message {
+                color: red;
+                font-size: 12px;
+            }
+    
+            .refund-popup-content input {
+                width: 100%;
+                padding: 8px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+    
+            .refund-popup-content button {
+                margin-top: 10px;
+                padding: 8px 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+    
+            #confirmRefundButton {
+                background-color: #28a745;
+                color: white;
+            }
+    
+            #confirmRefundButton:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+    
+            #cancelRefundButton {
+                background-color: #dc3545;
+                color: white;
+            }
+    
+    
+                /* Refund Popup Styling */
+                .refund-popup {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                }
+
+                .refund-popup-content {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                    text-align: center;
+                    min-width: 400px;
+                }
+
+                /* Refund Table Styling */
+                .refund-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                }
+
+                .refund-table th, .refund-table td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: center;
+                }
+
+                .refund-table th {
+                    background-color: #f4f4f4;
+                    font-weight: bold;
+                }
+
+                .refund-table tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+
+                .refund-table tr:hover {
+                    background-color: #f1f1f1;
+                }
+
+    
+        /* Transactions Management page all code ending*/
+        </style>
 </head>
 
 <body>
     <div class="custom_admin_dashboard_container">
         <!-- Sidebar -->
         <!-- Hamburger Icon -->
-        <div id="hamburger-menu" class="hamburger-menu" onclick="toggleSidebar()">☰</div>
+        <div id="custom_admin_dashboard_hamburger_menu_id" class="custom_admin_dashboard_hamburger_menu" onclick="toggleSidebar()">☰</div>
         <img src="/media/images/logo.png" class="admin-dashboard-small-lottery-image" />
         <!-- Sidebar -->
         <aside class="custom_admin_dashboard_sidebar">
@@ -473,6 +1054,14 @@
             </header>
             <section class="custom_admin_dashboard_dashboard">
                 <h1>Overview</h1>
+                <div id="custom_admin_dashboard_transactions_management" class="custom_admin_dashboard_transaction_manage">
+                    <!-- transactions_management Content load here -->  
+                </div>
+                <div id="custom_admin_dashboard_user_detail_page" class="custom_admin_dashboard_user_details">
+                    <!-- custom_admin_dashboard_user_detail_page Content load here -->  
+                    
+                </div>
+                
                 <div id="custom_admin_dashboard_overview_lottery_won_lost_count">
 
                 </div>
@@ -600,11 +1189,8 @@
                         <div id="lottery-events-container" class="custom_admin_dashboard_lottery-events-grid">
                             <!-- Lottery event cards will be dynamically injected here -->
                         </div>
-                        <div id='lottery_prevPage_and_nextPage_button' hidden>
-                            <button type="button" id="prevPageButton" class="btn btn-secondary">&lt;</button>
-                            <span id="pageButtons"></span>
-                            <button type="button" id="nextPageButton" class="btn btn-secondary">&gt;</button>
-                        </div>
+                        <div id="pagination-container"></div>
+                        
 
                     </div>
                 </div>
@@ -652,6 +1238,7 @@
                     </div>
                 </div>
 
+
             </section>
         </main>
     </div>
@@ -690,11 +1277,11 @@
             <form id="addLotteryEventForm" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="custom_admin_dashboard_title">
-                    <input type="text" class="custom_admin_dashboard_modal_title" name="title" placeholder="Title"
+                    <input type="text" id="new_lottery_title" class="custom_admin_dashboard_modal_title" name="title" placeholder="Title"
                         required><br>
                     <span class="lottery_events_add_title_error" id="lottery_events_add_title_validation"></span><br>
                 </div>
-                <div class="custom_admin_dashboard_slug">
+                <div class="custom_admin_dashboard_slug" style="display:none";>
                     <input type="text" name="slug" placeholder="Slug (leave blank to auto-generate)" optional><br>
                     <span class="lottery_events_add_slug_error" id="lottery_events_add_slug_validation"></span><br>
                 </div>
@@ -713,8 +1300,8 @@
                         id="lottery_events_add_category_validation"></span><br>
                 </div>
 
-                <div class="custom_admin_dashboard_price">
-                    <input type="number" name="price" placeholder="Price" min="0" required><br>
+                <div class="custom_admin_dashboard_price" style="display: none;">
+                    <input type="number" name="price" placeholder="Price" min="0" value="0"><br>
                     <span class="lottery_events_add_price_error" id="lottery_events_add_price_validation"></span><br>
                 </div>
 
@@ -795,8 +1382,8 @@
                         id="lottery_events_add_total_tickets_validation"></span><br>
                 </div>
 
-                <div class="custom_admin_dashboard_mini_limit">
-                    <input type="number" name="mini_limit" placeholder="Minimum Tickets" min="1" required><br>
+                <div class="custom_admin_dashboard_mini_limit"style=" display: none;opacity: 0;position: absolute;" >
+                    <input type="number" name="mini_limit" placeholder="Minimum Tickets" min="1" value="1"><br>
                     <span class="lottery_events_add_minilimit_error"
                         id="lottery_events_add_minilimit_validation"></span><br>
                 </div>
@@ -807,12 +1394,7 @@
                         id="lottery_events_add_maxlimit_validation"></span><br>
                 </div>
 
-                <div class="custom_admin_dashboard_free_postal_description">
-                    <textarea name="free_postal_description" placeholder="Free Postal Description"
-                        required></textarea><br>
-                    <span class="lottery_events_add_freepostal_error"
-                        id="lottery_events_add_freepostal_validation"></span><br>
-                </div>
+               
 
                 <div class="custom_admin_dashboard_competition_details">
                     <textarea name="competition_details" placeholder="Competition Details" required></textarea><br>
@@ -832,6 +1414,9 @@
             </form>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 </body>
 <script src="{% static 'js/custom.js' %}"></script>
 <script src="{% static 'plugins/chart.js' %}"></script>

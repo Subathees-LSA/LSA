@@ -9,7 +9,7 @@ class PaymentLottery(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)  # Amount in EUR
     payment_status = models.CharField(
         max_length=20,
-        choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')],
+        choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed'),("refunded", "Refunded"),],
         default='pending'
     )
     stripe_session_id = models.CharField(max_length=255, null=True, blank=True)  # Store Stripe session ID
