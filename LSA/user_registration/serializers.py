@@ -127,6 +127,19 @@ from rest_framework import serializers
 from .models import UserPrivacy
 
 class UserPrivacySerializer(serializers.ModelSerializer):
+    ip_address = serializers.IPAddressField(protocol='both', required=False, allow_null=True)
+    profile_photo_url = serializers.SerializerMethodField()
+
     class Meta:
         model = UserPrivacy
-        fields = '__all__'    
+        fields = '__all__'
+
+    def validate_profile_photo(self, value):
+        if value and not hasattr(value, 'read'):
+            raise serializers.ValidationError("Uploaded file is invalid.")
+        return value
+
+    def get_profile_photo_url(self, obj):
+        if obj.profile_photo:
+            return obj.profile_photo.url  # Return uploaded image URL
+        return '/media/default-profile.jpg'  # Default profile image

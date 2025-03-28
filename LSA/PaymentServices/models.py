@@ -18,3 +18,12 @@ class PaymentLottery(models.Model):
     receipt_url = models.CharField(max_length=512, null=True, blank=True)
     def __str__(self):
         return f"{self.user.username} -{self.payment_intent}- {self.lottery_event.title} - {self.quantity} tickets - {self.amount} GBP"
+
+class LotteryTicket(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lottery_tickets')
+    lottery_event = models.ForeignKey(LotteryEvent, on_delete=models.CASCADE, related_name='lottery_tickets')
+    payment = models.ForeignKey(PaymentLottery, on_delete=models.CASCADE, related_name='lottery_tickets')
+    ticket_number = models.CharField(max_length=6, unique=True, db_index=True)  # Unique 6-digit ticket number
+
+    def __str__(self):
+        return f"Ticket {self.ticket_number} for {self.lottery_event.title} (User: {self.user.username})"

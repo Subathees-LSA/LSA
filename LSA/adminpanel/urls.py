@@ -69,9 +69,20 @@ urlpatterns = [
     path('block-user/', block_user, name='block-user'), 
     path('social-links/', footer_view, name='social_links'),
     path('locations/', locations_view, name='locations'),
-    path("api/payment-lotteries/", PaymentLotteryListView.as_view(), name="payment-lottery-list"),
-    path("api/payment-lotteries/<str:payment_intent>/fetch-paid-amount/", FetchPaidAmountView.as_view(), name="fetch-paid-amount"),
-    path("api/payment-lotteries/<str:payment_intent>/refund/", RefundPaymentView.as_view(), name="refund-payment"),
+    path("lottery-draw-page/", staff_member_required(admin_lottery_draw_page), name="admin-lottery-draw-page"),
+    path('api/admin/lottery-draw/', AdminLotteryDrawView.as_view(), name='admin-lottery-draw'),
+    path('api/admin/send-otp/', AdminSendOTPView.as_view(), name='Admin-send-otp'),
+    path('api/admin/verify-otp/', AdminVerifyOTPView.as_view(), name='Admin-verify-otp'),
+    path('api/admin/publish-winner/', PublishWinnerView.as_view(), name='publish-winner'),
+    # lottery title and transaction pages api urls
+    path('check_lottery_title_unique/', check_lottery_title_unique, name='check_lottery_title_unique'),
+	path("api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/", api_admin_dashboard_payment_lottery_list_view_transactions_and_refund.as_view(), name="api_admin_dashboard_payment_lottery_list_view_transactions_and_refund"),
+    path("api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/<str:payment_intent>/fetch-paid-amount/", api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetch_paid_amount_view.as_view(), name="api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetch_paid_amount_view"),
+    path("api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/<str:payment_intent>/refund/", api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refund_payment_view.as_view(), name="api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refund_payment_view"),
+    # prize management api urls
+    path('api_admin_dashboard_prize_management_winner_list_api_view/', api_admin_dashboard_prize_management_winner_list_api_view.as_view(), name='api_admin_dashboard_prize_management_winner_list_api_view'),
+    path('api_admin_dashboard_prize_management/<int:pk>/update_winner_status/', api_admin_dashboard_prize_management_update_winner_status, name='api_admin_dashboard_prize_management_update_winner_status'),
+
 ]
 
 if settings.DEBUG:

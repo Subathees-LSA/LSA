@@ -33,6 +33,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.http import JsonResponse
+from user_agents import parse
+from user_registration.models import UserDeviceHistory
+from django.utils import timezone  # ✅ Add this import
+
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -81,16 +85,33 @@ class RegisterView(generics.CreateAPIView):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
-
+from django.utils.timezone import now
+from user_agents import parse
+from django.contrib.auth import login
+from django.urls import reverse
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+from .models import User, UserDeviceHistory, UserPrivacy, UserProfile
+from .serializers import LoginSerializer
 
 class LoginView(APIView):
     def post(self, request):
-        user_agent = request.headers.get('User-Agent', '')
-        if not user_agent or 'Mozilla' not in user_agent:
-            return Response(
-                {"detail": "Access denied. This endpoint is restricted to browsers only."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        user_agent_string = request.headers.get('User-Agent', '')
+        parsed_agent = parse(user_agent_string)
+
+        # Extract device info
+        device_family = parsed_agent.device.family.strip() if parsed_agent.device.family else "Unknown Device"
+        os_family = parsed_agent.os.family.strip() if parsed_agent.os.family else "Unknown OS"
+        browser_family = parsed_agent.browser.family.strip() if parsed_agent.browser.family else "Unknown Browser"
+
+        # Fix for "Other" device detection
+        if device_family.lower() in ["other", "generic"]:
+            device_family = "Unknown Device"
+
+        device_info = f"{device_family} - {os_family} - {browser_family}"
 
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -99,16 +120,35 @@ class LoginView(APIView):
             try:
                 user = User.objects.get(email=email)
                 user_profile = UserProfile.objects.filter(user=user).first()
-                is_blocked = user_profile.is_blocked if user_profile else False  # ✅ Get block status
-                if is_blocked:
-                    return Response({
-                        "error": "You are blocked."
-                    }, status=status.HTTP_403_FORBIDDEN)
-                elif user.check_password(password):
-                    if user.userprivacy.two_factor_auth_enabled:
-                        # Generate and send OTP if 2FA is enabled
-                        otp = generate_otp()
-                        user.userprivacy.set_otp(otp)
+                user_privacy, created = UserPrivacy.objects.get_or_create(user=user)
+
+                # 🚨 Blocked User Check
+                if user_profile and user_profile.is_blocked:
+                    return Response({"error": "You are blocked."}, status=status.HTTP_403_FORBIDDEN)
+
+                # 🚀 Check Password
+                if user.check_password(password):
+                    ip_address = self.get_client_ip(request)
+
+                    # ✅ Always Create a New Login Session (Even If IP is the Same)
+                    UserDeviceHistory.objects.create(
+                        user=user,
+                        device_info=device_info,
+                        ip_address=ip_address,
+                        login_time=now(),
+                        logout_time=None  # 💡 Ensures session remains active
+                    )
+
+                    # ✅ Update UserPrivacy with latest login details
+                    user_privacy.ip_address = ip_address
+                    user_privacy.device_info = device_info
+                    user_privacy.last_active = now()
+                    user_privacy.save()
+
+                    # 🔐 Handle Two-Factor Authentication (2FA)
+                    if user_privacy.two_factor_auth_enabled:
+                        otp = self.generate_otp()
+                        user_privacy.set_otp(otp)
                         send_mail(
                             'Your OTP Code',
                             f'Your OTP code is {otp}. It is valid for the next 5 minutes.',
@@ -120,18 +160,25 @@ class LoginView(APIView):
                             "message": "OTP sent to your email.",
                             "user_id": user.id
                         }, status=status.HTTP_200_OK)
-                    else:
-                        # If 2FA is disabled, login and redirect to user_welcome_page
-                        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                        return Response({
-                            "message": "Login successful.",
-                            "redirect_url": reverse('lottery_events')  # Add the redirect URL for 2FA disabled
-                        }, status=status.HTTP_200_OK)
-                else:
-                    return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+
+                    # ✅ If 2FA is disabled, log in and redirect
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    return Response({
+                        "message": "Login successful.",
+                        "redirect_url": reverse('lottery_events')
+                    }, status=status.HTTP_200_OK)
+
+                return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+
             except User.DoesNotExist:
                 return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def get_client_ip(request):
+        """Retrieve the client's IP address from the request."""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 class KYCStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]

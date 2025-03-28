@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import *
 from django.apps import apps
 from django.contrib.admin.sites import AlreadyRegistered
-
+from .models import LotteryEvent, Winner
+from PaymentServices.models import  LotteryTicket
 
 class LotteryEventImagesInline(admin.TabularInline):  # Use StackedInline for a vertical layout
     model = LotteryEventImages
@@ -81,7 +82,10 @@ admin.site.register(LotteryCategory)
 admin.site.register(Banner)
 admin.site.register(Previous_Winner_img)
 
-
+@admin.register(Winner)
+class WinnerAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ticket_number', 'lottery_event', 'selection_method')
+    list_filter = ('selection_method',)
 
 
 # Get all models in the 'adminpanel' app

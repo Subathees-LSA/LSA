@@ -63,46 +63,6 @@ from .models import Location
 from PaymentServices.models import PaymentLottery
 from django.db import models
 
-def create_dummy_contacts():
-    dummy_contacts = []
-    for i in range(30):
-        contact = Contact(
-            name=f"User {i+1}",
-            email=f"user{i+1}@example.com",
-            description="This is a dummy contact entry.",
-            
-        )
-        dummy_contacts.append(contact)
-
-    # Bulk create for better performance
-    Contact.objects.bulk_create(dummy_contacts)
-
-#create_dummy_contacts()
-
-def generate_dummy_data():
-    # Clear existing data**
-   
-
-    # Dummy data for yearly reports
-    years = list(range(2012, 2020))
-    for year in years:
-        win_lottery = random.randint(500_000, 1_000_000)
-        lost_lottery = random.randint(10_000, 50_000)
-        Report.objects.create(year=year, win_lottery=win_lottery, lost_lottery=lost_lottery)
-
-    # Dummy data for regional sales
-    regions = ['Africa', 'Asia', 'Europe', 'Latin America', 'North America']
-    for region in regions:
-        total_sales = random.randint(100_000_000, 200_000_000)
-        average = random.randint(1_000_000, 2_000_000)
-        return_value = random.randint(10_000, 30_000)
-        RegionalSales.objects.create(region=region, total_sales=total_sales, average=average, return_value=return_value)
-
-    print("Dummy data has been generated successfully!")
-
-# Call the function to populate the database
-#generate_dummy_data()
-
 @csrf_exempt
 @api_view(['POST'])
 def block_user(request):
@@ -656,7 +616,7 @@ class api_get_lottery_events(APIView):
             lottery_events = LotteryEvent.objects.all().order_by('-id')  # Latest by ID
              # Filter by search term if provided
             if search_query:
-                lottery_events = lottery_events.filter(title__istartswith=search_query)
+                lottery_events = lottery_events.filter(title__icontains=search_query)
 
             # Filter by category if provided
             if category_id:
@@ -1263,6 +1223,33 @@ def locations_view(request):
     locations = Location.objects.all()  # Get all locations from the database
     return render(request, 'footer.html', {'locations': locations})
 from django.conf import settings
+    # lottery title and transaction pages api views
+
+from PaymentServices.models import *
+import stripe
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
+import stripe
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import logging
+stripe.api_key = settings.STRIPE_API_KEY
+# Set up logging
+   
+def check_lottery_title_unique(request):
+    title = request.GET.get('title', '').strip()
+    if LotteryEvent.objects.filter(title__iexact=title).exists():
+        return JsonResponse({'exists': True})
+    return JsonResponse({'exists': False})
+from django.conf import settings
 
 from PaymentServices.models import *
 import stripe
@@ -1284,7 +1271,7 @@ stripe.api_key = settings.STRIPE_API_KEY
 # Set up logging
 
 # Set your Stripe API key
-class FetchPaidAmountView(APIView):
+class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetch_paid_amount_view(APIView):
     def get(self, request, payment_intent):
         try:
             # Retrieve all payments for the given payment_intent
@@ -1309,7 +1296,7 @@ class FetchPaidAmountView(APIView):
                 for payment in payments
             ]
 
-            # 🎯 Fetch the refunded amount from Stripe
+            #  Fetch the refunded amount from Stripe
             try:
                 full_payment_intent = f"pi_{payment_intent}"
                 stripe_refunds = stripe.Refund.list(payment_intent=full_payment_intent)
@@ -1322,7 +1309,7 @@ class FetchPaidAmountView(APIView):
                 "paid_amount": paid_amount,
                 "payment_status": payment_status,
                 "lottery_details": lottery_details,
-                "refunded_amount": refunded_amount,  # ✅ Added refunded amount
+                "refunded_amount": refunded_amount,  #  Added refunded amount
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -1330,7 +1317,7 @@ class FetchPaidAmountView(APIView):
             return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class RefundPaymentView(APIView):
+class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refund_payment_view(APIView):
     def post(self, request, payment_intent):
         try:
             # Find all payments with the same payment_intent
@@ -1378,9 +1365,291 @@ class RefundPaymentView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-class PaymentLotteryListView(APIView):
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+
+class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund(APIView):
     def get(self, request):
-        payment_lotteries = PaymentLottery.objects.all().order_by('-payment_at')
+        email = request.query_params.get('email', None)
+        
+        if email:
+            payment_lotteries = PaymentLottery.objects.filter(user__email=email).order_by('-payment_at')
+        else:
+            payment_lotteries = PaymentLottery.objects.all().order_by('-payment_at')
+        
         serializer = AdminrefundPaymentLotterySerializer(payment_lotteries, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
+
+
+import random
+from django.utils import timezone
+from django.db import transaction
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from rest_framework import status
+from adminpanel.models import LotteryEvent, Winner
+from PaymentServices.models import LotteryTicket,PaymentLottery
+from django.utils import timezone
+from django.db import transaction
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from rest_framework import status
+from adminpanel.models import LotteryEvent, Winner
+from PaymentServices.models import LotteryTicket, PaymentLottery
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+import random
+from datetime import datetime, timedelta
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from .models import AdminOTP, adminProfile
+from django.utils import timezone
+
+class AdminSendOTPView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        admin_profile = adminProfile.objects.get(user=request.user)
+        
+        # Generate 6-digit OTP
+        otp = str(random.randint(100000, 999999))
+        
+        # Delete any existing OTPs
+        AdminOTP.objects.filter(admin=admin_profile).delete()
+        
+        # Create new OTP
+        AdminOTP.objects.create(admin=admin_profile, otp=otp)
+        
+        # Send email
+        send_mail(
+            'Your OTP for Publishing Lottery Winner',
+            f'Your OTP is: {otp}',
+            settings.EMAIL_HOST_USER,
+            [request.user.email],
+            fail_silently=False,
+        )
+        
+        return Response({"message": "OTP sent successfully"})
+
+class AdminVerifyOTPView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        otp = request.data.get('otp')
+        if not otp or len(otp) != 6:
+            return Response({"verified": False, "error": "Invalid OTP format"})
+        
+        admin_profile = adminProfile.objects.get(user=request.user)
+        
+        try:
+            otp_record = AdminOTP.objects.get(
+                admin=admin_profile,
+                otp=otp,
+                #created_at__gte=datetime.now() - timedelta(minutes=10)
+                created_at__gte=timezone.now() - timedelta(minutes=10)
+            )
+            
+            if not otp_record.is_verified:
+                otp_record.is_verified = True
+                otp_record.save()
+                return Response({"verified": True})
+            
+            return Response({"verified": False, "error": "OTP already used"})
+        except AdminOTP.DoesNotExist:
+            return Response({"verified": False, "error": "Invalid OTP"})
+
+     
+from django.utils import timezone
+from django.db import transaction
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from rest_framework import status
+from adminpanel.models import LotteryEvent, Winner
+from PaymentServices.models import LotteryTicket, PaymentLottery
+from django.contrib.auth.models import User
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+from datetime import timedelta
+from .models import AdminOTP, adminProfile
+
+class AdminLotteryDrawView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        events = LotteryEvent.objects.all()
+        current_date = timezone.now()
+        return Response({
+            "events": [
+                {
+                    "id": event.id,
+                    "title": event.title,
+                    "image": event.image.url if event.image else "/static/default-lottery.jpg",
+                    "draw_date": event.draw_date.strftime("%Y-%m-%d %H:%M:%S"),
+                    "is_active": event.is_active,
+                    "sold_percentage": event.sold_percentage,
+                }
+                for event in events
+            ]
+        })
+
+    def post(self, request):
+        event_id = request.data.get("event_id")
+        method = request.data.get("method")
+        ticket_start = request.data.get("ticket_start")
+        ticket_end = request.data.get("ticket_end")
+        publish = request.data.get("publish", False)
+
+        if not event_id or not method:
+            return Response({"error": "Missing parameters"}, status=status.HTTP_400_BAD_REQUEST)
+
+        event = LotteryEvent.objects.filter(id=event_id).first()
+        if not event:
+            return Response({"error": "Invalid event"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if winner already exists (only if publishing)
+        if Winner.objects.filter(lottery_event=event).exists():
+            return Response({"error": "Winner has already been chosen for this lottery"}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        if method == "method1":
+            tickets = list(LotteryTicket.objects.filter(lottery_event=event))
+            if not tickets:
+                return Response({"error": "No tickets found for this lottery"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            winner_ticket = random.choice(tickets)
+            return Response({
+                "winner": {
+                    "ticket_number": winner_ticket.ticket_number,
+                    "user": winner_ticket.user.username,
+                    "selection_method": "method1"
+                }
+            })
+
+        elif method == "method2":
+            user_ticket_counts = {}
+            for ticket in LotteryTicket.objects.filter(lottery_event=event):
+                user_ticket_counts[ticket.user] = user_ticket_counts.get(ticket.user, 0) + 1
+
+            if not user_ticket_counts:
+                return Response({"error": "No tickets purchased for this lottery"}, status=status.HTTP_400_BAD_REQUEST)
+
+            max_tickets = max(user_ticket_counts.values())
+            top_users = [user for user, count in user_ticket_counts.items() if count == max_tickets]
+            selected_user = random.choice(top_users)
+            winner_ticket = random.choice(LotteryTicket.objects.filter(user=selected_user, lottery_event=event))
+            
+            return Response({
+                "winner": {
+                    "ticket_number": winner_ticket.ticket_number,
+                    "user": winner_ticket.user.username,
+                    "selection_method": "method2"
+                }
+            })
+
+        elif method == "method3":
+            if not ticket_start or not ticket_end:
+                return Response({"error": "Ticket number range required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                ticket_range = list(range(int(ticket_start), int(ticket_end) + 1))
+                selected_ticket = str(random.choice(ticket_range)).zfill(6)
+            except ValueError:
+                return Response({"error": "Invalid ticket range"}, status=status.HTTP_400_BAD_REQUEST)
+
+            winner_ticket = LotteryTicket.objects.filter(lottery_event=event, ticket_number=selected_ticket).first()
+            
+            if winner_ticket:
+                return Response({
+                    "ticket_number": winner_ticket.ticket_number,
+                    "user": winner_ticket.user.username,
+                    "selection_method": "method3"
+                })
+            else:
+                return Response({
+                    "ticket_number": selected_ticket,
+                    "user": "No User",
+                    "selection_method": "method3"
+                })
+
+        else:
+            return Response({"error": "Invalid selection method"}, status=400)
+
+class PublishWinnerView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        winner_data = request.data.get("winner_data")
+        event_id = request.data.get("event_id")
+        
+        if not winner_data or not event_id:
+            return Response({"error": "Missing parameters"}, status=status.HTTP_400_BAD_REQUEST)
+
+        event = LotteryEvent.objects.filter(id=event_id).first()
+        if not event:
+            return Response({"error": "Invalid event"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Verify admin with OTP
+        admin_profile = adminProfile.objects.get(user=request.user)
+        if not AdminOTP.objects.filter(admin=admin_profile, is_verified=True).exists():
+            return Response({"error": "Admin not verified with OTP"}, 
+                          status=status.HTTP_403_FORBIDDEN)
+
+        # Check if winner already exists
+        if Winner.objects.filter(lottery_event=event).exists():
+            return Response({"error": "Winner has already been published for this lottery"}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            if 'winner' in winner_data:  # For method1 and method2
+                winner_info = winner_data['winner']
+                user = User.objects.get(username=winner_info['user'])
+                payment = PaymentLottery.objects.filter(user=user).first()
+                
+                Winner.objects.create(
+                    user=user,
+                    lottery_event=event,
+                    payment=payment,
+                    ticket_number=winner_info['ticket_number'],
+                    selection_method=winner_info['selection_method']
+                )
+            else:  # For method3
+                if winner_data['user'] == "No User":
+                    user, _ = User.objects.get_or_create(
+                        username="No User", 
+                        defaults={"email": "no-user@example.com"}
+                    )
+                    payment = None
+                else:
+                    user = User.objects.get(username=winner_data['user'])
+                    payment = PaymentLottery.objects.filter(user=user).first()
+                
+                Winner.objects.create(
+                    user=user,
+                    lottery_event=event,
+                    payment=payment,
+                    ticket_number=winner_data['ticket_number'],
+                    selection_method=winner_data['selection_method']
+                )
+
+        return Response({"message": "Winner published successfully"})
+# prize management api views
+	
+class api_admin_dashboard_prize_management_winner_list_api_view(generics.ListAPIView):
+    queryset = Winner.objects.all()
+    serializer_class = WinnerSerializer
+
+@api_view(['PATCH'])
+def api_admin_dashboard_prize_management_update_winner_status(request, pk):
+    winner = get_object_or_404(Winner, pk=pk)
+    winner.prize_status = request.data.get('prize_status', winner.prize_status)
+    winner.prize_comments = request.data.get('prize_comments', winner.prize_comments)
+    winner.save()
+    return Response({"message": "Prize status updated successfully", "prize_comments": winner.prize_comments})
 

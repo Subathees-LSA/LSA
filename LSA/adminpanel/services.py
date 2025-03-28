@@ -131,3 +131,9 @@ def category_lottery_events_view(request, category_name):
         return render(request, '404.html', status=404)
     
 
+from django.urls import path
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+
+def admin_lottery_draw_page(request):
+    return render(request, "admin_lottery_draw.html")

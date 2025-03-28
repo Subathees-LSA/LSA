@@ -224,3 +224,24 @@ class AdminrefundPaymentLotterySerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentLottery
         fields = ['payment_intent', 'lottery_event_title', 'amount', 'payment_at', 'payment_status', 'user_email', 'quantity', 'receipt_url']	
+
+
+class WinnerSerializer(serializers.ModelSerializer):
+    customer_details = serializers.SerializerMethodField()
+    prize_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Winner
+        fields = ['id', 'ticket_number', 'customer_details', 'prize_details', 'prize_status', 'prize_comments','prize_no']
+
+    def get_customer_details(self, obj):
+        return {
+            "user_name": obj.user.username if obj.user else "No User",
+            "user_email": obj.user.email if obj.user else "N/A"
+        }
+
+    def get_prize_details(self, obj):
+        return {
+            "lottery_title": obj.lottery_event.title,
+            "lottery_image": obj.lottery_event.image.url if obj.lottery_event.image else None
+        }

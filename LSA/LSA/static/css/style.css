@@ -4452,7 +4452,7 @@ top: 20px;
         }
 
         /* Styling for the dynamic select dropdown in the table */
-        .custom_admin_dashboard_custom_table td select {
+        .user_kyc_waiting_list-kyc-statusselect {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 100px;
@@ -4467,25 +4467,26 @@ top: 20px;
         }
 
         /* Change border and background on hover */
-        .custom_admin_dashboard_custom_table td select:hover {
+        .user_kyc_waiting_list-kyc-statusselect:hover {
             border-color: #007bff;
-            background-color: #e9f5ff;
+          
             /* Light blue background */
         }
 
         /* Change styles when the select dropdown is active */
-        .custom_admin_dashboard_custom_table td select:focus {
+        .user_kyc_waiting_list-kyc-statusselect:focus {
             border-color: #0056b3;
-            background-color: #d9e9ff;
+           
             box-shadow: 0px 0px 5px rgba(0, 91, 187, 0.5);
         }
 
-        .custom_admin_dashboard_custom_table td select { color: black;  }  
-        .custom_admin_dashboard_custom_table td select[data-status="verified"] { background-color: #28B446; color: white; }
-         .custom_admin_dashboard_custom_table td select[data-status="pending"] { background-color: #FFAD33; color: black; } 
-         .custom_admin_dashboard_custom_table td select[data-status="rejected"] { background-color: red; color: white; } 
-         .custom_admin_dashboard_custom_table td select[data-status="waiting"] { background-color: yellow; color: black; } 
-          .custom_admin_dashboard_custom_table td select option { background-color: white !important; color: black !important; }
+        .user_kyc_waiting_list-kyc-statusselect { color: black;  }  
+        .user_kyc_waiting_list-kyc-statusselect[data-status="verified"] { background-color: #28B446; color: white; }
+         .user_kyc_waiting_list-kyc-statusselect[data-status="pending"] { background-color: #FFAD33; color: black; } 
+         .user_kyc_waiting_list-kyc-statusselect[data-status="rejected"] { background-color: red; color: white; } 
+         .user_kyc_waiting_list-kyc-statusselect[data-status="waiting"] { background-color: yellow; color: black; } 
+          .user_kyc_waiting_list-kyc-statusselect option { background-color: white !important; color: black !important; }
+
         #viewMoreButton {
             color: white;
             background-color: #FF6600;
@@ -5416,14 +5417,14 @@ margin-left: 2%;
 
 
 /* blocked user in user management css*/
-.block-user-btn {
+/* .block-user-btn {
     background-color: red;
     color: white;
     padding: 5px 10px;
     border: none;
     cursor: pointer;
     border-radius: 4px;
-}
+} */
 
 
 
@@ -8516,7 +8517,9 @@ input[type="db-email"] {
     padding: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
+#lot-detail-total-amount{   
+ padding-left: 20px;
+}
 /* Ticket Control Styles */
 .lot-detail-ticket-control-container {
     margin-top: 20px;
@@ -8525,6 +8528,7 @@ input[type="db-email"] {
 .lot-detail-ticket-control-buttons {
     display: flex;
     align-items: center;
+    margin-left: -11px;
    
 }
 
@@ -8578,6 +8582,7 @@ input[type="db-email"] {
     width: fit-content;
     background: #f8f8f8;
     /* border-radius: 5px; */
+    height:30px;
 }
 .currency-symbol {
     font-size: 20px;
@@ -8594,7 +8599,7 @@ input[type="db-email"] {
     text-align: left; 
     padding-left: 10px; 
     width: 60px; 
-    height:50px;
+    height:30px;
 }
 .ticket-count-label {
     margin: 0 10px;
@@ -8607,7 +8612,8 @@ input[type="db-email"] {
     display: flex;
     align-items: center; /* Align items vertically */
     gap: 10px; /* Add some space between label and input */
-    margin-left:60px;
+    /* margin-left:60px; */
+    
 }
 
 .lot-detail-total-label {
@@ -8617,8 +8623,8 @@ input[type="db-email"] {
 
 /* Competition Details Container */
 .lot-detail-competition-container {
-    width: 100%;
-    margin: 20px auto; /* Center the section */
+    margin-left: 0px;
+   
     padding: 20px;
     background-color: #fff; /* White background */
 
@@ -8777,7 +8783,7 @@ background-color: rgba(255, 102, 0, 0.05);
     border: 1.19px solid #D9DADB;
     background-color: transparent; /* If you want to remove the background */
     cursor: pointer;
-    margin-left:5%;
+    /* margin-left:5%; */
     font-family: Rajdhani;
 }
 .buy-now-button {
@@ -9117,7 +9123,6 @@ background-color: rgba(255, 102, 0, 0.05);
 }
 .similar_category_lottery_title {
     font-size: 16px;
-    font-weight: bold;
     margin-top: 10px;
     text-align: left;
     margin: 10px 20px;
@@ -11523,7 +11528,8 @@ background-color: rgba(255, 102, 0, 0.05);
 #favorites_container {
     font-family: Rajdhani;
     display: flex;
-    justify-content: flex-start;
+    max-height: 1200px;
+    justify-content: center;
     gap: 20px;
     flex-wrap: wrap;
     overflow-x: hidden;
@@ -11564,7 +11570,7 @@ background-color: rgba(255, 102, 0, 0.05);
 .favorite_lottery_events_favorite i {
     position: absolute;
     top: 25px;
-    right: 10px;
+    right: 5px;
     color: gray;
     cursor: pointer;
     background: white;
@@ -11693,6 +11699,9 @@ background-color: rgba(255, 102, 0, 0.05);
         padding: 10px;
         
     }
+    #favorites_container::-webkit-scrollbar {
+        display: none; /* Hide scrollbar */
+    }
 
     .favorite_event {
         width: calc(40.33% - 20px); /* 3 cards per row */
@@ -11704,10 +11713,11 @@ background-color: rgba(255, 102, 0, 0.05);
 }
 @media (max-width: 768px) {
     #favorites_container {
-        flex-direction: row;
-        justify-content: center;
+        /* flex-direction: row; */
+        justify-content: flex-start;
         gap: 30px;
         padding: 8px;
+        padding-right: 10px;
         padding-left: 10px;
     }
 
@@ -11715,6 +11725,9 @@ background-color: rgba(255, 102, 0, 0.05);
         width: calc(50% - 20px); /* 2 cards per row */
     }
 
+    #favorites_container::-webkit-scrollbar {
+        display: none; /* Hide scrollbar */
+    }
   
 
     .favorite_lottery_ticket_price {
@@ -11730,7 +11743,9 @@ background-color: rgba(255, 102, 0, 0.05);
         padding: 10px 0;
         padding-left: 10px;
         gap: 10px;
-        justify-content: flex-start;
+        padding-right: 10px;
+        justify-content: flex-start; /* Change from center to flex-start */
+       
     }
 
     #favorites_container::-webkit-scrollbar {
@@ -11838,13 +11853,528 @@ background-color: rgba(255, 102, 0, 0.05);
 .login_blocked-close:hover{
     color: #ff0000;
 }
+/*order page.html*/
+.myorderpage {
+    font-family: 'Rajdhani', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    width: 100%;
+    overflow-x: hidden;
+}
+.myorder-header {
+    display: flex;
+    justify-content: center; /* Center everything initially */
+    align-items: center;
+    position: relative; /* Needed for absolute positioning */
+    padding: 20px;
+    max-width: 1200px;
+    margin: 22px;
+}
+
+/* Heading */
+.myorder-heading {
+color: #23262F;
+ font-size: 48px;
+ font-family: Rajdhani;
+ font-weight: 700;
+ line-height: 56px;
+ word-wrap: break-word;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%); /* Perfect center alignment */
+    margin: 0;
+}
+
+/* Filter Dropdown */
+.myorders-filters {
+    position: absolute;
+    right: 0;
+    color: #777E90;
+    padding: 10px;
+    font-size: 17px;
+    font-family:bold;
+    /* border: 1px solid #ccc; */
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    padding: 10px;
+    width: auto;
+}
+
+/* Orders Container */
+.myorder-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* Order Box */
+.myorder-group {
+    background: #F7F7F7;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+}
+
+/* Order Title */
+.myorder-group h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+/* Order Meta */
+.myorder-group p {
+    font-size: 14px;
+    color: #666;
+    margin: 2px 0;
+}
+
+/* Status Badge */
+.myorder-status-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 15px;
+}
+
+/* Status Colors */
+.myorder-completed {
+    background-color: #28a745;
+    color: white;
+}
+
+.myorder-pending {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* Order Table */
+.myorder-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.myorder-table th, .myorder-table td {
+    border: none;
+    padding: 10px;
+    text-align: left;
+}
+
+.myorder-table th {
+    background: #f9f9f9;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.myorder-table td {
+    font-size: 14px;
+}
+
+/* Quantity Box */
+.myorder-quantity-box {
+    display: inline-block;
+    background: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Button Container */
+.myorder-button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+/* Button Styles */
+.myorder-button {
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    width: 45%;
+}
+
+.myorder-details-button {
+    background-color: #ff6600;
+    color: white;
+    border: none;
+}
+
+.myorder-help-button {
+    background: white;
+    color: #ff6600;
+    border: 2px solid #ff6600;
+}
+
+/* Modal Styles */
+.myorder-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.myorder-modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.myorder-close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.myorder-main-container {
+        display: flex;
+        /* max-width: 1200px; */
+        margin: 0 auto;
+    }
+
+    .myorder-sidebar {
+        width: 250px;
+        background: #F7F7F7;
+        padding: 20px;
+        border-radius: 12px;
+        height: 70vh;
+        margin-left: 15px;
+        margin-top: 50px;
+        box-shadow: 15px 55px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .myorder-menu {
+        list-style: none;
+        padding: 0;
+    }
+
+    .myorder-menu li {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    .myorder-menu li a {
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        color: #23262F;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 8px;
+        transition: 0.3s;
+        width: 100%;
+    }
+
+    .myorder-menu li a:hover {
+        background: #ff6600;
+        color: white;
+    }
+
+    .myorder-menu li img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+
+    .myorder-content {
+        flex: 1;
+        padding: 20px;
+    }
+	
+.receipt-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff6600;
+    text-decoration: none;
+}
+
+.receipt-link:hover {
+    text-decoration: underline;
+}
+	
+/* MOBILE VIEW (MAX 768px) */
+@media (max-width: 768px) {
+    .myorder-header {
+        flex-direction: column;
+        align-items: flex-start; /* Moves content to the left */
+        text-align: left; /* Ensures text aligns left */
+        padding: 10px;
+    }
+
+    .myorder-heading {
+        font-size: 29px;
+        position: absolute;
+        left: 30%;
+        transform: translateX(-50%); /* Perfect center alignment */
+        margin: 0;
+        line-height: 36px;
+        margin-bottom: 10px;
+        text-align: left; /* Moves the heading text to the left */
+    }
+
+    .myorders-filters {
+        width: 30%;
+        text-align: center;
+        position: absolute;
+        left: 77%;
+    }
+
+    /* Stack orders in single column */
+    .myorder-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    /* Order Details */
+    .myorder-group p {
+        font-size: 16px;
+    }
+
+   
+    .myorder-modal-content {
+        width: 90%;
+        max-width: 400px; /* Optional: Limit max width */
+        margin: 50% auto; /* Center it properly */
+        top: 15%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute; /* Ensure absolute positioning */
+    }
+    
+    .myorder-content {
+        flex: 1;
+        padding: 10px;
+    }
+}
 
 
 
+/* TABLET VIEW (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .myorder-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .myorder-heading {
+        font-size: 40px;
+        line-height: 48px;
+    }
+
+    .myorders-filters {
+        margin-left: auto;
+    }
+
+    /* Keep two columns */
+    .myorder-container {
+        grid-template-columns: repeat(2, minmax(250px, 1fr));
+    }
+
+    /* Keep buttons side-by-side */
+    .myorder-button-container {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .myorder-modal-content {
+        width: 90%;
+        max-width: 400px; /* Optional: Limit max width */
+        margin: 50% auto; /* Center it properly */
+        top: 5%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute; /* Ensure absolute positioning */
+    }
+
+    .myorder-button {
+        width: 48%;
+    }
+}
+
+    @media (max-width: 768px) {
+    .myorder-main-container {
+        flex-direction: column;
+    }
+
+    .myorder-sidebar {
+        width: 92%;
+        background: none;
+        margin-top: 0;
+        height: auto;
+        
+        padding: 6px;
+        text-align: center;
+        box-shadow: none;
+        overflow-x: auto;
+    }
+
+    .myorder-menu {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        white-space: nowrap;
+        gap: 10px;
+        padding: 10px 0;
+        scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+
+    .myorder-menu::-webkit-scrollbar {
+        display: none; /* Hide scrollbar in Chrome/Safari */
+    }
+
+    .myorder-menu li {
+        flex: 0 0 auto;
+        list-style: none;
+    }
+
+    .myorder-menu li a {
+        display: inline-block;
+        font-size: 18px; /* Adjusted size for better fit */
+        font-weight: 600;
+        color: #000;
+        background-color: #f5f5f5;
+        padding: 12px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.3s;
+        min-width: 140px; /* Uniform width */
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .myorder-menu li a.active {
+        background-color: #ff7f00; /* Highlight active menu */
+        color: #fff;
+    }
+
+    .myorder-menu li a:hover {
+        background-color: #ff7f00;
+        color: #fff;
+    }
+
+    .myorder-menu li img {
+        display: none;
+    }
+}
 
 
+@media (max-width: 1024px) {
+    .myorder-main-container {
+        flex-direction: column;
+    }
+
+    .myorder-sidebar {
+        width: 92%;
+        margin-top: 0;
+        height: auto;
+        background: none;
+        padding: 6px;
+        text-align: center;
+        box-shadow: none;
+        overflow-x: auto;
+    }
+
+    .myorder-menu {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        white-space: nowrap;
+        gap: 10px;
+        padding: 10px 0;
+        scrollbar-width: none; 
+    }
+
+    .myorder-menu::-webkit-scrollbar {
+        display: none; /* Hide scrollbar in Chrome/Safari */
+    }
+
+    .myorder-menu li {
+        flex: 0 0 auto;
+        list-style: none;
+    }
+
+    .myorder-menu li a {
+        display: inline-block;
+        font-size: 20px; /* Adjusted size for better fit */
+        font-weight: 600;
+        color: #000;
+        background-color: #f5f5f5;
+        padding: 12px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.3s;
+        min-width: 140px; /* Uniform width */
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .myorder-menu li a.active {
+        background-color: #ff7f00; /* Highlight active menu */
+        color: #fff;
+    }
+
+    .myorder-menu li a:hover {
+        background-color: #ff7f00;
+        color: #fff;
+    }
+
+    .myorder-menu li img {
+        display: none;
+    }
+}
+
+    .scroll-right {
+    position: absolute;
+    right: 10px;
+    top: 13%;
+    transform: translateY(-50%);
+    background: #ff6600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 18px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    display: none; /* Hidden by default */
+}
 
 
-/* .favorited {
-    color: red;
-} */
+@media (max-width: 768px) {
+    .scroll-right {
+        display: block; /* Show button only on mobile view */
+    }
+}
+
