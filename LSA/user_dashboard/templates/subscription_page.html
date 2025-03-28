@@ -1,0 +1,348 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Plans</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <style>
+          body {
+        overflow-x: hidden; /* Prevent horizontal scroll */
+    }
+        /* Main Container */
+        .subscription-main-container {
+            display: flex;
+            /* max-width: 1200px; */
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .subscription-sidebar {
+            width: 250px;
+            background: #F7F7F7;
+            padding: 20px;
+            border-radius: 12px;
+            height: 70vh;
+            margin-left: 15px;
+            margin-top: 50px;
+            box-shadow: 15px 55px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .subscription-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .subscription-menu li {
+            margin-bottom: 15px;
+        }
+
+        .subscription-menu li a {
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #23262F;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .subscription-menu li a:hover {
+            background: #ff6600;
+            color: white;
+        }
+
+        /* Subscription Content */
+        .subscription-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .subscription-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .subscription-header h1 {
+            color: #23262F;
+            font-size: 48px;
+            font-family: Rajdhani;
+            font-weight: 700;
+        }
+
+        .subscription-plans {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .plan {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 2px solid #ff6600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .plan h2 {
+            font-size: 20px;
+            color: #ff6600;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .price {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ff6600;
+            margin: 10px 0;
+        }
+
+        .plan ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .plan ul li {
+            margin: 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .plan button {
+            background: white;
+            color: #ff6600;
+            border: 2px solid #ff6600;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.3s ease;
+        }
+
+        .plan button:hover {
+            background: #e05c00;
+            color: white;
+        }
+
+        /* Hover Effect */
+        .plan:hover {
+            background: #1e1e1e;
+            color: white;
+            border: none;
+        }
+
+        .plan:hover h2,
+        .plan:hover .price,
+        .plan:hover ul li {
+            color: white;
+        }
+
+        .plan:hover button {
+            background: #ff6600;
+            color: white;
+            border: none;
+        }
+
+        .plan:hover button:hover {
+            background: #e05c00;
+        }
+
+/* Mobile Phones (max-width: 768px) */
+@media screen and (max-width: 768px) {
+    body {
+        overflow-x: hidden; /* Prevent horizontal scroll */
+    }
+
+    .subscription-main-container {
+        flex-direction: column;
+        align-items: center;
+        padding: 0 10px;
+        overflow-x: hidden; /* Prevent overflow */
+    }
+
+    .subscription-sidebar {
+        margin: 10px 0;
+        width: 100%; /* Ensure sidebar does not exceed width */
+    }
+
+    .subscription-header h1 {
+        font-size: 32px;
+        margin-top: 0px;
+    }
+
+    .subscription-plans {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        overflow: hidden; /* Ensure no overflow from plans section */
+    }
+
+    .plan {
+        width: 100%; /* Allow each plan to take full width in mobile */
+        padding: 15px;
+        text-align: center;
+        border-radius: 12px;
+        box-sizing: border-box;
+    }
+
+    /* Optional: Adjust for larger headings */
+    .plan h2 {
+        font-size: 16px;
+    }
+
+    .price {
+        font-size: 28px;
+    }
+
+    .plan ul li {
+        font-size: 14px;
+    }
+
+    .plan button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+}
+/* Tablet View (max-width: 1024px) */
+@media screen and (max-width: 1024px) {
+    body {
+        overflow-x: hidden; /* Prevent horizontal scroll */
+    }
+
+    /* Adjust Main Container */
+    .subscription-main-container {
+        flex-direction: column;
+        align-items: center;
+        padding: 0 15px;
+        overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .subscription-sidebar {
+        width: 90%;
+        margin: 20px 0;
+        height: auto;
+        box-shadow: none; /* Remove large box-shadow on tablets */
+    }
+
+    /* Subscription Header */
+    .subscription-header h1 {
+        font-size: 36px;
+    }
+
+    /* Plans Layout */
+    .subscription-plans {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .plan {
+        width: 80%;
+        padding: 20px;
+        text-align: center;
+        border-radius: 12px;
+        box-sizing: border-box;
+    }
+
+    /* Plan Text Adjustments */
+    .plan h2 {
+        font-size: 18px;
+    }
+
+    .price {
+        font-size: 32px;
+    }
+
+    .plan ul li {
+        font-size: 16px;
+    }
+
+    .plan button {
+        width: 100%;
+        padding: 14px;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="subscription-main-container">
+        <!-- Sidebar -->
+        <!-- <div class="subscription-sidebar"> -->
+            {% include 'myorder-sidebar.html' %}
+        <!-- </div> -->
+
+        <!-- Content -->
+        <div class="subscription-content">
+            <div class="subscription-header">
+                <h1>Agent Management Subscription</h1>
+                <p class="subtitle">Choose the best plan to boost your freelance career</p>
+            </div>
+
+            <div class="subscription-plans">
+                <div class="plan">
+                    <h2>Personal</h2>
+                    <div class="price">$19</div>
+                    <p>/ month</p>
+                    <ul>
+                        <li>✔ Full Access to Win4All</li>
+                        <li>✔ 100 GB Free Storage</li>
+                        <li>✔ Unlimited Visitors</li>
+                        <li>✔ 10 Agents</li>
+                        <li>✔ Live Chat Support</li>
+                    </ul>
+                    <button>Get 14 Days Free Trial</button>
+                </div>
+                <div class="plan">
+                    <h2>Professional</h2>
+                    <div class="price">$49</div>
+                    <p>/ month</p>
+                    <ul>
+                        <li>✔ Full Access to Win4All</li>
+                        <li>✔ 100 GB Free Storage</li>
+                        <li>✔ Unlimited Visitors</li>
+                        <li>✔ 10 Agents</li>
+                        <li>✔ Live Chat Support</li>
+                    </ul>
+                    <button>Get 14 Days Free Trial</button>
+                </div>
+                <div class="plan">
+                    <h2>Business</h2>
+                    <div class="price">$99</div>
+                    <p>/ month</p>
+                    <ul>
+                        <li>✔ Full Access to Win4All</li>
+                        <li>✔ 100 GB Free Storage</li>
+                        <li>✔ Unlimited Visitors</li>
+                        <li>✔ 10 Agents</li>
+                        <li>✔ Live Chat Support</li>
+                    </ul>
+                    <button>Get 14 Days Free Trial</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

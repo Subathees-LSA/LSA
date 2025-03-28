@@ -151,12 +151,14 @@
             </div>
             <div class="db-subscription">
                 <p class="db-text">Get Subscription now receive offers from us</p>
-                <input type="email" id="db-email" required >
-                <div class="db-checkbox">
+                <!-- <input type="email" id="db-email" required > -->
+                <!-- <div class="db-checkbox">
                     <input type="checkbox" id="db-notify" checked>
                     <label for="db-notify" class="db-text">Notify me news and blog information</label>
-                </div>
-                <button class="db-btn"onclick="dbSubscribe()">Subscribe Now</button>
+                </div> -->
+                <button class="db-btn" onclick="  window.location.href='{% url 'subscription_page' %}';">
+                    Subscribe Now
+                </button>
             </div>
         </div>
     </div>

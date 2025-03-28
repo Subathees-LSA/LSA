@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Login and Security</title>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                document.cookie.split(';').forEach(cookie => {
+                    const trimmed = cookie.trim();
+                    if (trimmed.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
+                    }
+                });
+            }
+            return cookieValue;
+        }
+        function logoutDevice(ipAddress, button) {
+    fetch('/api/logout-device/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ ip_address: ipAddress })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // If the current session is logged out, redirect to login page
+            if (data.is_current_session) {
+                window.location.href = "/login/";
+                return; // Stop further execution
+            }
+
+            // Remove the logged-out session from the UI
+            const sessionDiv = button.closest('.session');
+            sessionDiv.remove();
+
+            // If no more active sessions exist, show "No active sessions."
+            if (document.querySelectorAll('.session').length === 0) {
+                document.body.insertAdjacentHTML('beforeend', '<p>No active sessions.</p>');
+            }
+
+            alert("Device logged out successfully!");
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+  
+
+
+        function updatePassword() {
+            const newPassword = document.getElementById("new-password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+
+            if (newPassword.length < 8) {
+                alert("Password must be at least 8 characters long.");
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+
+            fetch("/update-password/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: new URLSearchParams({
+                    old_password: document.getElementById("old-password").value,
+                    new_password1: newPassword,
+                    new_password2: confirmPassword,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Password updated successfully!");
+                } else {
+                    alert(data.message);
+                    if (data.errors) {
+                        console.error("Errors:", data.errors);
+                    }
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+    {% include 'header.html' %}
+    {% include 'myorder-sidebar.html' %}
+    <h1>Login and Security</h1>
+
+    <h2>Change Password</h2>
+    <form id="password-form">
+        <div class="form-group">
+            <label for="old-password">Current Password</label>
+            <input type="password" id="old-password" placeholder="Enter Current password" required>
+        </div>
+        <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm new password" required>
+        </div>
+        <div class="form-group">
+            <button type="button" onclick="updatePassword()">Update Password</button>
+        </div>
+    </form>
+    
+    <hr>
+    <h2>Active Sessions</h2>
+   {% if device_history|length == 0 %}
+    <p>No active sessions.</p>
+{% else %}
+    {% for device in device_history %}
+        {% if not device.logout_time %}  <!-- Show only active sessions -->
+            <div class="session" data-ip="{{ device.ip_address }}">
+                <p><strong>Device:</strong> {{ device.device_info }}</p>
+                <p><strong>Last Active:</strong> {{ device.login_time }}</p>
+                <button type="button" class="logout-btn" onclick="logoutDevice('{{ device.ip_address }}', this)">
+                    Log out device
+                </button>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% include 'footer.html' %}
+</body>
+</html>

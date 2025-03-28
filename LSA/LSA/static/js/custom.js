@@ -516,14 +516,26 @@ function admin_chat_view() {
     function display_notificationPopup() {
         const notificationBell = document.getElementById("notification-bell");
         const notificationPopup = document.getElementById("notification-popup");
+        
         // Toggle the notification popup on bell icon click
-        notificationBell.addEventListener("click", () => {
-            if (notificationPopup.style.display === "none") {
+        notificationBell.addEventListener("click", function(event) {
+            // Get computed styles
+            const computedStyle = window.getComputedStyle(notificationPopup);
+            if (computedStyle.display === "none") {
                 notificationPopup.style.display = "block"; // Show the popup
-            } else if (notificationPopup.style.display === "block") {
+            } else if (computedStyle.display === "block") {
                 notificationPopup.style.display = "none"; // Show the popup
             } else {
-                notificationPopup.style.display = "block"; // Hide the popup
+                notificationPopup.style.display = "none"; // Hide the popup
+            }
+            event.stopPropagation();
+        });
+                // Hide the popup when clicking anywhere on the document
+            document.addEventListener('click', function(event) {
+            //  alert('click anywhere');
+            // Check if the click is outside the popup, if so, hide it
+            if (!notificationPopup.contains(event.target)) {
+                notificationPopup.style.display = 'none';
             }
         });
     }
@@ -831,7 +843,7 @@ function handleRefundClick(paymentIntent) {
         return;
     }
 
-    fetch(`/api/payment-lotteries/${paymentIntent}/fetch-paid-amount/`)
+    fetch(`/api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/${paymentIntent}/fetch-paid-amount/`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -932,7 +944,7 @@ function handleRefundClick(paymentIntent) {
                     return;
                 }
 
-                fetch(`/api/payment-lotteries/${paymentIntent}/refund/`, {
+                fetch(`/api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/${paymentIntent}/refund/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -988,7 +1000,7 @@ function openRefundSuccessPopup(paymentIntent, refundedAmount, lotteryDetails) {
         }
     });
 
-     // 🎯 Show Lottery Event Details in a Table Format
+     // Show Lottery Event Details in a Table Format
      let lotteryInfoHtml = `
      <h3>Transaction Details</h3>
      <table class="refund-table">
@@ -1076,22 +1088,35 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function custom_admin_dashboard_transactions_management_function() {
-    const custom_admin_dashboard_transactions_management_container = document.getElementById("custom_admin_dashboard_transactions_management");
+function custom_admin_dashboard_transactions_management_function(email = null, status = null) {
+   // Determine the container based on the status parameter
+   const containerId = status === "refunded" 
+   ? "custom_admin_dashboard_transactions_management_refunded" 
+   : "custom_admin_dashboard_transactions_management";
 
+    const custom_admin_dashboard_transactions_management_container = document.getElementById(containerId);
     if (!custom_admin_dashboard_transactions_management_container) return;
 
     custom_admin_dashboard_transactions_management_container.innerHTML = ""; // Clear previous content
 
     let custom_admin_dashboard_transactions_management_page = 1;
-    const custom_admin_dashboard_transactions_management_rowsPerPage = 5;
+    const custom_admin_dashboard_transactions_management_rowsPerPage = 10; // Set rows per page to 10
     let custom_admin_dashboard_transactions_management_allData = [];
 
     // Create Header
     function custom_admin_dashboard_transactions_management_createHeader() {
         const custom_admin_dashboard_transactions_management_header = document.createElement("div");
         custom_admin_dashboard_transactions_management_header.classList.add("custom_admin_dashboard_transactions_management_header");
-        custom_admin_dashboard_transactions_management_header.textContent = "Transactions Management > Transaction Details";
+
+        // Change heading based on parameters
+        if (email) {
+            custom_admin_dashboard_transactions_management_header.textContent = "";
+        } else if (status === "refunded") {
+            custom_admin_dashboard_transactions_management_header.textContent = "Refund Management";
+        } else {
+            custom_admin_dashboard_transactions_management_header.textContent = "Transactions Management > Transaction Details";
+        }
+
         return custom_admin_dashboard_transactions_management_header;
     }
 
@@ -1102,7 +1127,7 @@ function custom_admin_dashboard_transactions_management_function() {
 
         const custom_admin_dashboard_transactions_management_thead = document.createElement("thead");
         const custom_admin_dashboard_transactions_management_headerRow = document.createElement("tr");
-        ["Payment ID", "Product", "Amount", "Date", "Status", "Email", "Quantity", "Action"].forEach(text => {
+        ["Payment ID", "Lottery", "Amount", "Date", "Status", "Email", "Quantity", "Action"].forEach(text => {
             const th = document.createElement("th");
             th.textContent = text;
             custom_admin_dashboard_transactions_management_headerRow.appendChild(th);
@@ -1112,7 +1137,11 @@ function custom_admin_dashboard_transactions_management_function() {
         custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_thead);
 
         const custom_admin_dashboard_transactions_management_tbody = document.createElement("tbody");
-        custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body";
+        if (status === "refunded") {
+            custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body_refunded";
+        } else {
+            custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body";
+        }
         custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_tbody);
 
         return { custom_admin_dashboard_transactions_management_table, custom_admin_dashboard_transactions_management_tbody };
@@ -1120,86 +1149,136 @@ function custom_admin_dashboard_transactions_management_function() {
 
     // Fetch Data from API
     function custom_admin_dashboard_transactions_management_fetchData() {
-        fetch("/api/payment-lotteries/")
+        let apiUrl = "/api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/";
+        if (email) {
+            apiUrl += `?email=${email}`;
+        }
+
+        fetch(apiUrl)
             .then(response => response.json())
             .then(data => {
-                custom_admin_dashboard_transactions_management_allData = data;
+                // Filter data based on status parameter
+                if (status === "refunded") {
+                    custom_admin_dashboard_transactions_management_allData = data.filter(transaction => transaction.payment_status === "refunded");
+                } else {
+                    custom_admin_dashboard_transactions_management_allData = data;
+                }
                 custom_admin_dashboard_transactions_management_displayData();
+                custom_admin_dashboard_transactions_management_displayTransactionCount();
             })
             .catch(error => console.error("Error fetching transactions:", error));
+    }
+    function custom_admin_dashboard_transactions_management_displayTransactionCount() {
+        const total_number_of_transactions_count_user_details_management_element_id = document.getElementById("total_number_of_transactions_count_user_details_management");
+
+        if (total_number_of_transactions_count_user_details_management_element_id) {
+            //  Assign count to the given ID if it exists
+            total_number_of_transactions_count_user_details_management_element_id.textContent = `${custom_admin_dashboard_transactions_management_allData.length}`;
+        } else {
+            // Fallback: Show transaction count elsewhere (if needed)
+            console.log(`Total Transactions: ${custom_admin_dashboard_transactions_management_allData.length}`);
+        }
     }
 
     // Display Transactions Dynamically
     function custom_admin_dashboard_transactions_management_displayData() {
-        const custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body");
-        custom_admin_dashboard_transactions_management_tbody.innerHTML = "";
+        if (status === "refunded") {
+            var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded");
+        } else {
+            var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body");
+        }
+
+        if (custom_admin_dashboard_transactions_management_allData.length === 0) {
+            // Display "No transactions" message if no data is available
+            const noTransactionsRow = document.createElement("tr");
+            const noTransactionsCell = document.createElement("td");
+            noTransactionsCell.setAttribute("colspan", "8"); // Span all columns
+            noTransactionsCell.textContent = "No transactions.";
+            noTransactionsCell.classList.add("custom_admin_dashboard_transactions_management_no_transactions");
+            noTransactionsRow.appendChild(noTransactionsCell);
+            custom_admin_dashboard_transactions_management_tbody.appendChild(noTransactionsRow);
+            custom_admin_dashboard_transactions_management_updateViewMoreButton(); // Hide "View More" button
+            return;
+        }
 
         const start = (custom_admin_dashboard_transactions_management_page - 1) * custom_admin_dashboard_transactions_management_rowsPerPage;
         const end = start + custom_admin_dashboard_transactions_management_rowsPerPage;
-        const custom_admin_dashboard_transactions_management_paginatedData = custom_admin_dashboard_transactions_management_allData.slice(0, end);
+        const custom_admin_dashboard_transactions_management_paginatedData = custom_admin_dashboard_transactions_management_allData.slice(start, end);
 
         custom_admin_dashboard_transactions_management_paginatedData.forEach(event => {
             const row = document.createElement("tr");
 
-            // Inside the row.innerHTML in custom_admin_dashboard_transactions_management_displayData
-row.innerHTML = `
-<td>${event.payment_intent}</td>
-<td>${event.lottery_event_title}</td>
-<td>£${event.amount}</td>
-<td>${new Date(event.payment_at).toLocaleDateString()}</td>
-<td data-payment-intent="${event.payment_intent}">
-    <span class="custom_admin_dashboard_transactions_management_status_${ event.payment_status.toLowerCase()}">
-    ${event.payment_status}
-    </span>
-</td>
-<td>${event.user_email}</td>
-<td>${event.quantity}</td>
-<td>
-    <div class="custom_admin_dashboard_transactions_management_action_img_container">
-        <div class="custom_admin_dashboard_transactions_management_action_img" onclick="handleReceiptClick('${event.receipt_url}')">
-            <img src="/media/admin_files/custom_admin_dashboard_transactions_management_receipt_icon.jpg" alt="Receipt">
-            <span class="custom_admin_dashboard_transactions_management_tooltip">View Receipt</span>
-        </div>
-       <div class="custom_admin_dashboard_transactions_management_action_img" 
-                data-refund-intent="${event.payment_intent}"
-                onclick="handleRefundClick('${event.payment_intent}')">
-                <img src="/media/admin_files/custom_admin_dashboard_transactions_management_refund_icon.jpg" alt="Refund">
-                <span class="custom_admin_dashboard_transactions_management_tooltip">Initiate Refund</span>
-            </div>
-    </div>
-</td>
-`;
+            row.innerHTML = `
+                <td>${event.payment_intent}</td>
+                <td>${event.lottery_event_title}</td>
+                <td>£${event.amount}</td>
+                <td>${new Date(event.payment_at).toLocaleDateString()}</td>
+                <td data-payment-intent="${event.payment_intent}">
+                    <span class="custom_admin_dashboard_transactions_management_status_${ event.payment_status.toLowerCase()}">
+                    ${event.payment_status}
+                    </span>
+                </td>
+                <td>${event.user_email}</td>
+                <td>${event.quantity}</td>
+                <td>
+                    <div class="custom_admin_dashboard_transactions_management_action_img_container">
+                        <div class="custom_admin_dashboard_transactions_management_action_img" onclick="handleReceiptClick('${event.receipt_url}')">
+                            <img class ="view_Reciept" src="/media/admin_files/custom_admin_dashboard_transactions_management_receipt_icon.jpg" alt="Receipt">
+                            <span class="custom_admin_dashboard_transactions_management_tooltip">View Receipt</span>
+                        </div>
+                        <div class="custom_admin_dashboard_transactions_management_action_img" 
+                            data-refund-intent="${event.payment_intent}"
+                            onclick="handleRefundClick('${event.payment_intent}')">
+                            <img class ="view_Refund" src="/media/admin_files/custom_admin_dashboard_transactions_management_refund_icon.jpg" alt="Refund">
+                            <span class="custom_admin_dashboard_transactions_management_tooltip">Initiate Refund</span>
+                        </div>
+                    </div>
+                </td>
+            `;
 
             custom_admin_dashboard_transactions_management_tbody.appendChild(row);
+           
         });
 
         custom_admin_dashboard_transactions_management_updateViewMoreButton();
     }
 
-   
-
-    // Create and Manage "View More / View Less" Button
+    // Create and Manage "View More" Button
     function custom_admin_dashboard_transactions_management_createViewMoreButton() {
         const custom_admin_dashboard_transactions_management_viewMoreButton = document.createElement("button");
-        custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button";
+        if (status === "refunded") {
+            custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button_refunded";
+        } else {
+            custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button";
+        }
         custom_admin_dashboard_transactions_management_viewMoreButton.classList.add("custom_admin_dashboard_transactions_management_view_more_button");
         custom_admin_dashboard_transactions_management_viewMoreButton.textContent = "View More";
 
         custom_admin_dashboard_transactions_management_viewMoreButton.addEventListener("click", function () {
-            if (custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage < custom_admin_dashboard_transactions_management_allData.length) {
-                custom_admin_dashboard_transactions_management_page++;
-            } else {
-                custom_admin_dashboard_transactions_management_page = 1; // Reset to initial view
-            }
+            custom_admin_dashboard_transactions_management_page++;
             custom_admin_dashboard_transactions_management_displayData();
         });
 
         return custom_admin_dashboard_transactions_management_viewMoreButton;
     }
 
+    // Update "View More" Button Visibility
     function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
-        custom_admin_dashboard_transactions_management_viewMoreButton.textContent = 
-            (custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage < custom_admin_dashboard_transactions_management_allData.length) ? "View More" : "View Less";
+        if (status === "refunded") {
+            var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button_refunded");
+        } else {
+            var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button");
+        }
+        if (!custom_admin_dashboard_transactions_management_viewMoreButton) return;
+
+        const totalRows = custom_admin_dashboard_transactions_management_allData.length;
+        const rowsDisplayed = custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage;
+
+        if (totalRows <= rowsDisplayed || totalRows === 0) {
+            custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "none"; // Hide button if all rows are displayed or no transactions
+        } else {
+            custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "block"; // Show button if more rows are available
+        }
     }
 
     // Initialize Table and UI
@@ -1213,6 +1292,256 @@ row.innerHTML = `
 
     custom_admin_dashboard_transactions_management_fetchData();
 }
+
+// prize_management_page js code starting
+
+// Add this to your existing JavaScript code
+
+function renderPrizeManagementHTML() {
+    let container = document.getElementById("custom_admin_dashboard_prize_management_id");
+    container.innerHTML = `
+        <h2 class="prize_management_heading">Prize Management</h2>
+
+        <div class="prize_management_container">
+            <div class="prize_management_card">
+                <div>
+                    <h4 class="prize_management_card_title">Total Winners</h4>
+                    <p class="prize_management_card_value" id="prize_management_total_winners">0</p>
+                </div>
+                <div class="prize_management_icon_wrapper">
+                    <img class="prize_management_icon" src="" alt="Ticket Icon">
+                </div>
+            </div>
+            
+            <div class="prize_management_card">
+                <div>
+                    <h4 class="prize_management_card_title">Successfully Delivered</h4>
+                    <p class="prize_management_card_value" id="prize_management_delivered_winners">0</p>
+                </div>
+                <div class="prize_management_icon_wrapper">
+                    <img class="prize_management_icon" src="" alt="Success Icon">
+                </div>
+            </div>
+            
+            <div class="prize_management_card">
+                <div>
+                    <h4 class="prize_management_card_title">Canceled</h4>
+                    <p class="prize_management_card_value" id="prize_management_cancelled_winners">0</p>
+                </div>
+                <div class="prize_management_icon_wrapper">
+                    <img class="prize_management_icon" src="" alt="Cancel Icon">
+                </div>
+            </div>
+        </div>
+
+        <table class="prize_management_table">
+            <thead>
+                <tr>
+                    <th>Prize No</th>
+                    <th>Ticket Number</th>
+                    <th>Customer Details</th>
+                    <th>Prize Details</th>
+                    <th>Prize Status</th>
+                    <th>Comments</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div id="prize_management_no_winners" class="prize_management_hidden">No winners.</div>
+
+        <div id="prize_management_pagination" class="prize_management_pagination">
+            <ul></ul>
+        </div>
+
+        <div id="prize_management_image_popup" class="prize_management_popup prize_management_hidden">
+            <span class="prize_management_popup_close">&times;</span>
+            <img class="prize_management_popup_image">
+        </div>
+    `;
+}
+// Updated pagination functions
+function paginateData(data, currentPage, itemsPerPage) {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return data.slice(startIndex, endIndex);
+}
+
+function createPrizeManagementPagination(totalPages, currentPage) {
+    const paginationElement = document.querySelector("#prize_management_pagination ul");
+    
+    // Don't show pagination if there's only one page
+    if (totalPages <= 1) {
+        paginationElement.innerHTML = '';
+        return;
+    }
+
+    let liTag = '';
+    let beforePage = Math.max(currentPage - 1, 1);
+    let afterPage = Math.min(currentPage + 1, totalPages);
+
+    // Previous button
+    if (currentPage > 1) {
+        liTag += `<li class="prize_management_btn prize_management_prev" onclick="fetchWinners(${currentPage - 1})">
+                    <span><i class="fas fa-angle-left"></i> Prev</span>
+                  </li>`;
+    }
+
+    // First page
+    if (currentPage > 2) {
+        liTag += `<li class="prize_management_numb" onclick="fetchWinners(1)">
+                    <span>1</span>
+                  </li>`;
+        if (currentPage > 3) {
+            liTag += `<li class="prize_management_dots"><span>...</span></li>`;
+        }
+    }
+
+    // Pages around current page
+    for (let plength = beforePage; plength <= afterPage; plength++) {
+        if (plength < 1 || plength > totalPages) continue;
+        
+        const active = currentPage === plength ? "prize_management_active" : "";
+        liTag += `<li class="prize_management_numb ${active}" onclick="fetchWinners(${plength})">
+                    <span>${plength}</span>
+                  </li>`;
+    }
+
+    // Last page
+    if (currentPage < totalPages - 1) {
+        if (currentPage < totalPages - 2) {
+            liTag += `<li class="prize_management_dots"><span>...</span></li>`;
+        }
+        liTag += `<li class="prize_management_numb" onclick="fetchWinners(${totalPages})">
+                    <span>${totalPages}</span>
+                  </li>`;
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+        liTag += `<li class="prize_management_btn prize_management_next" onclick="fetchWinners(${currentPage + 1})">
+                    <span>Next <i class="fas fa-angle-right"></i></span>
+                  </li>`;
+    }
+
+    paginationElement.innerHTML = liTag;
+}
+
+// Updated fetchWinners function
+function fetchWinners(page = 1) {
+    fetch("/api_admin_dashboard_prize_management_winner_list_api_view/")
+        .then(response => response.json())
+        .then(data => {
+            const itemsPerPage = 10;
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+            const paginationElement = document.getElementById("prize_management_pagination");
+            
+            // Hide pagination if there are 10 or fewer winners
+            if (data.length <= itemsPerPage) {
+                paginationElement.classList.add("prize_management_hidden");
+            } else {
+                paginationElement.classList.remove("prize_management_hidden");
+            }
+
+            const paginatedData = paginateData(data, page, itemsPerPage);
+            
+            let totalWinners = 0, deliveredWinners = 0, cancelledWinners = 0;
+            let tableBody = document.querySelector(".prize_management_table tbody");
+            tableBody.innerHTML = ""; 
+
+            if (data.length === 0) {
+                document.getElementById("prize_management_no_winners").classList.remove("prize_management_hidden");
+                paginationElement.classList.add("prize_management_hidden");
+                return;
+            } else {
+                document.getElementById("prize_management_no_winners").classList.add("prize_management_hidden");
+            }
+
+            // Rest of your existing table population logic...
+            paginatedData.forEach(winner => {
+                totalWinners++;
+                if (winner.prize_status === "delivered") deliveredWinners++;
+                if (winner.prize_status === "cancelled") cancelledWinners++;
+
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${winner.prize_no}</td>
+                    <td>${winner.ticket_number}</td>
+                    <td>${winner.customer_details.user_name} <br> ${winner.customer_details.user_email}</td>
+                    <td>
+                        ${winner.prize_details.lottery_title} <br>
+                        <img src="${winner.prize_details.lottery_image}" class="prize_management_clickable_image">
+                    </td>
+                    <td>
+                        <select class="prize_management_status" data-id="${winner.id}">
+                            <option value="initiated" ${winner.prize_status === "initiated" ? "selected" : ""}>Initiated</option>
+                            <option value="on_the_way" ${winner.prize_status === "on_the_way" ? "selected" : ""}>On the Way</option>
+                            <option value="delivered" ${winner.prize_status === "delivered" ? "selected" : ""}>Delivered</option>
+                            <option value="cancelled" ${winner.prize_status === "cancelled" ? "selected" : ""}>Cancelled</option>
+                        </select>
+                    </td>
+                    <td>
+                        <textarea class="prize_management_comments" data-id="${winner.id}" rows="2">${winner.prize_comments || ''}</textarea>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById("prize_management_total_winners").innerText = data.length;
+            document.getElementById("prize_management_delivered_winners").innerText = deliveredWinners;
+            document.getElementById("prize_management_cancelled_winners").innerText = cancelledWinners;
+
+            // Create pagination only if needed
+            if (data.length > itemsPerPage) {
+                createPrizeManagementPagination(totalPages, page);
+            }
+
+            // Rest of your event listeners...
+            document.querySelectorAll(".prize_management_status").forEach(select => {
+                select.addEventListener("change", updateWinnerStatus);
+            });
+
+            document.querySelectorAll(".prize_management_comments").forEach(textarea => {
+                textarea.addEventListener("focusout", updateWinnerStatus);
+            });
+
+            document.querySelectorAll(".prize_management_clickable_image").forEach(image => {
+                image.addEventListener("click", prize_management_openImagePopup);
+            });
+
+            document.querySelector(".prize_management_popup_close").addEventListener("click", prize_management_closeImagePopup);
+        });
+}
+
+function prize_management_openImagePopup(event) {
+    let popup = document.getElementById("prize_management_image_popup");
+    let popupImage = popup.querySelector(".prize_management_popup_image");
+    popupImage.src = event.target.src;
+    popup.classList.remove("prize_management_hidden");
+}
+
+function prize_management_closeImagePopup() {
+    document.getElementById("prize_management_image_popup").classList.add("prize_management_hidden");
+}
+
+function updateWinnerStatus(event) {
+    let winnerId = event.target.dataset.id;
+    let prizeStatus = document.querySelector(`.prize_management_status[data-id='${winnerId}']`).value;
+    let prizeComments = document.querySelector(`.prize_management_comments[data-id='${winnerId}']`).value;
+
+    fetch(`/api_admin_dashboard_prize_management/${winnerId}/update_winner_status/`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+        },
+        body: JSON.stringify({ prize_status: prizeStatus, prize_comments: prizeComments }),
+    }).then(response => response.json())
+      .then(data => {
+          document.querySelector(`.prize_management_comments[data-id='${winnerId}']`).value = data.prize_comments;
+      });
+}
+// prize_management_page js code ending
 
 function showSpecificDiv(id) {
     // Select the section and the specific div by id
@@ -1238,9 +1567,16 @@ function showSpecificDiv(id) {
     } else {
         console.error(`Element with id "${id}" not found.`);
     }
-    if (id === "custom_admin_dashboard_transactions_management") {
-        custom_admin_dashboard_transactions_management_function();
+    if (id === "custom_admin_dashboard_prize_management_id") {
+        renderPrizeManagementHTML(); 
+        fetchWinners(1);
+    } else if (id === "custom_admin_dashboard_transactions_management_refunded") {
+        custom_admin_dashboard_transactions_management_function(null, "refunded");
+       
+    } else if (id === "custom_admin_dashboard_transactions_management") {
+        custom_admin_dashboard_transactions_management_function();  
     }
+   
     const nav_bar_user_management_button = document.getElementById("user_management_button_id");
     if (id === "custom_admin_dashboard_user_list_table") {
         nav_bar_user_management_button.style.display = "none";
@@ -1607,6 +1943,8 @@ function hidetoggleSidebar() {
         hamburger.innerHTML = "☰"; // Change back to hamburger
     }
 }
+
+
 function initializeDashboard() {
     try {
 
@@ -1901,14 +2239,14 @@ function initializeDashboard() {
                                                         <option value="pending" ${row.kyc_status === 'pending' ? 'selected' : ''}>Pending</option>
                                                     </select>
                                                 </td>
-                                                <td class="view-user-list" data-user-id="${row.user?.id}">
+                                                <td class="view_specfic_user_details" data-user-id="${row.user?.id}">
                                                 ${row.profile_image_url
                                                 ? `<img src="${row.profile_image_url}" alt="Profile Image" class="custom_admin_dashboard_user_management_profile_image">`
                                                 : ''
                                             }
 	                                            ${row.user?.username || 'N/A'}
                                                 </td>
-                                                <td class="view-user-list" >${row.user?.email || 'N/A'}</td>
+                                                <td class="view_specfic_user_details" data-user-id="${row.user?.id}" >${row.user?.email || 'N/A'}</td>
                                                 <td>
                                                             ${row.kyc_image_url
                                                 ? `<a href="#" class="view-kyc-image" data-imageurl="${row.kyc_image_url}" data-username="${row.user?.username || 'N/A'}" data-email="${row.user?.email || 'N/A'}" data-kycstatus="${row.kyc_status || 'N/A'}">View KYC Image</a>`
@@ -1919,42 +2257,124 @@ function initializeDashboard() {
                                                 <td><button class="block-user-btn" data-user-id="${row.user?.id}">${row.is_blocked ? 'Unblock User' : 'Block User'}</button></td>                                            `;
                                         tbody.appendChild(tr);
                                     }
+                                    window.goToUserManagement = function() {
+                                        fetchAndRenderUsers(true);
+                                        showSpecificDiv("custom_admin_dashboard_user_list_table");
+                                    };
+                                    
+                                    function displayUserDetails(user) {
+                                    
+                                        const custom_admin_dashboard_user_detail_page_container = document.getElementById("custom_admin_dashboard_user_detail_page");
+                                        custom_admin_dashboard_user_detail_page_container.innerHTML = `
+                                            <div class="users_management_user_details_page_gotousermanagement">
+                                                <span onclick="goToUserManagement()">Users Management</span> > <span>User Details</span>
+                                            </div>
+                                            <div class="users_management_user_details_page_user_details_card">
+                                                <div class="users_management_user_details_page_profile_section">
+                                                <p>
+                                                     <select class="user_kyc_waiting_list-kyc-statusselect" data-user-id="${user.user?.id}" data-status="${user.kyc_status}">
+                                                        <option value="waiting" ${user.kyc_status === 'waiting' ? 'selected' : ''}>Waiting</option>
+                                                        <option value="verified" ${user.kyc_status === 'verified' ? 'selected' : ''}>Verified</option>
+                                                        <option value="rejected" ${user.kyc_status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                                        <option value="pending" ${user.kyc_status === 'pending' ? 'selected' : ''}>Pending</option>
+                                                    </select><p>
+                                                    <img src="${user.profile_image_url || ''}" class="users_management_user_details_page_user_profile_image" alt="User Image">
+                                                    <h2>${user.user?.username || 'N/A'} </h2>
+                                                    <p>${user.user?.email || 'N/A'}</p>
+                                                    <p>${user.ip_address || 'N/A'}</p>
+                                                    
+                                                    <p><button class="block-user-btn" data-user-id="${user.user?.id}">
+                                                    <img src="http://127.0.0.1:8000/media/dashboard_preview_image/Frame.png"  alt="Block-Icon class="Block-icon"/>
+                                                    ${user.is_blocked ? 'Unblock User' : 'Block User'}</button></p>
+                                                    ${user.kyc_image_url ? `<a href="#" class="view-kyc-image" data-imageurl="${user.kyc_image_url}" data-username="${user.user?.username || 'N/A'}" data-email="${user.user?.email || 'N/A'}" data-kycstatus="${user.kyc_status || 'N/A'}">View KYC Image</a>` : 'KYC not submitted'}
+                                                </div>
+                                            </div>
+                                            <div>user statistics</div>
+                                            <div class="users_management_user_details_page_user_statistics">
+                                           
+                                        <div class="users_management_user_details_page_statistic_container">
+                                            <img src="http://127.0.0.1:8000/media/dashboard_preview_image/icon-park-solid_ticket.png">
+                                            <div>
+                                                <h3>Total Number Of Transactions</h3>
+                                                <p id="total_number_of_transactions_count_user_details_management">0</p>
+                                            </div>
+                                        </div>
+                                        <div class="users_management_user_details_page_statistic_container">
+                                            <img src="http://127.0.0.1:8000/media/dashboard_preview_image/solar_money-bag-bold.png">
+                                            <div>
+                                                <h3>Total Amount Earned</h3>
+                                                <p>5.2M</p>
+                                            </div>
+                                        </div>
+                                        <div class="users_management_user_details_page_statistic_container">
+                                            <img src="http://127.0.0.1:8000/media/dashboard_preview_image/solar_wallet-bold.png">
+                                            <div>
+                                                <h3>Total Amount in Wallet</h3>
+                                                <p>£ 50000</p>
+                                            </div>
+                                        </div>
+                                        `;
+                                    }
+                                    $(document).on('change', '.user_kyc_waiting_list-kyc-statusselect', function () {
+                                        try {
+                                            const userId = $(this).data('user-id'); // Get the user ID from the data attribute
+                                            const newStatus = $(this).val(); // Get the selected status
+                                    
+                                            // Update the background color based on the selected status
+                                            updateSelectColor($(this), newStatus);
+                                    
+                                            // Perform an AJAX POST request to update the KYC status
+                                            $.ajax({
+                                                url: adminupdaetkycapprovalUrl, // The URL to handle KYC approval updates
+                                                type: 'POST',
+                                                data: JSON.stringify({ user_id: userId, kyc_status: newStatus }), // Send the user ID and new status
+                                                contentType: 'application/json',
+                                                headers: { 'X-CSRFToken': csrfToken }, // Include CSRF token for security
+                                                success: function (response) {
+                                                    // Update the `rows` array with the new status
+                                                    const userIndex = rows.findIndex(row => row.user?.id === userId);
+                                                    if (userIndex !== -1) {
+                                                        rows[userIndex].kyc_status = newStatus; // Update the status in the `rows` array
+                                                    }
+                                    
+                                                    alert(`KYC status updated to ${newStatus}`); // Notify the user of success
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    alert(`Failed to update KYC status: ${error}`); // Notify the user of failure
+                                                }
+                                            });
+                                        } catch (error) {
+                                            console.error('Error:', error);
+                                            alert('An error occurred while updating the KYC status.');
+                                        }
+                                    });
+                                    $(document).on('click', '.view_specfic_user_details', function () {
+                                        let userId = $(this).data('user-id');
+                                        let user = rows.find(row => row.user?.id === userId);
+                                        if (user) {
+                                            user_management_button_function();
+                                            custom_admin_dashboard_transactions_management_function(user.user.email) 
+                                            displayUserDetails(user);
+                                            showSpecificDiv("custom_admin_dashboard_user_detail_page");
+                                            let user_details_custom_admin_dashboard_transactions_management = document.getElementById("custom_admin_dashboard_transactions_management");
+                                            if (user_details_custom_admin_dashboard_transactions_management.style.display === "none") {
+                                                user_details_custom_admin_dashboard_transactions_management.style.display = "block";
+                                                user_details_custom_admin_dashboard_transactions_management.style.opacity = "1";
+                                                user_details_custom_admin_dashboard_transactions_management.style.position = "relative";
+                                            }
 
+                                        } else {
+                                            console.error("User not found");
+                                        }
+                                    });
+                                    
+                                   
                                     function updateUserCount() {
                                         document.getElementById('userCountContainer').textContent = `Total Users: ${rows.length}`;
                                     }
                                  
-                                    function toggleFilterDropdown() {
-                                        const dropdown = document.getElementById("filterDropdown");
-                                        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-                                        // Ensure the current selected option remains highlighted when dropdown opens
-                                        document.querySelectorAll("#filterDropdown div").forEach(div => {
-                                            div.style.background = "white"; // Reset all to default
-                                            div.style.color = "black";
-                                        });
-
-                                        // Keep selected filter highlighted
-                                        const selectedDiv = document.getElementById(selectedFilter.replace(/\s+/g, ''));
-                                        selectedDiv.style.background = "#007bff"; // Blue highlight
-                                        selectedDiv.style.color = "white"
-                                    }
-                                    function applyFilter(option) {
-                                        selectedFilter = option;
-                                        document.getElementById("filterDropdown").style.display = "none";
-                                        currentIndex = 10; // Reset the index
-                                        searchUsers(); // Re-filter the users
-                                        // Remove highlight from all options
-                                        document.querySelectorAll("#filterDropdown div").forEach(div => {
-                                            div.style.background = "white"; // Default background
-                                            div.style.color = "black";
-                                        });
-
-
-                                        // Highlight the selected option
-                                        const selectedDiv = document.getElementById(option.replace(/\s+/g, ''));
-                                        selectedDiv.style.background = "#007bff"; // Blue highlight
-                                        selectedDiv.style.color = "white";
-                                    }
+                                   
+                                   
                                     $(document).on('click', '.block-user-btn', function () {
                                         let button = $(this);
                                         let userId = button.data('user-id');
@@ -1989,10 +2409,7 @@ function initializeDashboard() {
                                     });
 
 
-                                    $(document).on('click', '.view-user-list', function () {
-                                        let userId = $(this).data('user-id');
-
-                                    });
+                                 
 
                                     function viewMoreRows() {
                                         const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
@@ -2206,7 +2623,7 @@ try {
         }
     });
 
-    $(document).on('change', '.user_kyc_waiting_list-kyc-statusselect', function () {
+    $(document).on('change', '.user_kyc_waiting_list-kyc-statusselec', function () {
         try {
             const userId = $(this).data('user-id'); // Get the user ID from the data attribute
             const newStatus = $(this).val(); // Get the selected status
@@ -2251,7 +2668,6 @@ try {
     // Apply colors when the page loads
     function user_management_account_status_update_color() {
         $('.user_kyc_waiting_list-kyc-statusselect').each(function () {
-            alert(1)
             updateSelectColor($(this), $(this).val());
         });
     }
@@ -2509,6 +2925,27 @@ document.addEventListener('DOMContentLoaded', function () {
     fixedRevenueInput.addEventListener('input', lottery_events_updateTotalAmount);
     percentageRevenueSelect.addEventListener('input', lottery_events_updateTotalAmount);
     perTicketPriceInput.addEventListener('input', lottery_events_updateTotalTickets);
+   
+        $("#new_lottery_title").on("keyup", function () {
+            let new_lottery_title = $(this).val().trim();
+            if (new_lottery_title.length > 0) {
+                $.ajax({
+                    url: "/check_lottery_title_unique/",
+                    type: "GET",
+                    data: { title: new_lottery_title },
+                    success: function (response) {
+                        if (response.exists) {
+                            $("#lottery_events_add_title_validation").text("This title already exists!").css("color", "red");
+                        } else {
+                            $("#lottery_events_add_title_validation").text("");
+                        }
+                    },
+                });
+            } else {
+                $("#lottery_events_add_title_validation").text("");
+            }
+        });
+    
 });
 
 // Function to get CSRF token from cookies
@@ -3783,7 +4220,55 @@ function fetchCategories() {
 let currentPage = 1;
 let currentSearchTerm = '';
 let currentCategoryId = '';
-const lotteryPerPage = 3; // Set the number of lotteries per page
+let lottery_Cards = 3; // Set Lottery cards as default
+let lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
+//Dynamically change Lottery cards Per Page
+const lotteryCards=()=>{
+    // Define two media queries: one for max-width 830px and another for min-width 767px
+const mediaQueryMin = window.matchMedia('(min-width: 767px)');
+const mediaQueryMax = window.matchMedia('(max-width: 830px)');
+    if (mediaQueryMin.matches && mediaQueryMax.matches) {
+        lottery_Cards = 4; // Set the number of lotteries per page
+        lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
+    }
+    else{
+        lottery_Cards = 3;
+        lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
+    }
+    fetchLotteryEvents();
+}
+
+if( window.innerWidth>767 && window.innerWidth<830){ // On Load
+    lottery_Cards = 4; // Set the number of lotteries per page
+    lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
+}
+window.addEventListener("resize", lotteryCards);
+$(document).ready(function () {
+    // Use event delegation to handle dynamically added input fields
+    $(document).on("keyup", ".lottery_events_add_edit_title", function () {
+        let inputField = $(this);
+        let title = inputField.val().trim().toLowerCase();
+        let originalTitle = (inputField.data("original-value") || "").toString().toLowerCase();
+        let errorMessage = inputField.siblings(".lottery_edit_title_error");
+
+        if (title.length > 0) {
+            $.ajax({
+                url: "/check_lottery_title_unique/",
+                type: "GET",
+                data: { title: title },
+                success: function (response) {
+                    if (response.exists && title !== originalTitle) {
+                        errorMessage.text("This title already exists!").css("color", "red").show();
+                    } else {
+                        errorMessage.text("").hide();
+                    }
+                },
+            });
+        } else {
+            errorMessage.text("Title is required").css("color", "red").show();
+        }
+    });
+});
 
 function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     currentPage = page;
@@ -3839,7 +4324,7 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
            <h3>
                <span class="lottery_events_add_title">${event.title}</span>
                <input type="text" class="lottery_events_add_edit_title" value="${event.title}" data-original-value="${event.title}" required>
-               <div class="lottery_events_add_error_message lottery_edit_title_error">Title is required</div>
+               <div class="lottery_events_add_error_message lottery_edit_title_error"></div>
            </h3>
 
            <p>
@@ -4404,8 +4889,17 @@ function lottery_events_edit_validateFields(card) {
         isValid = false;
         card.querySelector('.lottery_edit_title_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-        card.querySelector('.lottery_edit_title_error').style.display = 'none';
+        var title_error_value = card.querySelector('.lottery_edit_title_error').textContent;
+        if (title_error_value.toLowerCase() === "this title already exists!" || title_error_value.trim() !== "") {
+            card.querySelector('.lottery_edit_title_error').style.display = 'block';
+            isValid = false;
+            card.querySelector('.lottery_edit_title_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else{
+            card.querySelector('.lottery_edit_title_error').style.display = 'none';
+        }
     }
+   
+   
 
     if (!description) {
         card.querySelector('.lottery_edit_description_error').style.display = 'block';
@@ -4820,13 +5314,35 @@ function submitAddLotteryEvent() {
     } else {
         clearValidationError('lottery_events_add_category_validation');
     }
-
-    // Validate Title
+    // Validate Title already exists!
+        if (title.length > 0) {
+            $.ajax({
+                url: "/check_lottery_title_unique/",
+                type: "GET",
+                data: { title : title },
+                success: function (response) {
+                    if (response.exists) {
+                        showValidationError('lottery_events_add_title_validation', 'This title already exists!.');
+                    } else {
+                        clearValidationError('lottery_events_add_title_validation');
+                        $("#lottery_events_add_title_validation").text("");
+                    }
+                },
+            });
+        } else {
+            showValidationError('lottery_events_add_title_validation', 'Title is required.');
+            
+        }
+        // Validate Title
     if (title === '') {
         showValidationError('lottery_events_add_title_validation', 'Title is required.');
     } else {
         clearValidationError('lottery_events_add_title_validation');
     }
+
+   
+
+    
 
     // Validate Description
     if (description === '') {
@@ -6565,6 +7081,7 @@ function fetchFavorites() {
 // Function to display the favorites (initially 4)
 function displayFavorites() {
     const container = document.getElementById('favorites_container');
+    const loadMoreBtn = document.getElementById('load_more_button');
     container.innerHTML = ''; // Clear existing content
 
 
@@ -6577,10 +7094,12 @@ function displayFavorites() {
 
 
     if (favoritesToShow.length === 0) {
-        container.innerHTML = '<p>No favorites added yet.</p>';
+        container.innerHTML = '<p style="text-align: center;font-weight:bold; font-size: 18px;">No favorites added yet</p>';
+        loadMoreBtn.style.display = 'none'; // Hide Load More button when no favorites exist
+        container.style.minHeight = "70vh";
         return;
     }
-
+    container.style.minHeight = "auto"; // Reset height if there are favorites
 
     favoritesToShow.forEach(event => {
         const favoriteElement = document.createElement('div');
@@ -6621,7 +7140,7 @@ function displayFavorites() {
 
     
     // Modified load more button logic
-    const loadMoreBtn = document.getElementById('load_more_button');
+
     if (!isMobile && allFavorites.length > displayedCount) {
         loadMoreBtn.style.display = 'block';
     } else {
@@ -6675,9 +7194,7 @@ function toggleChatbot() {
 function closeChatbot() {
     document.getElementById("chatbotPopup").style.display = "none";
 }
-function dbSubscribe() {
-    alert("You have subscribed successfully!");
-}
+
 function scrollToHowToPlay() {
     document.getElementById("how-to-play").scrollIntoView({ behavior: "smooth" });
 }
@@ -6846,15 +7363,18 @@ $(document).ready(function () {
                                     <tr>
                                         <th>Quantity</th>
                                         <th>Lottery</th>
+                                        <th>Ticket Numbers</th>
                                     </tr>
                                 </thead>
                                 <tbody>`;
 
                     $.each(group.payments.slice(0, 2), function (index, payment) {
+                        let ticketNumbers = payment.ticket_numbers.join(", ");
                         orderHTML += `
                             <tr>
                                 <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
                                 <td>${payment.lottery_event_title}</td>
+                                <td>${ticketNumbers}</td>
                             </tr>`;
                     });
 
@@ -6882,16 +7402,19 @@ $(document).ready(function () {
                                             <th>Quantity</th>
                                             <th>Lottery</th>
                                             <th>Amount</th>
+                                            <th>Ticket Numbers</th>
                                         </tr>
                                     </thead>
                                     <tbody>`;
 
                     $.each(group.payments, function (index, payment) {
+                        let ticketNumbers = payment.ticket_numbers.join(", ");
                         orderHTML += `
                                         <tr>
                                             <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
                                             <td>${payment.lottery_event_title}</td>
                                             <td>£${parseFloat(payment.amount).toFixed(2)}</td>
+                                            <td>${ticketNumbers}</td>
                                         </tr>`;
                     });
                     if (group.receipt_url) {
@@ -7003,3 +7526,291 @@ $(document).ready(function () {
     });
 });
 
+
+
+$(document).ready(function () {
+    let currentEventId = null;
+    let currentMethod = null;
+    let currentTicketStart = null;
+    let currentTicketEnd = null;
+    let isAdminVerified = false;
+    let isErrorModal = false;
+    let currentWinnerDetails = null; // Store winner details
+
+    function showModaldrawwinner(message, showPublish = true) {
+        $("#draw-winner-modal-message").html(message);
+        
+        if (showPublish) {
+            $("#publish-winner-container").show();
+            isAdminVerified = false;
+            $("#otp-verification-container").hide();
+            $("#draw-winner-close-modal").show();
+            $("#publish-winner").prop("checked", false);
+            isErrorModal = false;
+            $("#resend-otp").prop("disabled", true);
+        } else {
+            $("#publish-winner-container").hide();
+            $("#otp-verification-container").hide();
+            isErrorModal = true;
+        }
+        
+        $("#draw-winner-lottery-modal").fadeIn();
+        $("#draw-winner-modal-overlay").fadeIn();
+    }
+
+    function closeModaldrawwinner() {
+        $("#draw-winner-lottery-modal").fadeOut();
+        $("#draw-winner-modal-overlay").fadeOut();
+    }
+
+    $("#draw-winner-close-modal, #draw-winner-modal-overlay").click(function () {
+        closeModaldrawwinner();
+    });
+
+    $(document).mouseup(function (e) {
+        let modal = $("#draw-winner-lottery-modal");
+        if (!modal.is(e.target) && modal.has(e.target).length === 0) {
+            closeModaldrawwinner();
+        }
+    });
+
+    function showSuccessModal(message) {
+        $("#success-message").html(message);
+        $("#success-modal").fadeIn();
+        $("#success-modal-overlay").fadeIn();
+    }
+    
+    function closeSuccessModal() {
+        $("#success-modal").fadeOut();
+        $("#success-modal-overlay").fadeOut();
+    }
+    
+    $("#success-modal-close, #success-modal-overlay").click(function() {
+        closeSuccessModal();
+    });
+    
+    $(document).mouseup(function(e) {
+        let modal = $("#success-modal");
+        if (!modal.is(e.target) && modal.has(e.target).length === 0) {
+            closeSuccessModal();
+        }
+    });
+
+    $("#publish-winner").change(function() {
+        if ($(this).is(":checked")) {
+            $("#draw-winner-close-modal").hide();
+            $("#otp-verification-container").show();
+            $("#otp-input").val("");
+            $("#otp-status").text("");
+            
+            $.ajax({
+                url: "/api/admin/send-otp/",
+                type: "POST",
+                headers: {
+                    "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                },
+                success: function(response) {
+                    $("#otp-status").text("OTP sent to your email").css("color", "green");
+                },
+                error: function(xhr) {
+                    $("#otp-status").text("Failed to send OTP").css("color", "red");
+                }
+            });
+        } else {
+            $("#otp-verification-container").hide();
+            $("#draw-winner-close-modal").show();
+            isAdminVerified = false;
+        }
+    });
+
+    $("#otp-input").blur(function() {
+        const otp = $(this).val();
+        if (otp.length === 6) {
+            $.ajax({
+                url: "/api/admin/verify-otp/",
+                type: "POST",
+                headers: {
+                    "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                },
+                data: { otp: otp },
+                success: function(response) {
+                    if (response.verified) {
+                        $("#otp-status").text("OTP verified successfully").css("color", "green");
+                        isAdminVerified = true;
+                        $("#draw-winner-close-modal").show();
+                        $("#resend-otp").prop("disabled", true);
+                    } else {
+                        $("#otp-status").text("Invalid OTP").css("color", "red");
+                        isAdminVerified = false;
+                        $("#resend-otp").prop("disabled", false);
+                    }
+                },
+                error: function(xhr) {
+                    $("#otp-status").text("Error verifying OTP").css("color", "red");
+                    isAdminVerified = false;
+                    $("#resend-otp").prop("disabled", false);
+                }
+            });
+        }
+    });
+
+    $("#resend-otp").click(function() {
+        $.ajax({
+            url: "/api/admin/send-otp/",
+            type: "POST",
+            headers: {
+                "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+            },
+            success: function(response) {
+                $("#otp-status").text("New OTP sent to your email").css("color", "green");
+                $("#otp-input").val("");
+            },
+            error: function(xhr) {
+                $("#otp-status").text("Failed to resend OTP").css("color", "red");
+                $("#resend-otp").prop("disabled", false);
+            }
+        });
+    });
+
+    if ($("#draw-lottery-container").length > 0) {
+        $.ajax({
+            url: "/api/admin/lottery-draw/",
+            type: "GET",
+            success: function (response) {
+                let container = $("#draw-lottery-container");
+                container.empty();
+
+                response.events.forEach(event => {
+                    let drawDate = new Date(event.draw_date);
+                    let currentDate = new Date();
+                    let statusText = drawDate < currentDate ? "Draw Expired" : "Upcoming Draw";
+                    let statusColor = drawDate < currentDate ? "red" : "green";
+
+                    let card = `
+                        <div class="lottery-card">
+                            <p style="color: ${statusColor}; font-weight: bold;">${statusText}</p>
+                            <div class="admin_lottery_draw_date">${lottery_events_formatDrawDate(event.draw_date)}</div>
+                            <img src="${event.image}" alt="${event.title}">
+                            <h3>${event.title}</h3>
+                            <p>
+                            Active:
+                            <i class="${event.is_active ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger'}"></i>
+                            </p>
+                            <p>SOLD: ${event.sold_percentage}%</p>
+                            <label>
+                                <input type="radio" name="draw-method-${event.id}" value="method1">
+                                Random purchased tickets 
+                            </label><br>
+                            <label>
+                                <input type="radio" name="draw-method-${event.id}" value="method2">
+                                Random highest purchased user  
+                            </label><br>
+                            <label>
+                                <input type="radio" name="draw-method-${event.id}" value="method3">
+                                Random by Range
+                            </label><br>
+                            <input type="text" id="ticket-start-${event.id}" class="ticket-range" maxlength="6" placeholder="6 digit number" disabled>
+                            <input type="text" id="ticket-end-${event.id}" class="ticket-range" maxlength="6" placeholder="6 digit number" disabled>
+                            <button class="draw-btn" data-id="${event.id}">Draw Winner</button>
+                        </div>
+                    `;
+                    container.append(card);
+                });
+
+                $("input[type=radio]").change(function () {
+                    let eventId = $(this).attr("name").split("-")[2];
+                    let isMethod3 = $(this).val() === "method3";
+                    $(`#ticket-start-${eventId}, #ticket-end-${eventId}`).prop("disabled", !isMethod3);
+                });
+
+                $(".draw-btn").click(function () {
+                    currentEventId = $(this).data("id");
+                    currentMethod = $(`input[name='draw-method-${currentEventId}']:checked`).val();
+                    currentTicketStart = $(`#ticket-start-${currentEventId}`).val();
+                    currentTicketEnd = $(`#ticket-end-${currentEventId}`).val();
+
+                    if (!currentMethod) {
+                        showModaldrawwinner("Please select a method.", false);
+                        return;
+                    }
+
+                    if (currentMethod === "method3") {
+                        let ticketRegex = /^\d{6}$/;
+                        if (!ticketRegex.test(currentTicketStart) || !ticketRegex.test(currentTicketEnd)) {
+                            showModaldrawwinner("Please enter a valid 6-digit ticket number in both fields.", false);
+                            return;
+                        }
+                    }
+
+                    $.ajax({
+                        url: "/api/admin/lottery-draw/",
+                        type: "POST",
+                        contentType: "application/json",
+                        headers: {
+                            "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                        },
+                        data: JSON.stringify({ 
+                            event_id: currentEventId, 
+                            method: currentMethod,
+                            ticket_start: currentTicketStart, 
+                            ticket_end: currentTicketEnd,
+                            publish: false // Don't publish yet
+                        }),
+                        success: function (response) {
+                            currentWinnerDetails = response; // Store winner details
+                            let message = "";
+                            
+                            if (currentMethod === "method1" || currentMethod === "method2") {
+                                message = `Winner Selected: ${response.winner.ticket_number} (User: ${response.winner.user}) - ${response.winner.selection_method}`;
+                            } else if (currentMethod === "method3") {
+                                message = `Winner Selected: ${response.ticket_number} (User: ${response.user}) - ${response.selection_method}`;
+                            }
+                            
+                            showModaldrawwinner(message, true);
+                        },
+                        error: function (xhr) {
+                            showModaldrawwinner(xhr.responseJSON.error, false);
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    // Updated OK button handler
+    $("#draw-winner-close-modal").off("click").on("click", function() {
+        if (isErrorModal) {
+            closeModaldrawwinner();
+            return;
+        }
+        
+        const publish = $("#publish-winner").is(":checked") && isAdminVerified;
+        
+        if (!publish) {
+            closeModaldrawwinner();
+            return;
+        }
+
+        // Send the stored winner details to be published
+        $.ajax({
+            url: "/api/admin/publish-winner/",
+            type: "POST",
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+            },
+            data: JSON.stringify({
+                winner_data: currentWinnerDetails,
+                event_id: currentEventId
+            }),
+            success: function(response) {
+                closeModaldrawwinner();
+                showSuccessModal("Winner published successfully!");
+                isAdminVerified = false;
+            },
+            error: function(xhr) {
+                showModaldrawwinner(xhr.responseJSON.error, false);
+            }
+        });
+    });
+});

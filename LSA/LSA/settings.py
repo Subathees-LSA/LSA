@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'adminpanel',
     'social_django',
     'PaymentServices',
+    'django_user_agents',
 ]
 
 
@@ -54,7 +55,7 @@ AUTHENTICATION_BACKENDS = [
 
 
 # Login and redirect URLs
-LOGIN_REDIRECT_URL = '/user_welcome_page/'  
+LOGIN_REDIRECT_URL = '/lottery-events/'  
 LOGOUT_REDIRECT_URL = '/login/' 
 
 
@@ -82,7 +83,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
-
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'LSA.urls'
@@ -187,3 +188,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
+
+
+
+STRIPE_API_KEY = 'sk_test_51QN8IDCsQXzEoErVOjIUUmlViooHkadijA0u3yuTFGaBqCUlLO011H5U5J1qoGIJP0ZUd9T4ZRgfRAcwnMkBBuAF003JkBpatN'
+WEBHOOK_ENDPOINT_SECRET = 'whsec_9a03cf34890457b76a8092b1dc64507355427e9c8a66b1739f3693013bb27c97'
+DOMAIN = 'http://localhost:8000'

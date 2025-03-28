@@ -23,7 +23,7 @@ class LotteryCategory(models.Model):
         return self.name  
                             
 class LotteryEvent(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255,unique=True)
     slug = models.SlugField(unique=True, blank=True)  # Slug field
     category = models.ForeignKey(LotteryCategory, related_name='lottery_events', on_delete=models.CASCADE, null=True, blank=True,default=1)
     description = models.TextField()
@@ -309,3 +309,64 @@ class Location(models.Model):
     
     def __str__(self):
         return self.name
+
+# models.py
+class AdminOTP(models.Model):
+    admin = models.ForeignKey(adminProfile, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"OTP for {self.admin.user.username} - Verified: {self.is_verified}"
+
+from django.db import models
+from django.contrib.auth.models import User
+from .models import LotteryEvent
+from PaymentServices.models import PaymentLottery
+
+
+import random
+class Winner(models.Model):
+    SELECTION_METHODS = [
+        ('method1', 'Random purchsed  tickets'),
+        ('method2', 'Highest purchases ticket '),
+        ('method3', 'range choosen'),
+    ]
+
+    #user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    lottery_event = models.ForeignKey(LotteryEvent, on_delete=models.CASCADE)
+    # payment = models.ForeignKey(PaymentLottery, on_delete=models.CASCADE)
+    payment = models.ForeignKey(PaymentLottery, on_delete=models.SET_NULL, null=True, blank=True)
+    ticket_number = models.CharField(max_length=6, unique=True)
+    selection_method = models.CharField(max_length=10, choices=SELECTION_METHODS,default='method1')
+
+
+    PRIZE_STATUS_CHOICES = [
+        ('initiated', 'Initiated'),
+        ('on_the_way', 'On the Way'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    prize_no = models.PositiveIntegerField(unique=True, blank=True, null=True)
+    prize_status = models.CharField(max_length=20, choices=PRIZE_STATUS_CHOICES, default='initiated')
+    prize_comments = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def generate_unique_prize_no(self):
+        while True:
+            random_number = random.randint(100000, 999999)  # Generate a 6-digit number
+            if not Winner.objects.filter(prize_no=random_number).exists():
+                return random_number
+
+    def save(self, *args, **kwargs):
+        if not self.prize_no:
+            self.prize_no = self.generate_unique_prize_no()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        user_display = self.user.username if self.user else "No User"
+        return f"Winner: {user_display} (Ticket {self.ticket_number}) - {self.lottery_event.title}"    
