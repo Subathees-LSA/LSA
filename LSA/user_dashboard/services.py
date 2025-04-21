@@ -29,7 +29,6 @@ from django.contrib.auth import logout
 @login_required(login_url='user_login')
 def login_security(request):
     device_history = UserDeviceHistory.objects.filter(user=request.user, logout_time__isnull=True).order_by('-login_time')
-
     return render(request, "login_security.html", {"device_history": device_history})
 
 

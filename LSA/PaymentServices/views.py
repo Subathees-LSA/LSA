@@ -153,8 +153,8 @@ def stripe_webhook(request):
                 event.sold_tickets += quantity
                 
                 # Check if all tickets are sold
-                # if event.sold_tickets >= event.total_tickets:
-                #     event.is_active = False
+                if event.sold_tickets >= event.total_tickets:
+                    event.is_active = False
                 event.save()
 
                 # Generate unique tickets safely inside transaction

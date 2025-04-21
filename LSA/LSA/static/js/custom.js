@@ -162,9 +162,21 @@ function admin_chat_view() {
                 // Attach delete functionality
                 emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
 
-                // Open chat on click (excluding the delete icon and checkbox)
-                emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
-                emailItem.querySelector(".last-message").onclick = () => fetchMessagesByEmail(email);
+                const activateEmailItem = () => {
+                    // Remove active class from all email items
+                    document.querySelectorAll(".email-item").forEach((item) => {
+                        item.classList.remove("active");
+                    });
+        
+                    // Add active class to the current item
+                    emailItem.classList.add("active");
+        
+                    // Fetch and show messages
+                    fetchMessagesByEmail(email);
+                };
+        
+                emailItem.querySelector(".email-text").onclick = activateEmailItem;
+                emailItem.querySelector(".last-message").onclick = activateEmailItem;
 
 
 
@@ -460,6 +472,22 @@ function admin_chat_view() {
                 function specfic_user_chats_autoScroll() {
                     specfic_user_chats.scrollTop = specfic_user_chats.scrollHeight;
                 }
+                function showSelectedFileOnCustomerSupportPage(){
+                    const fileInput = document.getElementById('admin_contact_reply_file');
+                    const fileNameDisplay = document.getElementById('file-name');
+                    const sendReplyBtn = document.getElementById('send-reply-btn');
+                
+                    fileInput.addEventListener('change', function () {
+                    if (this.files.length > 0) {
+                        fileNameDisplay.textContent = `Selected: ${this.files[0].name}`;
+                    }
+                    });
+                
+                    sendReplyBtn.addEventListener('click', function () {
+                    fileNameDisplay.textContent = ''; // Remove the selected file name
+                    });
+                }
+                showSelectedFileOnCustomerSupportPage();
             })
             .catch((error) => console.error("Error fetching messages by email:", error));
     };
@@ -777,15 +805,26 @@ function admin_chat_view() {
 function filterEmails() {
     const searchInput = document.getElementById("searchEmail").value.toLowerCase();
     const emailItems = document.querySelectorAll(".email-item");
+    const noUsersMsg = document.getElementById("noUsersMsg");
+
+    let visibleCount = 0;
 
     emailItems.forEach((item) => {
         const emailText = item.querySelector(".email-text").innerText.toLowerCase();
         if (emailText.includes(searchInput)) {
-            item.style.display = "block"; // Show matching items
+            item.style.display = "block";
+            visibleCount++;
         } else {
-            item.style.display = "none"; // Hide non-matching items
+            item.style.display = "none";
         }
     });
+
+    // Show or hide the "No user found" message
+    if (visibleCount === 0) {
+        noUsersMsg.style.display = "block";
+    } else {
+        noUsersMsg.style.display = "none";
+    }
 }
 
 
@@ -1309,7 +1348,7 @@ function renderPrizeManagementHTML() {
                     <p class="prize_management_card_value" id="prize_management_total_winners">0</p>
                 </div>
                 <div class="prize_management_icon_wrapper">
-                    <img class="prize_management_icon" src="" alt="Ticket Icon">
+                    <img class="prize_management_icon" src="/media/Price_Management/Circle Icon Bagde.png" alt="Ticket Icon">
                 </div>
             </div>
             
@@ -1319,7 +1358,7 @@ function renderPrizeManagementHTML() {
                     <p class="prize_management_card_value" id="prize_management_delivered_winners">0</p>
                 </div>
                 <div class="prize_management_icon_wrapper">
-                    <img class="prize_management_icon" src="" alt="Success Icon">
+                    <img class="prize_management_icon" src="/media/Price_Management/Circle Icon Bagde (1).png" alt="Success Icon">
                 </div>
             </div>
             
@@ -1329,11 +1368,11 @@ function renderPrizeManagementHTML() {
                     <p class="prize_management_card_value" id="prize_management_cancelled_winners">0</p>
                 </div>
                 <div class="prize_management_icon_wrapper">
-                    <img class="prize_management_icon" src="" alt="Cancel Icon">
+                    <img class="prize_management_icon" src="/media/Price_Management/Circle Icon Bagde (2).png" alt="Cancel Icon">
                 </div>
             </div>
         </div>
-
+<div class="prize_management_table_wrapper">
         <table class="prize_management_table">
             <thead>
                 <tr>
@@ -1347,7 +1386,7 @@ function renderPrizeManagementHTML() {
             </thead>
             <tbody></tbody>
         </table>
-
+</div>
         <div id="prize_management_no_winners" class="prize_management_hidden">No winners.</div>
 
         <div id="prize_management_pagination" class="prize_management_pagination">
@@ -1524,10 +1563,22 @@ function prize_management_closeImagePopup() {
     document.getElementById("prize_management_image_popup").classList.add("prize_management_hidden");
 }
 
+function updateSummaryCounts() {
+    let delivered = 0, cancelled = 0;
+    document.querySelectorAll(".prize_management_status").forEach(select => {
+        if (select.value === "delivered") delivered++;
+        if (select.value === "cancelled") cancelled++;
+    });
+
+    document.getElementById("prize_management_delivered_winners").innerText = delivered;
+    document.getElementById("prize_management_cancelled_winners").innerText = cancelled;
+}
+
 function updateWinnerStatus(event) {
     let winnerId = event.target.dataset.id;
-    let prizeStatus = document.querySelector(`.prize_management_status[data-id='${winnerId}']`).value;
-    let prizeComments = document.querySelector(`.prize_management_comments[data-id='${winnerId}']`).value;
+    const winner_row = event.target.closest("tr");
+    let prizeStatus = winner_row.querySelector(".prize_management_status").value;
+    let prizeComments = winner_row.querySelector(".prize_management_comments").value;
 
     fetch(`/api_admin_dashboard_prize_management/${winnerId}/update_winner_status/`, {
         method: "PATCH",
@@ -1535,12 +1586,20 @@ function updateWinnerStatus(event) {
             "Content-Type": "application/json",
             "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
         },
-        body: JSON.stringify({ prize_status: prizeStatus, prize_comments: prizeComments }),
-    }).then(response => response.json())
-      .then(data => {
-          document.querySelector(`.prize_management_comments[data-id='${winnerId}']`).value = data.prize_comments;
-      });
+        body: JSON.stringify({
+            prize_status: prizeStatus,
+            prize_comments: prizeComments,
+        }),
+    })
+    .then(response => {
+        if (response.ok) {
+            updateSummaryCounts(); //  Update counts without full refresh
+        } else {
+            alert("Failed to update status.");
+        }
+    });
 }
+
 // prize_management_page js code ending
 
 function showSpecificDiv(id) {
@@ -1559,6 +1618,9 @@ function showSpecificDiv(id) {
 
         // Show only the specific div
         specificDiv.style.display = "block";
+        if (id === "draw-lottery-container") {
+            specificDiv.style.display = "flex";
+        }
         specificDiv.style.opacity = "1";
         specificDiv.style.position = "relative";
 
@@ -1575,6 +1637,11 @@ function showSpecificDiv(id) {
        
     } else if (id === "custom_admin_dashboard_transactions_management") {
         custom_admin_dashboard_transactions_management_function();  
+    } else if (id === "draw-lottery-container") {
+        custom_admin_dashboard_lottery_draw_winners_management_function();  
+    }  else if (id === "custom_admin_dashboard_winners_wall_management_winners_and_testimonials") {
+      
+        custom_admin_dashboard_winners_wall_testimonial_function();
     }
    
     const nav_bar_user_management_button = document.getElementById("user_management_button_id");
@@ -2240,8 +2307,8 @@ function initializeDashboard() {
                                                     </select>
                                                 </td>
                                                 <td class="view_specfic_user_details" data-user-id="${row.user?.id}">
-                                                ${row.profile_image_url
-                                                ? `<img src="${row.profile_image_url}" alt="Profile Image" class="custom_admin_dashboard_user_management_profile_image">`
+                                                ${row.profile_photo_url
+                                                ? `<img src="${row.profile_photo_url}" alt="Profile Image" class="custom_admin_dashboard_user_management_profile_image">`
                                                 : ''
                                             }
 	                                            ${row.user?.username || 'N/A'}
@@ -2260,6 +2327,7 @@ function initializeDashboard() {
                                     window.goToUserManagement = function() {
                                         fetchAndRenderUsers(true);
                                         showSpecificDiv("custom_admin_dashboard_user_list_table");
+                                        hidetoggleSidebar();
                                     };
                                     
                                     function displayUserDetails(user) {
@@ -2278,7 +2346,7 @@ function initializeDashboard() {
                                                         <option value="rejected" ${user.kyc_status === 'rejected' ? 'selected' : ''}>Rejected</option>
                                                         <option value="pending" ${user.kyc_status === 'pending' ? 'selected' : ''}>Pending</option>
                                                     </select><p>
-                                                    <img src="${user.profile_image_url || ''}" class="users_management_user_details_page_user_profile_image" alt="User Image">
+                                                    <img src="${user.profile_photo_url || ''}" class="users_management_user_details_page_user_profile_image" alt="User Image">
                                                     <h2>${user.user?.username || 'N/A'} </h2>
                                                     <p>${user.user?.email || 'N/A'}</p>
                                                     <p>${user.ip_address || 'N/A'}</p>
@@ -2362,6 +2430,7 @@ function initializeDashboard() {
                                                 user_details_custom_admin_dashboard_transactions_management.style.opacity = "1";
                                                 user_details_custom_admin_dashboard_transactions_management.style.position = "relative";
                                             }
+                                            hidetoggleSidebar();
 
                                         } else {
                                             console.error("User not found");
@@ -2972,9 +3041,25 @@ $.ajaxSetup({
 });
 $(document).ready(function () {
     // Email validation handler
-    $('#login-email').on('input', function () {
-        validateEmail($(this).val(), 'login-email-error');
+    $(document).ready(function () {
+        // Email validation handler
+        $('#login-email').on('focusout', function () {
+            const email = $(this).val().trim();
+            const errorElement = $('#login-email-error');
+    
+            // if (email === '') {
+            //     errorElement.text('').removeClass('login-error login-valid'); // Clear error message
+            //     return;
+            // }
+    
+            if (!validateEmail(email)) {
+                errorElement.text('Invalid email address.').addClass('login-error').removeClass('login-valid');
+            } else {
+                errorElement.text('').removeClass('login-error').addClass('login-valid'); // Optionally add a valid class
+            }
+        });
     });
+    
 
     // Password validation handler
     $('#login-password').on('input', function () {
@@ -3200,11 +3285,16 @@ togglePasswordVisibility('#signup-toggle-password', '#signup-password');
 
 
 // Username validation and availability check
-$('#signup-username').on('input', function () {
+$('#signup-username').on('focusout', function () {
     const username = $(this).val().trim();
     const errorElement = $('#signup-username-error');
     const suggestionElement = $('#signup-username-suggestion');
-
+ // Clear messages if input is empty
+//  if (username === '') {
+//     errorElement.text('').removeClass('signup-error signup-valid');
+//     suggestionElement.hide();
+//     return;
+// }
 
     if (!validateUsername(username)) {
         errorElement.text("Invalid username. Only letters, digits, @/./+/-/_ are allowed (max 20 characters).")
@@ -3245,7 +3335,7 @@ $('#signup-username').on('input', function () {
 
 let isEmailValid = false; // Track email validity
 // Email validation and availability check
-$('#signup-email').on('input', function () {
+$('#signup-email').on('focusout', function () {
     const email = $(this).val().trim();
     const errorElement = $('#signup-email-error');
 
@@ -3312,7 +3402,7 @@ $(document).ready(function () {
         // Validate conditions
         validateRequirement(password, /[A-Z]/, "#password-uppercase");  // Uppercase letter
         validateRequirement(password, /[a-z]/, "#password-lowercase");  // Lowercase letter
-        validateRequirement(password, /[0-9]/, "#password-number");     // Number
+        validateRequirement((password.match(/\d/g) || []).length >= 4, true, "#password-number");     // Number
         validateRequirement(password, /[\W_]/, "#password-special");    // Special character
         validateRequirement(password.length >= 8, true, "#password-length"); // Length
     });
@@ -3762,13 +3852,27 @@ $(document).ready(function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("password-reset-form");
+
     if (form) {
         form.addEventListener("submit", function (event) {
             event.preventDefault();
 
-            const email = document.getElementById("reset-email").value;
+            const email = document.getElementById("reset-email").value.trim();
+            const messageDiv = document.getElementById("reset-feedback");
             const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
+            
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+            if (!emailPattern.test(email)) {
+                messageDiv.textContent = 'Invalid email address';
+                messageDiv.style.color = "red";
+                return; // Stop form submission
+            }
+
+            // Clear any previous error
+            messageDiv.textContent = "";
+
+            // Proceed with fetch if validation passes
             fetch("/api/password-reset/", {
                 method: "POST",
                 headers: {
@@ -3779,7 +3883,6 @@ document.addEventListener("DOMContentLoaded", function () {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    const messageDiv = document.getElementById("reset-feedback");
                     if (data.message) {
                         // Hide form and show success message
                         document.getElementById("password-reset-form-container").style.display = "none";
@@ -3787,7 +3890,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         emailSentContainer.style.display = "block";
                         document.getElementById("reset-user-email").textContent = email;
                     } else if (data.email) {
-                        messageDiv.textContent = data.email[0]; // Display validation error
+                        messageDiv.textContent = data.email[0]; // Display backend validation error
                         messageDiv.style.color = "red";
                     }
                 })
@@ -3798,6 +3901,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
 
 $(document).ready(function () {
     togglePasswordVisibility('#toggle-password1', '#password1');
@@ -3887,7 +3991,7 @@ function validatePassword(password, errorElementId) {
     const errorElement = $('#' + errorElementId);
 
     if (password.length < 8) {
-        errorElement.text('Your password must contain at least 8 characters.');
+        errorElement.text('');
         return false;
     } else if (spacePattern.test(password)) {
         errorElement.text('Your password must not contain spaces.');
@@ -3903,7 +4007,7 @@ function validatePassword(password, errorElementId) {
         errorElement.text('Your password must contain at least one special character.');
         return false;
     } else if (digitCount < 4) {
-        errorElement.text('Your password must contain at least four numbers.');
+        errorElement.text('');
         return false;
     }
     errorElement.text(' ');
@@ -3921,11 +4025,17 @@ function validateUsername(username, errorElementId) {
 }
 // Email validation function
 function validateEmail(email, errorElementId) {
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     const errorElement = $('#' + errorElementId);
 
+    if (!email || email.trim() === '') {
+        errorElement.text('Email address is required.');
+        return false;
+    }
+    
+
     if (!emailPattern.test(email)) {
-        errorElement.text('Please enter a valid email address.');
+        errorElement.text('Please enter a valid email address');
         return false;
     }
     errorElement.text('');
@@ -3948,7 +4058,7 @@ function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
         passwordField.attr('type', isPassword ? 'text' : 'password');
 
         // Toggle the eye icon between `eye.svg` and `eye-slash.svg`
-        const newIconSrc = isPassword ? "/media/images/eye-slash.png" : "/media/images/eye.png";
+        const newIconSrc = isPassword ? "/media/images/eye.png" : "/media/images/eye-slash.png";
         icon.attr("src", newIconSrc);
     
     
@@ -3957,6 +4067,47 @@ function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
 
 
 // admin_signup.html
+$(document).ready(function () {
+    // Password validation message logic
+    var adminPasswordInput = $("#admin_signup_password_id");
+    var adminPasswordMessage = $("#admin_password_message");
+
+    // Initially hide the password validation box
+    adminPasswordMessage.hide();
+
+    // Show validation message box when clicking inside the password field
+    adminPasswordInput.on("focus", function () {
+        adminPasswordMessage.slideDown(200);
+    });
+
+    // Hide message box when clicking outside of the password input and message box
+    $(document).on("click", function (event) {
+        if (!$(event.target).closest("#admin_signup_password_id, #admin_password_message").length) {
+            adminPasswordMessage.slideUp(200);
+        }
+    });
+
+    // Password validation logic
+    adminPasswordInput.on("input", function () {
+        var password = adminPasswordInput.val();
+
+        // Validate each requirement dynamically
+        adminValidateRequirement(password, /[A-Z]/, "#admin_password_uppercase");  // Uppercase letter
+        adminValidateRequirement(password, /[a-z]/, "#admin_password_lowercase");  // Lowercase letter
+        adminValidateRequirement((password.match(/\d/g) || []).length >= 4, true, "#admin_password_number");    // Number
+        adminValidateRequirement(password, /[\W_]/, "#admin_password_special");    // Special character
+        adminValidateRequirement(password.length >= 8, true, "#admin_password_length"); // Minimum length
+    });
+
+    // Function to validate and update UI for password requirements
+    function adminValidateRequirement(password, regex, elementId) {
+        if (password && (regex instanceof RegExp ? regex.test(password) : password)) {
+            $(elementId).removeClass("invalid").addClass("valid").html("✔ " + $(elementId).text().slice(2));
+        } else {
+            $(elementId).removeClass("valid").addClass("invalid").html("❌ " + $(elementId).text().slice(2));
+        }
+    }
+});
 $(document).ready(function () {
     function getCookie(name) {
         let cookieValue = null;
@@ -3998,7 +4149,7 @@ $(document).ready(function () {
         });
     });
 
-    $('#admin_signup_email_id').on('blur', function () {
+    $('#admin_signup_email_id').on('input', function () {
         const admin_email = $(this).val();
         if (!validateEmail(admin_email)) return;
 
@@ -4023,7 +4174,7 @@ $(document).ready(function () {
         validateUsername($(this).val(), 'admin_signup_username_error');
     });
 
-    $('#admin_signup_email_id').on('input', function () {
+    $('#admin_signup_email_id').on('focusout', function () {
         validateEmail($(this).val(), 'admin_signup_email_error');
     });
 
@@ -4103,11 +4254,13 @@ $(document).ready(function () {
 
 
     $(document).ready(function () {
-        $('#custom_admin_login_email_id').on('input', function () {
+        $('#custom_admin_login_email_id').on('focusout', function () {
             validateEmail($(this).val(), 'custom_admin_login_email_error');
+            $('#custom_admin_login_errorMessage').text('');
         });
         $('#custom_admin_login_password_id').on('input', function () {
             validatePassword($(this).val(), 'custom_admin_login_password_error');
+            $('#custom_admin_login_errorMessage').text('');
         });
 
         // Form submission with AJAX
@@ -4289,6 +4442,10 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
         .then(data => {
             const container = document.getElementById('lottery-events-container');
             container.innerHTML = ''; // Clear existing events
+            if (!data || data.length === 0) {
+                container.textContent = 'Lottery not found '; 
+            }
+            
 
             const totalItems = data.length;
             const totalPages = Math.ceil(totalItems / lotteryPerPage);
@@ -6226,6 +6383,8 @@ function addToCart(event, redirectToCart = false) {
         })
         .then(data => {
             if (data.success) {
+                // Update cart count in header
+                updateCartCount();
                 if (redirectToCart) {
                     // Redirect to cart page after adding to cart
                     window.location.href = cartUrl;
@@ -6334,7 +6493,7 @@ function displayCartItems(cart) {
     let total = 0;
     
     if (Object.keys(cart).length === 0) {
-        container.innerHTML = '<p id="empty-cart-page">Your cart is empty.</p>';
+        container.innerHTML = '<p id="empty-cart-page">Your cart is empty</p>';
         totalElement.textContent = '0.00';
         subtotalElement.textContent = '0.00';
         return;
@@ -7094,7 +7253,7 @@ function displayFavorites() {
 
 
     if (favoritesToShow.length === 0) {
-        container.innerHTML = '<p style="text-align: center;font-weight:bold; font-size: 18px;">No favorites added yet</p>';
+        container.innerHTML = '<p style="text-align: center;font-weight:bold; font-size: 44px;">No favorites added yet</p>';
         loadMoreBtn.style.display = 'none'; // Hide Load More button when no favorites exist
         container.style.minHeight = "70vh";
         return;
@@ -7369,7 +7528,12 @@ $(document).ready(function () {
                                 <tbody>`;
 
                     $.each(group.payments.slice(0, 2), function (index, payment) {
-                        let ticketNumbers = payment.ticket_numbers.join(", ");
+                        // let ticketNumbers = payment.ticket_numbers.join(", ");
+
+                        let ticketNumbers = payment.ticket_numbers.slice(0, 1).join(", ");
+if (payment.ticket_numbers.length > 1) {
+         ticketNumbers += ` , etc...`; // Indicate there are more numbers
+}
                         orderHTML += `
                             <tr>
                                 <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
@@ -7527,8 +7691,7 @@ $(document).ready(function () {
 });
 
 
-
-$(document).ready(function () {
+function custom_admin_dashboard_lottery_draw_winners_management_function () {
     let currentEventId = null;
     let currentMethod = null;
     let currentTicketStart = null;
@@ -7543,14 +7706,14 @@ $(document).ready(function () {
         if (showPublish) {
             $("#publish-winner-container").show();
             isAdminVerified = false;
-            $("#otp-verification-container").hide();
+            $("#draws-otp-verification-container").hide();
             $("#draw-winner-close-modal").show();
             $("#publish-winner").prop("checked", false);
             isErrorModal = false;
-            $("#resend-otp").prop("disabled", true);
+            $("#draws-resend-otp").prop("disabled", true);
         } else {
             $("#publish-winner-container").hide();
-            $("#otp-verification-container").hide();
+            $("#draws-otp-verification-container").hide();
             isErrorModal = true;
         }
         
@@ -7575,22 +7738,22 @@ $(document).ready(function () {
     });
 
     function showSuccessModal(message) {
-        $("#success-message").html(message);
-        $("#success-modal").fadeIn();
-        $("#success-modal-overlay").fadeIn();
+        $("#draws-success-message").html(message);
+        $("#draws-success-modal").fadeIn();
+        $("#draws-success-modal-overlay").fadeIn();
     }
     
     function closeSuccessModal() {
-        $("#success-modal").fadeOut();
-        $("#success-modal-overlay").fadeOut();
+        $("#draws-success-modal").fadeOut();
+        $("#draws-success-modal-overlay").fadeOut();
     }
     
-    $("#success-modal-close, #success-modal-overlay").click(function() {
+    $("#draws-success-modal-close, #draws-success-modal-overlay").click(function() {
         closeSuccessModal();
     });
     
     $(document).mouseup(function(e) {
-        let modal = $("#success-modal");
+        let modal = $("#draws-success-modal");
         if (!modal.is(e.target) && modal.has(e.target).length === 0) {
             closeSuccessModal();
         }
@@ -7599,75 +7762,78 @@ $(document).ready(function () {
     $("#publish-winner").change(function() {
         if ($(this).is(":checked")) {
             $("#draw-winner-close-modal").hide();
-            $("#otp-verification-container").show();
-            $("#otp-input").val("");
-            $("#otp-status").text("");
+            $("#draws-otp-verification-container").show();
+            $("#draws-otp-input").val("");
+            $("#draws-otp-status").text("");
             
             $.ajax({
                 url: "/api/admin/send-otp/",
                 type: "POST",
                 headers: {
-                    "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                    //"X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                    "X-CSRFToken": pubish_winner_csrfToken
                 },
                 success: function(response) {
-                    $("#otp-status").text("OTP sent to your email").css("color", "green");
+                    $("#draws-otp-status").text("OTP sent to your email").css("color", "green");
                 },
                 error: function(xhr) {
-                    $("#otp-status").text("Failed to send OTP").css("color", "red");
+                    $("#draws-otp-status").text("Failed to send OTP").css("color", "red");
                 }
             });
         } else {
-            $("#otp-verification-container").hide();
+            $("#draws-otp-verification-container").hide();
             $("#draw-winner-close-modal").show();
             isAdminVerified = false;
         }
     });
 
-    $("#otp-input").blur(function() {
+    $("#draws-otp-input").blur(function() {
         const otp = $(this).val();
         if (otp.length === 6) {
             $.ajax({
                 url: "/api/admin/verify-otp/",
                 type: "POST",
                 headers: {
-                    "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                    // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                    "X-CSRFToken": pubish_winner_csrfToken
                 },
                 data: { otp: otp },
                 success: function(response) {
                     if (response.verified) {
-                        $("#otp-status").text("OTP verified successfully").css("color", "green");
+                        $("#draws-otp-status").text("OTP verified successfully").css("color", "green");
                         isAdminVerified = true;
                         $("#draw-winner-close-modal").show();
-                        $("#resend-otp").prop("disabled", true);
+                        $("#draws-resend-otp").prop("disabled", true);
                     } else {
-                        $("#otp-status").text("Invalid OTP").css("color", "red");
+                        $("#draws-otp-status").text("Invalid OTP").css("color", "red");
                         isAdminVerified = false;
-                        $("#resend-otp").prop("disabled", false);
+                        $("#draws-resend-otp").prop("disabled", false);
                     }
                 },
                 error: function(xhr) {
-                    $("#otp-status").text("Error verifying OTP").css("color", "red");
+                    $("#draws-otp-status").text("Error verifying OTP").css("color", "red");
                     isAdminVerified = false;
-                    $("#resend-otp").prop("disabled", false);
+                    $("#draws-resend-otp").prop("disabled", false);
                 }
             });
         }
     });
 
-    $("#resend-otp").click(function() {
+    $("#draws-resend-otp").click(function() {
         $.ajax({
             url: "/api/admin/send-otp/",
             type: "POST",
             headers: {
-                "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                "X-CSRFToken": pubish_winner_csrfToken
             },
             success: function(response) {
-                $("#otp-status").text("New OTP sent to your email").css("color", "green");
-                $("#otp-input").val("");
+                $("#draws-otp-status").text("New OTP sent to your email").css("color", "green");
+                $("#draws-otp-input").val("");
             },
             error: function(xhr) {
-                $("#otp-status").text("Failed to resend OTP").css("color", "red");
-                $("#resend-otp").prop("disabled", false);
+                $("#draws-otp-status").text("Failed to resend OTP").css("color", "red");
+                $("#draws-resend-otp").prop("disabled", false);
             }
         });
     });
@@ -7679,6 +7845,13 @@ $(document).ready(function () {
             success: function (response) {
                 let container = $("#draw-lottery-container");
                 container.empty();
+                // Create a wrapper div to ensure the heading stays above
+                let wrapper = $(`
+                    <div style="width: 100%;">
+                        <h2 style="text-align: center; width: 100%;">Lottery Draw</h2>
+                    </div>
+                `);
+                container.append(wrapper); // Append the wrapper first
 
                 response.events.forEach(event => {
                     let drawDate = new Date(event.draw_date);
@@ -7687,7 +7860,7 @@ $(document).ready(function () {
                     let statusColor = drawDate < currentDate ? "red" : "green";
 
                     let card = `
-                        <div class="lottery-card">
+                        <div class="draws-lottery-card">
                             <p style="color: ${statusColor}; font-weight: bold;">${statusText}</p>
                             <div class="admin_lottery_draw_date">${lottery_events_formatDrawDate(event.draw_date)}</div>
                             <img src="${event.image}" alt="${event.title}">
@@ -7709,9 +7882,9 @@ $(document).ready(function () {
                                 <input type="radio" name="draw-method-${event.id}" value="method3">
                                 Random by Range
                             </label><br>
-                            <input type="text" id="ticket-start-${event.id}" class="ticket-range" maxlength="6" placeholder="6 digit number" disabled>
-                            <input type="text" id="ticket-end-${event.id}" class="ticket-range" maxlength="6" placeholder="6 digit number" disabled>
-                            <button class="draw-btn" data-id="${event.id}">Draw Winner</button>
+                            <input type="text" id="ticket-start-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
+                            <input type="text" id="ticket-end-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
+                            <button class="draws-draw-btn" data-id="${event.id}">Draw Winner</button>
                         </div>
                     `;
                     container.append(card);
@@ -7723,7 +7896,7 @@ $(document).ready(function () {
                     $(`#ticket-start-${eventId}, #ticket-end-${eventId}`).prop("disabled", !isMethod3);
                 });
 
-                $(".draw-btn").click(function () {
+                $(".draws-draw-btn").click(function () {
                     currentEventId = $(this).data("id");
                     currentMethod = $(`input[name='draw-method-${currentEventId}']:checked`).val();
                     currentTicketStart = $(`#ticket-start-${currentEventId}`).val();
@@ -7747,7 +7920,8 @@ $(document).ready(function () {
                         type: "POST",
                         contentType: "application/json",
                         headers: {
-                            "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                            // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                            "X-CSRFToken": pubish_winner_csrfToken
                         },
                         data: JSON.stringify({ 
                             event_id: currentEventId, 
@@ -7797,7 +7971,8 @@ $(document).ready(function () {
             type: "POST",
             contentType: "application/json",
             headers: {
-                "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+                "X-CSRFToken": pubish_winner_csrfToken
             },
             data: JSON.stringify({
                 winner_data: currentWinnerDetails,
@@ -7813,4 +7988,381 @@ $(document).ready(function () {
             }
         });
     });
+}
+/*peronal info .html */
+function GetCSRFToken() {
+    let csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+    return csrfToken;
+}
+function piValidateForm() {
+    let isValid = true;
+    
+    document.querySelectorAll('.pi-error-message').forEach(el => el.textContent = '');
+
+    let username = document.getElementById("pi-username").value.trim();
+    if (username === "") {
+        document.getElementById("pi-username-error").textContent = "Username is required.";
+        isValid = false;
+    }
+
+    let phone = document.getElementById("pi-phone-number").value.trim();
+    let phoneRegex = /^\+44\d{10}$/; 
+    if (!phoneRegex.test(phone)) {
+        document.getElementById("pi-phone-error").textContent = "Enter a valid UK phone number starting with +44 and followed by 10 digits.";
+        isValid = false;
+    }
+
+    let address = document.getElementById("pi-address").value.trim();
+    if (address === "") {
+        document.getElementById("pi-address-error").textContent = "Address is required.";
+        isValid = false;
+    }
+
+    let website = document.getElementById("pi-website").value.trim();
+    if (website && !website.match(/^(https?:\/\/)/)) {
+        document.getElementById("pi-website-error").textContent = "Website must start with http:// or https://.";
+        isValid = false;
+    }
+
+    let profilePhoto = document.getElementById("pi-profile-photo").files[0];
+    if (profilePhoto) {
+        let validExtensions = ["image/jpeg", "image/png", "image/jpg"];
+        if (!validExtensions.includes(profilePhoto.type)) {
+            document.getElementById("pi-profile-photo-error").textContent = "Only JPG, PNG, and JPEG files are allowed.";
+            isValid = false;
+        }
+    }
+
+    return isValid;
+}
+
+function piPreviewImage(event) {
+    let file = event.target.files[0];
+    if (file) {
+        let validExtensions = ["image/jpeg", "image/png", "image/jpg"];
+        if (!validExtensions.includes(file.type)) {
+            document.getElementById("pi-profile-photo-error").textContent = "Only JPG, PNG, and JPEG files are allowed.";
+            return;
+        }
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById("pi-profile-preview").src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+}
+function piUpdateProfile() {
+if (!piValidateForm()) {
+return;
+}
+
+let formData = new FormData();
+formData.append("username", document.getElementById("pi-username").value);
+formData.append("phone_number", document.getElementById("pi-phone-number").value);
+
+let profilePhotoInput = document.getElementById("pi-profile-photo");
+if (profilePhotoInput.files.length > 0) {
+formData.append("profile_photo", profilePhotoInput.files[0]); 
+}
+
+formData.append("address", document.getElementById("pi-address").value);
+formData.append("website", document.getElementById("pi-website").value);
+formData.append("twitter", document.getElementById("pi-twitter").value);
+
+fetch("/api/personal-info/", {  
+method: "PUT",
+headers: {
+    "X-CSRFToken": GetCSRFToken(), 
+},
+body: formData
+})
+.then(response => response.json().then(data => ({ status: response.status, body: data })))
+.then(({ status, body }) => {
+console.log("Status Code:", status);
+console.log("Response:", body);
+
+if (status === 200) {
+    alert("Profile updated successfully!");
+
+    // Get the image element
+    let profileImg = document.querySelector(".pi-upload-box img"); 
+    
+    // Ensure the backend returns an updated image URL
+    if (profileImg && body.image_url) {  
+        let newSrc = body.image_url + "?t=" + new Date().getTime();
+        
+        // Preload the new image to prevent flickering
+        let tempImg = new Image();
+        tempImg.onload = function() {
+            profileImg.src = newSrc;
+        };
+        tempImg.src = newSrc;
+    }
+} else {
+    alert("Error: " + JSON.stringify(body));  
+}
+})
+.catch(error => {
+console.error("Fetch Error:", error);
 });
+}
+
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                document.cookie.split(';').forEach(cookie => {
+                    const trimmed = cookie.trim();
+                    if (trimmed.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
+                    }
+                });
+            }
+            return cookieValue;
+        }
+
+function logoutDevice(sessionKey, button) {
+    fetch('/api/logout-device/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ session_key: sessionKey })  // Send session key instead of IP
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // If the current session is logged out, redirect to login page
+            if (data.is_current_session) {
+                window.location.href = "/login/";
+                return;
+            }
+
+            // Remove the logged-out session from the UI
+            const sessionDiv = button.closest('.session');
+            sessionDiv.remove();
+
+            // If no more active sessions exist, show "No active sessions."
+            if (document.querySelectorAll('.session').length === 0) {
+                document.body.insertAdjacentHTML('beforeend', '<p>No active sessions.</p>');
+            }
+
+            alert("Device logged out successfully!");
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+function showToast(messages, isSuccess = false) {
+    const toast = document.getElementById("unique-toast");
+
+    toast.innerHTML = Array.isArray(messages)
+        ? messages.map(msg => `❌ ${msg}`).join("<br>")
+        : `❌ ${messages}`;
+
+    toast.className = "unique-toast show";
+    if (isSuccess) {
+        toast.classList.add("success");
+    }
+
+    toast.classList.remove("hidden");
+}
+
+function hideToast() {
+    const toast = document.getElementById("unique-toast");
+    toast.className = "unique-toast hidden";
+}
+function updatePassword() {
+    const oldPassword = document.getElementById("unique-old-password").value;
+    const newPassword = document.getElementById("unique-new-password").value;
+    const confirmPassword = document.getElementById("unique-confirm-password").value;
+
+    const errors = [];
+    const uppercasePattern = /[A-Z]/;
+    const lowercasePattern = /[a-z]/;
+    const numberPattern = /\d/g;
+    const specialCharPattern = /[!@#$%^&*(),.?":{}|<>]/;
+
+    if (newPassword.length < 8) {
+        errors.push("Password must be at least 8 characters long");
+    }
+    if (!uppercasePattern.test(newPassword)) {
+        errors.push("Password must contain at least one uppercase letter");
+    }
+    if (!lowercasePattern.test(newPassword)) {
+        errors.push("Password must contain at least one lowercase letter");
+    }
+    if ((newPassword.match(numberPattern) || []).length < 4) {
+        errors.push("Password must contain at least four numbers");
+    }
+    if (!specialCharPattern.test(newPassword)) {
+        errors.push("Password must contain at least one special character");
+    }
+    if (oldPassword === newPassword) {
+        errors.push("New password must not be the same as the current password");
+    }
+    if (newPassword !== confirmPassword) {
+        errors.push("Confirm password does not match");
+    }
+
+    if (errors.length > 0) {
+        showToast(errors);
+        return;
+    }
+
+    // If validation passes, hide the toast
+    hideToast();
+
+    fetch("/update-password/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: new URLSearchParams({
+            old_password: oldPassword,
+            new_password1: newPassword,
+            new_password2: confirmPassword,
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast("✅ Password updated successfully!", true);
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showToast(data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        showToast("Something went wrong");
+    });
+}
+
+
+//winner.html page
+   
+$(document).ready(function () {
+    let winnersData = [];
+    let drawDates = [];
+    let currentPage = 1;
+    const datesPerPage = 3;
+
+    function fetchWinnersusersdraw() {
+        $.ajax({
+            url: "/api/winners/",
+            method: "GET",
+            dataType: "json",
+            success: function (response) {
+                winnersData = response;
+                drawDates = Object.keys(response);
+
+                if (drawDates.length === 0) {
+                    $("#user-winners-container").html("<h2 class='user-winners-announcement'>🏆 Winners will be announced soon...</h2>");
+                    $("#user-winners-pagination").empty(); // Remove pagination if no winners
+                    return;
+                }
+
+                currentPage = 1;
+                renderuserWinners();
+                renderuserPagination();
+            },
+            error: function (error) {
+                console.log("Error fetching winners:", error);
+            }
+        });
+    }
+
+    function renderuserWinners() {
+        let winnersContainer = $("#user-winners-container");
+        winnersContainer.empty();
+
+        let startIdx = (currentPage - 1) * datesPerPage;
+        let endIdx = startIdx + datesPerPage;
+        let paginatedDates = drawDates.slice(startIdx, endIdx);
+
+        if (paginatedDates.length === 0) {
+            winnersContainer.html("<h3 class='user-winners-announcement'>🏆 Winners will be announced soon...</h3>");
+            return;
+        }
+
+        paginatedDates.forEach(function (draw_date) {
+            let section = `<h2 class="user-winners-drawdate">🏆${draw_date}</h2><ul class="user-winners-winner-list">`;
+            winnersData[draw_date].forEach(function (winner) {
+                section += `<li>
+                    <b>${winner.lottery_title}</b> - 
+                    <span>${winner.username || "N/A"}</span> - 
+                    Ticket <b>#${winner.ticket_number}</b>
+                </li>`;
+            });
+            section += `</ul>`;
+            winnersContainer.append(section);
+        });
+    }
+
+    function renderuserPagination() {
+        let paginationContainer = $("#user-winners-pagination");
+        paginationContainer.empty();
+
+        let totalPages = Math.ceil(drawDates.length / datesPerPage);
+        if (totalPages <= 1) return;
+
+        let paginationHTML = `<button class="prev-btn" ${currentPage === 1 ? "disabled" : ""}>« Prev</button>`;
+
+        let pageNumbers = [];
+        if (totalPages <= 3) {
+            for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+        } else {
+            if (currentPage <= 2) {
+                pageNumbers = [1, 2, 3];
+            // } else if (currentPage >= totalPages - 1) {
+            //     pageNumbers = [totalPages - 2, totalPages - 1, totalPages];
+        } else if (currentPage === totalPages) {
+            pageNumbers = [1, totalPages - 1, totalPages]; // First
+            } else {
+                pageNumbers = [currentPage - 1, currentPage, currentPage + 1];
+            }
+        }
+
+        pageNumbers.forEach((page) => {
+            paginationHTML += `<button class="page-btn ${page === currentPage ? "user-winners-active" : ""}" data-page="${page}">${page}</button>`;
+        });
+
+        if (totalPages > 3 && currentPage < totalPages - 1) {
+            paginationHTML += `<span>...</span><button class="page-btn" data-page="${totalPages}">${totalPages}</button>`;
+        }
+
+        paginationHTML += `<button class="next-btn" ${currentPage === totalPages ? "disabled" : ""}>Next »</button>`;
+        paginationContainer.append(paginationHTML);
+
+        $(".prev-btn").click(() => { if (currentPage > 1) { currentPage--; renderuserWinners(); renderuserPagination(); } });
+        $(".next-btn").click(() => { if (currentPage < totalPages) { currentPage++; renderuserWinners(); renderuserPagination(); } });
+        $(".page-btn").click(function () { currentPage = parseInt($(this).data("page")); renderuserWinners(); renderuserPagination(); });
+    }
+
+    fetchWinnersusersdraw();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

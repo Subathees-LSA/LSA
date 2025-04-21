@@ -93,6 +93,7 @@ class RegionalSalesListView(generics.ListAPIView):
     queryset = RegionalSales.objects.all()
     serializer_class = RegionalSalesSerializer
 
+
 class LotterySummaryView(APIView):
     def get(self, request, *args, **kwargs):
         total_won_lottery = LotteryStatistics.objects.aggregate(won_total=Sum('won_lottery'))['won_total'] or 0
@@ -112,11 +113,8 @@ class LotterySummaryView(APIView):
     # Filter active lottery events where draw_date is in the future
         active_lotteries = LotteryEvent.objects.filter(is_active=True, draw_date__gt=current_time).count()
 
-        statistics = LotteryStatistics.objects.all()
-    
-    # Assuming sales amount is proportional to the total lottery tickets
-        for stat in statistics:
-            stat.sales_amount = (stat.won_lottery + stat.lost_lottery) * 10  # Example calculation
+        
+        sales_amount = PaymentLottery.objects.aggregate(Sum('amount'))['amount__sum'] or 0    
 
         data = {
             "won_lottery_count": total_won_lottery,
@@ -125,10 +123,9 @@ class LotterySummaryView(APIView):
             "lost_lottery_amount": total_lost_amount,
             "active_users": active_users,
             "active_lotteries": active_lotteries,
-            "sales_amount":stat.sales_amount,
+            "sales_amount":sales_amount,
         }
         return Response(data)
-
 @api_view(['POST'])
 def mark_messages_as_read(request, email):
     try:
@@ -775,6 +772,9 @@ def add_to_cart(request):
     try:
         event = LotteryEvent.objects.get(slug=event_slug)
         max_limit = event.max_limit
+        stock_tickets = event.stock_tickets
+        # The actual limit is the smaller of max_limit or stock_tickets
+        actual_limit = min(max_limit, stock_tickets)
         event_title = event.title
 
         user = request.user if request.user.is_authenticated else None
@@ -792,7 +792,7 @@ def add_to_cart(request):
         
         new_total_quantity = current_quantity + quantity
         
-        remaining_tickets = max_limit - purchased_quantity 
+        remaining_tickets = actual_limit - purchased_quantity 
         
         if new_total_quantity > remaining_tickets:
             set_remaining_ticket=remaining_tickets-current_quantity
@@ -808,7 +808,7 @@ def add_to_cart(request):
                 "event_title": event_title,
                 "current_quantity": current_quantity,
                 "remaining_tickets": set_remaining_ticket,
-                "max_limit": max_limit
+                "max_limit": actual_limit
             }, status=400)
 
         # Update cart
@@ -817,7 +817,7 @@ def add_to_cart(request):
             "per_ticket_price": str(event.per_ticket_price),
             "quantity": new_total_quantity,
             "image": event.image.url if event.image else None,
-            "max_limit": max_limit,
+            "max_limit": actual_limit,
             "remaining_tickets": remaining_tickets - quantity  # Update remaining tickets
         }
 
@@ -830,13 +830,13 @@ def add_to_cart(request):
             "event_title": event_title,
             "tickets_added": quantity,
             "current_quantity": new_total_quantity,
-            "remaining_tickets": max_limit-purchased_quantity - new_total_quantity
+            "remaining_tickets": actual_limit - purchased_quantity - new_total_quantity
         })
         response.set_cookie('cart', json.dumps(cart), max_age=60 * 60 * 24 * 30)
         return response
 
     except LotteryEvent.DoesNotExist:
-        return Response({"success": False, "message": "Event not found."}, status=404)   
+        return Response({"success": False, "message": "Event not found."}, status=404)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -848,11 +848,11 @@ def get_cart(request):
     
     for event_slug, item in cart.items():
         try:
-            event = LotteryEvent.objects.get(slug=event_slug)
-            # Check if the event draw date is still in the future
-            # if event.draw_date > timezone.now():
-            if event.draw_date > timezone.now() and event.total_tickets > event.sold_tickets:
-                # Calculate the purchased quantity for logged-in users
+            event = LotteryEvent.objects.get(slug=event_slug,is_active=True)
+            stock_tickets = event.stock_tickets
+            actual_limit = min(event.max_limit, stock_tickets)
+            
+            if event.draw_date > timezone.now() and stock_tickets > 0:
                 purchased_quantity = 0
                 if user:
                     purchased_quantity = PaymentLottery.objects.filter(
@@ -861,18 +861,16 @@ def get_cart(request):
                         payment_status='completed'
                     ).aggregate(total_quantity=models.Sum('quantity'))['total_quantity'] or 0
 
-                # Check if the user has already purchased the maximum number of tickets for this event
-                if purchased_quantity >= event.max_limit:
-                    continue  # Skip this event from the cart if max limit is reached
+                if purchased_quantity >= actual_limit:
+                    continue
 
                 item['purchased_quantity'] = purchased_quantity
+                item['max_limit'] = actual_limit
                 updated_cart[event_slug] = item
         except LotteryEvent.DoesNotExist:
             pass
 
-    # Set the updated cart in the cookie
     response = Response(updated_cart)
-    
     response.set_cookie('cart', json.dumps(updated_cart), max_age=7 * 24 * 60 * 60, httponly=True, secure=False)
     return response
 
@@ -910,6 +908,8 @@ def update_cart(request):
     try:
         event = LotteryEvent.objects.get(slug=event_slug)
         max_limit = event.max_limit
+        stock_tickets = event.stock_tickets
+        actual_limit = min(max_limit, stock_tickets)
 
         # Check if user is logged in
         user = request.user if request.user.is_authenticated else None
@@ -929,22 +929,20 @@ def update_cart(request):
             current_quantity = int(cart[event_slug].get('quantity', 0))
             new_total_quantity = quantity
 
-            # Check if the new total quantity exceeds the max limit considering purchased tickets
-            if new_total_quantity + purchased_quantity > max_limit:
-                remaining_quantity = max_limit - (new_total_quantity + purchased_quantity)
+            if new_total_quantity + purchased_quantity > actual_limit:
+                remaining_quantity = actual_limit - (new_total_quantity + purchased_quantity)
                 return Response({
                     "success": False,
                     "message": (
                         f"Cannot update to {quantity} tickets for '{event.title}'. Only {remaining_quantity} more tickets "
-                        f"can be added. Max limit is {max_limit}."
+                        f"can be added. Max limit is {actual_limit}."
                     ),
                     "event_title": event.title,
                     "current_quantity": current_quantity,
                     "remaining_quantity": remaining_quantity,
-                    "max_limit": max_limit
+                    "max_limit": actual_limit
                 }, status=400)
 
-            # Update cart
             cart[event_slug]['quantity'] = new_total_quantity
 
             response = JsonResponse({
@@ -963,7 +961,7 @@ def update_cart(request):
         return Response({"success": False, "message": "Event not found in cart."}, status=404)
 
     except LotteryEvent.DoesNotExist:
-        return Response({"success": False, "message": "Event not found."}, status=404)
+        return Response({"success": False, "message": "Event not found."}, status=404)    
 
 
 
@@ -982,7 +980,7 @@ def get_favorites(request):
     favorites_slugs = json.loads(request.COOKIES.get('favorites', '[]'))
     print("Favorites slugs from cookies:", favorites_slugs)
     
-    events = LotteryEvent.objects.filter(slug__in=favorites_slugs, draw_date__gt=now())
+    events = LotteryEvent.objects.filter(slug__in=favorites_slugs, draw_date__gt=now(),is_active=True)
     print("Filtered active events:", events)
     
     favorite_events = []
@@ -1068,7 +1066,7 @@ class ContactCreateView(APIView):
                 )
 
             return Response(
-                {'message': 'Form submitted successfully!please check you email inbox.', 'data': serializer.data},
+                {'message': 'Form submitted successfully!Please check your email inbox.', 'data': serializer.data},
                 status=status.HTTP_201_CREATED
             )
 
@@ -1112,6 +1110,7 @@ class PreviousWinnersimgAPIView(APIView):
 
 
 class LotteryStatisticsView(APIView):
+    permission_classes = [IsAdminUser] 
     def get(self, request):
         month = int(request.query_params.get('month', 0))
         year = int(request.query_params.get('year', 0))
@@ -1144,26 +1143,50 @@ class LotteryStatisticsView(APIView):
             })
 
 
-class lottery_sales_availableYearsView(APIView):
+from django.db.models.functions import ExtractMonth, ExtractYear
+from django.db.models import Sum
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from calendar import month_abbr
+from datetime import datetime
+class lottery_sales_bar_chart_View(APIView):
+    permission_classes = [IsAdminUser] 
     def get(self, request):
-        years = lottery_sales_bar_chart.objects.values_list('year', flat=True).distinct().order_by('year')
+        year = int(request.query_params.get('year', datetime.now().year))
+        queryset = (
+            PaymentLottery.objects
+            .filter(payment_status='completed', payment_at__year=year)
+            .annotate(month=ExtractMonth('payment_at'))
+            .values('month')
+            .annotate(activity_count=Sum('quantity'))
+            .order_by('month')
+        )
+
+        response = [
+            {
+                'month': month_abbr[item['month']],  # e.g. Jan, Feb...
+                'activity_count': item['activity_count']
+            } for item in queryset
+        ]
+        return Response(response)
+        
+class lottery_sales_availableYearsView(APIView):
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        years = (
+            PaymentLottery.objects
+            .filter(payment_status='completed', payment_at__isnull=False)  # Exclude nulls!
+            .annotate(year=ExtractYear('payment_at'))
+            .values_list('year', flat=True)
+            .distinct()
+            .order_by('year')
+        )
         return Response({'years': list(years)})
 
 
-class lottery_sales_bar_chart_View(APIView):
-    def get(self, request):
-        year = int(request.query_params.get('year', 2025))  # Default to 2025 if not provided
-        data = lottery_sales_bar_chart.objects.filter(year=year).order_by('id')
-        response = [
-            {
-                'month': activity.month,
-                'activity_count': activity.activity_count
-            } for activity in data
-        ]
-        return Response(response)
-
 
 class LeaderboardAPIView(APIView):
+    permission_classes = [IsAdminUser]
     def get(self, request):
         leaderboard = Leaderboard.objects.order_by('rank')  # Order by rank
         serializer = LeaderboardSerializer(leaderboard, many=True)
@@ -1171,6 +1194,7 @@ class LeaderboardAPIView(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def user_statistics(request):
     # Calculate total and verified users
     total_users = UserProfile.objects.count()
@@ -1243,7 +1267,7 @@ from rest_framework import status
 import logging
 stripe.api_key = settings.STRIPE_API_KEY
 # Set up logging
-   
+@permission_classes([IsAdminUser])    
 def check_lottery_title_unique(request):
     title = request.GET.get('title', '').strip()
     if LotteryEvent.objects.filter(title__iexact=title).exists():
@@ -1272,6 +1296,7 @@ stripe.api_key = settings.STRIPE_API_KEY
 
 # Set your Stripe API key
 class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetch_paid_amount_view(APIView):
+    permission_classes = [IsAdminUser]
     def get(self, request, payment_intent):
         try:
             # Retrieve all payments for the given payment_intent
@@ -1318,6 +1343,7 @@ class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetc
 
 
 class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refund_payment_view(APIView):
+    permission_classes = [IsAdminUser] 
     def post(self, request, payment_intent):
         try:
             # Find all payments with the same payment_intent
@@ -1370,6 +1396,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund(APIView):
+    permission_classes = [IsAdminUser]
     def get(self, request):
         email = request.query_params.get('email', None)
         
@@ -1581,6 +1608,7 @@ class AdminLotteryDrawView(APIView):
         else:
             return Response({"error": "Invalid selection method"}, status=400)
 
+
 class PublishWinnerView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -1619,6 +1647,14 @@ class PublishWinnerView(APIView):
                     ticket_number=winner_info['ticket_number'],
                     selection_method=winner_info['selection_method']
                 )
+                profile = UserPrivacy.objects.filter(user=user).first()
+                WinnersWallWinnersList.objects.create(
+                    winner_name=user.username,
+                    ticket_number=winner_info['ticket_number'],
+                    lottery_name=event.title,
+                    draw_date=timezone.now(),  # Or use winner.created_at if you fetch it
+                    image=profile.profile_photo if profile and profile.profile_photo else None
+                )
             else:  # For method3
                 if winner_data['user'] == "No User":
                     user, _ = User.objects.get_or_create(
@@ -1637,15 +1673,27 @@ class PublishWinnerView(APIView):
                     ticket_number=winner_data['ticket_number'],
                     selection_method=winner_data['selection_method']
                 )
+                profile = UserPrivacy.objects.filter(user=user).first()
+                WinnersWallWinnersList.objects.create(
+                    winner_name=user.username,
+                    ticket_number=winner_data['ticket_number'],
+                    lottery_name=event.title,
+                    draw_date=timezone.now(),  # Or use winner.created_at if you fetch it
+                    image=profile.profile_photo if profile and profile.profile_photo else None
+                )
+            event.is_active = False
+            event.save()    
 
         return Response({"message": "Winner published successfully"})
 # prize management api views
 	
 class api_admin_dashboard_prize_management_winner_list_api_view(generics.ListAPIView):
+    permission_classes = [IsAdminUser] 
     queryset = Winner.objects.all()
-    serializer_class = WinnerSerializer
+    serializer_class = prize_management_WinnerSerializer
 
 @api_view(['PATCH'])
+@permission_classes([IsAdminUser])
 def api_admin_dashboard_prize_management_update_winner_status(request, pk):
     winner = get_object_or_404(Winner, pk=pk)
     winner.prize_status = request.data.get('prize_status', winner.prize_status)
@@ -1653,3 +1701,26 @@ def api_admin_dashboard_prize_management_update_winner_status(request, pk):
     winner.save()
     return Response({"message": "Prize status updated successfully", "prize_comments": winner.prize_comments})
 
+from rest_framework import serializers, viewsets
+from django.utils.timezone import now
+from django.shortcuts import render
+from .models import Winner
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from collections import defaultdict
+from .models import Winner
+from .serializers import WinnerSerializer
+from datetime import datetime
+
+class WinnerListView(APIView):
+    def get(self, request, *args, **kwargs):
+        winners = Winner.objects.all().order_by('-created_at')  
+
+        grouped_winners = defaultdict(list)
+        for winner in winners:
+            draw_date = winner.created_at.strftime("%A %dth of %B %Y")  
+            grouped_winners[draw_date].append(WinnerSerializer(winner).data)
+
+        return Response(grouped_winners)

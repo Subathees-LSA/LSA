@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -13,22 +12,22 @@
             flex-wrap: wrap;
             gap: 20px;
         }
-        .lottery-card {
+        .draws-lottery-card {
             border: 1px solid #ccc;
             padding: 10px;
             width: 300px;
             text-align: center;
             position: relative; /* Added for positioning children */
         }
-        .lottery-card img {
+        .draws-lottery-card img {
             width: 100%;
             height: 150px;
             object-fit: cover;
         }
-        .lottery-card input[type="radio"] {
+        .draws-lottery-card input[type="radio"] {
             margin-right: 8px;
         }
-        .ticket-range {
+        .draws-ticket-range {
             width: 100px;
             padding: 5px;
             margin: 5px;
@@ -36,7 +35,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        .draw-btn {
+        .draws-draw-btn {
             display: block;
             width: 80%;
             margin: 10px auto;
@@ -48,10 +47,10 @@
             cursor: pointer;
             font-size: 16px;
         }
-        .draw-btn:hover {
+        .draws-draw-btn:hover {
             background-color: #ff6600;
         }
-        .draw-lottery-modal {
+        .draws-lottery-modal {
             display: none; 
             position: fixed; 
             top: 50%; 
@@ -65,7 +64,7 @@
             width: 300px; 
             text-align: center;
         }
-        .draw-lottery-close-modal {
+        .draws-lottery-close-modal {
             background-color: #007bff; 
             color: white; 
             border: none; 
@@ -73,7 +72,7 @@
             border-radius: 5px; 
             cursor: pointer;
         }
-        .draw-lottery-overlay-modal {
+        .draws-lottery-overlay-modal {
             display: none; 
             position: fixed; 
             top: 0; 
@@ -83,14 +82,14 @@
             background: rgba(0, 0, 0, 0.5); 
             z-index: 999;
         }
-        #otp-verification-container {
+        #draws-otp-verification-container {
             margin-top: 15px;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
         
-        #otp-input {
+        #draws-otp-input {
             padding: 8px;
             width: 100px;
             text-align: center;
@@ -110,7 +109,7 @@
         #resend-otp:hover {
             background-color: #007bff;
         } {% endcomment %}
-        #resend-otp {
+        #draws-resend-otp {
             background-color: #6c757d;
             color: white;
             border: none;
@@ -120,14 +119,14 @@
             transition: background-color 0.3s; /* Add smooth transition */
         }
         
-        #resend-otp:disabled {
+        #draws-resend-otp:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
-        #resend-otp:enabled {
+        #draws-resend-otp:enabled {
             background-color: #007bff; /* Blue color when enabled */
         }
-        #otp-status {
+        #draws-otp-status {
             margin-top: 10px;
             font-size: 14px;
         }
@@ -141,7 +140,7 @@
             text-align: center;
         } {% endcomment %}
         /* Updated styles for status and date positioning */
-    .lottery-card > p:first-child {
+    .draws-lottery-card > p:first-child {
         position: absolute;
         top: 15px;
         left: 10px;
@@ -162,16 +161,19 @@
         text-align: center;
     }
     /* Add margin to the image to prevent overlap */
-    .lottery-card img {
+    .draws-lottery-card img {
         margin-top: 30px;
     }
     </style>
+    <script>
+        const pubish_winner_csrfToken = "{{ csrf_token }}"; 
+    </script>
 </head>
 <body>
     <h2>Lottery Draw</h2>
     <div class="draws-lottery-container" id="draw-lottery-container"></div>
 
-    <div id="draw-winner-lottery-modal" class="draw-lottery-modal">
+    <div id="draw-winner-lottery-modal" class="draws-lottery-modal">
         <h3>Lottery Draw Result</h3>
         <p id="draw-winner-modal-message"></p>
         {% comment %} <p>Ticket Number: <span id="draw-winner-ticket-number"></span></p>
@@ -186,24 +188,24 @@
                 <input type="checkbox" id="publish-winner"> Publish Winner
             </label><br>
         </div>
-       <div id="otp-verification-container" style="display: none;">
+       <div id="draws-otp-verification-container" style="display: none;">
             <p>An OTP has been sent to your email. Please verify:</p>
-            <input type="text" id="otp-input" placeholder="Enter OTP" maxlength="6">
-            <button id="resend-otp">Resend OTP</button>
-            <p id="otp-status"></p>
+            <input type="text" id="draws-otp-input" placeholder="Enter OTP" maxlength="6">
+            <button id="draws-resend-otp">Resend OTP</button>
+            <p id="draws-otp-status"></p>
         </div> 
-        <button id="draw-winner-close-modal" class="draw-lottery-close-modal">OK</button>
+        <button id="draw-winner-close-modal" class="draws-lottery-close-modal">OK</button>
     </div>
 
-    <div id="draw-winner-modal-overlay" class="draw-lottery-overlay-modal"></div>
+    <div id="draw-winner-modal-overlay" class="draws-lottery-overlay-modal"></div>
 
-<div id="success-modal" class="draw-lottery-modal">
+<div id="draws-success-modal" class="draws-lottery-modal">
     <h3>Success</h3>
-    <p id="success-message"></p>
-    <button id="success-modal-close" class="draw-lottery-close-modal">OK</button>
+    <p id="draws-success-message"></p>
+    <button id="draws-success-modal-close" class="draws-lottery-close-modal">OK</button>
 </div>
 
-<div id="success-modal-overlay" class="draw-lottery-overlay-modal"></div>
+<div id="draws-success-modal-overlay" class="draws-lottery-overlay-modal"></div>
     <script src="{% static 'js/custom.js' %}"></script>
 </body>
 </html> 

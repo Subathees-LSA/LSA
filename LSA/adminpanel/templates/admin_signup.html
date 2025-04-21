@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Admin Signup</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
@@ -70,8 +70,16 @@
                         <img src="/media/images/eye.png" alt="Show Password" class="toggle-eye-icon" >
                     </span>
                 </div>
-                <span id="admin_signup_password_error" class="admin-signup-error"></span>
+                <!-- <span id="admin_signup_password_error" class="admin-signup-error"></span> -->
             </div>
+             <!-- Password Validation Message Box -->
+<div id="admin_password_message" class="admin_password-message">
+    <p id="admin_password_uppercase" class="invalid" class="admin-password-show">❌ Password must contain at least one uppercase letter</p>
+    <p id="admin_password_lowercase" class="invalid" class="admin-password-show">❌ Password must contain at least one lowercase letter</p>
+    <p id="admin_password_number" class="invalid" class="admin-password-show">❌ Password must contain at least four number</p>
+    <p id="admin_password_special" class="invalid" class="admin-password-show">❌ Password must contain at least one special character</p>
+    <p id="admin_password_length" class="invalid" class="admin-password-show">❌ Password must be at least 8 characters long</p>
+</div>
             <button type=" submit" class="admin-signup-submit-button">Register Admin</button>
             <p>Already have an account? <a href="{% url 'custom_admin_login' %}">Login here</a></p>
             <div id="admin_signup_form_error_message" class="admin-signup-error-message"></div>

@@ -96,6 +96,10 @@ from rest_framework import status
 from rest_framework.views import APIView
 from .models import User, UserDeviceHistory, UserPrivacy, UserProfile
 from .serializers import LoginSerializer
+from django.contrib.sessions.models import Session
+from rest_framework.response import Response
+from .models import User, UserDeviceHistory, UserPrivacy, UserProfile
+from .serializers import LoginSerializer
 
 class LoginView(APIView):
     def post(self, request):
@@ -130,13 +134,20 @@ class LoginView(APIView):
                 if user.check_password(password):
                     ip_address = self.get_client_ip(request)
 
-                    # ✅ Always Create a New Login Session (Even If IP is the Same)
+                    # ✅ Log the user in
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+                    # ✅ Get session key
+                    session_key = request.session.session_key
+
+                    # ✅ Store session details in `UserDeviceHistory`
                     UserDeviceHistory.objects.create(
                         user=user,
                         device_info=device_info,
                         ip_address=ip_address,
                         login_time=now(),
-                        logout_time=None  # 💡 Ensures session remains active
+                        session_key=session_key,  # 💡 Store session key for logout tracking
+                        logout_time=None
                     )
 
                     # ✅ Update UserPrivacy with latest login details
@@ -162,9 +173,9 @@ class LoginView(APIView):
                         }, status=status.HTTP_200_OK)
 
                     # ✅ If 2FA is disabled, log in and redirect
-                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                     return Response({
                         "message": "Login successful.",
+                        "session_key": session_key,  # 💡 Return session key for frontend tracking
                         "redirect_url": reverse('lottery_events')
                     }, status=status.HTTP_200_OK)
 

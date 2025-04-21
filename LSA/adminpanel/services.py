@@ -137,3 +137,6 @@ from django.shortcuts import render
 
 def admin_lottery_draw_page(request):
     return render(request, "admin_lottery_draw.html")
+
+def winners_page(request):
+    return render(request, 'winners.html')
