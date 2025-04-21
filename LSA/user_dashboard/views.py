@@ -41,44 +41,54 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from user_registration.models import UserDeviceHistory
+from django.utils.timezone import now
+from django.contrib.sessions.models import Session
+from django.contrib.auth import logout
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from user_registration.models import UserDeviceHistory
 
 class LogoutDeviceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        ip_address = request.data.get("ip_address")
+        session_key = request.data.get("session_key")
 
-        if not ip_address:
-            return Response({"success": False, "message": "IP address is required."}, status=400)
+        if not session_key:
+            return Response({"success": False, "message": "Session key is required."}, status=400)
 
         try:
-            device = UserDeviceHistory.objects.filter(
-                user=request.user, 
-                ip_address=ip_address, 
-                logout_time__isnull=True
-            ).first()
+            # Find the session and delete only that specific session
+            session = Session.objects.filter(session_key=session_key).first()
+            if not session:
+                return Response({"success": False, "message": "Session not found."}, status=404)
 
-            if not device:
-                return Response({"success": False, "message": "Device not found."}, status=404)
+            session_data = session.get_decoded()
+            user_id = session_data.get('_auth_user_id')
 
-            # Check if user is logging out from their own session
-            is_current_session = (request.META.get('REMOTE_ADDR') == ip_address)
+            # Ensure the session belongs to the authenticated user
+            if str(user_id) != str(request.user.id):
+                return Response({"success": False, "message": "Unauthorized action."}, status=403)
 
-            # Delete session
-            sessions = Session.objects.filter(expire_date__gte=now())
-            for session in sessions:
-                session_data = session.get_decoded()
-                if session_data.get('_auth_user_id') == str(request.user.id):
-                    session.delete()
+            # Check if the user is logging out their current session
+            is_current_session = (session_key == request.session.session_key)
 
-            logout(request)  # Log out user
-            device.logout_time = now()
-            device.save()
+            # Delete the session
+            session.delete()
+
+            # Update the logout time in UserDeviceHistory
+            UserDeviceHistory.objects.filter(user=request.user, session_key=session_key, logout_time__isnull=True).update(logout_time=now())
+
+            # If user is logging out their own session, log them out
+            if is_current_session:
+                logout(request)
 
             return Response({
-                "success": True, 
+                "success": True,
                 "message": "Device logged out successfully.",
-                "is_current_session": is_current_session
+                "is_current_session": is_current_session,
+                "redirect_url": "/login/" 
             })
 
         except Exception as e:
@@ -88,20 +98,43 @@ class LogoutDeviceView(APIView):
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.http import JsonResponse
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.sessions.models import Session
 
 @login_required
 @csrf_exempt
 def update_password(request):
     if request.method == "POST":
-        form = PasswordChangeForm(request.user, request.POST)
-        if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)  # Important to keep the user logged in
-            return JsonResponse({"success": True, "message": "Password updated successfully!"})
-        else:
-            return JsonResponse({"success": False, "message": "Invalid password."}, status=400)
-    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
+        user = request.user
+        old_password = request.POST.get("old_password")
+        new_password1 = request.POST.get("new_password1")
+        new_password2 = request.POST.get("new_password2")
 
+        if not user.check_password(old_password):
+            return JsonResponse({"success": False, "message": "Incorrect current password."})
+
+        if new_password1 != new_password2:
+            return JsonResponse({"success": False, "message": "Passwords do not match."})
+
+        # Save the current session key before rotation
+        old_session_key = request.session.session_key
+
+        user.set_password(new_password1)
+        user.save()
+
+        # This rotates the session key
+        update_session_auth_hash(request, user)
+
+        # Get the new session key
+        new_session_key = request.session.session_key
+
+        # ✅ Update the UserDeviceHistory record with the new session key
+        from user_registration.models import UserDeviceHistory
+        UserDeviceHistory.objects.filter(user=user, session_key=old_session_key).update(session_key=new_session_key)
+
+        return JsonResponse({"success": True, "message": "Password updated successfully!"})
+
+    return JsonResponse({"success": False, "message": "Invalid request."})
 
     # user_dashboard/views.py
 from django.shortcuts import render

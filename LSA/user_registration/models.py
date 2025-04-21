@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_image = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     newsletter = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     kyc_status = models.CharField(
@@ -72,6 +71,6 @@ class UserDeviceHistory(models.Model):
     ip_address = models.GenericIPAddressField()
     login_time = models.DateTimeField(default=now)
     logout_time = models.DateTimeField(null=True, blank=True)
-
+    session_key = models.CharField(max_length=40, default="", blank=True)
     def __str__(self):
         return f"{self.user.username} - {self.device_info} ({self.ip_address})"

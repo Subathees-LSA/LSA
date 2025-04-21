@@ -1,0 +1,71 @@
+{% load static %}
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottery Winners</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .winner-list { list-style-type: none; padding: 0; }
+        .winner-list li { padding: 5px 0; font-size: 18px; }
+        h2 { color: orange; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    <h1>Lottery Winners</h1>
+    <div id="winners-container">
+        <!-- Data will be dynamically loaded here -->
+    </div>
+    {% include 'footer.html' %} 
+    <script src="{% static 'js/custom.js' %}"></script>  <!-- Include JavaScript -->
+</body>
+</html> {% endcomment %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottery Winners</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        {% comment %} .winner-list { list-style-type: none; padding: 0; }
+        .winner-list li { padding: 5px 0; font-size: 18px; } {% endcomment %}
+        .user-winners-drawdate { color: orange; margin-top: 20px; }
+        #user-winners-pagination { margin-top: 20px; text-align: center; }
+        #user-winners-pagination button { margin: 5px; padding: 8px 12px; cursor: pointer; }
+        .user-winners-active { background-color: orange; color: white; font-weight: bold; }
+        .user-winners-announcement {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff9800;
+            margin-top: 20px;
+        }
+.user-winners-winner-list {
+    list-style-type: disc; /* Dotted bullet points */
+    padding-left: 55px; /* Indent for better alignment */
+    margin-bottom: 20px;
+}
+.user-winners-winner-list li {
+    font-size: 16px;
+    color: #333;
+    padding: 5px 0;
+    line-height: 1.6;
+}
+.user-winners-winner-list span {
+    color: #555;
+}
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    <h1 style="text-align: center;">Lottery Winners</h1>
+    <div id="user-winners-container"></div>
+    <div id="user-winners-pagination"></div>
+    {% include 'footer.html' %} 
+    <script src="{% static 'js/custom.js' %}"></script>
+</body>
+</html>
+

@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Custom Admin Login</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
@@ -65,6 +65,7 @@
 
                 </div>
                 <p id="custom_admin_login_errorMessage" class="error-text"></p>
+                <span id="custom_admin_login_password_error" class="error-text"></span><br>
                 <div class="custom_admin_rememberme">
                     <label>
                         <input type="checkbox" id="remember-me-checkbox-admin"> Remember Me
@@ -74,7 +75,7 @@
                     <a class="admin-forget-password" href="{% url 'password_reset_page' %}">Forgot password?</a>
                 </div>
                 <span id="custom_admin_login_error" class="error-text"></span><br>
-                <span id="custom_admin_login_password_error" class="error-text"></span><br>
+              
                 <button type="submit" class="custom_admin_login_button">Login</button>
 
                 <p class="admin-signup1">Don’t have an account? <a class="admin-signup2"

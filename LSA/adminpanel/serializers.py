@@ -226,7 +226,7 @@ class AdminrefundPaymentLotterySerializer(serializers.ModelSerializer):
         fields = ['payment_intent', 'lottery_event_title', 'amount', 'payment_at', 'payment_status', 'user_email', 'quantity', 'receipt_url']	
 
 
-class WinnerSerializer(serializers.ModelSerializer):
+class prize_management_WinnerSerializer(serializers.ModelSerializer):
     customer_details = serializers.SerializerMethodField()
     prize_details = serializers.SerializerMethodField()
 
@@ -245,3 +245,14 @@ class WinnerSerializer(serializers.ModelSerializer):
             "lottery_title": obj.lottery_event.title,
             "lottery_image": obj.lottery_event.image.url if obj.lottery_event.image else None
         }
+
+from rest_framework import serializers
+from .models import Winner
+
+class WinnerSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    lottery_title = serializers.CharField(source='lottery_event.title', read_only=True)
+
+    class Meta:
+        model = Winner
+        fields = ['lottery_title', 'username', 'ticket_number', 'created_at']

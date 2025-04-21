@@ -22,8 +22,11 @@
  </head>
  <body class="nav-body">
      <nav class="navbar">
-         <div class="navbar-logo">
-            <img src="/media/images/logo.png" alt="Logo">   </div>
+        <a href="{% url 'lottery_events' %}">
+            <div class="navbar-logo">
+                <img src="/media/images/logo.png" alt="Logo">
+            </div>
+        </a>        
          <ul class="navbar-links">
              <!-- <li><a href="#">Latest Competitions</a></li> -->
              <li class="dropdown_competitions">
@@ -37,10 +40,21 @@
              <li><a href="#">Result</a></li>
              <li><a href="#">How it Works</a></li>
         
-         <div class="navbar-auth">
-            <a href="{% url 'user_login' %}" class="login">Login</a>
-            <a href="{% url 'user_signup' %}" class="register">Register</a>
-        </div>
+             <div class="navbar-auth">
+                {% if user.is_authenticated %}
+                    <div class="navbar-user-profile">
+                        <a href="{% url 'personal-info-web' %}">
+                            <img src="{{ user.userprivacy.profile_photo.url }}" alt="Profile Picture" class="profile-pic">
+                        </a>
+                    </div>
+                    <button type="button" class="logout-btn" onclick="logoutDevice('{{ request.session.session_key }}', this)">Logout</button>
+
+                {% else %}
+                    <a href="{% url 'user_login' %}" class="login">Login</a>
+                    <a href="{% url 'user_signup' %}" class="register">Register</a>
+                {% endif %}
+            </div>
+             
     </ul>
     <div class="navbar-icons">
       <div class="navbar-favorites">

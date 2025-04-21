@@ -1,142 +1,81 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Login and Security</title>
-    <script>
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                document.cookie.split(';').forEach(cookie => {
-                    const trimmed = cookie.trim();
-                    if (trimmed.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
-                    }
-                });
-            }
-            return cookieValue;
-        }
-        function logoutDevice(ipAddress, button) {
-    fetch('/api/logout-device/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ ip_address: ipAddress })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // If the current session is logged out, redirect to login page
-            if (data.is_current_session) {
-                window.location.href = "/login/";
-                return; // Stop further execution
-            }
-
-            // Remove the logged-out session from the UI
-            const sessionDiv = button.closest('.session');
-            sessionDiv.remove();
-
-            // If no more active sessions exist, show "No active sessions."
-            if (document.querySelectorAll('.session').length === 0) {
-                document.body.insertAdjacentHTML('beforeend', '<p>No active sessions.</p>');
-            }
-
-            alert("Device logged out successfully!");
-        } else {
-            alert(data.message);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-  
-
-
-        function updatePassword() {
-            const newPassword = document.getElementById("new-password").value;
-            const confirmPassword = document.getElementById("confirm-password").value;
-
-            if (newPassword.length < 8) {
-                alert("Password must be at least 8 characters long.");
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                alert("Passwords do not match.");
-                return;
-            }
-
-            fetch("/update-password/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: new URLSearchParams({
-                    old_password: document.getElementById("old-password").value,
-                    new_password1: newPassword,
-                    new_password2: confirmPassword,
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Password updated successfully!");
-                } else {
-                    alert(data.message);
-                    if (data.errors) {
-                        console.error("Errors:", data.errors);
-                    }
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-    </script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <title>Login & Security</title>
+       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
-    {% include 'header.html' %}
-    {% include 'myorder-sidebar.html' %}
-    <h1>Login and Security</h1>
+<body class="unique-body">
 
-    <h2>Change Password</h2>
-    <form id="password-form">
-        <div class="form-group">
-            <label for="old-password">Current Password</label>
-            <input type="password" id="old-password" placeholder="Enter Current password" required>
-        </div>
-        <div class="form-group">
-            <label for="new-password">New Password</label>
-            <input type="password" id="new-password" placeholder="Enter new password" required>
-        </div>
-        <div class="form-group">
-            <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" placeholder="Confirm new password" required>
-        </div>
-        <div class="form-group">
-            <button type="button" onclick="updatePassword()">Update Password</button>
-        </div>
-    </form>
+    {% include 'header.html' %}
+
+    <div class="unique-container">
     
-    <hr>
-    <h2>Active Sessions</h2>
-   {% if device_history|length == 0 %}
-    <p>No active sessions.</p>
-{% else %}
-    {% for device in device_history %}
-        {% if not device.logout_time %}  <!-- Show only active sessions -->
-            <div class="session" data-ip="{{ device.ip_address }}">
-                <p><strong>Device:</strong> {{ device.device_info }}</p>
-                <p><strong>Last Active:</strong> {{ device.login_time }}</p>
-                <button type="button" class="logout-btn" onclick="logoutDevice('{{ device.ip_address }}', this)">
-                    Log out device
-                </button>
-            </div>
-        {% endif %}
-    {% endfor %}
-{% endif %}
-{% include 'footer.html' %}
+        <!-- Sidebar -->
+        {% include 'myorder-sidebar.html' %}
+    
+        <!-- Content Section -->
+        <div class="unique-content-section">
+            <h1 class="unique-title-main">Login and Security</h1>
+    
+            <!-- Change Password Section -->
+            <h2 class="unique-title-sub">Change Password</h2>
+            <form id="unique-password-form">
+                <div class="unique-form-group">
+                    <label for="unique-old-password" class="unique-label">Current Password</label>
+                    <input type="password" id="unique-old-password" class="unique-input-password" placeholder="Enter current password" required>
+                   </div>
+                <div class="unique-form-group">
+                    <label for="unique-new-password" class="unique-label">New Password</label>
+                    <input type="password" id="unique-new-password" class="unique-input-password" placeholder="Enter new password" required>
+                    
+                </div>
+               
+
+                <div class="unique-form-group">
+                    <label for="unique-confirm-password" class="unique-label">Confirm Password</label>
+                    <input type="password" id="unique-confirm-password" class="unique-input-password" placeholder="Confirm new password" required>
+                </div>
+                <div id="unique-toast" class="unique-toast hidden"></div>
+                <div class="unique-form-group">
+                    <button type="button" class="unique-update-btn" onclick="updatePassword()">Update Password</button>
+                </div>
+             
+            </form>
+    
+            <hr>
+    
+            <!-- Active Sessions Section -->
+            <h2 class="unique-title-sub">Active Sessions</h2>
+            {% if device_history|length == 0 %}
+            <p>No active sessions.</p>
+            {% else %}
+                {% for device in device_history %}
+                    {% if not device.logout_time %}  <!-- Show only active sessions -->
+                    <div class="unique-session{% if device.session_key == request.session.session_key %} current-session{% endif %}" data-session-key="{{ device.session_key }}">
+                        <div class="unique-session-info">
+                            <p><strong>Device:</strong> {{ device.device_info }}</p>
+                            <p><strong>Last Active:</strong> {{ device.login_time }}</p>
+                            {% if device.session_key == request.session.session_key %}
+                                <p><em>(This device)</em></p>
+                            {% endif %}
+                        </div>
+                        <button type="button" class="unique-logout-btn" onclick="logoutDevice('{{ device.session_key }}', this)">
+                            Log out device
+                        </button>
+                    </div>
+                    
+                    
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    
+    {% include 'footer.html' %}
+
 </body>
 </html>
