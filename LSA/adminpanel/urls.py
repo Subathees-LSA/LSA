@@ -82,7 +82,8 @@ urlpatterns = [
     # prize management api urls
     path('api_admin_dashboard_prize_management_winner_list_api_view/', api_admin_dashboard_prize_management_winner_list_api_view.as_view(), name='api_admin_dashboard_prize_management_winner_list_api_view'),
     path('api_admin_dashboard_prize_management/<int:pk>/update_winner_status/', api_admin_dashboard_prize_management_update_winner_status, name='api_admin_dashboard_prize_management_update_winner_status'),
-
+    path('winners/', winners_page, name='winners_page'),
+    path('api/winners/', WinnerListView.as_view(), name='winner-list'),
 ]
 
 if settings.DEBUG:

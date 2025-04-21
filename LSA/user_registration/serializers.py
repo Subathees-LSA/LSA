@@ -77,25 +77,34 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             return f"/view_kyc_image/{obj.id}/"
         return None
  
+from rest_framework import serializers
+from .models import UserProfile, UserPrivacy
+from django.contrib.auth.models import User
+
+
 class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
     user = UserList()  # Nest the UserSerializer to include user details
     kyc_image_url = serializers.SerializerMethodField()
-    profile_image_url = serializers.SerializerMethodField()  # New field for profile image
+    profile_photo_url = serializers.SerializerMethodField()  # Updated field for profile photo
 
     class Meta:
         model = UserProfile
-        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url', 'ip_address', 'is_blocked', 'profile_image_url']
+        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url', 'ip_address', 'is_blocked', 'profile_photo_url']
 
     def get_kyc_image_url(self, obj):
         if obj.kyc_image:
             return f"/view_kyc_image/{obj.id}/"
         return None
 
-    def get_profile_image_url(self, obj):
-        if obj.profile_image:  # Assuming 'profile_image' is the field storing the profile picture
-            return obj.profile_image.url
-        return None   
-
+    def get_profile_photo_url(self, obj):
+        try:
+            user_privacy = UserPrivacy.objects.get(user=obj.user)
+            if user_privacy.profile_photo:
+                return user_privacy.profile_photo.url
+        except UserPrivacy.DoesNotExist:
+            return None
+        return None
+    
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 

@@ -45,6 +45,9 @@ class LotteryEvent(models.Model):
     free_postal_description = models.TextField(default="Enter the description for free postal entry.")
     competition_details = models.TextField(default="")   
 
+    @property
+    def stock_tickets(self):
+        return max(0, self.total_tickets - self.sold_tickets)
     
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -354,7 +357,8 @@ class Winner(models.Model):
     prize_no = models.PositiveIntegerField(unique=True, blank=True, null=True)
     prize_status = models.CharField(max_length=20, choices=PRIZE_STATUS_CHOICES, default='initiated')
     prize_comments = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def generate_unique_prize_no(self):
         while True:
@@ -370,3 +374,29 @@ class Winner(models.Model):
     def __str__(self):
         user_display = self.user.username if self.user else "No User"
         return f"Winner: {user_display} (Ticket {self.ticket_number}) - {self.lottery_event.title}"    
+
+from django.db import models
+from django.utils import timezone
+from django.urls import reverse
+
+class WinnersWallWinnersList(models.Model):
+    winner_name = models.CharField(max_length=150)
+    ticket_number = models.CharField(max_length=6)
+    lottery_name = models.CharField(max_length=255)
+    draw_date = models.DateTimeField(default=timezone.now)
+    image = models.ImageField(upload_to='winners_wall_photos/', blank=True, null=True)
+    flag = models.BooleanField(default=True, help_text="Toggle to show/hide winner on the wall")
+    updated_at = models.DateTimeField(auto_now=True)  
+    
+    class Meta:
+        ordering = ['-draw_date']
+       
+    
+    def __str__(self):
+        return f"{self.winner_name} - {self.lottery_name}"
+    
+    @property
+    def image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return None        

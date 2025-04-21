@@ -4,7 +4,7 @@
 <head>
     {% load static %}
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Login</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -50,7 +50,8 @@
                             style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
                             E-mail</h3>
                         <input type="email" id="login-email" class="login-input-email" placeholder="Email" required>
-                        {% comment %} <span id="login-email-error" class="login-error-text"></span> {% endcomment %}
+                         <span id="login-email-error" class="login-error-text"></span>
+                         <div class="custom_admin_login_input_container">
                         <h3
                             style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
                             Password</h3>
@@ -59,7 +60,7 @@
                         <span id="login-toggle-password" class="login-toggle-password">
                             <img src="/media/images/eye-slash.png" alt="Show Password" class="toggle-eye-icon" >
 
-                        </span>
+                        </span></div>
                         {% comment %} <span id="login-password-error" class="login-error-text"></span> {% endcomment %}
                         <span id="login-error" class="login-error-text"></span>
                         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -89,7 +90,7 @@
 
                         <div class="google-signin-custom">
                             <a href="{% url 'social:begin' 'google-oauth2' %}" class="submit-btn-custom1">
-                                <img src="/media/lottery_images/search%201.png" alt="Google Signin"
+                                <img src="/media/banner-footer/banner-footer (2).png" alt="Google Signin"
                                     class="google-signin-img">
                                 Gmail
                             </a>
