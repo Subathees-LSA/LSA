@@ -1128,6 +1128,11 @@ function getCookie(name) {
 }
 
 function custom_admin_dashboard_transactions_management_function(email = null, status = null) {
+
+// Add these with your other variables
+let custom_admin_dashboard_transactions_management_filteredData = null;
+let custom_admin_dashboard_transactions_management_isSearching = false;
+let custom_admin_dashboard_transactions_management_isFiltering = false;
    // Determine the container based on the status parameter
    const containerId = status === "refunded" 
    ? "custom_admin_dashboard_transactions_management_refunded" 
@@ -1155,6 +1160,48 @@ function custom_admin_dashboard_transactions_management_function(email = null, s
         } else {
             custom_admin_dashboard_transactions_management_header.textContent = "Transactions Management > Transaction Details";
         }
+        // Add this inside the custom_admin_dashboard_transactions_management_createHeader function, after setting the header text
+const searchContainer = document.createElement("div");
+searchContainer.classList.add("transactions_management_search_container");
+
+const searchInput = document.createElement("input");
+searchInput.id = "transactions_management_search_input";
+searchInput.classList.add("transactions_management_search_input");
+searchInput.placeholder = "Search by Payment ID, Lottery, or Email, or Quantity";
+searchInput.addEventListener("input", (e) => {
+    custom_admin_dashboard_transactions_management_handleSearch(e.target.value);
+});
+
+searchContainer.appendChild(searchInput);
+custom_admin_dashboard_transactions_management_header.appendChild(searchContainer);
+// Add this inside the custom_admin_dashboard_transactions_management_createHeader function, after the search input
+const filterContainer = document.createElement("div");
+filterContainer.classList.add("transactions_management_filter_container");
+
+const filterSelect = document.createElement("select");
+filterSelect.id = "transactions_management_filter_select";
+filterSelect.classList.add("transactions_management_filter_select");
+
+// Create filter options
+const options = [
+    { value: "all", text: "All Transactions" },
+    { value: "completed", text: "Completed" },
+    { value: "refunded", text: "Refunded" }
+];
+
+options.forEach(option => {
+    const optElement = document.createElement("option");
+    optElement.value = option.value;
+    optElement.textContent = option.text;
+    filterSelect.appendChild(optElement);
+});
+
+filterSelect.addEventListener("change", (e) => {
+    custom_admin_dashboard_transactions_management_handleFilter(e.target.value);
+});
+
+filterContainer.appendChild(filterSelect);
+custom_admin_dashboard_transactions_management_header.appendChild(filterContainer);
 
         return custom_admin_dashboard_transactions_management_header;
     }
@@ -1226,24 +1273,36 @@ function custom_admin_dashboard_transactions_management_function(email = null, s
         } else {
             var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body");
         }
-
-        if (custom_admin_dashboard_transactions_management_allData.length === 0) {
+    
+        // Get data based on search and filter
+        let dataToDisplay = [...custom_admin_dashboard_transactions_management_allData];
+        
+        if (custom_admin_dashboard_transactions_management_isSearching && custom_admin_dashboard_transactions_management_filteredData) {
+            dataToDisplay = custom_admin_dashboard_transactions_management_filteredData;
+        }
+        
+        if (custom_admin_dashboard_transactions_management_isFiltering && custom_admin_dashboard_transactions_management_filteredData) {
+            dataToDisplay = custom_admin_dashboard_transactions_management_filteredData;
+        }
+    
+        
+        if (!dataToDisplay || dataToDisplay.length === 0) {
             // Display "No transactions" message if no data is available
             const noTransactionsRow = document.createElement("tr");
             const noTransactionsCell = document.createElement("td");
-            noTransactionsCell.setAttribute("colspan", "8"); // Span all columns
+            noTransactionsCell.setAttribute("colspan", "8");
             noTransactionsCell.textContent = "No transactions.";
             noTransactionsCell.classList.add("custom_admin_dashboard_transactions_management_no_transactions");
             noTransactionsRow.appendChild(noTransactionsCell);
             custom_admin_dashboard_transactions_management_tbody.appendChild(noTransactionsRow);
-            custom_admin_dashboard_transactions_management_updateViewMoreButton(); // Hide "View More" button
+            custom_admin_dashboard_transactions_management_updateViewMoreButton();
             return;
         }
-
+    
         const start = (custom_admin_dashboard_transactions_management_page - 1) * custom_admin_dashboard_transactions_management_rowsPerPage;
         const end = start + custom_admin_dashboard_transactions_management_rowsPerPage;
-        const custom_admin_dashboard_transactions_management_paginatedData = custom_admin_dashboard_transactions_management_allData.slice(start, end);
-
+        const custom_admin_dashboard_transactions_management_paginatedData = dataToDisplay.slice(start, end);
+    
         custom_admin_dashboard_transactions_management_paginatedData.forEach(event => {
             const row = document.createElement("tr");
 
@@ -1302,23 +1361,31 @@ function custom_admin_dashboard_transactions_management_function(email = null, s
     }
 
     // Update "View More" Button Visibility
-    function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
-        if (status === "refunded") {
-            var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button_refunded");
-        } else {
-            var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button");
-        }
-        if (!custom_admin_dashboard_transactions_management_viewMoreButton) return;
-
-        const totalRows = custom_admin_dashboard_transactions_management_allData.length;
-        const rowsDisplayed = custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage;
-
-        if (totalRows <= rowsDisplayed || totalRows === 0) {
-            custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "none"; // Hide button if all rows are displayed or no transactions
-        } else {
-            custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "block"; // Show button if more rows are available
-        }
+    // Replace the updateViewMoreButton function with this version
+function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
+    if (status === "refunded") {
+        var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button_refunded");
+    } else {
+        var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button");
     }
+    if (!custom_admin_dashboard_transactions_management_viewMoreButton) return;
+
+    let dataToCheck = [...custom_admin_dashboard_transactions_management_allData];
+    
+    if (custom_admin_dashboard_transactions_management_isSearching || custom_admin_dashboard_transactions_management_isFiltering) {
+        dataToCheck = custom_admin_dashboard_transactions_management_filteredData || [];
+    }
+
+    const totalRows = dataToCheck ? dataToCheck.length : 0;
+    const rowsDisplayed = custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage;
+
+    if (totalRows <= rowsDisplayed || totalRows === 0) {
+        custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "none";
+    } else {
+        custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "block";
+    }
+   
+}
 
     // Initialize Table and UI
     const custom_admin_dashboard_transactions_management_header = custom_admin_dashboard_transactions_management_createHeader();
@@ -1330,6 +1397,74 @@ function custom_admin_dashboard_transactions_management_function(email = null, s
     custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_viewMoreButton);
 
     custom_admin_dashboard_transactions_management_fetchData();
+    // Add this as a new function in the code
+// Replace the existing search handler function with this updated version
+function custom_admin_dashboard_transactions_management_handleSearch(searchTerm) {
+    searchTerm = searchTerm.toLowerCase().trim();
+    custom_admin_dashboard_transactions_management_page = 1; // Reset to first page
+    
+    if (!searchTerm) {
+        // If search is empty, clear filtered state and show all data
+        custom_admin_dashboard_transactions_management_filteredData = null;
+    custom_admin_dashboard_transactions_management_isSearching = false;
+        if (status === "refunded") {
+            document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
+        } else {
+            document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
+        }
+        custom_admin_dashboard_transactions_management_displayData();
+        return;
+    }
+
+    // Filter the data
+    custom_admin_dashboard_transactions_management_filteredData = custom_admin_dashboard_transactions_management_allData.filter(transaction => {
+        const paymentId = transaction.payment_intent ? transaction.payment_intent.toLowerCase() : '';
+        const paymentquantity = transaction.quantity ? transaction.quantity.toString().toLowerCase() : '';
+        return (
+            paymentId.includes(searchTerm) ||
+            transaction.lottery_event_title.toLowerCase().includes(searchTerm) ||
+            transaction.user_email.toLowerCase().includes(searchTerm) ||
+            paymentquantity.includes(searchTerm)
+        );
+    });
+
+  custom_admin_dashboard_transactions_management_isSearching = true;
+    
+    // Clear current table
+    if (status === "refunded") {
+        document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
+    } else {
+        document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
+    }
+    
+    // Display filtered results
+    custom_admin_dashboard_transactions_management_displayData();
+}
+// Add this as a new function
+function custom_admin_dashboard_transactions_management_handleFilter(filterValue) {
+    custom_admin_dashboard_transactions_management_page = 1; // Reset to first page
+    
+    if (filterValue === "all") {
+        custom_admin_dashboard_transactions_management_filteredData = null;
+        custom_admin_dashboard_transactions_management_isFiltering = false;
+    } else {
+        custom_admin_dashboard_transactions_management_filteredData = custom_admin_dashboard_transactions_management_allData.filter(
+            transaction => transaction.payment_status.toLowerCase() === filterValue
+        );
+        custom_admin_dashboard_transactions_management_isFiltering = true;
+    }
+    
+    // Clear current table
+    if (status === "refunded") {
+        document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
+    } else {
+        document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
+    }
+    
+    // Display filtered results
+    custom_admin_dashboard_transactions_management_displayData();
+}
+
 }
 
 // prize_management_page js code starting
@@ -1602,6 +1737,1144 @@ function updateWinnerStatus(event) {
 
 // prize_management_page js code ending
 
+// custom_admin_dashboard_winners_wall_winners page winners list js code staring***
+//  winners_wall_Winners_list_Pagination JavaScript start
+function winners_wall_Winners_section_setupPagination(totalItems, itemsPerPage = 6, currentPage = 1, containerSelector = '#winners_wall_winners_list_items') {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    // Only show pagination if we have more than one page
+    if (totalPages <= 1) {
+        document.querySelector('.winners_wall_Winners_section_pagination')?.remove();
+        return;
+    }
+    
+    // Create or update pagination container
+    let paginationContainer = document.querySelector('.winners_wall_Winners_section_pagination');
+    if (!paginationContainer) {
+        paginationContainer = document.createElement('div');
+        paginationContainer.className = 'winners_wall_Winners_section_pagination';
+        document.querySelector(containerSelector).parentNode.insertAdjacentElement('afterend', paginationContainer);
+    }
+    
+    paginationContainer.innerHTML = `<ul></ul>`;
+    const element = paginationContainer.querySelector('ul');
+    element.innerHTML = winners_wall_Winners_section_createPagination(totalPages, currentPage);
+}
+
+function winners_wall_Winners_section_createPagination(totalPages, currentPage) {
+    let liTag = '';
+    const maxVisiblePages = 5; // Maximum pages to show around current page
+    let startPage, endPage;
+
+    // Calculate the range of pages to show
+    if (totalPages <= maxVisiblePages) {
+        // Show all pages if total pages is less than max visible
+        startPage = 1;
+        endPage = totalPages;
+    } else {
+        // Calculate start and end pages
+        const maxPagesBeforeCurrent = Math.floor(maxVisiblePages / 2);
+        const maxPagesAfterCurrent = Math.ceil(maxVisiblePages / 2) - 1;
+        
+        if (currentPage <= maxPagesBeforeCurrent) {
+            // Near the beginning
+            startPage = 1;
+            endPage = maxVisiblePages;
+        } else if (currentPage + maxPagesAfterCurrent >= totalPages) {
+            // Near the end
+            startPage = totalPages - maxVisiblePages + 1;
+            endPage = totalPages;
+        } else {
+            // Somewhere in the middle
+            startPage = currentPage - maxPagesBeforeCurrent;
+            endPage = currentPage + maxPagesAfterCurrent;
+        }
+    }
+
+    // Previous button
+    if (currentPage > 1) {
+        liTag += `<li class="winners_wall_Winners_section_btn winners_wall_Winners_section_prev" onclick="winners_wall_Winners_section_handlePaginationClick(${currentPage - 1})">
+            <span><i class="fas fa-angle-left"></i> Prev</span></li>`;
+    }
+
+    // First page and ellipsis
+    if (startPage > 1) {
+        liTag += `<li class="winners_wall_Winners_section_numb winners_wall_Winners_section_first" onclick="winners_wall_Winners_section_handlePaginationClick(1)">
+            <span>1</span></li>`;
+        if (startPage > 2) {
+            liTag += `<li class="winners_wall_Winners_section_dots"><span>...</span></li>`;
+        }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const active = currentPage === i ? "winners_wall_Winners_section_active" : "";
+        liTag += `<li class="winners_wall_Winners_section_numb ${active}" onclick="winners_wall_Winners_section_handlePaginationClick(${i})">
+            <span>${i}</span></li>`;
+    }
+
+    // Last page and ellipsis
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            liTag += `<li class="winners_wall_Winners_section_dots"><span>...</span></li>`;
+        }
+        liTag += `<li class="winners_wall_Winners_section_numb winners_wall_Winners_section_last" onclick="winners_wall_Winners_section_handlePaginationClick(${totalPages})">
+            <span>${totalPages}</span></li>`;
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+        liTag += `<li class="winners_wall_Winners_section_btn winners_wall_Winners_section_next" onclick="winners_wall_Winners_section_handlePaginationClick(${currentPage + 1})">
+            <span>Next <i class="fas fa-angle-right"></i></span></li>`;
+    }
+
+    return liTag;
+}
+
+function winners_wall_Winners_section_handlePaginationClick(page) {
+    // Get current search term
+    const searchTerm = document.getElementById('winners_wall_winners_list_search').value;
+    // Fetch winners with pagination
+    custom_admin_dashboard_winners_wall_fetchWinners(searchTerm, page);
+}
+//  winners_wall_Winners_list_Pagination JavaScript end
+
+//  fetchWinners function to support pagination and winners list main function start
+function custom_admin_dashboard_winners_wall_fetchWinners(searchTerm = '', page = 1, itemsPerPage = 6) {
+    const winnersContainer = document.getElementById('winners_wall_winners_list_items');
+    winnersContainer.innerHTML = '<div class="winners_wall_winners_list_loading">Loading...</div>';
+    
+    fetch(`/api/custom_admin_dashboard_winner_wall_winners_list/?search=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            winnersContainer.innerHTML = '';
+            
+            if (data.length === 0) {
+                winnersContainer.innerHTML = '<div class="winners_wall_winners_list_no_results">No Winners found.</div>';
+                winners_wall_Winners_section_setupPagination(0);
+                return;
+            }
+            
+            // Calculate pagination slice
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = data.slice(startIndex, endIndex);
+            
+            // Display only the current page's winners
+            paginatedData.forEach(winner => {
+                const winnerCard = document.createElement('div');
+                winnerCard.className = `winners_wall_winners_list_card ${winner.flag ? '' : 'winners_wall_winners_list_hidden'}`;
+                winnerCard.innerHTML = `
+                    <div class="winners_wall_winners_list_image_container">
+                        ${winner.image_url ? `<img src="${winner.image_url}" alt="${winner.winner_name}" class="winners_wall_winners_list_image">` : '<div class="winners_wall_winners_list_no_image">No Image</div>'}
+                        <button class="winners_wall_winners_list_edit_btn" data-id="${winner.id}">
+                            <img src="/media/admin_files/edit-img.png" alt="Edit">
+                        </button>
+                        <button class="winners_wall_winners_list_toggle_btn" data-id="${winner.id}" data-flag="${winner.flag ? '1' : '0'}">
+                            ${winner.flag ? 'Hide' : 'Show'}
+                        </button>
+                    </div>
+                    <div class="winners_wall_winners_list_details">
+                        <table>
+                            <tr>
+                                <th>Lottery Name</th>
+                                <td>${winner.lottery_name}</td>
+                            </tr>
+                            <tr>
+                                <th>Winner Name</th>
+                                <td>${winner.winner_name}</td>
+                            </tr>
+                            <tr>
+                                <th>Ticket Number</th>
+                                <td>${winner.ticket_number}</td>
+                            </tr>
+                            <tr>
+                                <th>Draw Date</th>
+                                <td>${winner.draw_date_formatted || 'Invalid Date'}</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+                
+                winnersContainer.appendChild(winnerCard);
+            });
+            
+            // Setup pagination with total items count
+            winners_wall_Winners_section_setupPagination(data.length, itemsPerPage, page);
+            // Add event listeners for edit buttons
+            document.querySelectorAll('.winners_wall_winners_list_edit_btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    custom_admin_dashboard_winners_wall_add_winners_function(this.dataset.id);
+                });
+            });
+            
+            // Add event listeners for toggle buttons
+            document.querySelectorAll('.winners_wall_winners_list_toggle_btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const winnerId = this.dataset.id;
+                    const newFlag = this.dataset.flag === '1' ? '0' : '1';
+                    
+                    fetch(`/api/custom_admin_dashboard_winner_wall_winner_detail/${winnerId}/`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': custom_admin_dashboard_csrfToken,
+                        },
+                        body: JSON.stringify({ flag: newFlag })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.dataset.flag = newFlag;
+                        this.textContent = newFlag === '1' ? 'Hide' : 'Show';
+                        const card = this.closest('.winners_wall_winners_list_card');
+                        if (newFlag === '1') {
+                            card.classList.remove('winners_wall_winners_list_hidden');
+                        } else {
+                            card.classList.add('winners_wall_winners_list_hidden');
+                        }
+                    });
+                });
+            });
+        })
+        .catch(error => {
+            winnersContainer.innerHTML = '<div class="winners_wall_winners_list_error">Error loading winners.</div>';
+            console.error('Error:', error);
+        });
+}
+//  fetchWinners function to support pagination and winners list main function end
+// custom_admin_dashboard_winners_wall_function to use pagination with page initial function start
+function custom_admin_dashboard_winners_wall_function() {
+    const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
+    container.innerHTML = '';
+    
+    const winnersWallDiv = document.createElement('div');
+    winnersWallDiv.className = 'winners_wall_winners_list_container';
+    
+    const winners_wall_navHeader = document.createElement('div');
+    winners_wall_navHeader.className = 'winners_wall_winners_list_nav_header';
+    winners_wall_navHeader.innerHTML = `
+        <h2>Winners Wall &gt; Winners</h2>
+        <div class="winners_wall_winners_list_controls">
+        <h4>Select the Page</h4>
+            <select id="winners_wall_winners_list_page_select" class="winners_wall_winners_list_select">
+                <option value="winners">Winners</option>
+                <option value="testimonial">Testimonial</option>
+            </select>
+            <button id="winners_wall_winners_list_add_btn" class="winners_wall_winners_list_button">Add Winners</button>
+            <input type="text" id="winners_wall_winners_list_search" class="winners_wall_winners_list_search" placeholder="Search winners...">
+        </div>
+    `;
+    
+    winnersWallDiv.appendChild(winners_wall_navHeader);
+
+    const pageSelect = winners_wall_navHeader.querySelector('#winners_wall_winners_list_page_select');
+    const addButton = winners_wall_navHeader.querySelector('#winners_wall_winners_list_add_btn');
+
+    if (pageSelect) {
+        pageSelect.addEventListener('change', function() {
+            if (this.value === 'testimonial') {
+                custom_admin_dashboard_winners_wall_testimonial_function();
+            }
+        });
+    }
+
+    if (addButton) {
+        addButton.addEventListener('click', function() {
+            custom_admin_dashboard_winners_wall_add_winners_function();
+        });
+    }
+    
+    const currentWinnersSection = document.createElement('div');
+    currentWinnersSection.className = 'winners_wall_winners_list_current_winners';
+    currentWinnersSection.innerHTML = '<h3>Current Winners</h3>';
+    
+    const winnersContainer = document.createElement('div');
+    winnersContainer.id = 'winners_wall_winners_list_items';
+    winnersContainer.className = 'winners_wall_winners_list_items_container';
+    currentWinnersSection.appendChild(winnersContainer);
+    winnersWallDiv.appendChild(currentWinnersSection);
+    
+    container.appendChild(winnersWallDiv);
+    
+    const searchInput = document.getElementById('winners_wall_winners_list_search');
+    searchInput.addEventListener('input', function(e) {
+        custom_admin_dashboard_winners_wall_fetchWinners(e.target.value);
+    });
+    
+    // Initial fetch with pagination
+    custom_admin_dashboard_winners_wall_fetchWinners();
+}
+// custom_admin_dashboard_winners_wall_function to use pagination with page initial function end
+// custom_admin_dashboard_winners_wall_winners page winners list js code ending***
+
+// custom_admin_dashboard_winners_wall_winners page winners list edit and add js code staring***
+// Function to show edit/add winner popup start
+function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = null) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'winners_wall_Winners_edit_add_overlay';
+    overlay.id = 'winners_wall_Winners_edit_add_overlay';
+    
+    // Create popup container
+    const popup = document.createElement('div');
+    popup.className = 'winners_wall_Winners_edit_add_container';
+    
+    // Determine title based on mode
+    const title = mode === 'add' ? 'Add Winner' : 'Edit Winner';
+    
+    // Popup header
+    const header = document.createElement('div');
+    header.className = 'winners_wall_Winners_edit_add_header';
+    header.innerHTML = `
+        <div class="winners_wall_Winners_edit_add_title">
+            <span id="winners_wall_Winners_edit_add_title_winners_wall">Winners Wall</span> > 
+            <span id="winners_wall_Winners_edit_add_title_winners">Winners</span> > 
+            ${title}
+        </div>
+        <button class="winners_wall_Winners_edit_add_close">&times;</button>
+    `;
+    
+    // Popup content
+    const content = document.createElement('div');
+    content.className = 'winners_wall_Winners_edit_add_content';
+    
+    // Image upload section
+    const imageSection = document.createElement('div');
+    imageSection.className = 'winners_wall_Winners_edit_add_image_section';
+    imageSection.innerHTML = `
+        <div class="winners_wall_Winners_edit_add_upload_container">
+            <label for="winners_wall_Winners_edit_add_image_upload" class="winners_wall_Winners_edit_add_upload_btn">
+                    <img src="/media/admin_files/upload-img.png" alt="Upload Icon" />    
+            Choose File
+            </label>
+          
+            <input type="file" id="winners_wall_Winners_edit_add_image_upload" class="winners_wall_Winners_edit_add_file_input" accept="image/*">
+            
+            <div class="winners_wall_Winners_edit_add_error" id="winners_wall_Winners_edit_add_image_error">Please select an image</div>
+        </div>
+        <div class="winners_wall_Winners_edit_add_image_preview" id="winners_wall_Winners_edit_add_image_preview">
+            ${winnerData && winnerData.image_url ? 
+                `<img src="${winnerData.image_url}" alt="Winner Image">` : 
+                'No image selected'}
+        </div>
+    `;
+    
+    // Form section
+    const form = document.createElement('form');
+    form.className = 'winners_wall_Winners_edit_add_form';
+    form.innerHTML = `
+        <div class="winners_wall_Winners_edit_add_form_group" id="winners_wall_Winners_edit_add_lottery_name_group">
+            <label for="winners_wall_Winners_edit_add_lottery_name">Lottery Name</label>
+            <input type="text" id="winners_wall_Winners_edit_add_lottery_name" value="${winnerData ? winnerData.lottery_name : ''}">
+            <div class="winners_wall_Winners_edit_add_error" id="winners_wall_Winners_edit_add_lottery_name_error">Please enter a lottery name</div>
+        </div>
+        <div class="winners_wall_Winners_edit_add_form_group" id="winners_wall_Winners_edit_add_winner_name_group">
+            <label for="winners_wall_Winners_edit_add_winner_name">Winner Name</label>
+            <input type="text" id="winners_wall_Winners_edit_add_winner_name" value="${winnerData ? winnerData.winner_name : ''}">
+            <div class="winners_wall_Winners_edit_add_error" id="winners_wall_Winners_edit_add_winner_name_error">Please enter a winner name</div>
+        </div>
+        <div class="winners_wall_Winners_edit_add_form_group" id="winners_wall_Winners_edit_add_ticket_number_group">
+            <label for="winners_wall_Winners_edit_add_ticket_number">Ticket Number</label>
+            <input type="text" id="winners_wall_Winners_edit_add_ticket_number" value="${winnerData ? winnerData.ticket_number : ''}">
+            <div class="winners_wall_Winners_edit_add_error" id="winners_wall_Winners_edit_add_ticket_number_error">Please enter a ticket number</div>
+        </div>
+        <div class="winners_wall_Winners_edit_add_form_group winners_wall_Winners_edit_add_date_time_group" id="winners_wall_Winners_edit_add_draw_date_group">
+            <label>Draw Date</label>
+            <div class="winners_wall_Winners_edit_add_date_time">
+                <input type="date" id="winners_wall_Winners_edit_add_draw_date" value="${winnerData && winnerData.draw_date ? winnerData.draw_date.split('T')[0] : ''}">
+                <input type="time" id="winners_wall_Winners_edit_add_draw_time" value="${winnerData && winnerData.draw_date ? winnerData.draw_date.split('T')[1].substring(0, 5) : '11:00'}">
+            </div>
+            <div class="winners_wall_Winners_edit_add_error" id="winners_wall_Winners_edit_add_draw_date_error">Please select a draw date and time</div>
+        </div>
+    `;
+    
+    // Buttons section
+    const buttons = document.createElement('div');
+    buttons.className = 'winners_wall_Winners_edit_add_buttons';
+    buttons.innerHTML = `
+        <button type="button" class="winners_wall_Winners_edit_add_cancel_btn">Cancel</button>
+        <button type="button" class="winners_wall_Winners_edit_add_submit_btn" id="winners_wall_Winners_edit_add_submit_btn">
+            ${mode === 'add' ? 'Add Winner' : 'Update'}
+        </button>
+    `;
+    
+    // Assemble popup
+    content.appendChild(imageSection);
+    content.appendChild(form);
+    content.appendChild(buttons);
+    popup.appendChild(header);
+    popup.appendChild(content);
+    overlay.appendChild(popup);
+    
+    // Add to document
+    document.body.appendChild(overlay);
+    
+    // Add event listeners
+    // Close button
+    const closeBtn = popup.querySelector('.winners_wall_Winners_edit_add_close');
+    closeBtn.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+    
+    // Cancel button
+    const cancelBtn = popup.querySelector('.winners_wall_Winners_edit_add_cancel_btn');
+    cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+    
+    // Title navigation
+    const winnersWallTitle = popup.querySelector('#winners_wall_Winners_edit_add_title_winners_wall');
+    const winnersTitle = popup.querySelector('#winners_wall_Winners_edit_add_title_winners');
+    
+    winnersWallTitle.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+    
+    winnersTitle.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+    
+    // Image upload preview
+    const fileInput = popup.querySelector('#winners_wall_Winners_edit_add_image_upload');
+    const imagePreview = popup.querySelector('#winners_wall_Winners_edit_add_image_preview');
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imagePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                hideError('winners_wall_Winners_edit_add_image_error');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Helper functions for validation
+    function showError(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        const error = document.getElementById(errorId);
+        const group = field.closest('.winners_wall_Winners_edit_add_form_group') || 
+                      field.closest('.winners_wall_Winners_edit_add_date_time_group');
+        
+        if (group) group.classList.add('invalid');
+        if (error) error.classList.add('show');
+    }
+    
+    function hideError(errorId) {
+        const error = document.getElementById(errorId);
+        if (error) {
+            error.classList.remove('show');
+            const group = error.closest('.winners_wall_Winners_edit_add_form_group') || 
+                           error.closest('.winners_wall_Winners_edit_add_date_time_group');
+            if (group) group.classList.remove('invalid');
+        }
+    }
+    
+    // Validate individual fields
+    function validateField(fieldId, errorId) {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+            showError(fieldId, errorId);
+            return false;
+        } else {
+            hideError(errorId);
+            return true;
+        }
+    }
+    
+    // Validate date and time
+    function validateDateTime() {
+        const dateField = document.getElementById('winners_wall_Winners_edit_add_draw_date');
+        const timeField = document.getElementById('winners_wall_Winners_edit_add_draw_time');
+        const errorId = 'winners_wall_Winners_edit_add_draw_date_error';
+        
+        if (!dateField.value || !timeField.value) {
+            showError('winners_wall_Winners_edit_add_draw_date', errorId);
+            return false;
+        } else {
+            hideError(errorId);
+            return true;
+        }
+    }
+    
+    // Add input event listeners for validation
+    document.getElementById('winners_wall_Winners_edit_add_lottery_name').addEventListener('input', function() {
+        validateField('winners_wall_Winners_edit_add_lottery_name', 'winners_wall_Winners_edit_add_lottery_name_error');
+    });
+    
+    document.getElementById('winners_wall_Winners_edit_add_winner_name').addEventListener('input', function() {
+        validateField('winners_wall_Winners_edit_add_winner_name', 'winners_wall_Winners_edit_add_winner_name_error');
+    });
+    
+    document.getElementById('winners_wall_Winners_edit_add_ticket_number').addEventListener('input', function() {
+        validateField('winners_wall_Winners_edit_add_ticket_number', 'winners_wall_Winners_edit_add_ticket_number_error');
+    });
+    
+    document.getElementById('winners_wall_Winners_edit_add_draw_date').addEventListener('change', validateDateTime);
+    document.getElementById('winners_wall_Winners_edit_add_draw_time').addEventListener('change', validateDateTime);
+    
+    // Submit button
+    const submitBtn = popup.querySelector('#winners_wall_Winners_edit_add_submit_btn');
+    submitBtn.addEventListener('click', function() {
+        // Validate all fields
+        const isLotteryNameValid = validateField('winners_wall_Winners_edit_add_lottery_name', 'winners_wall_Winners_edit_add_lottery_name_error');
+        const isWinnerNameValid = validateField('winners_wall_Winners_edit_add_winner_name', 'winners_wall_Winners_edit_add_winner_name_error');
+        const isTicketNumberValid = validateField('winners_wall_Winners_edit_add_ticket_number', 'winners_wall_Winners_edit_add_ticket_number_error');
+        const isDateTimeValid = validateDateTime();
+        
+        if (!isLotteryNameValid || !isWinnerNameValid || !isTicketNumberValid || !isDateTimeValid) {
+            return;
+        }
+        
+        const lotteryName = document.getElementById('winners_wall_Winners_edit_add_lottery_name').value;
+        const winnerName = document.getElementById('winners_wall_Winners_edit_add_winner_name').value;
+        const ticketNumber = document.getElementById('winners_wall_Winners_edit_add_ticket_number').value;
+        const drawDate = document.getElementById('winners_wall_Winners_edit_add_draw_date').value;
+        const drawTime = document.getElementById('winners_wall_Winners_edit_add_draw_time').value;
+        const imageFile = fileInput.files[0];
+        
+        const drawDateTime = `${drawDate}T${drawTime}:00`;
+        
+        const formData = new FormData();
+        formData.append('lottery_name', lotteryName);
+        formData.append('winner_name', winnerName);
+        formData.append('ticket_number', ticketNumber);
+        formData.append('draw_date', drawDateTime);
+        formData.append('flag', true);
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+        
+        const url = mode === 'add' ? '/api/custom_admin_dashboard_winner_wall_winners_list/' : `/api/custom_admin_dashboard_winner_wall_winner_detail/${winnerData.id}/`;
+        const method = mode === 'add' ? 'POST' : 'PUT';
+        
+        fetch(url, {
+            method: method,
+            headers: {
+                'X-CSRFToken': custom_admin_dashboard_csrfToken,
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                custom_admin_dashboard_winners_wall_fetchWinners(); // Refresh the winners list
+                document.body.removeChild(overlay);
+            } else {
+                alert('Error saving winner: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error saving winner');
+        });
+    });
+}
+// Function to show edit/add winner popup start end
+
+
+//  function to use the new popup fetch ajax to winner details start
+function custom_admin_dashboard_winners_wall_add_winners_function(winnerId = null) {
+    if (winnerId) {
+        // Edit mode - fetch winner data first
+        fetch(`/api/custom_admin_dashboard_winner_wall_winner_detail/${winnerId}/`)
+            .then(response => response.json())
+            .then(data => {
+                winners_wall_Winners_edit_add_show_popup('edit', data);
+            })
+            .catch(error => {
+                console.error('Error fetching winner:', error);
+                alert('Error loading winner data');
+            });
+    } else {
+        // Add mode
+        winners_wall_Winners_edit_add_show_popup('add');
+    }
+}
+//  function to use the new popup fetch ajax to winner details end
+// custom_admin_dashboard_winners_wall_winners page winners list edit and add js code ending***
+
+
+// custom_admin_dashboard_winners_wall_testimonials page testimonials list  js code also delete code js testimonialending***
+
+// Main controller function(custom_admin_dashboard_winners_wall_testimonial_function) for testimonials management page is  starting 
+// Main controller function with pagination support
+function custom_admin_dashboard_winners_wall_testimonial_function() {
+    const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
+    container.innerHTML = '';
+    
+    // Create navigation header (same as before)
+    const navHeader = document.createElement('div');
+    navHeader.className = 'winners_wall_testimonial_nav_header';
+    navHeader.innerHTML = `
+        <span class="winners_wall_testimonial_nav_title">
+            <span class="winners_wall_testimonial_nav_clickable" 
+                  onclick="custom_admin_dashboard_winners_wall_function()">Winners Wall</span> > Testimonial
+        </span>
+        <div class="winners_wall_testimonial_controls">
+        <h4>Select the Page</h4>
+            <select id="winners_wall_testimonial_section_select" class="winners_wall_testimonial_select">
+                <option value="testimonial" selected>Testimonial</option>
+                <option value="winners">Winners</option>
+            </select>
+           
+            <button id="winners_wall_testimonial_add_btn" class="winners_wall_testimonial_add_btn">
+                Add Testimonial
+            </button>
+             <input type="text" id="winners_wall_testimonial_search" class="winners_wall_testimonial_search" 
+                   placeholder="Search testimonials...">
+        </div>
+    `;
+    container.appendChild(navHeader);
+    
+    // Add event listeners (same as before)
+    document.getElementById('winners_wall_testimonial_section_select').addEventListener('change', function() {
+        if (this.value === 'winners') custom_admin_dashboard_winners_wall_function();
+    });
+    
+    document.getElementById('winners_wall_testimonial_add_btn').addEventListener('click', function() {
+        custom_admin_dashboard_winners_wall_add_testimonial_function();
+    });
+    
+    let searchTimeout;
+    document.getElementById('winners_wall_testimonial_search').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            winners_wall_testimonial_load_testimonials(this.value.trim());
+        }, 300);
+    });
+    
+    // Load testimonials initially
+    winners_wall_testimonial_load_testimonials();
+}
+
+// Global variables for pagination
+let winners_wall_testimonial_current_page = 1;
+const winners_wall_testimonial_items_per_page = 10;
+let winners_wall_testimonial_total_items = 0;
+let winners_wall_testimonial_all_data = [];
+
+// Modified load testimonials function with pagination
+function winners_wall_testimonial_load_testimonials(searchQuery = '') {
+    const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
+    
+    // Clear existing content
+    const existingContent = container.querySelector('.winners_wall_testimonial_content_container');
+    if (existingContent) container.removeChild(existingContent);
+    
+    // Create loading state
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'winners_wall_testimonial_loading';
+    loadingDiv.textContent = 'Loading testimonials...';
+    container.appendChild(loadingDiv);
+    
+    // Build API URL
+    let url = '/api/custom_admin_dashboard_winners_wall_testimonials_list/';
+    if (searchQuery) {
+        url += `?search=${encodeURIComponent(searchQuery)}`;
+    }
+    
+    // Fetch testimonials
+    fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            container.removeChild(loadingDiv);
+            
+            // Store all data and total items count
+            winners_wall_testimonial_all_data = data;
+            winners_wall_testimonial_total_items = data.length;
+            
+            // Reset to page 1 when search changes
+            if (searchQuery) {
+                winners_wall_testimonial_current_page = 1;
+            }
+            
+            // Create content container
+            const contentContainer = document.createElement('div');
+            contentContainer.className = 'winners_wall_testimonial_content_container';
+            container.appendChild(contentContainer);
+            
+            // Display testimonials for current page
+            winners_wall_testimonial_display_page(contentContainer, searchQuery);
+            
+            // Create pagination if needed
+            if (winners_wall_testimonial_total_items > winners_wall_testimonial_items_per_page) {
+                winners_wall_testimonial_create_pagination(contentContainer);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading testimonials:', error);
+            container.removeChild(loadingDiv);
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'winners_wall_testimonial_error';
+            errorDiv.textContent = 'Error loading testimonials. Please try again.';
+            container.appendChild(errorDiv);
+        });
+}
+
+// Function to display testimonials for current page
+function winners_wall_testimonial_display_page(container, searchQuery = '') {
+    // Clear previous content
+    const existingSection = container.querySelector('.winners_wall_testimonial_table_section');
+    if (existingSection) container.removeChild(existingSection);
+    
+    const section = document.createElement('div');
+    section.className = 'winners_wall_testimonial_table_section';
+    
+    // Add heading
+    const heading = document.createElement('h3');
+    heading.className = 'winners_wall_testimonial_heading';
+    heading.textContent = 'Current Testimonial';
+    section.appendChild(heading);
+    
+    // Calculate pagination bounds
+    const startIndex = (winners_wall_testimonial_current_page - 1) * winners_wall_testimonial_items_per_page;
+    const endIndex = Math.min(startIndex + winners_wall_testimonial_items_per_page, winners_wall_testimonial_total_items);
+    const pageData = winners_wall_testimonial_all_data.slice(startIndex, endIndex);
+    
+    if (winners_wall_testimonial_total_items === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'winners_wall_testimonial_empty';
+        emptyDiv.textContent = searchQuery ? 
+            'No testimonials found matching your search.' : 
+            'No testimonials found.';
+        section.appendChild(emptyDiv);
+        container.appendChild(section);
+        return;
+    }
+    
+    // Create table
+    const table = document.createElement('table');
+    table.className = 'winners_wall_testimonial_table';
+    
+    // Table header
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th>IMAGE</th>
+            <th>CONTENT</th>
+            <th>NAME</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+    
+    // Table body
+    const tbody = document.createElement('tbody');
+    
+    // Add testimonials as rows
+    pageData.forEach(testimonial => {
+        const row = document.createElement('tr');
+        row.className = 'winners_wall_testimonial_row';
+        row.innerHTML = `
+            <td class="winners_wall_testimonial_image_cell">
+                <img src="${testimonial.image}" alt="${testimonial.name}" 
+                     class="winners_wall_testimonial_image"
+                     onclick="winners_wall_testimonial_show_image('${testimonial.image}')">
+            </td>
+            <td class="winners_wall_testimonial_content_cell">
+                ${testimonial.quote}
+            </td>
+            <td class="winners_wall_testimonial_name_cell">
+                <div class="winners_wall_testimonial_actions">
+                    <button class="winners_wall_testimonial_edit_btn" 
+                            onclick="custom_admin_dashboard_winners_wall_add_testimonial_function(${testimonial.id})">
+                        Edit
+                    </button>
+                    <button class="winners_wall_testimonial_delete_btn" 
+                            onclick="winners_wall_testimonial_delete(${testimonial.id})">
+                        Delete
+                    </button>
+                </div>
+                <div class="winners_wall_testimonial_name">${testimonial.name}</div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    table.appendChild(tbody);
+    section.appendChild(table);
+    container.appendChild(section);
+}
+
+// Pagination creation function winners wall testimonials pagination code 
+// Updated pagination creation function with duplicate page number fix
+function winners_wall_testimonial_create_pagination(container) {
+    const totalPages = Math.ceil(winners_wall_testimonial_total_items / winners_wall_testimonial_items_per_page);
+    const paginationContainer = document.createElement('div');
+    paginationContainer.className = 'winners_wall_testimonial_pagination';
+    
+    const paginationUL = document.createElement('ul');
+    paginationContainer.appendChild(paginationUL);
+    
+    let liTag = '';
+    const currentPage = winners_wall_testimonial_current_page;
+    
+    // Previous button
+    if (currentPage > 1) {
+        liTag += `<li class="winners_wall_testimonial_btn winners_wall_testimonial_prev" 
+                     onclick="winners_wall_testimonial_change_page(${currentPage - 1})">
+                     <span><i class="fas fa-angle-left"></i> Prev</span></li>`;
+    }
+    
+    // Always show first page
+    if (totalPages > 1) {
+        const active = currentPage === 1 ? 'winners_wall_testimonial_active' : '';
+        liTag += `<li class="winners_wall_testimonial_numb ${active}" 
+                      onclick="winners_wall_testimonial_change_page(1)">
+                      <span>1</span></li>`;
+    }
+    
+    // Show dots and previous page if needed
+    if (currentPage > 3 && totalPages > 3) {
+        liTag += `<li class="winners_wall_testimonial_dots"><span>...</span></li>`;
+    }
+    
+    // Show pages around current page
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        if (i < 2 || i > totalPages - 1) continue;
+        
+        const active = currentPage === i ? 'winners_wall_testimonial_active' : '';
+        liTag += `<li class="winners_wall_testimonial_numb ${active}" 
+                      onclick="winners_wall_testimonial_change_page(${i})">
+                      <span>${i}</span></li>`;
+    }
+    
+    // Show dots and next page if needed
+    if (currentPage < totalPages - 2 && totalPages > 3) {
+        liTag += `<li class="winners_wall_testimonial_dots"><span>...</span></li>`;
+    }
+    
+    // Always show last page if there is one
+    if (totalPages > 1) {
+        const active = currentPage === totalPages ? 'winners_wall_testimonial_active' : '';
+        liTag += `<li class="winners_wall_testimonial_numb ${active}" 
+                      onclick="winners_wall_testimonial_change_page(${totalPages})">
+                      <span>${totalPages}</span></li>`;
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+        liTag += `<li class="winners_wall_testimonial_btn winners_wall_testimonial_next" 
+                     onclick="winners_wall_testimonial_change_page(${currentPage + 1})">
+                     <span>Next <i class="fas fa-angle-right"></i></span></li>`;
+    }
+    
+    paginationUL.innerHTML = liTag;
+    container.appendChild(paginationContainer);
+}
+
+// Updated function to handle page changes and empty states
+function winners_wall_testimonial_change_page(newPage) {
+    const container = document.querySelector('.winners_wall_testimonial_content_container');
+    const totalPages = Math.ceil(winners_wall_testimonial_total_items / winners_wall_testimonial_items_per_page);
+    
+    // Handle case where deletion leaves us on an empty page
+    if (newPage > totalPages) {
+        newPage = Math.max(1, totalPages);
+    }
+    
+    winners_wall_testimonial_current_page = newPage;
+    
+    // Check if current page would be empty
+    const startIndex = (newPage - 1) * winners_wall_testimonial_items_per_page;
+    if (startIndex >= winners_wall_testimonial_total_items && winners_wall_testimonial_total_items > 0) {
+        // Move to previous page if current would be empty
+        winners_wall_testimonial_current_page = Math.max(1, newPage - 1);
+        winners_wall_testimonial_display_page(container);
+    } else {
+        winners_wall_testimonial_display_page(container);
+    }
+    
+    // Update pagination controls
+    const paginationContainer = document.querySelector('.winners_wall_testimonial_pagination');
+    if (paginationContainer) {
+        container.removeChild(paginationContainer);
+        if (winners_wall_testimonial_total_items > winners_wall_testimonial_items_per_page) {
+            winners_wall_testimonial_create_pagination(container);
+        }
+    }
+}
+
+
+// Function to show image in lightbox testimonial winner full show js code
+function winners_wall_testimonial_show_image(imageUrl) {
+    const lightbox = document.createElement('div');
+    lightbox.className = 'winners_wall_testimonial_lightbox';
+    lightbox.innerHTML = `
+        <div class="winners_wall_testimonial_lightbox_content">
+            <span class="winners_wall_testimonial_lightbox_close" 
+                  onclick="document.body.removeChild(this.parentNode.parentNode)">&times;</span>
+            <img src="${imageUrl}" class="winners_wall_testimonial_lightbox_image">
+        </div>
+    `;
+    document.body.appendChild(lightbox);
+}
+
+// Function to delete testimonial
+// Updated delete function with proper pagination handling
+function winners_wall_testimonial_delete(testimonialId) {
+    if (!confirm('Are you sure you want to delete this testimonial?')) {
+        return;
+    }
+    
+    fetch(`/api/custom_admin_dashboard_winners_wall_testimonial_detail/${testimonialId}/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': custom_admin_dashboard_csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Remove the deleted testimonial from our local data
+            winners_wall_testimonial_all_data = winners_wall_testimonial_all_data.filter(
+                item => item.id !== testimonialId
+            );
+            winners_wall_testimonial_total_items = winners_wall_testimonial_all_data.length;
+            
+            // Calculate the current page's range
+            const itemsPerPage = winners_wall_testimonial_items_per_page;
+            const currentPage = winners_wall_testimonial_current_page;
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            
+            // Check if current page would be empty after deletion
+            if (startIndex >= winners_wall_testimonial_total_items && currentPage > 1) {
+                // Move to previous page if current would be empty
+                winners_wall_testimonial_current_page = currentPage - 1;
+            }
+            
+            // Refresh the display
+            const container = document.querySelector('.winners_wall_testimonial_content_container');
+            if (container) {
+                winners_wall_testimonial_display_page(container);
+                
+                // Update pagination controls if they exist
+                const paginationContainer = document.querySelector('.winners_wall_testimonial_pagination');
+                if (paginationContainer) {
+                    container.removeChild(paginationContainer);
+                    if (winners_wall_testimonial_total_items > itemsPerPage) {
+                        winners_wall_testimonial_create_pagination(container);
+                    }
+                }
+            }
+        } else {
+            alert('Error deleting testimonial');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting testimonial:', error);
+        alert('Error deleting testimonial');
+    });
+}
+
+// custom_admin_dashboard_winners_wall_testimonials page testimonials list  js code also deletecode js testimonial ending***
+
+// custom_admin_dashboard_winners_wall_testimonials page testimonials list edit and add js code ending***
+
+// Function to show add/edit testimonial popup
+function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonialId = null) {
+    const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
+    container.innerHTML = '';
+    
+    // Determine if we're in add or edit mode
+    const isEditMode = testimonialId !== null;
+    
+    // Create popup container
+    const popupContainer = document.createElement('div');
+    popupContainer.className = 'winners_wall_testimonial_popup_container';
+    
+    // Create navigation header
+    const navHeader = document.createElement('div');
+    navHeader.className = 'winners_wall_testimonial_nav_header';
+    navHeader.innerHTML = `
+        <span class="winners_wall_testimonial_nav_title">
+            <span class="winners_wall_testimonial_nav_clickable" 
+                  onclick="custom_admin_dashboard_winners_wall_function()">Winners Wall</span> > 
+            <span class="winners_wall_testimonial_nav_clickable" 
+                  onclick="custom_admin_dashboard_winners_wall_testimonial_function()">Testimonial</span> > 
+            <span>${isEditMode ? 'Edit Testimonial' : 'Add Testimonial'}</span>
+        </span>
+    `;
+    popupContainer.appendChild(navHeader);
+    
+    // Create main content container
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'winners_wall_testimonial_popup_content';
+    
+    // Create form
+    const form = document.createElement('form');
+    form.id = 'winners_wall_testimonial_form';
+    form.className = 'winners_wall_testimonial_form';
+    
+    // Image upload section
+    const imageSection = document.createElement('div');
+    imageSection.className = 'winners_wall_testimonial_image_section';
+    imageSection.innerHTML = `
+       <div class="winners_wall_testimonial_image_upload">
+    <label class="winners_wall_testimonial_upload_label">Upload Image</label>
+    <input type="file" id="winners_wall_testimonial_image_input" class="winners_wall_testimonial_image_input" accept="image/*">
+    <label for="winners_wall_testimonial_image_input" src="/media/admin_files/upload-img.png" class="winners_wall_testimonial_choose_file_btn">
+        <img src="/media/admin_files/upload-img.png" alt="Upload Icon" />
+        Choose File
+    </label>
+</div>
+
+        <div class="winners_wall_testimonial_image_preview_container">
+            <img id="winners_wall_testimonial_image_preview" class="winners_wall_testimonial_image_preview" 
+                 src="${isEditMode ? '/media/admin_files/No_image_available.png' : '/media/admin_files/no_image.png'}" 
+                 alt="Preview">
+        </div>
+    `;
+    form.appendChild(imageSection);
+    
+    
+    // Form fields section
+    const fieldsSection = document.createElement('div');
+    fieldsSection.className = 'winners_wall_testimonial_fields_section';
+    fieldsSection.innerHTML = `
+        <div class="winners_wall_testimonial_field">
+            <label for="winners_wall_testimonial_name_input" class="winners_wall_testimonial_field_label">Winner Name</label>
+            <input type="text" id="winners_wall_testimonial_name_input" class="winners_wall_testimonial_text_input" 
+                   placeholder="Enter winner name">
+        </div>
+        <div class="winners_wall_testimonial_field">
+            <label for="winners_wall_testimonial_quote_input" class="winners_wall_testimonial_field_label">Winner Quote/Content</label>
+            <textarea id="winners_wall_testimonial_quote_input" class="winners_wall_testimonial_textarea_input" 
+                      placeholder="Enter testimonial content"></textarea>
+        </div>
+    `;
+    form.appendChild(fieldsSection);
+    
+    // Buttons section
+    const buttonsSection = document.createElement('div');
+    buttonsSection.className = 'winners_wall_testimonial_buttons_section';
+    buttonsSection.innerHTML = `
+        <button type="button" class="winners_wall_testimonial_cancel_btn" 
+                onclick="custom_admin_dashboard_winners_wall_testimonial_function()">Cancel</button>
+        <button type="button" class="winners_wall_testimonial_submit_btn" 
+                id="winners_wall_testimonial_submit_btn">${isEditMode ? 'Update' : 'Add Testimonial'}</button>
+    `;
+    form.appendChild(buttonsSection);
+    
+    contentContainer.appendChild(form);
+    popupContainer.appendChild(contentContainer);
+    container.appendChild(popupContainer);
+    
+    // Set up image preview functionality
+    document.getElementById('winners_wall_testimonial_image_input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('winners_wall_testimonial_image_preview').src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // If in edit mode, load the testimonial data
+    if (isEditMode) {
+        winners_wall_testimonial_load_testimonial_data(testimonialId);
+    }
+    
+    // Set up submit button functionality
+    document.getElementById('winners_wall_testimonial_submit_btn').addEventListener('click', function() {
+        winners_wall_testimonial_handle_submit(isEditMode, testimonialId);
+    });
+}
+
+// Function to load testimonial data for editing
+function winners_wall_testimonial_load_testimonial_data(testimonialId) {
+    fetch(`/api/custom_admin_dashboard_winners_wall_testimonial_detail/${testimonialId}/`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            // Populate form fields
+            document.getElementById('winners_wall_testimonial_name_input').value = data.name || '';
+            document.getElementById('winners_wall_testimonial_quote_input').value = data.quote || '';
+            
+            // Set image preview if image exists
+            if (data.image) {
+                document.getElementById('winners_wall_testimonial_image_preview').src = data.image;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading testimonial data:', error);
+            alert('Error loading testimonial data. Please try again.');
+        });
+}
+
+// Function to handle form submission
+function winners_wall_testimonial_handle_submit(isEditMode, testimonialId = null) {
+    const name = document.getElementById('winners_wall_testimonial_name_input').value.trim();
+    const quote = document.getElementById('winners_wall_testimonial_quote_input').value.trim();
+    const imageInput = document.getElementById('winners_wall_testimonial_image_input');
+    
+    // Basic validation
+    if (!name || !quote ) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('quote', quote);
+    
+    // Add image if selected
+    if (imageInput.files.length > 0) {
+        formData.append('image', imageInput.files[0]);
+    }
+    
+    // Determine the API endpoint and method
+    const url = isEditMode ? `/api/custom_admin_dashboard_winners_wall_testimonial_detail/${testimonialId}/` : '/api/custom_admin_dashboard_winners_wall_testimonials_list/';
+    const method = isEditMode ? 'PUT' : 'POST';
+    
+    // Show loading state
+    const submitBtn = document.getElementById('winners_wall_testimonial_submit_btn');
+    const originalBtnText = submitBtn.textContent;
+    submitBtn.textContent = 'Processing...';
+    submitBtn.disabled = true;
+    
+    // Make the API request
+    fetch(url, {
+        method: method,
+        headers: {
+            'X-CSRFToken': custom_admin_dashboard_csrfToken
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        // Return to testimonial list
+        custom_admin_dashboard_winners_wall_testimonial_function();
+    })
+    .catch(error => {
+        console.error('Error saving testimonial:', error);
+        alert('Error saving testimonial. Please try again.');
+    })
+    .finally(() => {
+        submitBtn.textContent = originalBtnText;
+        submitBtn.disabled = false;
+    });
+}
+
+
+// custom_admin_dashboard_winners_wall_testimonials page testimonials list edit and add js code ending***
+
 function showSpecificDiv(id) {
     // Select the section and the specific div by id
     const section = document.querySelector(".custom_admin_dashboard_dashboard");
@@ -1640,8 +2913,7 @@ function showSpecificDiv(id) {
     } else if (id === "draw-lottery-container") {
         custom_admin_dashboard_lottery_draw_winners_management_function();  
     }  else if (id === "custom_admin_dashboard_winners_wall_management_winners_and_testimonials") {
-      
-        custom_admin_dashboard_winners_wall_testimonial_function();
+        custom_admin_dashboard_winners_wall_function();
     }
    
     const nav_bar_user_management_button = document.getElementById("user_management_button_id");
@@ -1652,6 +2924,53 @@ function showSpecificDiv(id) {
 
 }
 let salesChart; // Store chart instance for dynamic updates
+function exportToExcel() {
+    if (!salesChart) {
+        alert("No data available to export.");
+        return;
+    }
+
+    const labels = salesChart.data.labels;
+    const data = salesChart.data.datasets[0].data;
+
+    // 🔍 Dynamically fetch year from a dropdown or input with id 'yearSelector'
+    const selectedYear = document.getElementById('yearSelect')?.value || new Date().getFullYear();
+
+    // Prepare Excel data
+    const excelData = [];
+
+    // Add heading row with correct year
+    excelData.push([`Monthly Sales Chart – ${selectedYear}`]);
+    excelData.push([]); // Empty row for spacing
+
+    // Headers with renamed column
+    excelData.push(['Month', 'Sales Amount']);
+
+    // Add monthly data
+    for (let i = 0; i < labels.length; i++) {
+        excelData.push([labels[i], data[i]]);
+    }
+
+    // Create worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+    // Apply bold styling to headers
+    const headerCell1 = worksheet['A3'];
+    const headerCell2 = worksheet['B3'];
+    if (headerCell1) headerCell1.s = { font: { bold: true }, alignment: { horizontal: 'center' } };
+    if (headerCell2) headerCell2.s = { font: { bold: true }, alignment: { horizontal: 'center' } };
+
+    // Create workbook and append
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Sales");
+
+    // Export with dynamic year in filename
+    XLSX.writeFile(workbook, `lottery_sales_${selectedYear}.xlsx`);
+}
+
+
+
+
 // Function to fetch and display sales data
 function fetchSalesData(year) {
     $.ajax({
@@ -1660,12 +2979,12 @@ function fetchSalesData(year) {
         data: { year: year },
         success: function (data) {
             const labels = data.map(item => item.month);
-            const activityCounts = data.map(item => item.activity_count);
+            const salesamount = data.map(item => item.sales_amount);
 
             // If the chart already exists, update it
             if (salesChart) {
                 salesChart.data.labels = labels;
-                salesChart.data.datasets[0].data = activityCounts;
+                salesChart.data.datasets[0].data = salesamount;
                 salesChart.update();
             } else {
                 // Create the chart for the first time
@@ -1675,8 +2994,8 @@ function fetchSalesData(year) {
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Sales Count',
-                            data: activityCounts,
+                            label: 'Sales',
+                            data: salesamount,
                             backgroundColor: 'rgba(255, 87, 34, 0.8)', // Matching orange color
                             borderColor: 'rgba(255, 87, 34, 1)',
                             borderWidth: 0, // No border for clean design
@@ -1724,7 +3043,7 @@ function fetchSalesData(year) {
                             y: {
                                 title: {
                                     display: true,
-                                    text: 'lottery Sales Count', // Y-axis label
+                                    text: 'lottery Sales', // Y-axis label
                                     color: '#555',
                                     font: {
                                         size: 14,
@@ -2012,6 +3331,708 @@ function hidetoggleSidebar() {
 }
 
 
+function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
+    // Fetch data from API
+    fetch('/api/draws-stats/')  // You'll need to create this API endpoint
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('report_and_analytics_Pending_vs_completed_draws_pie_chart');
+            
+            // Clear previous content
+            container.innerHTML = '';
+             // Calculate percentages
+             const totalDraws = data.total_draws;
+             const completedDraws = data.completed_draws;
+             const pendingDraws = totalDraws - completedDraws;
+             const completedPercentage = totalDraws > 0 ? Math.round((completedDraws / totalDraws) * 100) : 0;
+             const pendingPercentage = totalDraws > 0 ? 100 - completedPercentage : 0;
+            
+            // Create header section
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_header';
+            
+            const heading = document.createElement('h3');
+            heading.textContent = 'Pending vs Completed Draws';
+            
+            const exportBtn = document.createElement('button');
+            exportBtn.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_export_btn';
+            exportBtn.textContent = 'Export';
+            exportBtn.onclick = report_and_analytics_Pending_vs_completed_draws_pie_chart_export_function;
+            
+            headerDiv.appendChild(heading);
+            headerDiv.appendChild(exportBtn);
+            container.appendChild(headerDiv);
+            
+            // Create chart container
+            const chartContainer = document.createElement('div');
+            chartContainer.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_container';
+            
+            // Create pie chart using Chart.js
+            const canvas = document.createElement('canvas');
+            canvas.id = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_canvas';
+            chartContainer.appendChild(canvas);
+            container.appendChild(chartContainer);
+            
+            // Create legend
+            const legendDiv = document.createElement('div');
+            legendDiv.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_legend';
+            
+            const completedLegend = document.createElement('div');
+            completedLegend.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_item';
+            completedLegend.innerHTML = '<span class="report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_color" style="background-color: #4e73df;"></span> Completed Draws: ' + data.completed_draws;
+            
+            const pendingLegend = document.createElement('div');
+            pendingLegend.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_item';
+            pendingLegend.innerHTML = '<span class="report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_color" style="background-color: #1cc88a;"></span> Pending Draws: ' + data.pending_draws;
+            
+            legendDiv.appendChild(completedLegend);
+            legendDiv.appendChild(pendingLegend);
+            container.appendChild(legendDiv);
+            
+            // Initialize chart
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: [
+                        `Completed Draws (${completedPercentage}%)`, 
+                        `Pending Draws (${pendingPercentage}%)`
+                    ],
+                    datasets: [{
+                        data: [data.completed_draws, data.pending_draws],
+                        backgroundColor: ['#4e73df', '#1cc88a'],
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // We're using our custom legend
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching draw statistics:', error);
+            const container = document.getElementById('report_and_analytics_Pending_vs_completed_draws_pie_chart');
+            container.innerHTML = '<p class="report_and_analytics_Pending_vs_completed_draws_pie_chart_error">Error loading draw statistics</p>';
+        });
+}
+
+function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_function() {
+    // Fetch data again for export
+    fetch('/api/draws-stats/')
+        .then(response => response.json())
+        .then(data => {
+            // Create Excel workbook
+            const workbook = XLSX.utils.book_new();
+            
+            // Prepare worksheet data
+            const wsData = [
+                ['Pending vs Completed Draws'],
+                [''], // Empty row for spacing
+                ['', ''], // Placeholder for chart (will be merged)
+                [''], // Empty row for spacing
+                ['Completed Draws', '', data.completed_draws],
+                ['Pending Draws', '', data.pending_draws]
+            ];
+            
+            const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Add merge for chart area
+            if (!worksheet['!merges']) worksheet['!merges'] = [];
+            worksheet['!merges'].push({ s: { r: 2, c: 0 }, e: { r: 2, c: 1 } });
+            
+            // Add to workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Draws Report");
+            
+            // Export the workbook
+            XLSX.writeFile(workbook, 'Pending_vs_Completed_Draws.xlsx');
+        })
+        .catch(error => {
+            console.error('Error exporting draw statistics:', error);
+            alert('Error exporting report');
+        });
+}
+
+
+
+
+
+function report_and_analytics_winners_vs_losers_chart_function() {
+    const container = document.getElementById('report_and_analytics_winners_vs_losers_chart');
+    if (!container) return;
+
+    // Fetch data from API
+    fetch('/api/winners-vs-losers-chart/')
+        .then(response => response.json())
+        .then(data => {
+            // Clear container
+            container.innerHTML = '';
+            
+            // Create header with export button
+            const header = document.createElement('div');
+            header.className = 'report_and_analytics_winners_vs_losers_chart_header';
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.alignItems = 'center';
+            header.style.marginBottom = '20px';
+            
+            const title = document.createElement('h2');
+            title.textContent = 'Number of Winners Today';
+            title.style.margin = '0';
+            
+            const exportBtn = document.createElement('button');
+            exportBtn.textContent = 'Export';
+            exportBtn.className = 'report_and_analytics_winners_vs_losers_chart_export_btn';
+            exportBtn.style.padding = '5px 15px';
+            exportBtn.style.backgroundColor = '#4CAF50';
+            exportBtn.style.color = 'white';
+            exportBtn.style.border = 'none';
+            exportBtn.style.borderRadius = '4px';
+            exportBtn.style.cursor = 'pointer';
+            exportBtn.onclick = report_and_analytics_winners_vs_losers_chart_export_function;
+            
+            header.appendChild(title);
+            header.appendChild(exportBtn);
+            container.appendChild(header);
+            
+            // Create today's counts section
+            const todayCounts = document.createElement('div');
+            todayCounts.style.display = 'flex';
+            todayCounts.style.marginBottom = '20px';
+            todayCounts.style.gap = '20px';
+            
+            const winnersDiv = document.createElement('div');
+            winnersDiv.innerHTML = `
+                <div style="font-weight: bold;">Today Winners</div>
+                <div style="font-size: 24px;">${data.today_winners} <span style="color: green; font-size: 14px;">↑</span></div>
+            `;
+            
+            const losersDiv = document.createElement('div');
+            losersDiv.innerHTML = `
+                <div style="font-weight: bold;">Today Losers</div>
+                <div style="font-size: 24px;">${data.today_losers} <span style="color: red; font-size: 14px;">↓</span></div>
+            `;
+            
+            todayCounts.appendChild(winnersDiv);
+            todayCounts.appendChild(losersDiv);
+            container.appendChild(todayCounts);
+            
+            // Create chart container
+            const chartContainer = document.createElement('div');
+            chartContainer.style.position = 'relative';
+            chartContainer.style.height = '300px';
+            chartContainer.style.marginBottom = '30px';
+            container.appendChild(chartContainer);
+            
+            // Prepare chart data
+            const labels = data.weekly_data.map(item => item.date);
+            const winnersData = data.weekly_data.map(item => item.winners);
+            const losersData = data.weekly_data.map(item => item.losers);
+            
+            // Create line chart
+            const ctx = document.createElement('canvas');
+            chartContainer.appendChild(ctx);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Winners',
+                            data: winnersData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Losers',
+                            data: losersData,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+            
+            // Create totals section
+            const totalsDiv = document.createElement('div');
+            totalsDiv.style.display = 'flex';
+            totalsDiv.style.gap = '20px';
+            totalsDiv.style.marginTop = '20px';
+            
+            const totalWinners = document.createElement('div');
+            totalWinners.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 10px; height: 10px; background-color: rgba(75, 192, 192, 1); margin-right: 5px;"></div>
+                    <span>Winners (${data.total_winners})</span>
+                </div>
+            `;
+            
+            const totalLosers = document.createElement('div');
+            totalLosers.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 10px; height: 10px; background-color: rgba(255, 99, 132, 1); margin-right: 5px;"></div>
+                    <span>Looser (${data.total_losers})</span>
+                </div>
+            `;
+            
+            totalsDiv.appendChild(totalWinners);
+            totalsDiv.appendChild(totalLosers);
+            container.appendChild(totalsDiv);
+        })
+        .catch(error => {
+            console.error('Error fetching winners vs losers chart data:', error);
+            container.innerHTML = '<p>Error loading chart data</p>';
+        });
+}
+
+function report_and_analytics_winners_vs_losers_chart_export_function() {
+    // Fetch data from API
+    fetch('/api/winners-vs-losers-chart/')
+        .then(response => response.json())
+        .then(data => {
+            try {
+                const XLSX = window.XLSX;
+                if (!XLSX) {
+                    alert('Excel export library not loaded');
+                    return;
+                }
+
+                // Prepare worksheet data
+                const wsData = [
+                    // Main heading
+                    ['Number of Winners and Losers'],
+                    [], // Empty row for spacing
+                    
+                    // Today's counts
+                    ['Today\'s Count', ''],
+                    ['Today Winners:', data.today_winners],
+                    ['Today Losers:', data.today_losers],
+                    [], // Empty row for spacing
+                    
+                    // Weekly totals
+                    ['Weekly Totals', ''],
+                    ['Total Winners:', data.total_winners],
+                    ['Total Losers:', data.total_losers],
+                    [], // Empty row for spacing
+                    
+                    // Daily breakdown header
+                    ['Daily Breakdown (Last 7 Days)'],
+                    ['Date', 'Winners', 'Losers'],
+                    
+                    // Daily data rows
+                    ...data.weekly_data.map(item => [
+                        item.date, 
+                        item.winners, 
+                        item.losers
+                    ])
+                ];
+
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                // Apply styling through cell properties
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                
+                // Format main heading (row 0)
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_address = {c:C, r:0};
+                    const cell_ref = XLSX.utils.encode_cell(cell_address);
+                    if (!ws[cell_ref]) continue;
+                    
+                    ws[cell_ref].s = {
+                        font: { bold: true, sz: 16 },
+                        alignment: { horizontal: 'center' }
+                    };
+                }
+                
+                // Merge heading cells
+                ws['!merges'] = [
+                    { s: {r:0, c:0}, e: {r:0, c:2} }
+                ];
+                
+                // Format section headers (Today's Count, Weekly Totals, Daily Breakdown)
+                [2, 6, 10].forEach(row => {
+                    const cell_ref = XLSX.utils.encode_cell({r:row, c:0});
+                    if (ws[cell_ref]) {
+                        ws[cell_ref].s = {
+                            font: { bold: true, sz: 14 },
+                            fill: { fgColor: { rgb: "D3D3D3" } }
+                        };
+                    }
+                });
+                
+                // Format column headers
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_address = {c:C, r:11}; // Daily breakdown header row
+                    const cell_ref = XLSX.utils.encode_cell(cell_address);
+                    if (!ws[cell_ref]) continue;
+                    
+                    ws[cell_ref].s = {
+                        font: { bold: true },
+                        fill: { fgColor: { rgb: "E6E6E6" } }
+                    };
+                }
+                
+                // Format numbers to be right-aligned
+                for (let R = 3; R <= 4; ++R) { // Today's counts
+                    const cell_ref = XLSX.utils.encode_cell({r:R, c:1});
+                    if (ws[cell_ref]) {
+                        ws[cell_ref].s = { alignment: { horizontal: 'right' } };
+                    }
+                }
+                
+                for (let R = 7; R <= 8; ++R) { // Weekly totals
+                    const cell_ref = XLSX.utils.encode_cell({r:R, c:1});
+                    if (ws[cell_ref]) {
+                        ws[cell_ref].s = { alignment: { horizontal: 'right' } };
+                    }
+                }
+                
+                for (let R = 12; R <= range.e.r; ++R) { // Daily data
+                    for (let C = 1; C <= 2; ++C) {
+                        const cell_ref = XLSX.utils.encode_cell({r:R, c:C});
+                        if (ws[cell_ref]) {
+                            ws[cell_ref].s = { alignment: { horizontal: 'right' } };
+                        }
+                    }
+                }
+                
+                // Set column widths
+                ws['!cols'] = [
+                    { wch: 20 }, // Date column
+                    { wch: 10 }, // Winners column
+                    { wch: 10 }  // Losers column
+                ];
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Winners vs Losers");
+                
+                // Export the file
+                XLSX.writeFile(wb, 'winners_vs_losers_report.xlsx');
+                
+            } catch (e) {
+                console.error('Excel export error:', e);
+                alert('Error exporting to Excel');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data for export:', error);
+            alert('Error loading data for export');
+        });
+}
+
+
+// report_and_analytics_overall_transaction_report_chart_function start
+function report_and_analytics_overall_transaction_report_chart_function() {
+    const container = document.getElementById('report_and_analytics_overall_transaction_report_chart');
+    if (!container) return;
+
+    // Fetch data from API
+    fetch('/api/report_and_analytics/overall_transaction_report/')
+        .then(response => response.json())
+        .then(data => {
+            // Inject HTML structure
+            container.innerHTML = `
+                <div class="report_and_analytics_overall_transaction_report_chart_header_class">
+                    <h2>Overall Transaction Report</h2>
+                    <button class="report_and_analytics_overall_transaction_report_chart_export_button_class" 
+                            onclick="report_and_analytics_overall_transaction_report_chart_export_function()">
+                        Export
+                    </button>
+                </div>
+                <div class="report_and_analytics_overall_transaction_report_chart_amount_class">
+                    ${data.current_month} <span>${data.current_amount}</span>
+                </div>
+                <div class="report_and_analytics_overall_transaction_report_chart_canvas_container_class">
+                    <canvas id="report_and_analytics_overall_transaction_report_chart_canvas"></canvas>
+                </div>
+                <div class="report_and_analytics_overall_transaction_report_chart_legend_class">
+                    <div><span class="report_and_analytics_overall_transaction_report_chart_successful_class"></span> Successful</div>
+                    <div><span class="report_and_analytics_overall_transaction_report_chart_refunded_class"></span> Refunded</div>
+                </div>
+            `;
+
+            // Initialize chart
+            const ctx = document.getElementById('report_and_analytics_overall_transaction_report_chart_canvas').getContext('2d');
+            window.report_and_analytics_overall_transaction_report_chart_instance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.months,
+                    datasets: [
+                        {
+                            label: 'Successful',
+                            data: data.successful,
+                            borderColor: '#4CAF50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Refunded',
+                            data: data.refunded,
+                            borderColor: '#F44336',
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: £${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '£' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching transaction report data:', error);
+            container.innerHTML = '<p>Error loading transaction report data</p>';
+        });
+}
+// report_and_analytics_overall_transaction_report_chart_function end
+
+
+
+// report_and_analytics_overall_transaction_report_chart_export_function  Export function to Excel with raw data table start
+async function report_and_analytics_overall_transaction_report_chart_export_function() {
+    try {
+        // Load ExcelJS library dynamically
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js');
+        
+        // Fetch the data again for export
+        const response = await fetch('/api/report_and_analytics/overall_transaction_report/');
+        const data = await response.json();
+        
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet("Transaction Report");
+        
+        // Add main heading
+        sheet.mergeCells('A1:D1');
+        const titleRow = sheet.getRow(1);
+        titleRow.getCell(1).value = 'Overall Transaction Report';
+        titleRow.getCell(1).font = { bold: true, size: 16 };
+        titleRow.getCell(1).alignment = { horizontal: 'center' };
+        titleRow.height = 25;
+        
+        // Add current month/year and profits
+        const currentDate = new Date();
+        const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+        const currentYear = currentDate.getFullYear();
+        
+        sheet.mergeCells('A2:D2');
+        const subtitleRow = sheet.getRow(2);
+        subtitleRow.getCell(1).value = `Current Period: ${currentMonth} ${currentYear} | Net Profit: ${data.current_amount}`;
+        subtitleRow.getCell(1).font = { bold: true };
+        subtitleRow.getCell(1).alignment = { horizontal: 'center' };
+        subtitleRow.height = 20;
+        
+        // Add empty row for spacing
+        sheet.addRow([]);
+        
+        // Add table headers
+        const headerRow = sheet.getRow(4);
+        headerRow.values = ['Month', 'Successful (£)', 'Refunded (£)', 'Net (£)'];
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: 'center' };
+        headerRow.eachCell(cell => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD3D3D3' }
+            };
+        });
+        
+        // Add data rows
+        data.months.forEach((month, index) => {
+            const successful = data.successful[index] || 0;
+            const refunded = data.refunded[index] || 0;
+            const net = successful - refunded;
+            
+            const row = sheet.addRow([
+                month,
+                successful.toLocaleString('en-GB', { minimumFractionDigits: 2 }),
+                refunded.toLocaleString('en-GB', { minimumFractionDigits: 2 }),
+                net.toLocaleString('en-GB', { minimumFractionDigits: 2 })
+            ]);
+            
+            row.eachCell(cell => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+                if (cell.col === 4) { // Net column
+                    cell.font = { bold: true };
+                    cell.numFmt = '£#,##0.00;[Red]-£#,##0.00';
+                }
+            });
+            
+            // Highlight current month
+            if (month === currentMonth.slice(0, 3)) {
+                row.eachCell(cell => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF0F0F0' }
+                    };
+                });
+            }
+        });
+        
+        // Format columns
+        sheet.columns = [
+            { key: 'month', width: 15 },
+            { key: 'successful', width: 18 },
+            { key: 'refunded', width: 18 },
+            { key: 'net', width: 18 }
+        ];
+        
+        // Format numbers
+        for (let i = 5; i <= sheet.rowCount; i++) {
+            sheet.getCell(`B${i}`).numFmt = '£#,##0.00';
+            sheet.getCell(`C${i}`).numFmt = '£#,##0.00';
+            sheet.getCell(`D${i}`).numFmt = '£#,##0.00;[Red]-£#,##0.00';
+        }
+        
+        // // Add totals row
+        // const totalRow = sheet.addRow([
+        //     'TOTAL',
+        //     `=SUM(B5:B${sheet.rowCount})`,
+        //     `=SUM(C5:C${sheet.rowCount})`,
+        //     `=SUM(D5:D${sheet.rowCount})`
+        // ]);
+        
+        // totalRow.font = { bold: true };
+        // totalRow.eachCell(cell => {
+        //     cell.border = {
+        //         top: { style: 'double' },
+        //         bottom: { style: 'thin' },
+        //         left: { style: 'thin' },
+        //         right: { style: 'thin' }
+        //     };
+        //     if (cell.col > 1) {
+        //         cell.numFmt = '£#,##0.00;[Red]-£#,##0.00';
+        //     }
+        // });
+        
+        // Generate and download Excel file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Overall_Transaction_Report_${currentMonth}_${currentYear}.xlsx`;
+        link.click();
+    } catch (error) {
+        console.error("Error exporting report:", error);
+        alert("Error exporting report. Please try again.");
+    }
+}
+
+// Helper function to load scripts dynamically (unchanged)
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+// report_and_analytics_overall_transaction_report_chart_export_function  Export function to Excel with raw data table start
+
+// report_and_analytics_monthly_sales_bar_chart_function start
+function report_and_analytics_monthly_sales_bar_chart_function() {
+	const custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container = document.getElementById("report_and_analytics_monthly_sales_bar_chart");
+	custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container.innerHTML = `
+	 <div id="custom_admin_dashboard_bar_chart_filter">
+        <h1>Monthly Sales Chart</h1>
+
+        <!-- Year Selection Dropdown -->
+        <label for="yearSelect">Select Year:</label>
+        <select id="yearSelect"></select>
+        <button onclick="exportToExcel()">Export to Excel</button>
+
+
+    </div>
+    <div class="admin-dashboard-report-container" style="width: 50%;height: 50%;">
+        <canvas class="admin-dashboard-report" id="salesChart" width="800" height="400"></canvas>
+    </div>
+	 `;
+
+ }
+// report_and_analytics_monthly_sales_bar_chart_function end
 function initializeDashboard() {
     try {
 
@@ -2109,11 +4130,18 @@ function initializeDashboard() {
                                         `;
                                     custom_admin_dashboard_overview_lottery_won_lost_count.appendChild(lottery_won_lost_container);
                                     lottery_won_and_lost_total_calculation();
-                                } else if (tab.type === 'lottery_sales_overview') {
-                                    const custom_admin_dashboard_bar_chart_filter = document.getElementById("custom_admin_dashboard_bar_chart_filter");
-                                    custom_admin_dashboard_bar_chart_filter.style.display = "block";
-                                    dynamic_lottery_sales_bar_chart();
-
+                                } else if (tab.type === 'charts') {
+                                    if (tab.identifier === 'report_and_analytics_monthly_sales_bar_chart') {
+                                        report_and_analytics_monthly_sales_bar_chart_function();
+                                        dynamic_lottery_sales_bar_chart(); // If needed with it
+                                    } else if (tab.identifier === 'report_and_analytics_Pending_vs_completed_draws_pie_chart') {
+                                        report_and_analytics_Pending_vs_completed_draws_pie_chart_function();
+                                    } else if (tab.identifier === 'report_and_analytics_winners_vs_losers_chart') {
+                                        report_and_analytics_winners_vs_losers_chart_function();
+                                    } else if (tab.identifier === 'report_and_analytics_overall_transaction_report_chart') {
+                                        report_and_analytics_overall_transaction_report_chart_function();
+                                    }
+                                
                                 } else if (tab.type === 'lottery_sales_overview_regional_reports') {
                                     const lottery_sales_overview_regional_reports = document.getElementById("regional_sales_overview_dashboard");
                                     lottery_sales_overview_regional_reports.style.display = "flex";
@@ -2352,7 +4380,7 @@ function initializeDashboard() {
                                                     <p>${user.ip_address || 'N/A'}</p>
                                                     
                                                     <p><button class="block-user-btn" data-user-id="${user.user?.id}">
-                                                    <img src="http://127.0.0.1:8000/media/dashboard_preview_image/Frame.png"  alt="Block-Icon class="Block-icon"/>
+                                                    <img src="/media/dashboard_preview_image/Frame.png"  alt="Block-Icon class="Block-icon"/>
                                                     ${user.is_blocked ? 'Unblock User' : 'Block User'}</button></p>
                                                     ${user.kyc_image_url ? `<a href="#" class="view-kyc-image" data-imageurl="${user.kyc_image_url}" data-username="${user.user?.username || 'N/A'}" data-email="${user.user?.email || 'N/A'}" data-kycstatus="${user.kyc_status || 'N/A'}">View KYC Image</a>` : 'KYC not submitted'}
                                                 </div>
@@ -2820,6 +4848,76 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", function () {
     const contactForm = document.getElementById("contact-form");
     const responseMessage = document.getElementById("contact-response-message");
+    const orderDetailsBox = document.getElementById("contact-order-details-box");
+    const orderDetailsContent = document.getElementById("contact-order-details-content");
+
+    // Auto-fill user name and email
+    if (user_name) {
+        document.getElementById('contact-name').value = user_name;
+    }
+    if (user_email) {
+        document.getElementById('contact-email').value = user_email;
+    }
+
+    if (help_session_id) {
+        // Show the order details box
+        orderDetailsBox.style.display = 'block';
+        
+        // Fetch order details
+        fetch(`/api/my-orders/?filter=all`)
+            .then(response => response.json())
+            .then(data => {
+                const order = data[help_session_id];
+                if (order) {
+                    // Build order details HTML
+                    let orderDetailsHTML = `
+                        <p><strong>Order ID:</strong> ${order.payment_id}</p>
+                        <p><strong>Status:</strong> ${order.payment_status}</p>
+                        <p><strong>Total Amount:</strong> £${parseFloat(order.total_amount).toFixed(2)}</p>
+                        <p><strong>Date:</strong> ${new Date(order.payment_at).toLocaleString()}</p>
+                        <h4>Items:</h4>
+                        <ul class="contact-order-items-list">`;
+
+                    // Find all winning lotteries and tickets
+                    let winningLotteries = [];
+                    let winningTickets = [];
+                    
+                    order.payments.forEach(payment => {
+                        orderDetailsHTML += `<li>
+                            <strong>${payment.quantity}x ${payment.lottery_event_title}</strong>
+                            ${payment.winning_tickets && payment.winning_tickets.length > 0 ? 
+                              '<span class="contact-winner-badge">WINNER!</span>' : ''}
+                            <p>Ticket Numbers: ${payment.ticket_numbers.join(', ')}</p>
+                        </li>`;
+                        
+                        if (payment.winning_tickets && payment.winning_tickets.length > 0) {
+                            winningLotteries.push(payment.lottery_event_title);
+                            winningTickets = winningTickets.concat(payment.winning_tickets.map(t => `${payment.lottery_event_title}: ${t}`));
+                        }
+                    });
+
+                    orderDetailsHTML += `</ul>`;
+                    
+                    // Add winning information if any
+                    if (winningLotteries.length > 0) {
+                        orderDetailsHTML += `
+                            <div class="contact-winning-info">
+                                <h4>Winning Information</h4>
+                                <p>Congratulations! You won in ${winningLotteries.join(', ')}</p>
+                                <p>Winning Tickets: ${winningTickets.join(', ')}</p>
+                            </div>`;
+                    }
+
+                    orderDetailsContent.innerHTML = orderDetailsHTML;
+                    
+                    // Clear the session ID after use
+                    localStorage.removeItem('help_session_id');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching order details:', error);
+            });
+    }
 
     // Handle form submission
     contactForm.addEventListener("submit", async function (e) {
@@ -2827,8 +4925,16 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const name = document.getElementById("contact-name").value;
             const email = document.getElementById("contact-email").value;
-            const description = document.getElementById("contact-description").value;
+            let description = document.getElementById("contact-description").value;
 
+            // If order details exist, prepend them to the description
+            if (help_session_id && orderDetailsContent.innerHTML) {
+                // const orderDetailsText = `\n\n--- ORDER DETAILS ---\n${orderDetailsContent.textContent}`;
+                // description += orderDetailsText;
+                const orderDetailsText = `\n${orderDetailsContent.textContent}\n\n`;
+                description = orderDetailsText + description;
+            }
+            
             const response = await fetch("/api/contact/", {
                 method: "POST",
 
@@ -2836,14 +4942,31 @@ document.addEventListener("DOMContentLoaded", function () {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": contact_csrfToken
                 },
-                body: JSON.stringify({ name, email, description }),
+                body: JSON.stringify({ 
+                    name, 
+                    email, 
+                    description,
+                    order_id: help_session_id || null  // Include order ID if available
+                }),
             });
 
             if (response.ok) {
                 const data = await response.json();
                 responseMessage.innerText = data.message;
                 responseMessage.style.color = "green";
-                contactForm.reset(); // Clear the form after success
+                contactForm.reset();
+                // Reset the form and order details
+                document.getElementById("contact-description").value = '';
+                    // Hide the order details box if it was shown
+                orderDetailsBox.style.display = 'none';
+                orderDetailsContent.innerHTML = '';
+                // Re-fill username and email after reset
+                if (user_name) {
+                    document.getElementById('contact-name').value = user_name;
+                }
+                if (user_email) {
+                    document.getElementById('contact-email').value = user_email;
+                }
             } else {
                 const errorData = await response.json();
                 responseMessage.innerText = errorData.email ? errorData.email[0] : "No error message found";
@@ -7504,20 +9627,34 @@ $(document).ready(function () {
                 }
 
                 $.each(data, function (sessionId, group) {
+                    // Find all winning lotteries in this group
+                    let winningLotteries = [];
+                    group.payments.forEach(payment => {
+                        if (payment.winning_tickets && payment.winning_tickets.length > 0) {
+                            winningLotteries.push(payment.lottery_event_title);
+                        }
+                    });
+                    
+                    // Remove duplicates
+                    winningLotteries = [...new Set(winningLotteries)];
+                    
                     let orderHTML = `
                         <div class="myorder-group">
                             <h4>Order ID: <strong>${group.payment_id}</strong></h4>
                             <span class="myorder-status-badge ${group.payment_status === 'completed' ? 'myorder-completed' : 'myorder-canceled'}">
                                 ${group.payment_status.charAt(0).toUpperCase() + group.payment_status.slice(1)}
                             </span>
+                            ${winningLotteries.length > 0 ? 
+                              '<span class="myorder-winner-badge">WINNER!</span>' : ''}
                             <p><i class="fa fa-calendar"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleDateString() : 'N/A'}
                                 &nbsp; <i class="fa fa-clock"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleTimeString() : 'N/A'}</p>
-                            <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>`
-                    // Add Receipt Link (Outside Modal)
-                if (group.receipt_url) {
-                    orderHTML += `<p><a href="${group.receipt_url}" target="_blank" class="receipt-link">View Receipt</a></p>`;
-                }
-                            orderHTML +=`<table class="myorder-table">
+                            <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>`;
+                    
+                    if (group.receipt_url) {
+                        orderHTML += `<p><a href="${group.receipt_url}" target="_blank" class="receipt-link">View Receipt</a></p>`;
+                    }
+                    
+                    orderHTML += `<table class="myorder-table">
                                 <thead>
                                     <tr>
                                         <th>Quantity</th>
@@ -7528,16 +9665,21 @@ $(document).ready(function () {
                                 <tbody>`;
 
                     $.each(group.payments.slice(0, 2), function (index, payment) {
-                        // let ticketNumbers = payment.ticket_numbers.join(", ");
-
                         let ticketNumbers = payment.ticket_numbers.slice(0, 1).join(", ");
-if (payment.ticket_numbers.length > 1) {
-         ticketNumbers += ` , etc...`; // Indicate there are more numbers
-}
+                        if (payment.ticket_numbers.length > 1) {
+                            ticketNumbers += ` , etc...`;
+                        }
+                        
+                        // Check if this payment has winning tickets
+                        let winnerIndicator = '';
+                        if (payment.winning_tickets && payment.winning_tickets.length > 0) {
+                            winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER!</span>';
+                        }
+                        
                         orderHTML += `
                             <tr>
                                 <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
-                                <td>${payment.lottery_event_title}</td>
+                                <td>${payment.lottery_event_title} ${winnerIndicator}</td>
                                 <td>${ticketNumbers}</td>
                             </tr>`;
                     });
@@ -7551,14 +9693,16 @@ if (payment.ticket_numbers.length > 1) {
                     orderHTML += `
                         <div class="myorder-button-container">
                             <button class="myorder-button myorder-details-button" onclick="showModal('${sessionId}')">Details</button>
-                         <button class="myorder-button myorder-help-button" onclick="#">Get Help</button>
-                            </div>
+                            <button class="myorder-button myorder-help-button" onclick="getHelp('${sessionId}')">Get Help</button>
+                        </div>
 
                         <div id="myorder-modal-${sessionId}" class="myorder-modal">
                             <div class="myorder-modal-content">
                                 <span class="myorder-close" onclick="closeModal('${sessionId}')">&times;</span>
                                 <h4>Order ID: <strong>${group.payment_id}</strong></h4>
                                 <p>Status: ${group.payment_status.charAt(0).toUpperCase() + group.payment_status.slice(1)}</p>
+                                ${winningLotteries.length > 0 ? 
+                                  `<p class="myorder-winner-notice">Congratulations! You won ${winningLotteries.length > 1 ? 'these lotteries' : 'this lottery'}: ${winningLotteries.join(', ')}!</p>` : ''}
                                 <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>
                                 <table class="myorder-table">
                                     <thead>
@@ -7572,11 +9716,28 @@ if (payment.ticket_numbers.length > 1) {
                                     <tbody>`;
 
                     $.each(group.payments, function (index, payment) {
-                        let ticketNumbers = payment.ticket_numbers.join(", ");
+                        let ticketNumbers = payment.ticket_numbers.map(ticket => {
+                            if (payment.winning_tickets && payment.winning_tickets.includes(ticket)) {
+                                return `<span class="myorder-winning-ticket">${ticket} (WINNER)</span>`;
+                            }
+                            return ticket;
+                        }).join(", ");
+                        // Check if this payment has winning tickets
+                        let winnerIndicator = '';
+                        if (payment.winning_tickets && payment.winning_tickets.length > 0) {
+                            winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER!</span>';
+                        }
+                        
+                        // Highlight the entire row if it contains winning tickets
+                        let rowClass = '';
+                        if (payment.winning_tickets && payment.winning_tickets.length > 0) {
+                            rowClass = 'class="winning-row"';
+                        }
+                        
                         orderHTML += `
-                                        <tr>
+                                        <tr ${rowClass}>
                                             <td><span class="myorder-quantity-box">${payment.quantity}</span></td>
-                                            <td>${payment.lottery_event_title}</td>
+                                            <td>${payment.lottery_event_title}${winnerIndicator}</td>
                                             <td>£${parseFloat(payment.amount).toFixed(2)}</td>
                                             <td>${ticketNumbers}</td>
                                         </tr>`;
@@ -7597,7 +9758,13 @@ if (payment.ticket_numbers.length > 1) {
 
     // Initial load
     fetchOrders("all");
-
+        // Update the Get Help button in custom.js
+        window.getHelp = function(sessionId) {
+        // Store the sessionId in localStorage
+        localStorage.setItem('help_session_id', sessionId);
+        // Redirect to contact page
+        window.location.href = '/contact/';
+    }
     // Event listener for filter change
     $("#myorder-filter").change(function () {
         let selectedFilter = $(this).val();
@@ -7621,8 +9788,7 @@ if (payment.ticket_numbers.length > 1) {
         });
     });
 });
-
-
+//for scroll right btn for sidebar
 function initializeMenuScroll() {
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector(".myorder-sidebar");
@@ -7659,13 +9825,25 @@ function initializeMenuScroll() {
         // Initial check
         checkScrollVisibility();
 
-        // Recheck when window resizes
+        // Scroll active menu item into view after short delay
+        setTimeout(() => {
+            const activeItem = menu.querySelector(".active");
+            if (activeItem) {
+                activeItem.scrollIntoView({
+                    behavior: "smooth",
+                    inline: "center",
+                    block: "nearest"
+                });
+            }
+        }, 100);
+
+        // Recheck on window resize
         window.addEventListener("resize", checkScrollVisibility);
     }
 }
 
-// Run function when DOM is fully loaded
 document.addEventListener("DOMContentLoaded", initializeMenuScroll);
+
 //Block user popup for mannual login
 $(document).ready(function () {
     // Wait for the loader to disappear before showing the modal
@@ -8143,7 +10321,7 @@ function logoutDevice(sessionKey, button) {
             }
 
             // Remove the logged-out session from the UI
-            const sessionDiv = button.closest('.session');
+            const sessionDiv = button.closest('.unique-session');
             sessionDiv.remove();
 
             // If no more active sessions exist, show "No active sessions."
@@ -8245,18 +10423,16 @@ function updatePassword() {
     });
 }
 
-
 //winner.html page
-   
 $(document).ready(function () {
     let winnersData = [];
     let drawDates = [];
     let currentPage = 1;
-    const datesPerPage = 3;
+    const datesPerPage = 5;
 
     function fetchWinnersusersdraw() {
         $.ajax({
-            url: "/api/winners/",
+            url: "/api/winners-wall/",  // Update the endpoint
             method: "GET",
             dataType: "json",
             success: function (response) {
@@ -8265,7 +10441,7 @@ $(document).ready(function () {
 
                 if (drawDates.length === 0) {
                     $("#user-winners-container").html("<h2 class='user-winners-announcement'>🏆 Winners will be announced soon...</h2>");
-                    $("#user-winners-pagination").empty(); // Remove pagination if no winners
+                    $("#user-winners-pagination").empty();
                     return;
                 }
 
@@ -8278,34 +10454,33 @@ $(document).ready(function () {
             }
         });
     }
-
     function renderuserWinners() {
         let winnersContainer = $("#user-winners-container");
         winnersContainer.empty();
-
+    
         let startIdx = (currentPage - 1) * datesPerPage;
         let endIdx = startIdx + datesPerPage;
         let paginatedDates = drawDates.slice(startIdx, endIdx);
-
+    
         if (paginatedDates.length === 0) {
             winnersContainer.html("<h3 class='user-winners-announcement'>🏆 Winners will be announced soon...</h3>");
             return;
         }
-
+    
         paginatedDates.forEach(function (draw_date) {
             let section = `<h2 class="user-winners-drawdate">🏆${draw_date}</h2><ul class="user-winners-winner-list">`;
             winnersData[draw_date].forEach(function (winner) {
                 section += `<li>
                     <b>${winner.lottery_title}</b> - 
                     <span>${winner.username || "N/A"}</span> - 
-                    Ticket <b>#${winner.ticket_number}</b>
+                    Ticket <b class="winner-ticket">#${winner.ticket_number}</b>
                 </li>`;
             });
             section += `</ul>`;
             winnersContainer.append(section);
         });
     }
-
+    
     function renderuserPagination() {
         let paginationContainer = $("#user-winners-pagination");
         paginationContainer.empty();
@@ -8348,6 +10523,24 @@ $(document).ready(function () {
 
     fetchWinnersusersdraw();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

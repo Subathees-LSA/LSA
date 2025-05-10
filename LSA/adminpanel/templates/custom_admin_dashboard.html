@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap"
@@ -25,6 +24,7 @@
         const apiEditDeleteLotteryEventsUrl = "{% url 'api_edit_delete_lottery_events' 0 %}";
         const get_lottery_categories_url = "{% url 'get-lottery-categories' %}";
         const admin_chats_csrfToken = "{{ csrf_token }}";
+        const custom_admin_dashboard_csrfToken = "{{ csrf_token }}";
         window.onload = function () {
             initializeDashboard();
             admin_chat_view()
@@ -169,6 +169,1734 @@
 .draws-lottery-card img {
     margin-top: 30px;
 }
+</style>
+
+<style>
+    .report_and_analytics_overall_transaction_report_chart_class {
+font-family: Arial, sans-serif;
+background: white;
+border-radius: 8px;
+padding: 20px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+
+.report_and_analytics_overall_transaction_report_chart_header_class {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+
+.report_and_analytics_overall_transaction_report_chart_header_class h2 {
+margin: 0;
+font-size: 18px;
+color: #333;
+}
+
+.report_and_analytics_overall_transaction_report_chart_export_button_class {
+background: #4CAF50;
+color: white;
+border: none;
+padding: 8px 16px;
+border-radius: 4px;
+cursor: pointer;
+font-size: 14px;
+}
+
+.report_and_analytics_overall_transaction_report_chart_export_button_class:hover {
+background: #3e8e41;
+}
+
+.report_and_analytics_overall_transaction_report_chart_amount_class {
+font-size: 24px;
+font-weight: bold;
+margin-bottom: 20px;
+color: #333;
+}
+
+.report_and_analytics_overall_transaction_report_chart_amount_class span {
+color: #1FE08F;
+}
+
+.report_and_analytics_overall_transaction_report_chart_canvas_container_class {
+height: 300px;
+margin-bottom: 20px;
+}
+
+.report_and_analytics_overall_transaction_report_chart_legend_class {
+display: flex;
+gap: 20px;
+font-size: 14px;
+color: #666;
+}
+
+.report_and_analytics_overall_transaction_report_chart_successful_class {
+display: inline-block;
+width: 12px;
+height: 12px;
+background: #1FE08F;
+margin-right: 5px;
+border-radius: 2px;
+}
+
+.report_and_analytics_overall_transaction_report_chart_refunded_class {
+display: inline-block;
+width: 12px;
+height: 12px;
+background: #F44336;
+margin-right: 5px;
+border-radius: 2px;
+}
+</style>
+<style>
+    .report_and_analytics_winners_vs_losers_chart_class {
+font-family: Arial, sans-serif;
+padding: 20px;
+background-color: white;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+
+.report_and_analytics_winners_vs_losers_chart_export_btn:hover {
+background-color: #45a049 !important;
+}
+
+.report_and_analytics_winners_vs_losers_chart_header {
+border-bottom: 1px solid #eee;
+padding-bottom: 10px;
+}
+</style>
+<style>
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_class {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+max-width: 416px;
+margin: 20px 20px;
+padding: 20px;
+background: #fff;
+border-radius: 8px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_header h3 {
+margin: 0;
+color: #333;
+font-size: 18px;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_export_btn {
+background-color: #4e73df;
+color: white;
+border: none;
+padding: 8px 16px;
+border-radius: 4px;
+cursor: pointer;
+font-size: 14px;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_export_btn:hover {
+background-color: #3a5bc7;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_container {
+height: 300px;
+width: 300px;
+margin: 0 auto 20px;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_legend {
+display: flex;
+justify-content: center;
+gap: 20px;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_item {
+display: flex;
+align-items: center;
+font-size: 14px;
+color: #555;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_color {
+display: inline-block;
+width: 16px;
+height: 16px;
+border-radius: 4px;
+margin-right: 8px;
+}
+
+.report_and_analytics_Pending_vs_completed_draws_pie_chart_error {
+color: #e74a3b;
+text-align: center;
+padding: 20px;
+}
+</style>
+
+<!-- winners wall page css start -->
+<style>
+    /* Pagination Styles */
+    .winners_wall_testimonial_pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .winners_wall_testimonial_pagination ul {
+        display: flex;
+        flex-wrap: wrap;
+        background: #fff;
+        padding: 8px;
+        border-radius: 50px;
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .winners_wall_testimonial_pagination ul li {
+        color: #344054;
+        list-style: none;
+        line-height: 45px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.3s ease;
+    }
+
+    .winners_wall_testimonial_pagination ul li.winners_wall_testimonial_numb {
+        height: 45px;
+        width: 45px;
+        margin: 0 3px;
+        line-height: 45px;
+        border-radius: 50%;
+    }
+
+    .winners_wall_testimonial_pagination ul li.winners_wall_testimonial_first {
+        margin: 0px 3px 0 -5px;
+    }
+
+    .winners_wall_testimonial_pagination ul li.winners_wall_testimonial_last {
+        margin: 0px -5px 0 3px;
+    }
+
+    .winners_wall_testimonial_pagination ul li.winners_wall_testimonial_dots {
+        font-size: 22px;
+        cursor: default;
+    }
+
+    .winners_wall_testimonial_pagination ul li.winners_wall_testimonial_btn {
+        padding: 0 20px;
+        border-radius: 50px;
+    }
+
+    .winners_wall_testimonial_pagination li.winners_wall_testimonial_active,
+    .winners_wall_testimonial_pagination ul li.winners_wall_testimonial_numb:hover,
+    .winners_wall_testimonial_pagination ul li.winners_wall_testimonial_btn:hover {
+        color: #fff;
+        background: #ff6600;
+    }
+
+    /* Existing styles for testimonials table remain the same */
+    /* Main container */
+    .custom_admin_dashboard_winners_wall_management_winners_and_testimonials_class {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #fff;
+    }
+
+    /* Navigation header */
+    .winners_wall_testimonial_nav_header {
+        /* display: flex; */
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .winners_wall_testimonial_nav_title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .winners_wall_testimonial_nav_clickable {
+        color: #0066cc;
+        cursor: pointer;
+    }
+
+    .winners_wall_testimonial_nav_clickable:hover {
+        text-decoration: underline;
+    }
+
+    .winners_wall_testimonial_controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .winners_wall_testimonial_select {
+        padding: 8px 12px;
+        color: #ff6600;
+        font-weight: 900;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+    }
+
+    .winners_wall_testimonial_search {
+        padding: 8px 12px;
+        width: 250px;
+        border: 1px solid #ddd;
+        border-radius: 15px;
+        margin-left: 42%;
+    }
+
+    .winners_wall_testimonial_add_btn {
+        background-color: #ff6600;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .winners_wall_testimonial_add_btn:hover {
+        background-color: #c25d1a;
+    }
+
+    /* Testimonials table section */
+    .winners_wall_testimonial_table_section {
+        margin-top: 20px;
+    }
+
+    .winners_wall_testimonial_heading {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .winners_wall_testimonial_empty {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-align: center;
+        color: #666;
+        font-style: italic;
+    }
+
+    /* Table styles */
+    .winners_wall_testimonial_table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .winners_wall_testimonial_table th {
+        background-color: #f5f5f5;
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 2px solid #ddd;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .winners_wall_testimonial_table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        vertical-align: top;
+    }
+
+    .winners_wall_testimonial_row:hover {
+        background-color: #f9f9f9;
+    }
+
+    /* Image cell */
+    .winners_wall_testimonial_image_cell {
+        width: 120px;
+    }
+
+    .winners_wall_testimonial_image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .winners_wall_testimonial_image:hover {
+        transform: scale(1.05);
+    }
+
+    /* Content cell */
+    .winners_wall_testimonial_content_cell {
+        font-style: italic;
+        color: #555;
+        line-height: 1.5;
+        border-left: 1px solid #000000;
+        border-right: 1px solid #000000;
+        padding: 10px;
+
+    }
+
+
+    /* Name cell */
+    .winners_wall_testimonial_name_cell {
+        width: 200px;
+    }
+
+    .winners_wall_testimonial_actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .winners_wall_testimonial_edit_btn {
+        background-color: #ff6600;
+        color: white;
+        font-weight: 900;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .winners_wall_testimonial_edit_btn:hover {
+        background-color: #d55505;
+    }
+
+    .winners_wall_testimonial_delete_btn {
+        background-color: #ff6600;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .winners_wall_testimonial_delete_btn:hover {
+        background-color: #cb580c;
+    }
+
+    .winners_wall_testimonial_name {
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Lightbox styles remain the same as previous implementation */
+    .winners_wall_testimonial_image {
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .winners_wall_testimonial_image:hover {
+        transform: scale(1.02);
+    }
+
+    .winners_wall_testimonial_quote {
+        font-style: italic;
+        color: #555;
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+
+    .winners_wall_testimonial_name {
+        font-weight: bold;
+        color: #333;
+        margin-top: 10px;
+    }
+
+    .winners_wall_testimonial_actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .winners_wall_testimonial_edit_btn,
+    .winners_wall_testimonial_delete_btn {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+
+
+
+
+    /* Lightbox */
+    .winners_wall_testimonial_lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .winners_wall_testimonial_lightbox_content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+    }
+
+    .winners_wall_testimonial_lightbox_image {
+        max-width: 100%;
+        max-height: 80vh;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .winners_wall_testimonial_lightbox_close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        font-size: 35px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .winners_wall_testimonial_lightbox_close:hover {
+        color: #ddd;
+    }
+</style>
+<style>
+    /* Winners Wall Testimonial Popup Container */
+    .winners_wall_testimonial_popup_container {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Navigation Header */
+    .winners_wall_testimonial_nav_header {
+        padding: 15px 0;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    .winners_wall_testimonial_nav_title {
+        font-size: 16px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .winners_wall_testimonial_nav_clickable {
+        color: #000000;
+        cursor: pointer;
+    }
+
+    .winners_wall_testimonial_nav_clickable:hover {
+        text-decoration: underline;
+    }
+
+    /* Form Container */
+    .winners_wall_testimonial_form {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    /* Image Section */
+    .winners_wall_testimonial_image_section {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+    }
+
+    .winners_wall_testimonial_image_upload {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .winners_wall_testimonial_upload_label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .winners_wall_testimonial_image_input {
+        display: none;
+    }
+
+    .winners_wall_testimonial_choose_file_btn {
+        background-color: #f8f9fa;
+        border: 2px dashed #ccc;
+        height: 200px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 16px;
+        color: #666;
+        transition: all 0.3s;
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        flex-direction: column;
+    }
+
+    .winners_wall_testimonial_choose_file_btn:hover {
+        background-color: #e9ecef;
+        border-color: #999;
+        color: #333;
+    }
+
+
+
+    .winners_wall_testimonial_choose_file_btn:hover {
+        background-color: #e9ecef;
+    }
+
+    .winners_wall_testimonial_image_preview_container {
+        flex: 1;
+        border: 1px dashed #ccc;
+        border-radius: 4px;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background-color: #f9f9f9;
+    }
+
+    .winners_wall_testimonial_image_preview {
+        max-width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+    }
+
+    /* Fields Section */
+    .winners_wall_testimonial_fields_section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .winners_wall_testimonial_field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .winners_wall_testimonial_field_label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .winners_wall_testimonial_text_input {
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .winners_wall_testimonial_textarea_input {
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 800;
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Buttons Section */
+    .winners_wall_testimonial_buttons_section {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+        margin-top: 10px;
+    }
+
+    .winners_wall_testimonial_cancel_btn {
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 800;
+        color: #333;
+        transition: all 0.3s;
+    }
+
+    .winners_wall_testimonial_cancel_btn:hover {
+        background-color: #e9ecef;
+    }
+
+    .winners_wall_testimonial_submit_btn {
+        padding: 10px 20px;
+        background-color: #ff6600;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        transition: all 0.3s;
+    }
+
+    .winners_wall_testimonial_submit_btn:hover {
+        background-color: #cc4c0c;
+    }
+
+
+    @media (max-width: 768px) {
+        .winners_wall_testimonial_popup_container {
+            padding: 15px;
+            width: 85%;
+        }
+
+        .winners_wall_testimonial_nav_header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .winners_wall_testimonial_image_section {
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .winners_wall_testimonial_choose_file_btn {
+            width: 100%;
+            min-width: 300px;
+            height: 180px;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .winners_wall_testimonial_image_preview_container {
+            width: 100%;
+            min-height: 180px;
+        }
+
+        .winners_wall_testimonial_image_preview {
+            max-height: 200px;
+        }
+
+        .winners_wall_testimonial_field_label,
+        .winners_wall_testimonial_text_input,
+        .winners_wall_testimonial_textarea_input {
+            font-size: 13px;
+        }
+
+        .winners_wall_testimonial_text_input,
+        .winners_wall_testimonial_textarea_input {
+            width: 95%;
+            padding: 8px 10px;
+        }
+
+        .winners_wall_testimonial_buttons_section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .winners_wall_testimonial_cancel_btn,
+        .winners_wall_testimonial_submit_btn {
+            width: 100%;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .winners_wall_testimonial_nav_title {
+            font-size: 14px;
+        }
+    }
+
+    /* Responsive adjustments */
+
+
+
+    @media (max-width: 768px) {
+        .custom_admin_dashboard_winners_wall_management_winners_and_testimonials_class {
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .winners_wall_testimonial_nav_header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .winners_wall_testimonial_controls {
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .winners_wall_testimonial_search,
+        .winners_wall_testimonial_select,
+        .winners_wall_testimonial_add_btn {
+            width: 100%;
+            margin-left: 0;
+            font-size: 14px;
+        }
+
+        .winners_wall_testimonial_add_btn {
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .winners_wall_testimonial_table {
+            display: block;
+            overflow-x: auto;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .winners_wall_testimonial_image_section {
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .winners_wall_testimonial_image {
+            width: 100%;
+            height: auto;
+            max-width: 300px;
+            object-fit: cover;
+        }
+
+        .winners_wall_testimonial_pagination ul {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 8px;
+            gap: 5px;
+        }
+
+        .winners_wall_testimonial_pagination ul li {
+            font-size: 14px;
+            line-height: 42px;
+            width: 42px;
+            height: 42px;
+            text-align: center;
+            border-radius: 4px;
+            background: #f1f1f1;
+        }
+
+        .winners_wall_testimonial_content_cell,
+        .winners_wall_testimonial_name_cell {
+            font-size: 14px;
+            padding: 10px 6px;
+            word-break: break-word;
+        }
+
+        .winners_wall_testimonial_name_cell {
+            width: 100%;
+        }
+
+        .winners_wall_testimonial_edit_btn,
+        .winners_wall_testimonial_delete_btn {
+            padding: 6px 10px;
+            font-size: 13px;
+            min-width: 44px;
+            min-height: 44px;
+            margin: 2px 0;
+        }
+
+        .winners_wall_testimonial_lightbox_image {
+            max-width: 95vw;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+
+        .winners_wall_testimonial_lightbox_close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 30px;
+            color: white;
+            z-index: 9999;
+        }
+    }
+</style>
+
+
+
+
+
+<style>
+    /* Winners Wall Winners List Styles */
+    .winners_wall_winners_list_container {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .winners_wall_winners_list_nav_header {
+        /* display: flex; */
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .winners_wall_winners_list_controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .winners_wall_winners_list_select {
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        color: #FF6600;
+        font-weight: 900;
+    }
+
+    .winners_wall_winners_list_button {
+        padding: 8px 16px;
+        background-color: #FF6600;
+        color: white;
+        font-weight: 900;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+    }
+
+    .winners_wall_winners_list_button:hover {
+        background-color: #c05914;
+    }
+
+    .winners_wall_winners_list_search {
+        padding: 8px 12px;
+        border-radius: 15px;
+        border: 1px solid #ddd;
+        min-width: 200px;
+        margin-left: 50%;
+    }
+
+    .winners_wall_winners_list_current_winners h3 {
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .winners_wall_winners_list_items_container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(313px, 1fr));
+        gap: 20px;
+    }
+
+    .winners_wall_winners_list_card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .winners_wall_winners_list_hidden {
+        border: 2px solid #ff6b6b;
+        opacity: 0.8;
+    }
+
+    .winners_wall_winners_list_image_container {
+        position: relative;
+        height: 200px;
+        background-color: #f5f5f5;
+    }
+
+    .winners_wall_winners_list_image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .winners_wall_winners_list_no_image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #777;
+    }
+
+    .winners_wall_winners_list_edit_btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: white;
+        background-color: #FF6600;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .winners_wall_winners_list_edit_btn img {
+        width: 16px;
+        height: 16px;
+
+    }
+
+    .winners_wall_winners_list_toggle_btn {
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        background: #FF6600;
+        color: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 2;
+    }
+
+    .winners_wall_winners_list_toggle_btn:hover {
+        background: #c45307;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .winners_wall_winners_list_hidden .winners_wall_winners_list_toggle_btn {
+        background: rgba(255, 107, 107, 0.9);
+        color: white;
+        border-color: #ff6b6b;
+    }
+
+
+    .winners_wall_winners_list_details {
+        padding: 15px;
+    }
+
+    .winners_wall_winners_list_details table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .winners_wall_winners_list_details th {
+        padding: 8px 0;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .winners_wall_winners_list_details td {
+        padding: 8px 0;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        color: #FF6600;
+    }
+
+    .winners_wall_winners_list_details th {
+        width: 120px;
+        color: #666;
+    }
+
+    .winners_wall_winners_list_loading,
+    .winners_wall_winners_list_no_results,
+    .winners_wall_winners_list_error {
+        padding: 20px;
+        text-align: center;
+        color: #666;
+        grid-column: 1 / -1;
+    }
+</style>
+<style>
+    .winners_wall_winners_list_image_container {
+        position: relative;
+        height: 200px;
+        background-color: #f5f5f5;
+        overflow: hidden;
+    }
+
+    .winners_wall_winners_list_image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    @media (max-width: 768px) {
+        .winners_wall_winners_list_container {
+            padding: 10px;
+        }
+
+        .winners_wall_winners_list_nav_header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .winners_wall_winners_list_controls {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .winners_wall_winners_list_search {
+            width: 100%;
+            margin-left: 0;
+            margin-top: 10px;
+            min-width: unset;
+        }
+
+        .winners_wall_winners_list_select,
+        .winners_wall_winners_list_button {
+            width: 100%;
+        }
+
+        .winners_wall_winners_list_items_container {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .winners_wall_winners_list_card {
+            width: 100%;
+        }
+
+        .winners_wall_winners_list_image_container {
+            height: 180px;
+        }
+
+        .winners_wall_winners_list_edit_btn,
+        .winners_wall_winners_list_toggle_btn {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+            padding: 0;
+        }
+
+        .winners_wall_winners_list_toggle_btn {
+            top: 40px;
+            right: 8px;
+            padding: 4px 8px;
+            font-size: 10px;
+        }
+
+        .winners_wall_winners_list_details th,
+        .winners_wall_winners_list_details td {
+            font-size: 14px;
+        }
+
+        .winners_wall_winners_list_loading,
+        .winners_wall_winners_list_no_results,
+        .winners_wall_winners_list_error {
+            font-size: 14px;
+            padding: 15px;
+        }
+    }
+</style>
+
+
+
+<style>
+    /* Pagination CSS */
+    .winners_wall_Winners_section_pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .winners_wall_Winners_section_pagination ul {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        background: #fff;
+        padding: 8px;
+        border-radius: 50px;
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .winners_wall_Winners_section_pagination ul li {
+        color: #344054;
+        list-style: none;
+        line-height: 45px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.3s ease;
+    }
+
+    .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_numb {
+        list-style: none;
+        height: 45px;
+        width: 45px;
+        margin: 0 3px;
+        line-height: 45px;
+        border-radius: 50%;
+    }
+
+    .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_numb.winners_wall_Winners_section_first {
+        margin: 0px 3px 0 -5px;
+    }
+
+    .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_numb.winners_wall_Winners_section_last {
+        margin: 0px -5px 0 3px;
+    }
+
+    .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_dots {
+        font-size: 22px;
+        cursor: default;
+    }
+
+    .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_btn {
+        padding: 0 20px;
+        border-radius: 50px;
+    }
+
+    .winners_wall_Winners_section_pagination li.winners_wall_Winners_section_active,
+    .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_numb:hover,
+    .winners_wall_Winners_section_pagination ul li:first-child:hover,
+    .winners_wall_Winners_section_pagination ul li:last-child:hover {
+        color: #fff;
+        background: #FF6600;
+    }
+
+    @media (max-width: 768px) {
+        .winners_wall_Winners_section_pagination {
+            margin-top: 15px;
+            padding: 0 10px;
+        }
+
+        .winners_wall_Winners_section_pagination ul {
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 30px;
+        }
+
+        .winners_wall_Winners_section_pagination ul li {
+            font-size: 16px;
+            height: 40px;
+            width: 40px;
+            line-height: 40px;
+            margin: 2px;
+        }
+
+        .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_btn {
+            padding: 0 12px;
+            font-size: 14px;
+        }
+
+        .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_dots {
+            font-size: 20px;
+        }
+
+        .winners_wall_Winners_section_pagination ul li.winners_wall_Winners_section_numb {
+            height: 38px;
+            width: 38px;
+            font-size: 14px;
+        }
+    }
+</style>
+
+
+
+
+
+
+
+
+
+
+<!-- CSS -->
+<style>
+    /* Popup Overlay */
+    .winners_wall_Winners_edit_add_overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    /* Popup Container */
+    .winners_wall_Winners_edit_add_container {
+        background-color: white;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Popup Header */
+    .winners_wall_Winners_edit_add_header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .winners_wall_Winners_edit_add_title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .winners_wall_Winners_edit_add_title span {
+        cursor: pointer;
+        color: #000000;
+    }
+
+    .winners_wall_Winners_edit_add_title span:hover {
+        text-decoration: underline;
+    }
+
+    .winners_wall_Winners_edit_add_close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    /* Popup Content */
+    .winners_wall_Winners_edit_add_content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Image Upload Section */
+    .winners_wall_Winners_edit_add_image_section {
+        display: flex;
+        gap: 20px;
+    }
+
+    .winners_wall_Winners_edit_add_upload_container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .winners_wall_Winners_edit_add_image_preview {
+        flex: 1;
+        border: 1px dashed #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 200px;
+        background-color: #f9f9f9;
+    }
+
+    .winners_wall_Winners_edit_add_image_preview img {
+        max-width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+    }
+
+    .winners_wall_Winners_edit_add_file_input {
+        display: none;
+    }
+
+    .winners_wall_Winners_edit_add_upload_btn {
+        background-color: #f8f9fa;
+        border: 2px dashed #ccc;
+        height: 200px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 16px;
+        color: #666;
+        transition: all 0.3s;
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        flex-direction: column;
+    }
+
+
+    .winners_wall_Winners_edit_add_upload_btn:hover {
+        background-color: #e9ecef;
+        border-color: #999;
+        color: #333;
+    }
+
+    /* Form Fields */
+    .winners_wall_Winners_edit_add_form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .winners_wall_Winners_edit_add_form_group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .winners_wall_Winners_edit_add_form_group label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    .winners_wall_Winners_edit_add_form_group input,
+    .winners_wall_Winners_edit_add_form_group select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .winners_wall_Winners_edit_add_date_time {
+        display: flex;
+        gap: 10px;
+    }
+
+    .winners_wall_Winners_edit_add_date_time input {
+        flex: 1;
+    }
+
+    /* Buttons */
+    .winners_wall_Winners_edit_add_buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .winners_wall_Winners_edit_add_cancel_btn,
+    .winners_wall_Winners_edit_add_submit_btn {
+        padding: 8px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .winners_wall_Winners_edit_add_cancel_btn {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        color: #333;
+    }
+
+    .winners_wall_Winners_edit_add_cancel_btn:hover {
+        background-color: #e0e0e0;
+    }
+
+    .winners_wall_Winners_edit_add_submit_btn {
+        background-color: #FF6600;
+        border: 1px solid #FF6600;
+        color: white;
+    }
+
+    .winners_wall_Winners_edit_add_submit_btn:hover {
+        background-color: #d76418;
+    }
+
+    @media (max-width: 768px) {
+        .winners_wall_Winners_edit_add_container {
+            width: 95%;
+            max-height: 95vh;
+            border-radius: 6px;
+        }
+
+        .winners_wall_Winners_edit_add_header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .winners_wall_Winners_edit_add_title {
+            font-size: 16px;
+        }
+
+        .winners_wall_Winners_edit_add_content {
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .winners_wall_Winners_edit_add_image_section {
+            flex-direction: column;
+        }
+
+        .winners_wall_Winners_edit_add_upload_btn {
+            height: 160px;
+            font-size: 14px;
+            padding: 10px;
+            max-width: 100%;
+        }
+
+        .winners_wall_Winners_edit_add_image_preview {
+            min-height: 160px;
+        }
+
+        .winners_wall_Winners_edit_add_image_preview img {
+            max-height: 200px;
+        }
+
+        .winners_wall_Winners_edit_add_form_group input,
+        .winners_wall_Winners_edit_add_form_group select {
+            font-size: 13px;
+            padding: 7px 10px;
+        }
+
+        .winners_wall_Winners_edit_add_date_time {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .winners_wall_Winners_edit_add_buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .winners_wall_Winners_edit_add_cancel_btn,
+        .winners_wall_Winners_edit_add_submit_btn {
+            width: 100%;
+            font-size: 14px;
+        }
+    }
+</style>
+<!-- CSS Additions -->
+<style>
+    /* Validation Error Styles */
+    .winners_wall_Winners_edit_add_error {
+        color: #d32f2f;
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .winners_wall_Winners_edit_add_error.show {
+        display: block;
+    }
+
+    .winners_wall_Winners_edit_add_form_group.invalid input,
+    .winners_wall_Winners_edit_add_form_group.invalid select {
+        border-color: #d32f2f;
+    }
+
+    .winners_wall_Winners_edit_add_date_time_group.invalid .winners_wall_Winners_edit_add_date_time {
+        border: 1px solid #d32f2f;
+        padding: 7px 11px;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+        .winners_wall_Winners_edit_add_container {
+            width: 95%;
+            max-height: 95vh;
+            border-radius: 6px;
+        }
+
+        .winners_wall_Winners_edit_add_header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .winners_wall_Winners_edit_add_title {
+            font-size: 16px;
+        }
+
+        .winners_wall_Winners_edit_add_content {
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .winners_wall_Winners_edit_add_image_section {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .winners_wall_Winners_edit_add_upload_btn {
+            height: 160px;
+            font-size: 14px;
+            padding: 10px;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .winners_wall_Winners_edit_add_image_preview {
+            min-height: 160px;
+        }
+
+        .winners_wall_Winners_edit_add_image_preview img {
+            max-height: 200px;
+        }
+
+        .winners_wall_Winners_edit_add_form_group input,
+        .winners_wall_Winners_edit_add_form_group select {
+            font-size: 14px;
+            padding: 8px 10px;
+        }
+
+        .winners_wall_Winners_edit_add_form_group.invalid input,
+        .winners_wall_Winners_edit_add_form_group.invalid select {
+            border-color: #d32f2f;
+        }
+
+        .winners_wall_Winners_edit_add_error {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #d32f2f;
+        }
+
+        .winners_wall_Winners_edit_add_date_time {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .winners_wall_Winners_edit_add_date_time_group.invalid .winners_wall_Winners_edit_add_date_time {
+            border: 1px solid #d32f2f;
+            padding: 7px 10px;
+            border-radius: 4px;
+        }
+
+        .winners_wall_Winners_edit_add_buttons {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .winners_wall_Winners_edit_add_cancel_btn,
+        .winners_wall_Winners_edit_add_submit_btn {
+            width: 100%;
+            font-size: 14px;
+        }
+    }
+</style>
+<style>
+    /* Add these styles to your CSS transactions_management_search_container*/
+    .transactions_management_search_container {
+        margin: 15px 0;
+        width: 100%;
+    }
+
+    .transactions_management_search_input {
+        width: 98%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .transactions_management_search_input:focus {
+        outline: none;
+        border-color: #FF6600;
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+
+    /* Add these styles to your CSS transactions_management_filter_container*/
+    .transactions_management_filter_container {
+        margin: 15px 0;
+        width: 100%;
+    }
+
+    .transactions_management_filter_select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .transactions_management_filter_select:focus {
+        outline: none;
+        border-color: #FF6600;
+        box-shadow: 0 0 0 2px rgba(249, 5, 180, 0.2);
+    }
+
+    @media (max-width: 768px) {
+
+        /* Centering containers */
+        .transactions_management_search_container,
+        .transactions_management_filter_container {
+            margin: 10px auto;
+            width: 90%;
+            /* Adjusted width to ensure good fit */
+            text-align: center;
+            /* Centering content */
+        }
+
+        /* Centering the input and select elements */
+        .transactions_management_search_input,
+        .transactions_management_filter_select {
+            width: 100%;
+            /* Full width for better touch interaction */
+            font-size: 14px;
+            padding: 12px;
+            /* Slightly increased padding for easier tapping */
+            text-align: center;
+            /* Center the text inside the input */
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            /* Ensure padding doesn't overflow */
+        }
+
+        /* Focus state styling */
+        .transactions_management_search_input:focus,
+        .transactions_management_filter_select:focus {
+            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+            border-color: #FF6600;
+            /* Highlight border on focus */
+        }
+    }
 </style>
 
 </head>
@@ -317,24 +2045,24 @@
                     <div class="custom_admin_dashboard_overview_statistics_count">
                     </div>
 
-                    <div>
-                        <div id="custom_admin_dashboard_bar_chart_filter" style="display: none;">
-                            <h1>Monthly Sales Chart</h1>
-
-                            <!-- Year Selection Dropdown -->
-                            <label for="yearSelect">Select Year:</label>
-                            <select id="yearSelect"></select>
-                        </div>
-                        <div class="admin-dashboard-report-container" style="width: 50%;height: 50%;">
-                            <canvas class="admin-dashboard-report" id="salesChart" width="800" height="400"></canvas>
-                        </div>
+                    <div class="report_and_analytics_monthly_sales_bar_chart_class" id="report_and_analytics_monthly_sales_bar_chart">
+                       
                     </div>
 
-                    <div class="leaderboard_class" id="leaderboard" style="display: none;">
-
-                        <!-- Data will be injected here -->
+                    <div class="report_and_analytics_Pending_vs_completed_draws_pie_chart_class" 
+                            id="report_and_analytics_Pending_vs_completed_draws_pie_chart">
+                        <!-- Content will be injected here -->
                     </div>
-                    <h1 id="leaderboard_title"></h1>
+                    <div class="report_and_analytics_winners_vs_losers_chart_class" 
+                        id="report_and_analytics_winners_vs_losers_chart">
+                        <!-- Content will be injected here -->
+                    </div>
+                    <div class="report_and_analytics_overall_transaction_report_chart_class" 
+                    id="report_and_analytics_overall_transaction_report_chart">
+                    <!-- Content will be injected by JavaScript -->
+                    </div>
+
+                    
                 </div>
                 <div class="custom_admin_dashboard_user_table" id="custom_admin_dashboard_user_list_table">
 
@@ -635,5 +2363,10 @@
 <script src="{% static 'js/custom.js' %}"></script>
 <script src="{% static 'plugins/chart.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
+<!-- Include required libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx-js-style.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </html>

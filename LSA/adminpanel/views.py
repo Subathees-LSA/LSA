@@ -1038,6 +1038,39 @@ def add_to_favorites(request):
     response.set_cookie('favorites', json.dumps(favorites), max_age=60 * 60 * 24 * 30) 
     return response
 
+# class ContactCreateView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         serializer = ContactSerializer(data=request.data)
+#         if serializer.is_valid():
+#             # Save the form data
+#             contact = serializer.save()
+
+#             # Send an auto-response email
+#             try:
+#                 send_mail(
+#                     subject="Thank You for Contacting Us",  # Email subject
+#                     message=f"Hi {contact.name},\n\n"
+#                             f"Thank you for reaching out! We have received your message:\n\n"
+#                             f"\"{contact.description}\"\n\n"
+#                             "Our team will get back to you shortly.\n\n"
+#                             "Best Regards,\n"
+#                             "Team Win 4all",  # Email body
+#                     from_email='your-email@gmail.com',  # Replace with your email
+#                     recipient_list=[contact.email],  # Send to the user's email
+#                     fail_silently=False,
+#                 )
+#             except Exception as e:
+#                 return Response(
+#                     {'message': 'Form submitted, but email failed to send.', 'error': str(e)},
+#                     status=status.HTTP_201_CREATED
+#                 )
+
+#             return Response(
+#                 {'message': 'Form submitted successfully!Please check your email inbox.', 'data': serializer.data},
+#                 status=status.HTTP_201_CREATED
+#             )
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class ContactCreateView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ContactSerializer(data=request.data)
@@ -1048,17 +1081,28 @@ class ContactCreateView(APIView):
             # Send an auto-response email
             try:
                 send_mail(
-                    subject="Thank You for Contacting Us",  # Email subject
+                    subject="Thank You for Contacting Us",
                     message=f"Hi {contact.name},\n\n"
                             f"Thank you for reaching out! We have received your message:\n\n"
                             f"\"{contact.description}\"\n\n"
                             "Our team will get back to you shortly.\n\n"
                             "Best Regards,\n"
-                            "Team Win 4all",  # Email body
-                    from_email='your-email@gmail.com',  # Replace with your email
-                    recipient_list=[contact.email],  # Send to the user's email
+                            "Team Win 4all",
+                    from_email='your-email@gmail.com',
+                    recipient_list=[contact.email],
                     fail_silently=False,
                 )
+                
+                # Also send to admin if it's about an order
+                if 'ORDER DETAILS' in contact.description:
+                    send_mail(
+                        subject=f"Order Help Request: {request.data.get('order_id', 'N/A')}",
+                        message=f"Customer {contact.name} ({contact.email}) needs help with their order:\n\n"
+                                f"{contact.description}",
+                        from_email='your-email@gmail.com',
+                        recipient_list=['admin@example.com'],  # Your admin email
+                        fail_silently=False,
+                    )
             except Exception as e:
                 return Response(
                     {'message': 'Form submitted, but email failed to send.', 'error': str(e)},
@@ -1066,7 +1110,7 @@ class ContactCreateView(APIView):
                 )
 
             return Response(
-                {'message': 'Form submitted successfully!Please check your email inbox.', 'data': serializer.data},
+                {'message': 'Form submitted successfully! Please check your email inbox.', 'data': serializer.data},
                 status=status.HTTP_201_CREATED
             )
 
@@ -1158,14 +1202,14 @@ class lottery_sales_bar_chart_View(APIView):
             .filter(payment_status='completed', payment_at__year=year)
             .annotate(month=ExtractMonth('payment_at'))
             .values('month')
-            .annotate(activity_count=Sum('quantity'))
+            .annotate(sales_amount=Sum('amount'))
             .order_by('month')
         )
 
         response = [
             {
                 'month': month_abbr[item['month']],  # e.g. Jan, Feb...
-                'activity_count': item['activity_count']
+                'sales_amount': item['sales_amount']
             } for item in queryset
         ]
         return Response(response)
@@ -1267,7 +1311,7 @@ from rest_framework import status
 import logging
 stripe.api_key = settings.STRIPE_API_KEY
 # Set up logging
-@permission_classes([IsAdminUser])    
+@permission_classes([IsAdminUser])   
 def check_lottery_title_unique(request):
     title = request.GET.get('title', '').strip()
     if LotteryEvent.objects.filter(title__iexact=title).exists():
@@ -1343,7 +1387,7 @@ class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetc
 
 
 class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refund_payment_view(APIView):
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsAdminUser]
     def post(self, request, payment_intent):
         try:
             # Find all payments with the same payment_intent
@@ -1609,6 +1653,24 @@ class AdminLotteryDrawView(APIView):
             return Response({"error": "Invalid selection method"}, status=400)
 
 
+# prize management api views
+	
+class api_admin_dashboard_prize_management_winner_list_api_view(generics.ListAPIView):
+    permission_classes = [IsAdminUser]
+    queryset = Winner.objects.all()
+    serializer_class = prize_management_WinnerSerializer
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def api_admin_dashboard_prize_management_update_winner_status(request, pk):
+    winner = get_object_or_404(Winner, pk=pk)
+    winner.prize_status = request.data.get('prize_status', winner.prize_status)
+    winner.prize_comments = request.data.get('prize_comments', winner.prize_comments)
+    winner.save()
+    return Response({"message": "Prize status updated successfully", "prize_comments": winner.prize_comments})
+
+
+
+
 class PublishWinnerView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -1685,35 +1747,317 @@ class PublishWinnerView(APIView):
             event.save()    
 
         return Response({"message": "Winner published successfully"})
-# prize management api views
-	
-class api_admin_dashboard_prize_management_winner_list_api_view(generics.ListAPIView):
-    permission_classes = [IsAdminUser] 
-    queryset = Winner.objects.all()
-    serializer_class = prize_management_WinnerSerializer
-
-@api_view(['PATCH'])
-@permission_classes([IsAdminUser])
-def api_admin_dashboard_prize_management_update_winner_status(request, pk):
-    winner = get_object_or_404(Winner, pk=pk)
-    winner.prize_status = request.data.get('prize_status', winner.prize_status)
-    winner.prize_comments = request.data.get('prize_comments', winner.prize_comments)
-    winner.save()
-    return Response({"message": "Prize status updated successfully", "prize_comments": winner.prize_comments})
-
-from rest_framework import serializers, viewsets
-from django.utils.timezone import now
-from django.shortcuts import render
-from .models import Winner
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+# winners wall winners
 from rest_framework.views import APIView
-from collections import defaultdict
-from .models import Winner
-from .serializers import WinnerSerializer
-from datetime import datetime
+from rest_framework.response import Response
+from rest_framework import status
+from .models import WinnersWallWinnersList
+from .serializers import WinnersWallWinnersListSerializer
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.db import models
 
+class custom_admin_dashboard_winner_wall_winners_list(APIView):
+    """
+    List all winners or create a new winner
+    """
+    # In views.py - update the get method in WinnersList class
+    def get(self, request, format=None):
+         # First get flag=True objects, ordered by draw_date descending (newest first)
+        # visible_winners = WinnersWallWinnersList.objects.filter(flag=True).order_by('-draw_date')
+        
+        # # Then get flag=False objects, ordered by draw_date descending
+        # hidden_winners = WinnersWallWinnersList.objects.filter(flag=False).order_by('-draw_date')
+        
+        # # Combine the querysets
+        # winners = list(visible_winners) + list(hidden_winners)
+        winners = WinnersWallWinnersList.objects.all().order_by('-updated_at','-draw_date')
+        #winners = WinnersWallWinnersList.objects.all()
+        
+        search_query = request.query_params.get('search', None)
+        if search_query:
+            winners = winners.filter(
+                models.Q(lottery_name__icontains=search_query) |
+                models.Q(winner_name__icontains=search_query) |
+                models.Q(ticket_number__icontains=search_query) |
+                models.Q(draw_date__contains=search_query)
+            )
+        
+        serializer = WinnersWallWinnersListSerializer(winners, many=True)
+        return Response(serializer.data)
+    
+    @method_decorator(csrf_exempt)
+    def post(self, request, format=None):
+        serializer = WinnersWallWinnersListSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class custom_admin_dashboard_winner_wall_winner_detail(APIView):
+    """
+    Retrieve, update or delete a winner instance
+    """
+    def get_object(self, pk):
+        try:
+            return WinnersWallWinnersList.objects.get(pk=pk)
+        except WinnersWallWinnersList.DoesNotExist:
+            return None
+    
+    def get(self, request, pk, format=None):
+        winner = self.get_object(pk)
+        if not winner:
+            return Response(
+                {"error": "Winner not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = WinnersWallWinnersListSerializer(winner)
+        return Response(serializer.data)
+    
+    @method_decorator(csrf_exempt)
+    def put(self, request, pk, format=None):
+        winner = self.get_object(pk)
+        if not winner:
+            return Response(
+                {"error": "Winner not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = WinnersWallWinnersListSerializer(winner, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @method_decorator(csrf_exempt)
+    def patch(self, request, pk, format=None):
+        winner = self.get_object(pk)
+        if not winner:
+            return Response(
+                {"error": "Winner not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Specifically for flag toggling
+        if 'flag' in request.data:
+            winner.flag = request.data['flag']
+            winner.save()
+            return Response(
+                {"success": f"Flag updated to {winner.flag}"},
+                status=status.HTTP_200_OK
+            )
+        
+        serializer = WinnersWallWinnersListSerializer(winner, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @method_decorator(csrf_exempt)
+    def delete(self, request, pk, format=None):
+        winner = self.get_object(pk)
+        if not winner:
+            return Response(
+                {"error": "Winner not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        winner.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+#winners wall testimonials
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from .models import Testimonial
+from .serializers import custom_admin_dashboard_winners_wall_testimonials_serializer
+
+class custom_admin_dashboard_winners_wall_testimonials_list(APIView):
+    """
+    List all testimonials or create a new testimonial.
+    """
+    def get(self, request, format=None):
+        search_query = request.query_params.get('search', None)
+        
+        if search_query:
+            testimonials = Testimonial.objects.filter(
+                models.Q(name__icontains=search_query) | 
+                models.Q(quote__icontains=search_query)
+            ).order_by('-created_at')
+        else:
+            testimonials = Testimonial.objects.all().order_by('-created_at')
+            
+        serializer = custom_admin_dashboard_winners_wall_testimonials_serializer(testimonials, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = custom_admin_dashboard_winners_wall_testimonials_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class custom_admin_dashboard_winners_wall_testimonial_detail(APIView):
+    """
+    Retrieve, update or delete a testimonial instance.
+    """
+    def get_object(self, pk):
+        return get_object_or_404(Testimonial, pk=pk)
+
+    def get(self, request, pk, format=None):
+        testimonial = self.get_object(pk)
+        serializer = custom_admin_dashboard_winners_wall_testimonials_serializer(testimonial)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        testimonial = self.get_object(pk)
+        serializer = custom_admin_dashboard_winners_wall_testimonials_serializer(testimonial, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        testimonial = self.get_object(pk)
+        testimonial.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import LotteryEvent, Winner
+# Pending vs Completed Draws
+class DrawStatsAPI(APIView):
+    def get(self, request):
+        total_draws = LotteryEvent.objects.count()
+        completed_draws = Winner.objects.values('lottery_event').distinct().count()
+        pending_draws = total_draws - completed_draws
+        
+        return Response({
+            'total_draws': total_draws,
+            'completed_draws': completed_draws,
+            'pending_draws': pending_draws
+        })
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta
+# Number of Winners Today
+class WinnersVsLosersChartAPI(APIView):
+    def get(self, request):
+        today = timezone.now().date()
+        week_ago = today - timedelta(days=6)
+        
+        # Today's winners count
+        today_winners = Winner.objects.filter(created_at__date=today).count()
+        
+        # Today's losers count
+        # Get lottery events with winners today
+        winning_lotteries = Winner.objects.filter(
+            created_at__date=today
+        ).values_list('lottery_event', flat=True).distinct()
+        
+        # Get all unique participants in these lotteries today
+        participants = PaymentLottery.objects.filter(
+            lottery_event__in=winning_lotteries,
+            payment_status='completed'
+        ).values('user').distinct().count()
+        
+        # Subtract winners from participants to get losers
+        today_losers = participants - today_winners if participants > today_winners else 0
+        
+        # Weekly data
+        weekly_data = []
+        for i in range(7):
+            day = week_ago + timedelta(days=i)
+            
+            # Winners for the day
+            day_winners = Winner.objects.filter(created_at__date=day).count()
+            
+            # Losers for the day
+            day_winning_lotteries = Winner.objects.filter(
+                created_at__date=day
+            ).values_list('lottery_event', flat=True).distinct()
+            
+            day_participants = PaymentLottery.objects.filter(
+                lottery_event__in=day_winning_lotteries,
+                payment_status='completed'
+            ).values('user').distinct().count()
+            
+            day_losers = day_participants - day_winners if day_participants > day_winners else 0
+            
+            weekly_data.append({
+                'date': day.strftime('%d %B'),
+                'winners': day_winners,
+                'losers': day_losers
+            })
+        
+        # Total counts for the week
+        total_winners = sum(day['winners'] for day in weekly_data)
+        total_losers = sum(day['losers'] for day in weekly_data)
+        
+        return Response({
+            'today_winners': today_winners,
+            'today_losers': today_losers,
+            'weekly_data': weekly_data,
+            'total_winners': total_winners,
+            'total_losers': total_losers
+        })
+
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
+from rest_framework.views import APIView
+from datetime import datetime
+from rest_framework.response import Response
+# Overall Transaction Report
+class OverallTransactionReportView(APIView):
+    def get(self, request):
+        current_year = datetime.now().year
+        current_month = datetime.now().strftime('%B %Y')
+        
+        # Get data for the current year
+        queryset = PaymentLottery.objects.filter(
+            payment_at__year=current_year,
+            payment_status__in=['completed', 'refunded']
+        ).annotate(
+            month=TruncMonth('payment_at')
+        ).values('month', 'payment_status').annotate(
+            total_amount=Sum('amount')
+        ).order_by('month')
+        
+        # Initialize data structure
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        successful = [0] * 12
+        refunded = [0] * 12
+        
+        # Populate data
+        for entry in queryset:
+            month_index = entry['month'].month - 1
+            if entry['payment_status'] == 'completed':
+                successful[month_index] = float(entry['total_amount'])
+            elif entry['payment_status'] == 'refunded':
+                refunded[month_index] = float(entry['total_amount'])
+        
+        # Calculate current month total
+        current_month_index = datetime.now().month - 1
+        current_amount = successful[current_month_index] - refunded[current_month_index]
+        
+        return Response({
+            'months': months,
+            'successful': successful,
+            'refunded': refunded,
+            'current_month': current_month,
+            'current_amount': f'£{current_amount:,.2f}'
+        })
+from django.db.models.functions import TruncMonth
+from rest_framework.views import APIView
+from datetime import datetime
+from .serializers import WinnerSerializer
 class WinnerListView(APIView):
     def get(self, request, *args, **kwargs):
         winners = Winner.objects.all().order_by('-created_at')  
@@ -1724,3 +2068,29 @@ class WinnerListView(APIView):
             grouped_winners[draw_date].append(WinnerSerializer(winner).data)
 
         return Response(grouped_winners)
+    
+from django.db.models.functions import TruncDate
+from collections import defaultdict
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import WinnersWallWinnersList
+from datetime import datetime
+
+class WinnersWallListView(APIView):
+    def get(self, request, *args, **kwargs):
+        # Get only winners with flag=True and order by draw_date descending
+        winners = WinnersWallWinnersList.objects.filter(flag=True).order_by('-draw_date')
+        
+        grouped_winners = defaultdict(list)
+        for winner in winners:
+            # Format the date as "Monday 12th of March 2024"
+            draw_date = winner.draw_date.strftime("%A %dth of %B %Y")
+            grouped_winners[draw_date].append({
+                'lottery_title': winner.lottery_name,
+                'username': winner.winner_name,
+                'ticket_number': winner.ticket_number,
+                'image_url': winner.image_url if winner.image else None
+            })
+            
+        return Response(grouped_winners)
+

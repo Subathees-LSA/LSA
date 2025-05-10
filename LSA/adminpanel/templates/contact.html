@@ -9,7 +9,62 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
        <script> 
         const contact_csrfToken = "{{ csrf_token }}";
+        const user_email = "{{ request.user.email }}";
+        const user_name = "{{ request.user.username }}";
+        const help_session_id = localStorage.getItem('help_session_id');
         </script>
+        <style>
+            /* Order Details Box Styles */
+.contact-order-details-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.contact-order-details-box h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.contact-order-items-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.contact-order-items-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.contact-order-items-list li:last-child {
+    border-bottom: none;
+}
+
+.contact-winner-badge {
+    background-color: #ffd700;
+    color: #000;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.contact-winning-info {
+    background-color: #fff8e1;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.contact-winning-info h4 {
+    color: #ffab00;
+    margin-bottom: 5px;
+}
+        </style>
 </head>
 <body class="contact-page">
     {% include 'header.html' %}
@@ -17,8 +72,13 @@
         <h1 class="contact-title">Contact Us</h1>
         <form id="contact-form" class="contact-form">
             {% csrf_token %}
-            <input type="text" id="contact-name" name="name" class="contact-input" placeholder="Your Name" required>
-            <input type="email" id="contact-email" name="email" class="contact-input" placeholder="Your Email" required>
+            <input type="text" id="contact-name" name="name" class="contact-input" placeholder="Your Name" required readonly>
+            <input type="email" id="contact-email" name="email" class="contact-input" placeholder="Your Email" required readonly>
+            <!-- Order Details Box (only shown when help_session_id exists) -->
+            <div id="contact-order-details-box" class="contact-order-details-box" style="display: none;">
+                <h3>Order Details</h3>
+                <div id="contact-order-details-content" class="contact-order-details-content"></div>
+            </div>
             <textarea id="contact-description" name="description" class="contact-textarea" placeholder="Enter your message" required></textarea>
             <button type="submit" id="contact-submit" class="contact-button">Send Request</button>
         </form>

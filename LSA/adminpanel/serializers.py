@@ -2,6 +2,12 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import *
 from rest_framework import serializers
+# serializers.py
+from rest_framework import serializers
+from .models import Testimonial
+
+from rest_framework import serializers
+from .models import Testimonial
 
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:
@@ -256,3 +262,71 @@ class WinnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Winner
         fields = ['lottery_title', 'username', 'ticket_number', 'created_at']
+
+
+
+# In serializers.py
+# winners wall winners
+class WinnersWallWinnersListSerializer(serializers.ModelSerializer):
+    draw_date_formatted = serializers.SerializerMethodField()
+    image = serializers.ImageField(required=False)  
+    
+    class Meta:
+        model = WinnersWallWinnersList
+        fields = [
+            'id',
+            'winner_name',
+            'ticket_number',
+            'lottery_name',
+            'draw_date',
+            'draw_date_formatted',
+            'image_url',
+            'image',
+            'flag'
+        ]
+        extra_kwargs = {
+            'draw_date': {'write_only': False}
+        }
+    
+    def get_draw_date_formatted(self, obj):
+        if obj.draw_date:
+            # Format as: December 6, 2024 10:00 PM
+            return obj.draw_date.strftime("%B %d, %Y %I:%M %p")
+        return "No date specified"
+    
+    # def to_representation(self, instance):
+    #     rep = super().to_representation(instance)
+    #     rep['draw_date'] = instance.draw_date.isoformat() if instance.draw_date else None
+    #     return rep
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        # Handle the image field
+        if instance.image:
+            rep['image'] = instance.image.url
+        else:
+            rep['image'] = None
+
+        # Handle the draw_date field
+        rep['draw_date'] = instance.draw_date.isoformat() if instance.draw_date else None
+
+        return rep
+
+#winners wall testimonials
+class custom_admin_dashboard_winners_wall_testimonials_serializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)  # Make image optional for updates
+    
+    class Meta:
+        model = Testimonial
+        fields = ['id', 'name', 'quote', 'image', 'created_at']
+        read_only_fields = ['id', 'created_at']
+        
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.image:
+            representation['image'] = instance.image.url
+        else:
+            representation['image'] = None
+        return representation
+
+  

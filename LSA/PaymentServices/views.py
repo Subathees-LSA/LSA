@@ -30,7 +30,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .serializers import PaymentLotterySerializer
 from django.shortcuts import render
-
+from adminpanel.models import Winner
 def custom_404(request, exception):
     return render(request, '404.html', status=404)
 def check_user_authentication(request):
@@ -77,7 +77,7 @@ def create_checkout_session(request):
         line_items=line_items,
         mode="payment",
         success_url=f"{settings.DOMAIN}/success/",
-        cancel_url=f"{settings.DOMAIN}/cancel/",
+        #cancel_url=f"{settings.DOMAIN}/cancel/",
         customer_email=user.email,
     )
 
@@ -194,9 +194,12 @@ def my_order_api(request):
         "total_amount": 0, 
         "payment_at": None, 
         "payment_status": None,
-        "receipt_url": None
+        "receipt_url": None,
+        "user_email": request.user.email,  # Add user email
+        "user_name": request.user.username  # Add username
     })
-
+    # Get all winning tickets for this user
+    winning_tickets = Winner.objects.filter(user=request.user).values_list('ticket_number', flat=True)
     for payment in user_payments:
         session_id = payment.stripe_session_id
         if grouped_payments[session_id]["payment_id"] is None:
@@ -210,7 +213,11 @@ def my_order_api(request):
         
         payment_data = PaymentLotterySerializer(payment).data
         payment_data["ticket_numbers"] = list(tickets)  # Add ticket numbers to response
-        
+        # Add winner information for each ticket
+        payment_data["winning_tickets"] = []
+        for ticket in tickets:
+            if ticket in winning_tickets:
+                payment_data["winning_tickets"].append(ticket)
         grouped_payments[session_id]["payments"].append(payment_data)
         grouped_payments[session_id]["total_amount"] += float(payment.amount)
 
