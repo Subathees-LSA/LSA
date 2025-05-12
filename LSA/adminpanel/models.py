@@ -183,10 +183,10 @@ class Leaderboard(models.Model):
 class admin_dashboard_preview(models.Model):
     name = models.CharField(max_length=100, help_text="Tab name to display")
     dashboard_preview_image = models.ImageField(upload_to='dashboard_preview_image/', blank=True, null=True)
-    identifier = models.CharField(max_length=50, unique=True, help_text="Unique identifier for this container (used in frontend)")
+    identifier = models.CharField(max_length=150, unique=True, help_text="Unique identifier for this container (used in frontend)")
     type = models.CharField(
         max_length=100,
-        choices=[(' ', 'Select type'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'), ('lottery_sales_overview', 'lottery_sales_overview'), ('user_leaderboard', 'user_leaderboard'), ('lottery_sales_overview_regional_reports', 'lottery_sales_overview_regional_reports'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
+        choices=[(' ', 'Select type'),('charts', 'charts'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'),('user_leaderboard', 'user_leaderboard'), ('lottery_sales_overview_regional_reports', 'lottery_sales_overview_regional_reports'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
         default='',
         help_text="Type of content"
     )
@@ -213,7 +213,6 @@ class admin_dashboard_preview(models.Model):
             "won_percentage",
             "current_won_percentage",
             "lost_percentage",
-            "lottery_sales_overview",
             "user_leaderboard",
             "lottery_sales_overview_regional_reports",
             "total_lottery_won_lost_count",
@@ -222,7 +221,11 @@ class admin_dashboard_preview(models.Model):
             "overview_active_users_count",
             "overview_active_lotteries_count",
             "overview_sales_amount",
-            "notification-bell-container"
+            "notification-bell-container",
+            "report_and_analytics_monthly_sales_bar_chart",
+            "report_and_analytics_Pending_vs_completed_draws_pie_chart",
+            "report_and_analytics_winners_vs_losers_chart",
+            "report_and_analytics_overall_transaction_report_chart"
         
         }
 

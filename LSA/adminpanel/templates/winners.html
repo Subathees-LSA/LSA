@@ -1,71 +1,184 @@
 {% load static %}
-{% comment %} <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lottery Winners</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .winner-list { list-style-type: none; padding: 0; }
-        .winner-list li { padding: 5px 0; font-size: 18px; }
-        h2 { color: orange; margin-top: 20px; }
-    </style>
-</head>
-<body>
-    {% include 'header.html' %}
-    <h1>Lottery Winners</h1>
-    <div id="winners-container">
-        <!-- Data will be dynamically loaded here -->
-    </div>
-    {% include 'footer.html' %} 
-    <script src="{% static 'js/custom.js' %}"></script>  <!-- Include JavaScript -->
-</body>
-</html> {% endcomment %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lottery Winners</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        {% comment %} .winner-list { list-style-type: none; padding: 0; }
-        .winner-list li { padding: 5px 0; font-size: 18px; } {% endcomment %}
-        .user-winners-drawdate { color: orange; margin-top: 20px; }
-        #user-winners-pagination { margin-top: 20px; text-align: center; }
-        #user-winners-pagination button { margin: 5px; padding: 8px 12px; cursor: pointer; }
-        .user-winners-active { background-color: orange; color: white; font-weight: bold; }
-        .user-winners-announcement {
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #ff9800;
-            margin-top: 20px;
-        }
-.user-winners-winner-list {
-    list-style-type: disc; /* Dotted bullet points */
-    padding-left: 55px; /* Indent for better alignment */
-    margin-bottom: 20px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lottery Winners</title>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+/* General body styles */
+html, body {
+    font-family: Rajdhani;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
 }
-.user-winners-winner-list li {
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.winnerheader {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 10px 15px;
+    background-color: #222;
+    color: #f2f2f2;
+}
+
+.winner-section {
+    width: 100%;  /* Ensure container doesn't exceed screen width */
+    margin: 0 auto;
+    padding: 10px;
+    min-height: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-sizing: border-box;  /* Ensure padding is included in width */
+}
+
+.user-winners-drawdate {
+    display: flex;
+    align-items: center;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+}
+
+.winner-draw-date i {
+    background: #000;
+    color: orange;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 8px;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.winner-list {
+    list-style: none;
+    margin: 10px 0 30px 50px;
+    padding: 0;
+}
+
+.winner-list li {
     font-size: 16px;
     color: #333;
-    padding: 5px 0;
-    line-height: 1.6;
+    margin-bottom: 8px;
+    line-height: 1.5;
 }
-.user-winners-winner-list span {
-    color: #555;
+
+.winner-ticket {
+    color: #FF6600;  /* Ensure ticket numbers are orange */
+    font-weight: bold;
 }
-    </style>
+
+#user-winners-pagination {
+    text-align: center;
+    margin: 30px 0;
+}
+
+#user-winners-pagination button {
+    margin: 5px;
+    padding: 8px 14px;
+    background: #f2f2f2;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#user-winners-pagination .user-winners-active {
+    background-color: #FF6600;
+    color: white;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .winnerheader {
+        font-size: 24px;  /* Smaller font size for header */
+        padding: 10px;  /* Reduce padding */
+    }
+
+    .winner-section {
+        padding: 5px;  /* Reduce internal padding */
+    }
+
+    .user-winners-drawdate {
+        font-size: 18px;  /* Smaller font size for mobile */
+        padding: 8px 12px;  /* Adjust padding */
+    }
+
+    .winner-list li {
+        font-size: 14px;  /* Smaller font size for list items */
+    }
+
+    #user-winners-pagination button {
+        padding: 6px 10px;  /* Smaller button size for mobile */
+    }
+
+    #user-winners-pagination .user-winners-active {
+        font-size: 14px;  /* Adjust font size for active page */
+    }
+}
+
+/* Tablet responsiveness */
+@media (max-width: 1024px) {
+    .winnerheader {
+        font-size: 26px;  /* Adjust font size for tablets */
+    }
+
+    .user-winners-drawdate {
+        font-size: 19px;  /* Slightly smaller font for tablets */
+        padding: 9px 14px;  /* Adjust padding */
+    }
+
+    .winner-list li {
+        font-size: 15px;  /* Adjust font size for tablets */
+    }
+
+    #user-winners-pagination button {
+        padding: 7px 12px;  /* Slightly smaller button size */
+    }
+}
+
+  </style>
 </head>
 <body>
-    {% include 'header.html' %}
-    <h1 style="text-align: center;">Lottery Winners</h1>
-    <div id="user-winners-container"></div>
-    <div id="user-winners-pagination"></div>
-    {% include 'footer.html' %} 
-    <script src="{% static 'js/custom.js' %}"></script>
+    <div class="page-wrapper">
+  {% include 'header.html' %}
+  <div class="main-content"> 
+  <div class="winnerheader">Lottery Winners</div>
+
+  <div class="winner-section" id="user-winners-container">
+    <!-- Winners list will load here dynamically -->
+  </div>
+
+  <div id="user-winners-pagination"></div>
+</div>
+
+  {% include 'footer.html' %}
+</div>
+  <script src="{% static 'js/custom.js' %}"></script> <!-- Your custom JS -->
 </body>
 </html>
-

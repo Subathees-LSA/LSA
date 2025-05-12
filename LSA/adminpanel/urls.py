@@ -12,6 +12,21 @@ from django.conf.urls import handler404
 
 
 urlpatterns = [
+    # Overall Transaction Report
+    path('api/report_and_analytics/overall_transaction_report/', 
+         OverallTransactionReportView.as_view(), 
+         name='overall_transaction_report'),
+    # Number of Winners Today
+    path('api/winners-vs-losers-chart/', WinnersVsLosersChartAPI.as_view(), name='winners-vs-losers-chart'),
+     # Pending vs Completed Draws
+    path('api/draws-stats/', DrawStatsAPI.as_view(), name='draws-stats'),
+    # winners wall winners
+    path('api/custom_admin_dashboard_winner_wall_winners_list/', custom_admin_dashboard_winner_wall_winners_list.as_view(), name='custom_admin_dashboard_winner_wall_winners_list'),
+    path('api/custom_admin_dashboard_winner_wall_winner_detail/<int:pk>/', custom_admin_dashboard_winner_wall_winner_detail.as_view(), name='custom_admin_dashboard_winner_wall_winner_detail'),
+    #winners wall testimonials
+    path('api/custom_admin_dashboard_winners_wall_testimonials_list/', custom_admin_dashboard_winners_wall_testimonials_list.as_view(), name='custom_admin_dashboard_winners_wall_testimonials_list'),
+    path('api/custom_admin_dashboard_winners_wall_testimonial_detail/<int:pk>/', custom_admin_dashboard_winners_wall_testimonial_detail.as_view(), name='custom_admin_dashboard_winners_wall_testimonial_detail'),
+    
     path('custom/admin/signup/',admin_signup, name='admin_signup'),
     path('api/admin/signup/', api_admin_signup.as_view(), name='api_admin_signup'),
     path('custom/admin/login/', custom_admin_login, name='custom_admin_login'),
@@ -84,6 +99,8 @@ urlpatterns = [
     path('api_admin_dashboard_prize_management/<int:pk>/update_winner_status/', api_admin_dashboard_prize_management_update_winner_status, name='api_admin_dashboard_prize_management_update_winner_status'),
     path('winners/', winners_page, name='winners_page'),
     path('api/winners/', WinnerListView.as_view(), name='winner-list'),
+    path('api/winners-wall/', WinnersWallListView.as_view(), name='winners-wall-list'),
+
 ]
 
 if settings.DEBUG:

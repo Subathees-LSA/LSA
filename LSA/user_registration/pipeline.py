@@ -83,3 +83,46 @@ def block_user_check(backend, user, response, *args, **kwargs):
         return redirect('user_login')
 
 
+# app1/pipeline.py
+
+from user_agents import parse
+from django.utils.timezone import now
+from django.contrib.auth import login
+from .models import UserPrivacy, UserDeviceHistory
+
+def save_login_session_details(strategy, details, backend, user=None, request=None, *args, **kwargs):
+    if user and request:
+        # Log the user in via Django session framework
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+        user_agent_string = request.META.get('HTTP_USER_AGENT', '')
+        parsed_agent = parse(user_agent_string)
+
+        device_family = parsed_agent.device.family or "Unknown Device"
+        os_family = parsed_agent.os.family or "Unknown OS"
+        browser_family = parsed_agent.browser.family or "Unknown Browser"
+
+        if device_family.lower() in ["other", "generic"]:
+            device_family = "Unknown Device"
+
+        device_info = f"{device_family} - {os_family} - {browser_family}"
+        ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+
+        request.session.save()  # Ensure session key exists
+        session_key = request.session.session_key
+
+        # Save to UserDeviceHistory
+        UserDeviceHistory.objects.create(
+            user=user,
+            device_info=device_info,
+            ip_address=ip_address,
+            login_time=now(),
+            session_key=session_key
+        )
+
+        # Update UserPrivacy
+        user_privacy, _ = UserPrivacy.objects.get_or_create(user=user)
+        user_privacy.device_info = device_info
+        user_privacy.ip_address = ip_address
+        user_privacy.last_active = now()
+        user_privacy.save()

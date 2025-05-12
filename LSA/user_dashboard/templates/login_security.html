@@ -7,6 +7,69 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <title>Login & Security</title>
        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+       <script>
+        $(document).ready(function () {
+            togglePasswordVisibility('#toggle-old-password', '#unique-old-password');
+            togglePasswordVisibility('#toggle-new-password', '#unique-new-password');
+            togglePasswordVisibility('#toggle-confirm-password', '#unique-confirm-password');
+        });
+        function initializeMenuScroll() {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector(".myorder-sidebar");
+        const menu = document.querySelector(".myorder-menu");
+
+        // Create the scroll button
+        const scrollButton = document.createElement("button");
+        scrollButton.classList.add("scroll-right");
+        scrollButton.innerHTML = "▶";
+        sidebar.appendChild(scrollButton);
+
+        // Function to check if scrolling is needed
+        function checkScrollVisibility() {
+            if (menu.scrollWidth > menu.clientWidth) {
+                scrollButton.style.display = "block";
+            } else {
+                scrollButton.style.display = "none";
+            }
+        }
+
+        // Scroll event to hide button when at the end
+        scrollButton.addEventListener("click", function () {
+            menu.scrollBy({ left: 200, behavior: "smooth" });
+        });
+
+        menu.addEventListener("scroll", function () {
+            if (menu.scrollLeft + menu.clientWidth >= menu.scrollWidth) {
+                scrollButton.style.display = "none";
+            } else {
+                scrollButton.style.display = "block";
+            }
+        });
+
+        // Initial check
+        checkScrollVisibility();
+
+        // Scroll active menu item into view after short delay
+        setTimeout(() => {
+            const activeItem = menu.querySelector(".active");
+            if (activeItem) {
+                activeItem.scrollIntoView({
+                    behavior: "smooth",
+                    inline: "center",
+                    block: "nearest"
+                });
+            }
+        }, 100);
+
+        // Recheck on window resize
+        window.addEventListener("resize", checkScrollVisibility);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", initializeMenuScroll);
+
+    </script>
+    
 </head>
 <body class="unique-body">
 
@@ -26,18 +89,32 @@
             <form id="unique-password-form">
                 <div class="unique-form-group">
                     <label for="unique-old-password" class="unique-label">Current Password</label>
-                    <input type="password" id="unique-old-password" class="unique-input-password" placeholder="Enter current password" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="unique-old-password" class="unique-input-password" placeholder="Enter current password" required>
+                        <button type="button" id="toggle-old-password" class="toggle-password-btn">
+                            <img src="/media/images/eye-slash.png" alt="Toggle Password" />
+                        </button>
+                    </div>
                    </div>
                 <div class="unique-form-group">
                     <label for="unique-new-password" class="unique-label">New Password</label>
-                    <input type="password" id="unique-new-password" class="unique-input-password" placeholder="Enter new password" required>
-                    
+                    <div class="password-wrapper">
+                        <input type="password" id="unique-new-password" class="unique-input-password" placeholder="Enter new password" required>
+                        <button type="button" id="toggle-new-password" class="toggle-password-btn">
+                            <img src="/media/images/eye-slash.png" alt="Toggle Password" />
+                        </button>
+                    </div>
                 </div>
                
 
                 <div class="unique-form-group">
                     <label for="unique-confirm-password" class="unique-label">Confirm Password</label>
-                    <input type="password" id="unique-confirm-password" class="unique-input-password" placeholder="Confirm new password" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="unique-confirm-password" class="unique-input-password" placeholder="Confirm new password" required>
+                        <button type="button" id="toggle-confirm-password" class="toggle-password-btn">
+                            <img src="/media/images/eye-slash.png" alt="Toggle Password" />
+                        </button>
+                    </div>
                 </div>
                 <div id="unique-toast" class="unique-toast hidden"></div>
                 <div class="unique-form-group">
