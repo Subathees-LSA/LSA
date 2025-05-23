@@ -215,11 +215,21 @@ class BannerSerializer(serializers.ModelSerializer):
         fields = ['title', 'image','show_title', 'show_explore_button']
 
 
+# class PreviousWinnerimgSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Previous_Winner_img
+#         fields = ['id', 'name', 'image'] 
 class PreviousWinnerimgSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Previous_Winner_img
-        fields = ['id', 'name', 'image'] 
+    image_url = serializers.SerializerMethodField()
 
+    class Meta:
+        model = WinnersWallWinnersList
+        fields = ['winner_name', 'ticket_number', 'lottery_name', 'draw_date', 'image_url']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 from PaymentServices.models import *
 
@@ -330,3 +340,13 @@ class custom_admin_dashboard_winners_wall_testimonials_serializer(serializers.Mo
         return representation
 
   
+from rest_framework import serializers
+from .models import Winner
+
+class WonLotteryWinnerSerializer(serializers.ModelSerializer):
+    # lottery_event = serializers.StringRelatedField()
+    lottery_event = serializers.CharField(source='lottery_event.title')
+    
+    class Meta:
+        model = Winner
+        fields = ['lottery_event', 'ticket_number', 'prize_no', 'prize_status', 'prize_comments']

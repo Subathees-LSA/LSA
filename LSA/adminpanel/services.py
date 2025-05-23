@@ -140,3 +140,9 @@ def admin_lottery_draw_page(request):
 
 def winners_page(request):
     return render(request, 'winners.html')
+
+
+def my_won_lottery_page(request):
+    if not request.user.is_authenticated:
+        return redirect('/login/')  # Redirect to login page if not authenticated
+    return render(request, 'my_won_lottery_page.html')

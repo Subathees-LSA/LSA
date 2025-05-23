@@ -43,7 +43,8 @@ class LotteryEvent(models.Model):
     mini_limit = models.PositiveIntegerField(default=1)  # Minimum number of tickets
     max_limit = models.PositiveIntegerField(default=10)  # Maximum number of tickets
     free_postal_description = models.TextField(default="Enter the description for free postal entry.")
-    competition_details = models.TextField(default="")   
+    competition_details = models.TextField(default="") 
+    created_at = models.DateTimeField(default=timezone.now)  
 
     @property
     def stock_tickets(self):
@@ -75,6 +76,9 @@ class LotteryEvent(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.sold_percentage}% sold"
+
+    class Meta:
+        ordering = ['-draw_date']
 
 
 class LotteryEventImages(models.Model):
@@ -186,7 +190,7 @@ class admin_dashboard_preview(models.Model):
     identifier = models.CharField(max_length=150, unique=True, help_text="Unique identifier for this container (used in frontend)")
     type = models.CharField(
         max_length=100,
-        choices=[(' ', 'Select type'),('charts', 'charts'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'),('user_leaderboard', 'user_leaderboard'), ('lottery_sales_overview_regional_reports', 'lottery_sales_overview_regional_reports'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
+        choices=[(' ', 'Select type'),('charts', 'charts'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'),('user_leaderboard', 'user_leaderboard'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
         default='',
         help_text="Type of content"
     )
@@ -214,7 +218,8 @@ class admin_dashboard_preview(models.Model):
             "current_won_percentage",
             "lost_percentage",
             "user_leaderboard",
-            "lottery_sales_overview_regional_reports",
+            "report_and_analytics_marginal_chart",
+            "admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart",
             "total_lottery_won_lost_count",
             "overview_sales_count_won-lottery-amount",
             "overview_sales_count_lost-lottery-amount",
@@ -225,7 +230,9 @@ class admin_dashboard_preview(models.Model):
             "report_and_analytics_monthly_sales_bar_chart",
             "report_and_analytics_Pending_vs_completed_draws_pie_chart",
             "report_and_analytics_winners_vs_losers_chart",
-            "report_and_analytics_overall_transaction_report_chart"
+            "report_and_analytics_overall_transaction_report_chart",
+            "inactive_users",
+            "new_users_this_month"
         
         }
 

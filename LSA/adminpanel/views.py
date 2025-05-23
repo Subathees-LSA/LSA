@@ -109,6 +109,23 @@ class LotterySummaryView(APIView):
             user__last_login__year=year
         ).count()
         current_time = timezone.now()
+        now = timezone.now()
+        ninety_days_ago = now - timedelta(days=90)
+
+    
+
+        # Users who have NOT logged in in the last 90 days
+        inactive_users = UserProfile.objects.filter(
+            user__last_login__lt=ninety_days_ago
+        ).count()
+
+        # Users created in the current month
+        new_users_this_month = User.objects.filter(
+            date_joined__year=now.year,
+            date_joined__month=now.month
+        ).count()
+
+   
     
     # Filter active lottery events where draw_date is in the future
         active_lotteries = LotteryEvent.objects.filter(is_active=True, draw_date__gt=current_time).count()
@@ -124,6 +141,8 @@ class LotterySummaryView(APIView):
             "active_users": active_users,
             "active_lotteries": active_lotteries,
             "sales_amount":sales_amount,
+            'inactive_users': inactive_users,
+            'new_users_this_month': new_users_this_month,
         }
         return Response(data)
 @api_view(['POST'])
@@ -1139,19 +1158,31 @@ class BannerView(APIView):
             return Response({"error": "An unexpected error occurred", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# class PreviousWinnersimgAPIView(APIView):
+#     def get(self, request):
+#         try:
+#             winners = Previous_Winner_img.objects.all()
+#             serializer = PreviousWinnerimgSerializer(winners, many=True)
+#             return Response({'winners': serializer.data}, status=status.HTTP_200_OK)
+#         except Previous_Winner_img.DoesNotExist:
+#             return Response({'error': 'No winners found.'}, status=status.HTTP_404_NOT_FOUND)
+#         except APIException as api_error:
+#             return Response({'error': str(api_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         except Exception as e:
+#             return Response({'error': 'An unexpected error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class PreviousWinnersimgAPIView(APIView):
     def get(self, request):
         try:
-            winners = Previous_Winner_img.objects.all()
+            # Get only winners with flag=True, ordered by draw_date (newest first)
+            winners = WinnersWallWinnersList.objects.filter(
+                flag=True,
+                image__isnull=False
+            ).exclude(image='').order_by('-updated_at')
+            #winners = WinnersWallWinnersList.objects.filter(flag=True).order_by('-updated_at')
             serializer = PreviousWinnerimgSerializer(winners, many=True)
             return Response({'winners': serializer.data}, status=status.HTTP_200_OK)
-        except Previous_Winner_img.DoesNotExist:
-            return Response({'error': 'No winners found.'}, status=status.HTTP_404_NOT_FOUND)
-        except APIException as api_error:
-            return Response({'error': str(api_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({'error': 'An unexpected error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 class LotteryStatisticsView(APIView):
     permission_classes = [IsAdminUser] 
@@ -1935,11 +1966,20 @@ class DrawStatsAPI(APIView):
         total_draws = LotteryEvent.objects.count()
         completed_draws = Winner.objects.values('lottery_event').distinct().count()
         pending_draws = total_draws - completed_draws
-        
+
+        if total_draws > 0:
+            completed_percentage = (completed_draws / total_draws) * 100
+            pending_percentage = (pending_draws / total_draws) * 100
+        else:
+            completed_percentage = 0.0
+            pending_percentage = 0.0
+
         return Response({
             'total_draws': total_draws,
             'completed_draws': completed_draws,
-            'pending_draws': pending_draws
+            'pending_draws': pending_draws,
+            'completed_draws_percentage': round(completed_percentage, 2),
+            'pending_draws_percentage': round(pending_percentage, 2)
         })
 
 from rest_framework.views import APIView
@@ -2094,3 +2134,454 @@ class WinnersWallListView(APIView):
             
         return Response(grouped_winners)
 
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db.models import Sum, Q
+from .models import LotteryEvent, PaymentLottery, LotteryCategory
+from datetime import datetime
+import calendar
+from django.http import HttpResponse
+import pandas as pd
+from io import BytesIO
+
+class MarginalChartDataView(APIView):
+    def get(self, request):
+        year = request.GET.get('year')
+        month = request.GET.get('month')
+        
+        # Base query for lotteries
+        lotteries_query = Q(created_at__year=year)
+        if month and month != 'all':
+            lotteries_query &= Q(created_at__month=month)
+        
+        # Get all lottery events for the selected period
+        lotteries = LotteryEvent.objects.filter(lotteries_query).select_related('category')
+        
+        # Get all successful payments for these lotteries
+        payments = PaymentLottery.objects.filter(
+            lottery_event__in=lotteries,
+            payment_status='completed'
+        )
+        
+        # Group by category and calculate totals
+        categories = LotteryCategory.objects.filter(
+            lottery_events__in=lotteries
+        ).distinct()
+        
+        data = []
+        for category in categories:
+            category_lotteries = lotteries.filter(category=category)
+            total_amount = sum(float(lottery.total_amount) for lottery in category_lotteries)
+            
+            category_payments = payments.filter(lottery_event__category=category)
+            total_sales = category_payments.aggregate(total=Sum('amount'))['total'] or 0
+            
+            margin = float(total_sales) - float(total_amount)
+            margin_reached = margin >= 0
+            
+            data.append({
+                'category': category.name,
+                'total_amount': float(total_amount),
+                'total_sales': float(total_sales),
+                'margin': margin,
+                'margin_reached': margin_reached,
+                'margin_status': 'Reached' if margin_reached else 'Not Reached'
+            })
+        
+        # Calculate overall totals
+        overall_sales = sum(item['total_sales'] for item in data)
+        overall_target = sum(item['total_amount'] for item in data)
+        overall_margin = overall_sales - overall_target
+        overall_status = 'Reached' if overall_margin >= 0 else 'Not Reached'
+        
+        # Get available years and months for dropdowns
+        years = LotteryEvent.objects.dates('created_at', 'year').values_list('created_at__year', flat=True).distinct()
+        months = LotteryEvent.objects.filter(created_at__year=year).dates('created_at', 'month').values_list('created_at__month', flat=True).distinct()
+        
+        return Response({
+            'data': data,
+            'overall': {
+                'total_sales': overall_sales,
+                'total_target': overall_target,
+                'margin': overall_margin,
+                'margin_status': overall_status
+            },
+            'years': list(years),
+            'months': [{'value': 'all', 'name': 'All Months'}] + [{'value': m, 'name': calendar.month_name[m]} for m in months],
+            'selected_year': int(year) if year else None,
+            'selected_month': month if month else None
+        })
+
+class MarginalChartExportView(APIView):
+    def get(self, request):
+        year = request.GET.get('year')
+        month = request.GET.get('month')
+        
+        # Reuse the same logic as the chart data view
+        view = MarginalChartDataView()
+        response = view.get(request)
+        data = response.data['data']
+        overall = response.data['overall']
+        
+        # Create a DataFrame for Excel export
+        df = pd.DataFrame(data)
+        df = df[['category', 'total_sales', 'total_amount', 'margin', 'margin_status']]
+        df.columns = ['Category', 'Sales', 'Target', 'Margin', 'Status']
+        
+        # Add overall row
+        overall_df = pd.DataFrame([{
+            'Category': 'TOTAL',
+            'Sales': overall['total_sales'],
+            'Target': overall['total_target'],
+            'Margin': overall['margin'],
+            'Status': overall['margin_status']
+        }])
+        df = pd.concat([df, overall_df])
+        
+        # Create Excel file in memory
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='Margin Chart', index=False, startrow=2)
+        
+        # Get workbook and worksheet objects
+        workbook = writer.book
+        worksheet = writer.sheets['Margin Chart']
+        
+        # Add title
+        title_format = workbook.add_format({
+            'bold': True,
+            'size': 16,
+            'align': 'center',
+            'valign': 'vcenter'
+        })
+        
+        month_name = calendar.month_name[int(month)] if month and month != 'all' else ''
+        title = f'Margin Chart - {year}' + (f' {month_name}' if month_name else '')
+        worksheet.merge_range('A1:E1', title, title_format)
+        
+        # Add header formatting
+        header_format = workbook.add_format({
+            'bold': True,
+            'border': 1,
+            'bg_color': '#4e73df',
+            'color': 'white',
+            'align': 'center',
+            'valign': 'vcenter'
+        })
+        
+        for col_num, value in enumerate(df.columns.values):
+            worksheet.write(2, col_num, value, header_format)
+        
+        # Add data formatting
+        data_format = workbook.add_format({
+            'border': 1,
+            'align': 'center',
+            'valign': 'vcenter'
+        })
+        
+        money_format = workbook.add_format({
+            'num_format': '€#,##0.00',
+            'border': 1,
+            'align': 'center',
+            'valign': 'vcenter'
+        })
+        
+        status_format = workbook.add_format({
+            'border': 1,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bold': True
+        })
+        
+        reached_format = workbook.add_format({
+            'bg_color': '#1cc88a',
+            'border': 1,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bold': True
+        })
+        
+        not_reached_format = workbook.add_format({
+            'bg_color': '#e74a3b',
+            'border': 1,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bold': True
+        })
+        
+        # Apply formatting
+        for row_num in range(3, len(df) + 3):
+            for col_num in range(5):  # 5 columns
+                if col_num in [1, 2, 3]:  # Sales, Target, Margin columns
+                    worksheet.write(row_num, col_num, df.iloc[row_num-3, col_num], money_format)
+                elif col_num == 4:  # Status column
+                    status = df.iloc[row_num-3, col_num]
+                    if status == 'Reached':
+                        worksheet.write(row_num, col_num, status, reached_format)
+                    else:
+                        worksheet.write(row_num, col_num, status, not_reached_format)
+                else:
+                    worksheet.write(row_num, col_num, df.iloc[row_num-3, col_num], data_format)
+        
+        # Adjust column widths
+        worksheet.set_column('A:A', 20)
+        worksheet.set_column('B:D', 15)
+        worksheet.set_column('E:E', 15)
+        
+        # Close the writer
+        writer.close()
+        output.seek(0)
+        
+        # Create filename
+        month_name = calendar.month_name[int(month)].title() if month and month != 'all' else ''
+        filename = f'margin_chart_{year}' + (f'_{month_name}' if month_name else '') + '.xlsx'
+        
+        # Create response
+        response = HttpResponse(
+            output.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
+
+import random
+import string
+from django.utils.text import slugify
+from django.utils import timezone
+
+def create_dummy_lottery_events(n=10):
+    for i in range(n):
+        # Create unique category
+        category_name = f"Category {i+1} - {''.join(random.choices(string.ascii_uppercase, k=5))}"
+        category = LotteryCategory.objects.create(name=category_name)
+
+        # Generate title and slug
+        title = f"Dummy Lottery Event {i+1}"
+        slug = slugify(title + '-' + ''.join(random.choices(string.ascii_lowercase, k=4)))
+
+        # Create the event
+        event = LotteryEvent.objects.create(
+            title=title,
+            slug=slug,
+            category=category,
+            description="This is a dummy lottery event.",
+            price=random.uniform(10, 100),
+            draw_date=timezone.now() + timezone.timedelta(days=random.randint(5, 30)),
+            sold_percentage=random.randint(0, 100),
+            total_tickets=100,
+            sold_tickets=random.randint(0, 100),
+            total_budget=random.uniform(1000, 5000),
+            revenue_type=random.choice(['fixed', 'percentage']),
+            revenue_value=random.uniform(100, 500),
+            total_amount=random.uniform(2000, 6000),
+            per_ticket_price=random.uniform(10, 100),
+            mini_limit=1,
+            max_limit=10,
+            free_postal_description="Free postal entry instructions here.",
+            competition_details="Dummy competition details.",
+        )
+        print(f"Created: {event.title} with Category: {category.name}")
+#create_dummy_lottery_events()
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db.models import Count, Sum
+from datetime import datetime, timedelta
+from .models import Winner, LotteryEvent
+
+class LotteryReportAPI(APIView):
+    def get(self, request):
+        # Get data for last 5 years
+        current_year = datetime.now().year
+        years = range(current_year - 4, current_year + 1)
+        
+        data = []
+        total_won = 0
+        total_lost = 0
+        
+        for year in years:
+            # Get all winners for this year
+            winners = Winner.objects.filter(created_at__year=year)
+            won = winners.count()
+            lost = 0
+            
+            # Calculate lost tickets (sold_tickets - 1 for each winner)
+            for winner in winners:
+                if winner.lottery_event:
+                    lost += winner.lottery_event.sold_tickets - 1
+            
+            data.append({
+                'year': year,
+                'won': won,
+                'lost': lost
+            })
+            
+            total_won += won
+            total_lost += lost
+        
+        return Response({
+            'years_data': data,
+            'total_won': total_won,
+            'total_lost': total_lost,
+            'status': 'success'
+        })
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.http import HttpResponse
+from datetime import datetime
+import xlsxwriter
+from io import BytesIO
+from .models import Winner, LotteryEvent
+
+class LotteryReportExportAPI(APIView):
+    def get(self, request):
+        # Create a file-like buffer to receive Excel data
+        output = BytesIO()
+
+        # Create a workbook and add a worksheet
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet('Lottery Report')
+        
+        # Add formats
+        header_format = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#4472C4',
+            'font_color': 'white',
+            'border': 1
+        })
+        
+        title_format = workbook.add_format({
+            'bold': True,
+            'font_size': 16,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#8EA9DB',
+            'border': 1
+        })
+        
+        data_format = workbook.add_format({
+            'align': 'center',
+            'valign': 'vcenter',
+            'border': 1
+        })
+        
+        total_format = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#F2F2F2',
+            'border': 1
+        })
+        
+        # Get data for last 5 years
+        current_year = datetime.now().year
+        years = range(current_year - 4, current_year + 1)
+        
+        data = []
+        total_won = 0
+        total_lost = 0
+        
+        for year in years:
+            winners = Winner.objects.filter(created_at__year=year)
+            won = winners.count()
+            lost = 0
+            
+            for winner in winners:
+                if winner.lottery_event:
+                    lost += winner.lottery_event.sold_tickets - 1
+            
+            data.append({
+                'year': year,
+                'won': won,
+                'lost': lost
+            })
+            
+            total_won += won
+            total_lost += lost
+        
+        # Write title
+        worksheet.merge_range('A1:D1', 'Overall Won and Lost Lotteries Report', title_format)
+        
+        # Write headers
+        worksheet.write('A2', 'Year', header_format)
+        worksheet.write('B2', 'Won', header_format)
+        worksheet.write('C2', 'Lost', header_format)
+        worksheet.write('D2', 'Total', header_format)
+        
+        # Write data
+        row = 2
+        for item in data:
+            worksheet.write(row, 0, item['year'], data_format)
+            worksheet.write(row, 1, item['won'], data_format)
+            worksheet.write(row, 2, item['lost'], data_format)
+            worksheet.write(row, 3, item['won'] + item['lost'], data_format)
+            row += 1
+        
+        # Write totals
+        worksheet.write(row, 0, 'Total', total_format)
+        worksheet.write(row, 1, total_won, total_format)
+        worksheet.write(row, 2, total_lost, total_format)
+        worksheet.write(row, 3, total_won + total_lost, total_format)
+        
+        # Add chart
+        # chart = workbook.add_chart({'type': 'column'})
+        
+        # # Configure the series
+        # chart.add_series({
+        #     'name': '=Lottery Report!$B$2',
+        #     'categories': '=Lottery Report!$A$3:$A$' + str(row),
+        #     'values': '=Lottery Report!$B$3:$B$' + str(row),
+        #     'fill': {'color': '#4BC0C0'},
+        #     'border': {'color': 'black'}
+        # })
+        
+        # chart.add_series({
+        #     'name': '=Lottery Report!$C$2',
+        #     'categories': '=Lottery Report!$A$3:$A$' + str(row),
+        #     'values': '=Lottery Report!$C$3:$C$' + str(row),
+        #     'fill': {'color': '#FF6384'},
+        #     'border': {'color': 'black'}
+        # })
+        
+        # # Configure chart axes
+        # chart.set_x_axis({'name': 'Year', 'name_font': {'bold': True}})
+        # chart.set_y_axis({'name': 'Count', 'name_font': {'bold': True}})
+        
+        # Insert the chart
+        # worksheet.insert_chart('F2', chart, {'x_offset': 25, 'y_offset': 10})
+        
+        # Set column widths
+        worksheet.set_column('A:A', 12)
+        worksheet.set_column('B:D', 12)
+        
+        # Close the workbook
+        workbook.close()
+        
+        # Rewind the buffer
+        output.seek(0)
+        
+        # Create the response
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=Lottery_Report.xlsx'
+        
+        return response    
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .models import Winner
+from .serializers import WonLotteryWinnerSerializer
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_won_lottery(request):
+    # winners = Winner.objects.filter(user=request.user)
+    winners = Winner.objects.filter(user=request.user).order_by('-created_at')
+    serializer = WonLotteryWinnerSerializer(winners, many=True)
+    return Response(serializer.data)

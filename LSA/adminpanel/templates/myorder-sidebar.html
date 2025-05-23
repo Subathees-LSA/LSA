@@ -9,8 +9,9 @@
         <li class="{% if request.resolver_match.url_name == 'my-orders' %}active{% endif %}">
             <a href="{% url 'my-orders' %}"><img src="/media/icons/Line.png" alt="icon"> My Orders</a>
         </li>
-        <li class="{% if request.path == '#' %}active{% endif %}">
-            <a href="#"><img src="/media/icons/Frame.png" alt="icon"> My Wallet</a>
+        {% comment %} <li class="{% if request.path == '#' %}active{% endif %}"> {% endcomment %}
+         <li class="{% if request.resolver_match.url_name == 'my_won_lottery_page' %}active{% endif %}">
+            <a href="{% url 'my_won_lottery_page' %}"><img src="/media/icons/Frame.png" alt="icon"> My Won Lotteries</a>
         </li>
         <li class="{% if request.path == '#' %}active{% endif %}">
             <a href="#"><img src="/media/icons/noti.png" alt="icon"> My Points</a>
