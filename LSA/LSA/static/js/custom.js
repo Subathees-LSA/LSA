@@ -2924,7 +2924,7 @@ function showSpecificDiv(id) {
 
 }
 let salesChart; // Store chart instance for dynamic updates
-function exportToExcel() {
+async function exportToExcel() {
     if (!salesChart) {
         alert("No data available to export.");
         return;
@@ -2932,43 +2932,71 @@ function exportToExcel() {
 
     const labels = salesChart.data.labels;
     const data = salesChart.data.datasets[0].data;
-
-    // 🔍 Dynamically fetch year from a dropdown or input with id 'yearSelector'
     const selectedYear = document.getElementById('yearSelect')?.value || new Date().getFullYear();
 
-    // Prepare Excel data
-    const excelData = [];
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Monthly Sales");
 
-    // Add heading row with correct year
-    excelData.push([`Monthly Sales Chart – ${selectedYear}`]);
-    excelData.push([]); // Empty row for spacing
+    // Main Title
+    sheet.mergeCells('A1:B1');
+    const titleRow = sheet.getRow(1);
+    titleRow.getCell(1).value = `Monthly Sales Chart – ${selectedYear}`;
+    titleRow.getCell(1).font = { bold: true, size: 14 };
+    titleRow.getCell(1).alignment = { horizontal: 'center' };
+    titleRow.height = 20;
 
-    // Headers with renamed column
-    excelData.push(['Month', 'Sales Amount']);
+    // Empty spacer row
+    sheet.addRow([]);
 
-    // Add monthly data
+    // Header Row
+    const headerRow = sheet.addRow(['Month', 'Sales Amount']);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { horizontal: 'center' };
+    headerRow.eachCell(cell => {
+        cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+        };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE0E0E0' },
+        };
+    });
+
+    // Add data rows
     for (let i = 0; i < labels.length; i++) {
-        excelData.push([labels[i], data[i]]);
+        const row = sheet.addRow([labels[i], data[i]]);
+        row.eachCell(cell => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' },
+            };
+            cell.alignment = { horizontal: 'center' };
+        });
     }
 
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+    // Adjust column widths
+    sheet.columns = [
+        { width: 20 },
+        { width: 20 }
+    ];
 
-    // Apply bold styling to headers
-    const headerCell1 = worksheet['A3'];
-    const headerCell2 = worksheet['B3'];
-    if (headerCell1) headerCell1.s = { font: { bold: true }, alignment: { horizontal: 'center' } };
-    if (headerCell2) headerCell2.s = { font: { bold: true }, alignment: { horizontal: 'center' } };
+    // Download Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
 
-    // Create workbook and append
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Sales");
-
-    // Export with dynamic year in filename
-    XLSX.writeFile(workbook, `lottery_sales_${selectedYear}.xlsx`);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `lottery_sales_${selectedYear}.xlsx`;
+    link.click();
 }
-
-
 
 
 // Function to fetch and display sales data
@@ -3006,6 +3034,23 @@ function fetchSalesData(year) {
                     },
                     options: {
                         responsive: true,
+                         // 🔧 FIX TOOLTIP ISSUES ON SMALL BARS
+
+            interaction: {
+
+                mode: 'index',
+
+                intersect: false
+
+            },
+
+            hover: {
+
+                mode: 'index',
+
+                intersect: false
+
+            },
                         plugins: {
                             legend: {
                                 display: false // Hiding the legend for simplicity
@@ -3198,93 +3243,14 @@ async function fetchRegionalSales() {
 }
 
 
-async function renderCharts() {
-    const reports = await fetchReports();
-    const regionalSales = await fetchRegionalSales();
-
-    // Extract the most recent values for displaying in the metrics
-    const lastReport = reports[reports.length - 1];
-    const totalSalesData = regionalSales[0];  // Assuming the first region's data for demonstration
-
-    // Dynamically display the Won and Lost Lottery amounts
-    document.getElementById('overview_wonLottery').textContent = `£${lastReport.win_lottery.toLocaleString()}`;
-    document.getElementById('overview_lostLottery').textContent = `£${lastReport.lost_lottery.toLocaleString()}`;
-
-    // Dynamically display the Total Sales, Average, and Return amounts
-    document.getElementById('overview_totalSales').textContent = `£${totalSalesData.total_sales.toLocaleString()}`;
-    document.getElementById('overview_averageSales').textContent = `£${totalSalesData.average.toLocaleString()}`;
-    document.getElementById('overview_returnSales').textContent = `£${totalSalesData.return_value.toLocaleString()}`;
-
-    // Prepare data for charts
-    const years = reports.map(report => report.year);
-    const winLottery = reports.map(report => report.win_lottery);
-    const lostLottery = reports.map(report => report.lost_lottery);
-
-    const regions = regionalSales.map(sale => sale.region);
-    const totalSales = regionalSales.map(sale => sale.total_sales);
-    const averages = regionalSales.map(sale => sale.average);
-
-    // Reports Chart
-    new Chart(document.getElementById('overview_reportsChart'), {
-        type: 'bar',
-        data: {
-            labels: years,
-            datasets: [
-                {
-                    label: 'Win Lottery',
-                    data: winLottery,
-                    backgroundColor: 'orange'
-                },
-                {
-                    label: 'Lost Lottery',
-                    data: lostLottery,
-                    backgroundColor: 'red'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' }
-            }
-        }
-    });
-
-    // Regional Sales Chart
-    new Chart(document.getElementById('overview_regionalChart'), {
-        type: 'bar',
-        data: {
-            labels: regions,
-            datasets: [
-                {
-                    label: 'Total Sales',
-                    data: totalSales,
-                    backgroundColor: 'orange'
-                },
-                {
-                    label: 'Average',
-                    data: averages,
-                    backgroundColor: 'red'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            indexAxis: 'y',  // Horizontal bars
-            plugins: {
-                legend: { position: 'top' }
-            }
-        }
-    });
-}
 
 function lottery_won_and_lost_total_calculation() {
     fetch('/api/lottery-summary/')
         .then(response => response.json())
         .then(data => {
             const ids = {
-                'overview_sales_count_won-lottery-amount': data.won_lottery_amount,
-                'overview_sales_count_lost-lottery-amount': data.lost_lottery_amount,
+                'inactive_users': data.inactive_users,
+                'new_users_this_month': data.new_users_this_month,
                 'overview_active_users_count': data.active_users,
                 'overview_active_lotteries_count': data.active_lotteries,
                 'overview_sales_amount': '£' + data.sales_amount
@@ -3340,12 +3306,7 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
             
             // Clear previous content
             container.innerHTML = '';
-             // Calculate percentages
-             const totalDraws = data.total_draws;
-             const completedDraws = data.completed_draws;
-             const pendingDraws = totalDraws - completedDraws;
-             const completedPercentage = totalDraws > 0 ? Math.round((completedDraws / totalDraws) * 100) : 0;
-             const pendingPercentage = totalDraws > 0 ? 100 - completedPercentage : 0;
+             
             
             // Create header section
             const headerDiv = document.createElement('div');
@@ -3379,11 +3340,11 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
             
             const completedLegend = document.createElement('div');
             completedLegend.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_item';
-            completedLegend.innerHTML = '<span class="report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_color" style="background-color: #4e73df;"></span> Completed Draws: ' + data.completed_draws;
+            completedLegend.innerHTML = '<span class="report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_color" style="background-color: #c75205;"></span> Completed Draws: ' + data.completed_draws;
             
             const pendingLegend = document.createElement('div');
             pendingLegend.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_item';
-            pendingLegend.innerHTML = '<span class="report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_color" style="background-color: #1cc88a;"></span> Pending Draws: ' + data.pending_draws;
+            pendingLegend.innerHTML = '<span class="report_and_analytics_Pending_vs_completed_draws_pie_chart_legend_color" style="background-color: #FF6600;"></span> Pending Draws: ' + data.pending_draws;
             
             legendDiv.appendChild(completedLegend);
             legendDiv.appendChild(pendingLegend);
@@ -3395,13 +3356,13 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
                 type: 'pie',
                 data: {
                     labels: [
-                        `Completed Draws (${completedPercentage}%)`, 
-                        `Pending Draws (${pendingPercentage}%)`
+                        `Completed Draws (${data.completed_draws_percentage}%)`, 
+                        `Pending Draws (${data.pending_draws_percentage}%)`
                     ],
                     datasets: [{
                         data: [data.completed_draws, data.pending_draws],
-                        backgroundColor: ['#4e73df', '#1cc88a'],
-                        borderColor: '#fff',
+                        backgroundColor: ['#c75205', '#FF6600'],
+                        border:'none',
                         borderWidth: 1
                     }]
                 },
@@ -3423,42 +3384,115 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
         });
 }
 
+
 function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_function() {
     // Fetch data again for export
     fetch('/api/draws-stats/')
         .then(response => response.json())
         .then(data => {
-            // Create Excel workbook
-            const workbook = XLSX.utils.book_new();
+            // Create a new workbook
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Draws Report');
             
-            // Prepare worksheet data
-            const wsData = [
-                ['Pending vs Completed Draws'],
-                [''], // Empty row for spacing
-                ['', ''], // Placeholder for chart (will be merged)
-                [''], // Empty row for spacing
-                ['Completed Draws', '', data.completed_draws],
-                ['Pending Draws', '', data.pending_draws]
+            // Add title with merged cells and styling
+            worksheet.mergeCells('A1:B1');
+            const titleCell = worksheet.getCell('A1');
+            titleCell.value = 'Pending vs Completed Draws';
+            titleCell.font = {
+                bold: true,
+                size: 13,
+                color: { argb: 'FFFFFFFF' }
+            };
+            titleCell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF4e73df' } // Blue background
+            };
+            titleCell.alignment = { 
+                vertical: 'middle', 
+                horizontal: 'center' 
+            };
+            titleCell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            
+            // Add empty row for spacing
+            worksheet.addRow([]);
+            
+            // Add data headers
+            const headers = ['Status', 'Count'];
+            const headerRow = worksheet.addRow(headers);
+            
+            // Style headers
+            headerRow.eachCell((cell) => {
+                cell.font = {
+                    bold: true,
+                    color: { argb: 'FFFFFFFF' }
+                };
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FF1cc88a' } // Green background
+                };
+                cell.alignment = { 
+                    vertical: 'middle', 
+                    horizontal: 'center' 
+                };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+            
+            // Add data rows
+            const dataRows = [
+                ['Completed Draws', data.completed_draws],
+                ['Pending Draws', data.pending_draws]
             ];
             
-            const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+            dataRows.forEach(rowData => {
+                const row = worksheet.addRow(rowData);
+                
+                // Style data cells
+                row.eachCell((cell) => {
+                    cell.alignment = { 
+                        vertical: 'middle', 
+                        horizontal: 'center' 
+                    };
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+            });
             
-            // Add merge for chart area
-            if (!worksheet['!merges']) worksheet['!merges'] = [];
-            worksheet['!merges'].push({ s: { r: 2, c: 0 }, e: { r: 2, c: 1 } });
+            // Set column widths
+            worksheet.getColumn(1).width = 20;
+            worksheet.getColumn(2).width = 15;
             
-            // Add to workbook
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Draws Report");
-            
-            // Export the workbook
-            XLSX.writeFile(workbook, 'Pending_vs_Completed_Draws.xlsx');
+            // Generate Excel file
+            workbook.xlsx.writeBuffer().then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Pending_vs_Completed_Draws_Report.xlsx';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
         })
         .catch(error => {
             console.error('Error exporting draw statistics:', error);
             alert('Error exporting report');
         });
 }
-
 
 
 
@@ -3489,12 +3523,14 @@ function report_and_analytics_winners_vs_losers_chart_function() {
             const exportBtn = document.createElement('button');
             exportBtn.textContent = 'Export';
             exportBtn.className = 'report_and_analytics_winners_vs_losers_chart_export_btn';
-            exportBtn.style.padding = '5px 15px';
-            exportBtn.style.backgroundColor = '#4CAF50';
-            exportBtn.style.color = 'white';
-            exportBtn.style.border = 'none';
+            exportBtn.style.padding = '8px 16px';
+            exportBtn.style.backgroundColor = '#fffefd';
+            exportBtn.style.color = 'black';
+            exportBtn.style.border = '1px solid rgba(0,0,0,0.5)';
             exportBtn.style.borderRadius = '4px';
             exportBtn.style.cursor = 'pointer';
+            exportBtn.style.fontWeight="bold";
+
             exportBtn.onclick = report_and_analytics_winners_vs_losers_chart_export_function;
             
             header.appendChild(title);
@@ -3526,7 +3562,7 @@ function report_and_analytics_winners_vs_losers_chart_function() {
             // Create chart container
             const chartContainer = document.createElement('div');
             chartContainer.style.position = 'relative';
-            chartContainer.style.height = '300px';
+            chartContainer.style.height = '135px';
             chartContainer.style.marginBottom = '30px';
             container.appendChild(chartContainer);
             
@@ -3547,7 +3583,7 @@ function report_and_analytics_winners_vs_losers_chart_function() {
                         {
                             label: 'Winners',
                             data: winnersData,
-                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderColor: '#FF6600',
                             backgroundColor: 'rgba(75, 192, 192, 0.2)',
                             tension: 0.1,
                             fill: true
@@ -3555,7 +3591,7 @@ function report_and_analytics_winners_vs_losers_chart_function() {
                         {
                             label: 'Losers',
                             data: losersData,
-                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderColor: '#c75205',
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             tension: 0.1,
                             fill: true
@@ -3596,7 +3632,7 @@ function report_and_analytics_winners_vs_losers_chart_function() {
             const totalWinners = document.createElement('div');
             totalWinners.innerHTML = `
                 <div style="display: flex; align-items: center;">
-                    <div style="width: 10px; height: 10px; background-color: rgba(75, 192, 192, 1); margin-right: 5px;"></div>
+                    <div style="width: 10px; height: 10px; background-color: #FF6600; margin-right: 5px;"></div>
                     <span>Winners (${data.total_winners})</span>
                 </div>
             `;
@@ -3604,7 +3640,7 @@ function report_and_analytics_winners_vs_losers_chart_function() {
             const totalLosers = document.createElement('div');
             totalLosers.innerHTML = `
                 <div style="display: flex; align-items: center;">
-                    <div style="width: 10px; height: 10px; background-color: rgba(255, 99, 132, 1); margin-right: 5px;"></div>
+                    <div style="width: 10px; height: 10px; background-color: #c75205; margin-right: 5px;"></div>
                     <span>Looser (${data.total_losers})</span>
                 </div>
             `;
@@ -3619,143 +3655,165 @@ function report_and_analytics_winners_vs_losers_chart_function() {
         });
 }
 
+
 function report_and_analytics_winners_vs_losers_chart_export_function() {
     // Fetch data from API
     fetch('/api/winners-vs-losers-chart/')
         .then(response => response.json())
         .then(data => {
-            try {
-                const XLSX = window.XLSX;
-                if (!XLSX) {
-                    alert('Excel export library not loaded');
-                    return;
-                }
-
-                // Prepare worksheet data
-                const wsData = [
-                    // Main heading
-                    ['Number of Winners and Losers'],
-                    [], // Empty row for spacing
-                    
-                    // Today's counts
-                    ['Today\'s Count', ''],
-                    ['Today Winners:', data.today_winners],
-                    ['Today Losers:', data.today_losers],
-                    [], // Empty row for spacing
-                    
-                    // Weekly totals
-                    ['Weekly Totals', ''],
-                    ['Total Winners:', data.total_winners],
-                    ['Total Losers:', data.total_losers],
-                    [], // Empty row for spacing
-                    
-                    // Daily breakdown header
-                    ['Daily Breakdown (Last 7 Days)'],
-                    ['Date', 'Winners', 'Losers'],
-                    
-                    // Daily data rows
-                    ...data.weekly_data.map(item => [
-                        item.date, 
-                        item.winners, 
-                        item.losers
-                    ])
-                ];
-
-                // Create workbook and worksheet
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-                // Apply styling through cell properties
-                const range = XLSX.utils.decode_range(ws['!ref']);
+            // Create a new workbook
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Winners vs Losers');
+            
+            // 1. Add main title with styling
+            worksheet.mergeCells('A1:C1');
+            const titleRow = worksheet.getCell('A1');
+            titleRow.value = 'Number of Winners and Losers Report';
+            titleRow.font = {
+                bold: true,
+                size: 13,
+                color: { argb: 'FFFFFFFF' }
+            };
+            titleRow.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF4F81BD' }
+            };
+            titleRow.alignment = { 
+                vertical: 'middle', 
+                horizontal: 'center' 
+            };
+            titleRow.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            
+            // 2. Add Today's Count section
+            worksheet.mergeCells('A3:B3');
+            const todayTitle = worksheet.getCell('A3');
+            todayTitle.value = "Today's Count";
+            applySectionHeaderStyle(todayTitle);
+            
+            worksheet.getCell('A4').value = 'Today Winners:';
+            worksheet.getCell('B4').value = data.today_winners;
+            worksheet.getCell('A5').value = 'Today Losers:';
+            worksheet.getCell('B5').value = data.today_losers;
+            
+            // 3. Add Weekly Totals section
+            worksheet.mergeCells('A7:B7');
+            const weeklyTitle = worksheet.getCell('A7');
+            weeklyTitle.value = "Weekly Totals";
+            applySectionHeaderStyle(weeklyTitle);
+            
+            worksheet.getCell('A8').value = 'Total Winners:';
+            worksheet.getCell('B8').value = data.total_winners;
+            worksheet.getCell('A9').value = 'Total Losers:';
+            worksheet.getCell('B9').value = data.total_losers;
+            
+            // 4. Add Daily Breakdown section
+            worksheet.mergeCells('A11:C11');
+            const dailyTitle = worksheet.getCell('A11');
+            dailyTitle.value = "Daily Breakdown (Last 7 Days)";
+            applySectionHeaderStyle(dailyTitle);
+            
+            // Column headers
+            worksheet.getCell('A12').value = 'Date';
+            worksheet.getCell('B12').value = 'Winners';
+            worksheet.getCell('C12').value = 'Losers';
+            
+            // Style column headers
+            ['A12', 'B12', 'C12'].forEach(cellAddress => {
+                const cell = worksheet.getCell(cellAddress);
+                cell.font = { bold: true };
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD9D9D9' }
+                };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+                cell.alignment = { 
+                    vertical: 'middle', 
+                    horizontal: 'center' 
+                };
+            });
+            
+            // Add daily data rows
+            data.weekly_data.forEach((dayData, index) => {
+                const row = 13 + index;
+                worksheet.getCell(`A${row}`).value = dayData.date;
+                worksheet.getCell(`B${row}`).value = dayData.winners;
+                worksheet.getCell(`C${row}`).value = dayData.losers;
                 
-                // Format main heading (row 0)
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = {c:C, r:0};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    if (!ws[cell_ref]) continue;
-                    
-                    ws[cell_ref].s = {
-                        font: { bold: true, sz: 16 },
-                        alignment: { horizontal: 'center' }
+                // Apply borders to data cells
+                [`A${row}`, `B${row}`, `C${row}`].forEach(cellAddress => {
+                    const cell = worksheet.getCell(cellAddress);
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
                     };
-                }
-                
-                // Merge heading cells
-                ws['!merges'] = [
-                    { s: {r:0, c:0}, e: {r:0, c:2} }
-                ];
-                
-                // Format section headers (Today's Count, Weekly Totals, Daily Breakdown)
-                [2, 6, 10].forEach(row => {
-                    const cell_ref = XLSX.utils.encode_cell({r:row, c:0});
-                    if (ws[cell_ref]) {
-                        ws[cell_ref].s = {
-                            font: { bold: true, sz: 14 },
-                            fill: { fgColor: { rgb: "D3D3D3" } }
-                        };
+                    
+                    // Right-align numbers
+                    if (cellAddress.startsWith('B') || cellAddress.startsWith('C')) {
+                        cell.alignment = { horizontal: 'right' };
                     }
                 });
-                
-                // Format column headers
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = {c:C, r:11}; // Daily breakdown header row
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    if (!ws[cell_ref]) continue;
-                    
-                    ws[cell_ref].s = {
-                        font: { bold: true },
-                        fill: { fgColor: { rgb: "E6E6E6" } }
-                    };
-                }
-                
-                // Format numbers to be right-aligned
-                for (let R = 3; R <= 4; ++R) { // Today's counts
-                    const cell_ref = XLSX.utils.encode_cell({r:R, c:1});
-                    if (ws[cell_ref]) {
-                        ws[cell_ref].s = { alignment: { horizontal: 'right' } };
-                    }
-                }
-                
-                for (let R = 7; R <= 8; ++R) { // Weekly totals
-                    const cell_ref = XLSX.utils.encode_cell({r:R, c:1});
-                    if (ws[cell_ref]) {
-                        ws[cell_ref].s = { alignment: { horizontal: 'right' } };
-                    }
-                }
-                
-                for (let R = 12; R <= range.e.r; ++R) { // Daily data
-                    for (let C = 1; C <= 2; ++C) {
-                        const cell_ref = XLSX.utils.encode_cell({r:R, c:C});
-                        if (ws[cell_ref]) {
-                            ws[cell_ref].s = { alignment: { horizontal: 'right' } };
-                        }
-                    }
-                }
-                
-                // Set column widths
-                ws['!cols'] = [
-                    { wch: 20 }, // Date column
-                    { wch: 10 }, // Winners column
-                    { wch: 10 }  // Losers column
-                ];
-                
-                // Add worksheet to workbook
-                XLSX.utils.book_append_sheet(wb, ws, "Winners vs Losers");
-                
-                // Export the file
-                XLSX.writeFile(wb, 'winners_vs_losers_report.xlsx');
-                
-            } catch (e) {
-                console.error('Excel export error:', e);
-                alert('Error exporting to Excel');
-            }
+            });
+            
+            // Set column widths
+            worksheet.columns = [
+                { key: 'date', width: 20 },
+                { key: 'winners', width: 12 },
+                { key: 'losers', width: 12 }
+            ];
+            
+            // Generate Excel file
+            workbook.xlsx.writeBuffer().then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'winners_vs_losers_report.xlsx';
+                link.click();
+                URL.revokeObjectURL(link.href);
+            });
         })
         .catch(error => {
-            console.error('Error fetching data for export:', error);
-            alert('Error loading data for export');
+            console.error('Error exporting report:', error);
+            alert('Error exporting report');
         });
 }
 
+// Helper function to style section headers
+function applySectionHeaderStyle(cell) {
+    cell.font = {
+        bold: true,
+        size: 14,
+        color: { argb: 'FFFFFFFF' }
+    };
+    cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF7B7B7B' }
+    };
+    cell.alignment = { 
+        vertical: 'middle', 
+        horizontal: 'left' 
+    };
+    cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+    };
+}
 
 // report_and_analytics_overall_transaction_report_chart_function start
 function report_and_analytics_overall_transaction_report_chart_function() {
@@ -4033,6 +4091,357 @@ function report_and_analytics_monthly_sales_bar_chart_function() {
 
  }
 // report_and_analytics_monthly_sales_bar_chart_function end
+
+// report_and_analytics_marginal_chart_function start
+function report_and_analytics_marginal_chart_function(marginal_year, marginal_month) {
+    const container = document.getElementById('report_and_analytics_marginal_chart');
+    container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    
+    fetch(`/api/marginal-chart-data/?year=${marginal_year}&month=${marginal_month}`)
+        .then(response => response.json())
+        .then(data => {
+            renderMarginalChart(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            container.innerHTML = '<div class="alert alert-danger">Failed to load chart data</div>';
+        });
+}
+
+function renderMarginalChart(data) {
+    const container = document.getElementById('report_and_analytics_marginal_chart');
+    
+    // Prepare HTML
+    let html = `
+        <div class="report_and_analytics_marginal_chart_header_class">
+            <h3 class="report_and_analytics_marginal_chart_heading_class">Margin Chart</h3>
+            <button class="btn btn-sm btn-primary report_and_analytics_marginal_chart_export_button_class" 
+                    onclick="report_and_analytics_marginal_chart_export_function()">
+                Export
+            </button>
+        </div>
+        <div class="report_and_analytics_marginal_chart_filters_class mb-3">
+            <select id="report_and_analytics_marginal_chart_year_select" class="form-select-sm">
+                ${data.years.map(year => `<option value="${year}" ${year == data.selected_year ? 'selected' : ''}>${year}</option>`).join('')}
+            </select>
+            <select id="report_and_analytics_marginal_chart_month_select" class="form-select-sm">
+                ${data.months.map(month => `<option value="${month.value}" ${month.value == data.selected_month ? 'selected' : ''}>${month.name}</option>`).join('')}
+            </select>
+        </div>
+        <div class="report_and_analytics_marginal_chart_container_class">
+            <div class="report_and_analytics_marginal_chart_canvas_container_class">
+                <canvas id="report_and_analytics_marginal_chart_canvas" height="300"></canvas>
+            </div>
+            <div class="report_and_analytics_marginal_chart_summary_class">
+                <div class="summary-item">
+                    <span class="summary-label">Total Sales:</span>
+                    <span class="summary-value">€${data.overall.total_sales.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                     <span class="summary-label">Margin:</span>
+                    <span class="summary-value ${data.overall.margin >= 0 ? 'text-success' : 'text-danger'}">
+                        €${Math.abs(data.overall.margin).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        (${data.overall.margin >= 0 ? '+' : '-'})
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Total Target:</span>
+                    <span class="summary-value">€${data.overall.total_target.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <span class="summary-label">Status:</span>
+                    <span class="summary-value ${data.overall.margin_status === 'Reached' ? 'text-success' : 'text-danger'}">
+                        ${data.overall.margin_status}
+                    </span>
+                </div>
+               
+            </div>
+        </div>
+        <div class="report_and_analytics_marginal_chart_legend_class mt-3">
+            <div><span class="legend-color sales"></span> Sales</div>
+            <div><span class="legend-color target"></span> Target</div>
+            <div><span class="legend-color reached"></span> Margin Reached</div>
+            <div><span class="legend-color not-reached"></span> Margin Not Reached</div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    
+    // Add event listeners for dropdowns
+    document.getElementById('report_and_analytics_marginal_chart_year_select').addEventListener('change', function() {
+        const year = this.value;
+        fetch(`/api/marginal-chart-data/?year=${year}`)
+            .then(response => response.json())
+            .then(data => {
+                const monthSelect = document.getElementById('report_and_analytics_marginal_chart_month_select');
+                monthSelect.innerHTML = data.months.map(month => 
+                    `<option value="${month.value}">${month.name}</option>`
+                ).join('');
+                report_and_analytics_marginal_chart_function(year, 'all');
+            });
+    });
+    
+    document.getElementById('report_and_analytics_marginal_chart_month_select').addEventListener('change', function() {
+        const year = document.getElementById('report_and_analytics_marginal_chart_year_select').value;
+        const month = this.value;
+        report_and_analytics_marginal_chart_function(year, month);
+    });
+    
+    // Render chart if data exists
+    if (data.data && data.data.length > 0) {
+        marginal_renderChart(data.data);
+    } else {
+        container.innerHTML += '<div class="alert alert-info mt-3">No data available for the selected period</div>';
+    }
+}
+
+function marginal_renderChart(chartData) {
+    const ctx = document.getElementById('report_and_analytics_marginal_chart_canvas').getContext('2d');
+    
+    const categories = chartData.map(item => item.category);
+    const salesData = chartData.map(item => item.total_sales);
+    const targetData = chartData.map(item => item.total_amount);
+    const marginData = chartData.map(item => item.margin);
+    const backgroundColors = chartData.map(item => item.margin_reached ? 'rgba(28, 200, 138, 0.7)' : 'rgba(231, 74, 59, 0.7)');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: [
+                {
+                    label: 'Sales',
+                    data: salesData,
+                    backgroundColor: 'rgba(78, 115, 223, 0.7)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                },
+                {
+                    label: 'Target',
+                    data: targetData,
+                    backgroundColor: 'rgba(110, 110, 110, 0.7)',
+                    borderColor: 'rgba(110, 110, 110, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            // 🔧 FIX TOOLTIP ISSUES ON SMALL BARS
+
+            interaction: {
+
+                mode: 'index',
+
+                intersect: false
+
+            },
+
+            hover: {
+
+                mode: 'index',
+
+                intersect: false
+
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.parsed.y.toLocaleString('en-US', {style: 'currency', currency: 'EUR'});
+                            return label;
+                        },
+                        afterLabel: function(context) {
+                            const dataIndex = context.dataIndex;
+                            const margin = marginData[dataIndex];
+                            const status = margin >= 0 ? 'Reached' : 'Not Reached';
+                            return [
+                                `Margin: ${margin.toLocaleString('en-US', {style: 'currency', currency: 'EUR'})}`,
+                                `Status: ${status}`
+                            ];
+                        }
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '€' + value.toLocaleString('en-US');
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+function report_and_analytics_marginal_chart_export_function() {
+    const year = document.getElementById('report_and_analytics_marginal_chart_year_select').value;
+    const month = document.getElementById('report_and_analytics_marginal_chart_month_select').value;
+    
+    window.location.href = `/api/marginal-chart-export/?year=${year}&month=${month}`;
+}
+// report_and_analytics_marginal_chart_function end
+
+
+// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function start
+function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function() {
+    const container = document.getElementById('admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart');
+    // Fetch data from API
+    fetch('/api/lottery-report/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                container.innerHTML = `
+        <div class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_header_class">
+            <h3>Overall Won and Lost Lotteries Report</h3>
+            <button onclick="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function()" 
+                    class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_button_class">
+                Export
+            </button>
+        </div>
+        <div class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_class">
+            <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_won_class">
+                <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_color_class" style="background-color: #4BC0C0;"></span> Won : ${data.total_won}
+            </span>
+            <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_lost_class">
+                <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_color_class" style="background-color: #FF6384;"></span> Lost : ${data.total_lost}
+            </span>
+            </span>
+        </div>
+        <div class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_canvas_container_class">
+            <canvas id="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_canvas"></canvas>
+        </div>
+    `;
+                renderChart(data);
+                
+            } else {
+                container.innerHTML += '<p>Error loading data</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            container.innerHTML += '<p>Error loading data</p>';
+        });
+    
+    function renderChart(data) {
+        const years = data.years_data.map(item => item.year.toString());
+        const wonData = data.years_data.map(item => item.won);
+        const lostData = data.years_data.map(item => item.lost);
+        
+        const ctx = document.getElementById('admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_canvas').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: years,
+                datasets: [
+                    {
+                        label: 'Won',
+                        data: wonData,
+                        backgroundColor: '#4BC0C0',
+                        borderColor: '#4BC0C0',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Lost',
+                        data: lostData,
+                        backgroundColor: '#FF6384',
+                        borderColor: '#FF6384',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                // 🔧 FIX TOOLTIP ISSUES ON SMALL BARS
+
+            interaction: {
+
+                mode: 'index',
+
+                intersect: false
+
+            },
+
+            hover: {
+
+                mode: 'index',
+
+                intersect: false
+
+            },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const datasetIndex = context[0].datasetIndex;
+                                const dataIndex = context[0].dataIndex;
+                                const value = context[0].parsed.y;
+                                const year = years[dataIndex];
+                                
+                                if (datasetIndex === 0) {
+                                    return `Year: ${year}\nTotal Won: ${value}`;
+                                } else {
+                                    return `Year: ${year}\nTotal Lost: ${value}`;
+                                }
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+}
+// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function end
+
+// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function start
+
+function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function() {
+    // Create a temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = '/api/lottery-report-export/';
+    link.download = 'Lottery_Report.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function end
+
 function initializeDashboard() {
     try {
 
@@ -4102,18 +4511,18 @@ function initializeDashboard() {
                                 else if (tab.type === 'overview_notification_bell') {
                                     document.getElementById("notification-bell-container").hidden = false;
                                 }
-                                else if (tab.type === 'Statistics_count') {
-                                    const container = document.createElement('div');
-                                    container.className = 'custom_admin_dashboard_card';
-                                    const lottery_sales_dynamic_count_filter = document.getElementById("lottery_sales_dynamic_count_filter");
-                                    lottery_sales_dynamic_count_filter.style.display = "block";
-                                    container.innerHTML = `
+                                 else if (tab.type === 'Statistics_count') {
+                                    const custom_admin_dashboard_report_and_analytics_statistics_count_container = document.createElement('div');
+                                    custom_admin_dashboard_report_and_analytics_statistics_count_container.className = 'custom_admin_dashboard_card';
+                                    const custom_admin_dashboard_report_and_analytics_statistics_count = document.getElementById("custom_admin_dashboard_report_and_analytics_statistics_count");
+                                    
+                                    custom_admin_dashboard_report_and_analytics_statistics_count_container.innerHTML = `
                                             <h2>${tab.name}</h2>
-                                            <p id="${tab.identifier}"></p>
+                                            <p id="${tab.identifier}">${data[tab.identifier] || 0}</p>
                                         `;
-                                    Statistics_count_dashboard.appendChild(container);
-                                    lottery_sales_count();
-                                } else if (tab.type === 'overview_counts') {
+                                        custom_admin_dashboard_report_and_analytics_statistics_count.appendChild(custom_admin_dashboard_report_and_analytics_statistics_count_container);
+                                    // lottery_sales_count();
+                                }  else if (tab.type === 'overview_counts') {
 
                                     const custom_admin_dashboard_overview_lottery_won_lost_count = document.getElementById("custom_admin_dashboard_overview_lottery_won_lost_count");
                                     const lottery_won_lost_container = document.createElement('div');
@@ -4140,12 +4549,14 @@ function initializeDashboard() {
                                         report_and_analytics_winners_vs_losers_chart_function();
                                     } else if (tab.identifier === 'report_and_analytics_overall_transaction_report_chart') {
                                         report_and_analytics_overall_transaction_report_chart_function();
+                                    } else if (tab.identifier === 'admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart') {
+                                         admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function();
+                                    } else if (tab.identifier === 'report_and_analytics_marginal_chart') {
+                                        const currentDate = new Date();
+                                        report_and_analytics_marginal_chart_function(currentDate.getFullYear(), 'all');
                                     }
-                                
-                                } else if (tab.type === 'lottery_sales_overview_regional_reports') {
-                                    const lottery_sales_overview_regional_reports = document.getElementById("regional_sales_overview_dashboard");
-                                    lottery_sales_overview_regional_reports.style.display = "flex";
-                                    renderCharts();
+                                    
+                
                                 } else if (tab.type === 'user_leaderboard') {
                                     const leaderboard_container = document.getElementById("leaderboard");
                                     leaderboard_container.style.display = "block";
@@ -8268,6 +8679,56 @@ async function fetchWinners_mainpage() {
             throw new Error(`Error fetching winners: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
+        // Initially display the first 8 images
+        const initialWinners = data.winners.slice(0, 8);
+        renderWinners_mainpage(initialWinners, false, [3, 3, 3]);
+    } catch (error) {
+        console.error("Failed to fetch winners:", error);
+    }
+}
+
+function toggleWinners_mainpage() {
+    // Instead of loading more winners, redirect to the winners page
+    window.location.href = '/winners';
+}
+
+function renderWinners_mainpage(winners, append, rowLimit) {
+    const container = document.getElementById("previous_winner_section");
+    container.innerHTML = ""; // Always clear existing content
+
+    let rowIndex = 0;
+    let count = 0;
+    let row;
+
+    winners.forEach((winner, index) => {
+        if (count === rowLimit[rowIndex]) {
+            rowIndex++;
+            count = 0;
+        }
+
+        if (count === 0) {
+            row = document.createElement("div");
+            row.className = "previous-mainpage-winner-row";
+            container.appendChild(row);
+        }
+
+        const winnerDiv = document.createElement("div");
+        winnerDiv.className = "previous-mainpage-winner";
+        winnerDiv.innerHTML = `
+            <img src="${winner.image_url}" alt="${winner.winner_name}" class="previous-mainpage-winner-image">
+        `;
+        row.appendChild(winnerDiv);
+        count++;
+    });
+}
+/*
+async function fetchWinners_mainpage() {
+    try {
+        const response = await fetch(winnersUrl_mainpage);
+        if (!response.ok) {
+            throw new Error(`Error fetching winners: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
         // Initially display the first 8 images in the order of 2, 3, 3
         const initialWinners = data.winners.slice(0, 8);
         renderWinners_mainpage(initialWinners, false, [3, 3, 3]);
@@ -8342,7 +8803,7 @@ function renderWinners_mainpage(winners, append, rowLimit) {
         displayedCount_previous_winner += winners.length;
     }
 }
-
+*/
 async function category_fetchBanner() {
     try {
         const response = await fetch(bannerUrl, {
@@ -10338,10 +10799,10 @@ function logoutDevice(sessionKey, button) {
 }
 function showToast(messages, isSuccess = false) {
     const toast = document.getElementById("unique-toast");
+  toast.innerHTML = Array.isArray(messages)
+    ? messages.map(msg => `${isSuccess ? "✅" : "❌"} ${msg}`).join("<br>")
+    : `${isSuccess ? "✅" : "❌"} ${messages}`;
 
-    toast.innerHTML = Array.isArray(messages)
-        ? messages.map(msg => `❌ ${msg}`).join("<br>")
-        : `❌ ${messages}`;
 
     toast.className = "unique-toast show";
     if (isSuccess) {
@@ -10349,6 +10810,7 @@ function showToast(messages, isSuccess = false) {
     }
 
     toast.classList.remove("hidden");
+      setTimeout(hideToast, 5000);
 }
 
 function hideToast() {
@@ -10411,7 +10873,7 @@ function updatePassword() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast("✅ Password updated successfully!", true);
+            showToast(" Password updated successfully!", true);
             setTimeout(() => window.location.reload(), 1500);
         } else {
             showToast(data.message);
@@ -10524,8 +10986,46 @@ $(document).ready(function () {
     fetchWinnersusersdraw();
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    fetch("/api/my-won-lottery/", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            // "X-CSRFToken": getCookie("csrftoken"),
+            "X-CSRFToken":mywon_lottery,
+        },
+        credentials: "include"
+    })
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById("wonCardsContainer");
+        container.innerHTML = "";
 
+        if (data.length === 0) {
+            container.innerHTML = "<p>No winning entries found.</p>";
+            return;
+        }
 
+        data.forEach((item, index) => {
+            const colors = ["my-won-lottery-card-blue", "my-won-lottery-card-lightblue", "my-won-lottery-card-purple"];
+            const cardColor = colors[index % colors.length];
+            const card = `
+                <div class="my-won-lottery-card ${cardColor}">
+                    <div class="my-won-lottery-prize-status">${item.prize_status}</div>
+                    <div class="my-won-lottery-prize-number">Prize No:${item.prize_no || "N/A"}</div>
+                    
+                    <div class="my-won-lottery-prize-data">
+                        <p><strong>Won Lottery:</strong> ${item.lottery_event}</p>
+                        <p><strong>Won Ticket No:</strong> ${item.ticket_number}</p>
+                        <p><strong>Comments:</strong> ${item.prize_comments || "-"}</p>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += card;
+        });
+    })
+    .catch(error => console.error("Error fetching won lotteries:", error));
+});
 
 
 

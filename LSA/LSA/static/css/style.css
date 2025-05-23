@@ -1645,7 +1645,7 @@ height: 40px;
 .password-reset-email-sent-container {
 width: 100%;
 left: 5px;
-top: 400px;
+top: 400px !important;
 padding: 10px;
 }
 .password-reset-email-sent-button{
@@ -1777,10 +1777,11 @@ margin-left: 0px;
 }
 
 .password-reset-email-sent-container {
-width: 90% !important;
-left: 0;
-top: 250px !important;
-padding: 10px;
+    width: 90% !important;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    top: 250px !important
 }
 .password-reset-email-sent-button{
     margin-left: 10px;
@@ -2054,13 +2055,14 @@ top: 20px;
 }
 .confirm-success a {
     display: inline-block;
-    margin-top: 15px;
+    margin-top: 1px;
     padding: 10px 20px;
     color: white;
     background-color: #FF6600;
     border-radius: 4px;
     font-weight: bold;
     text-decoration: none;
+    font-size: 25px;
 }
 .confirm-success a:hover { background-color: #FF6600; }
 
@@ -2641,7 +2643,7 @@ top: 20px;
 
 
 
-@media screen and (max-width: 1024px) {
+@media  (min-width: 769px)  and (max-width: 1024px) {
     /* Container for the page */
     .container {
         width: 100%; /* Changed from 110% to ensure proper layout */
@@ -2780,7 +2782,7 @@ top: 20px;
 .success-container {
     width: 100%;
     max-width: 380px;
-    margin-top: -55%; /* Adjust to avoid pushing elements off-screen */
+    margin-top: -30%; /* Adjust to avoid pushing elements off-screen */
     margin-left: auto; /* Centering the container horizontally */
     margin-right: auto; /* Centering the container horizontally */
     position: relative; /* Ensure proper positioning */
@@ -2794,6 +2796,7 @@ top: 20px;
 
 /* Success inner container */
 .success-inner {
+    top: 200px;
     width: 100%;
     display: flex; /* Use flexbox for better alignment */
     flex-direction: column; /* Align children in a column */
@@ -3020,7 +3023,7 @@ top: 20px;
 .success-container {
     width: 100%;
     max-width: 380px;
-    margin-top: -55%; /* Adjust to avoid pushing elements off-screen */
+    margin-top: -40%; /* Adjust to avoid pushing elements off-screen */
     margin-left: auto; /* Centering the container horizontally */
     margin-right: auto; /* Centering the container horizontally */
     position: relative; /* Ensure proper positioning */
@@ -4270,7 +4273,7 @@ top: 20px;
     }
 
    .custom_admin_login_form_class input {
-    width: calc(100% - 30px); /* Ensures no overflow */
+    width: calc(110% - 30px); /* Ensures no overflow */
     max-width: 100%;
     font-size: 18px;
     padding: 24px;
@@ -4338,7 +4341,7 @@ top: 20px;
     .custom_admin_login_show_password {
         position: absolute;
         right: 45px;
-        top: 48%;
+        top: 65%;
         transform: translateY(-50%);
         cursor: pointer;
         font-size: 1.2em;
@@ -4534,12 +4537,14 @@ top: 20px;
         .custom_admin_dashboard_custom_table th:nth-child(2),
         .custom_admin_dashboard_custom_table td:nth-child(2) {
             text-align: center;
+            cursor: pointer;
             /* Right aligns second column */
         }
 
         .custom_admin_dashboard_custom_table th:nth-child(3),
         .custom_admin_dashboard_custom_table td:nth-child(3) {
             text-align: center;
+            cursor: pointer;
             /* Right aligns third column */
         }
 
@@ -4601,6 +4606,15 @@ top: 20px;
        /* Make it responsive */
 /* 📌 For tablets and medium screens */
 @media (max-width: 1024px) {
+
+    .email-item {
+        flex-direction: row;
+        align-items: center;
+        padding: 8px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+
     .custom_admin_dashboard_custom_table {
         display: block;
         overflow-x: auto; /* Enables horizontal scrolling */
@@ -5767,17 +5781,22 @@ margin-left: 2%;
 
         .custom_admin_dashboard_lottery-events-grid {
             display: grid;
-            /* Ensure it's displayed as a grid */
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
             padding: 20px;
-
+        
+            justify-items: center;  /* This centers each grid item */
+            align-items: center;    /* Aligns items in grid cells */
+            text-align: center;
+        
+            width: 100%;
+            max-width: 1200px;      /* Keeps grid neat & centered */
+            margin: 0 auto;         /* This centers the whole grid container */
+        
             border-top-left-radius: 13px;
             border-top-right-radius: 13px;
-            display: none;
-            /* Keep hidden unless needed */
         }
-
+        
 
 
 
@@ -6067,9 +6086,8 @@ margin-left: 2%;
 
         }
 
-         #lottery_sales_dynamic_count_filter,
+        
 #custom_admin_dashboard_bar_chart_filter {
-    display: none;
     color: #4D4D4D;
     font-size: 14px;
     font-family: Rajdhani, sans-serif;
@@ -6200,8 +6218,8 @@ margin-left: 2%;
 
 /* over view page pagination */
 
-#regional_sales_overview_dashboard {
-    display: none;
+#admin_dashboard_overview_won_lost_mariginal_charts {
+    display: flex;
     
 }
 
@@ -6211,12 +6229,12 @@ margin-left: 2%;
 }
 
 .overview_chart-container {
-    width: 48%;
-    padding: 20px;
-    background: white;
+    width: 50%;
+    padding: 15px;
+   
     border-radius: 10px;
     position: relative;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+   
 }
 
 .overview_regional_sales_title {
@@ -6292,7 +6310,13 @@ margin-left: 2%;
         justify-content: center; /* Center items */
         gap: 10px; /* Adjust spacing */
     }
-
+    .custom_admin_dashboard_lottery-events-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        padding: 20px;
+        max-width: 100%;
+        margin-left: -20px;
+    }
     .overview_sales_count_card {
         width: calc(50% - 10px); /* Make two containers fit in one row */
         max-width: 350px;
@@ -6315,10 +6339,12 @@ margin-left: 2%;
     }
 }
 
-
+#new_users_this_month,
+#inactive_users,
 #overview_sales_amount,
 #overview_active_users_count,
 #overview_active_lotteries_count{
+    
     color: #FF6600;
     font-size: 26px;
     font-weight: 700;
@@ -9087,6 +9113,9 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     font-weight: 700;
     line-height: 1.0;
     text-align: left;
+  
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Price and ticket info */
@@ -12002,6 +12031,9 @@ background-color: rgba(255, 102, 0, 0.05);
     color: #BEBEBE;
     font-size: 15px;
     font-weight: 600;
+     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .similar_category_lottery_per_ticket_price {
@@ -13487,6 +13519,9 @@ background-color: rgba(255, 102, 0, 0.05);
     font-weight: 700;
     line-height: 1.0;
     text-align: left;
+     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .category_lottery_ticket_price {
@@ -14482,6 +14517,9 @@ background-color: rgba(255, 102, 0, 0.05);
     font-weight: 700;
     line-height: 1.0;
     text-align: left;
+     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Price and ticket info */
@@ -14776,6 +14814,7 @@ color: #23262F;
     padding: 10px;
     font-size: 17px;
     font-family:bold;
+    font-family: Rajdhani;
     /* border: 1px solid #ccc; */
     border-radius: 5px;
     background-color: white;
@@ -14922,9 +14961,11 @@ color: #23262F;
     background-color: white;
     margin: 10% auto;
     padding: 20px;
-    width: 50%;
+    width: 70%;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        max-height: 60vh;    
+        overflow-y: auto;   
 }
 
 .myorder-close {
@@ -15079,6 +15120,14 @@ color: #23262F;
         align-items: center;
         padding: 15px;
     }
+.myorder-group {
+    background: #F7F7F7;
+    border-radius: 12px;
+    padding: 20px;
+    width:325px;
+    position: relative;
+
+}
 
     .myorder-heading {
         font-size: 40px;
@@ -15093,6 +15142,7 @@ color: #23262F;
     .myorder-container {
         grid-template-columns: repeat(2, minmax(250px, 1fr));
         min-height: 47vh;
+        justify-items:right;
     }
 
     /* Keep buttons side-by-side */
@@ -15101,19 +15151,12 @@ color: #23262F;
         gap: 10px;
     }
 
-    .myorder-modal-content {
-        width: 90%;
-        max-width: 400px; /* Optional: Limit max width */
-        margin: 50% auto; /* Center it properly */
-        top: 5%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        position: absolute; /* Ensure absolute positioning */
+
         .myorder-modal-content {
             width: 90%;
             max-width: 400px;
             margin: 50% auto;
-            top: 5%;
+            top: 15%;
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
@@ -15998,7 +16041,7 @@ color: #23262F;
 
     .unique-logout-btn {
         margin-top: 10px;
-        width: 30%;
+        width: 35%;
     }
 }
 /*for navbar */

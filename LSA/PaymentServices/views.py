@@ -79,6 +79,7 @@ def create_checkout_session(request):
         success_url=f"{settings.DOMAIN}/success/",
         #cancel_url=f"{settings.DOMAIN}/cancel/",
         customer_email=user.email,
+        customer_creation='always',
     )
 
     return Response({"checkout_url": session.url})

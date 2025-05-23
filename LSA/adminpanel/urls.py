@@ -12,6 +12,12 @@ from django.conf.urls import handler404
 
 
 urlpatterns = [
+	path('api/marginal-chart-data/', MarginalChartDataView.as_view(), name='marginal_chart_data'),
+    path('api/marginal-chart-export/', MarginalChartExportView.as_view(), name='marginal_chart_export'),
+    path('api/lottery-report/', 
+         LotteryReportAPI.as_view(), 
+         name='LotteryReportAPI'),
+          path('api/lottery-report-export/', LotteryReportExportAPI.as_view(), name='lottery-report-export'),
     # Overall Transaction Report
     path('api/report_and_analytics/overall_transaction_report/', 
          OverallTransactionReportView.as_view(), 
@@ -100,7 +106,8 @@ urlpatterns = [
     path('winners/', winners_page, name='winners_page'),
     path('api/winners/', WinnerListView.as_view(), name='winner-list'),
     path('api/winners-wall/', WinnersWallListView.as_view(), name='winners-wall-list'),
-
+    path('api/my-won-lottery/', my_won_lottery, name='my_won_lottery'),
+    path('my-won-lottery/', my_won_lottery_page, name='my_won_lottery_page'),
 ]
 
 if settings.DEBUG:

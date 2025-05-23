@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Events</title>
+       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <script>
@@ -105,8 +106,12 @@
                         <h3>"{{ testimonial.quote }}"</h3>
                         <p>- {{ testimonial.name }}</p>
                     </div>
-                    <div class="testimonial-image">
-                        <img src="{{ testimonial.image.url }}" alt="{{ testimonial.name }}">
+                     <div class="testimonial-image">
+                        {% if testimonial.image %}
+                            <img src="{{ testimonial.image.url }}" alt="{{ testimonial.name }}">
+                        {% else %}
+                            <img src="/media/testimonials/default.jpg" alt="{{ testimonial.name }}">
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
