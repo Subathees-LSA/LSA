@@ -127,6 +127,8 @@ function admin_chat_view() {
 
                 messages.forEach((message) => {
                     user_name = message.name;
+                    starred = message.starred; // Make sure your message object has this
+    
                 });
 
                 const emailItem = document.createElement("div");
@@ -136,6 +138,7 @@ function admin_chat_view() {
                 <span class="email-text">${email}</span>
                 <span class="last-message"></span>
                 <span class="delete-icon" title="Delete Email">🗑️</span>
+                <span class="starred_chat">${starred ? "⭐" : ""}</span>
             `;
                 const lastMessageElement = emailItem.querySelector(".last-message");
 
@@ -178,7 +181,12 @@ function admin_chat_view() {
                 emailItem.querySelector(".email-text").onclick = activateEmailItem;
                 emailItem.querySelector(".last-message").onclick = activateEmailItem;
 
-
+                emailItem.onclick = (e) => {
+                    const target = e.target;
+                    if (!target.classList.contains("email-checkbox") && !target.classList.contains("delete-icon")) {
+                        activateEmailItem();
+                    }
+                };
 
                 // Append the email item to the message list
                 all_users_name.appendChild(emailItem);
@@ -731,7 +739,12 @@ function admin_chat_view() {
 
                     // Open chat on click (excluding the delete icon and checkbox)
                     emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
-
+                    emailItem.onclick = (e) => {
+                        const target = e.target;
+                        if (!target.classList.contains("email-checkbox") && !target.classList.contains("delete-icon")) {
+                        fetchMessagesByEmail(email);
+                        }
+                    };
                     // Append the email item to the message list
 
                     all_users_name.appendChild(emailItem);
@@ -1249,6 +1262,9 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
                 } else {
                     custom_admin_dashboard_transactions_management_allData = data;
                 }
+                const custom_admin_dashboard_transactions_management_viewMoreButton = custom_admin_dashboard_transactions_management_createViewMoreButton();
+                custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_viewMoreButton);
+
                 custom_admin_dashboard_transactions_management_displayData();
                 custom_admin_dashboard_transactions_management_displayTransactionCount();
             })
@@ -1390,11 +1406,11 @@ function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
     // Initialize Table and UI
     const custom_admin_dashboard_transactions_management_header = custom_admin_dashboard_transactions_management_createHeader();
     const { custom_admin_dashboard_transactions_management_table } = custom_admin_dashboard_transactions_management_createTable();
-    const custom_admin_dashboard_transactions_management_viewMoreButton = custom_admin_dashboard_transactions_management_createViewMoreButton();
+    // const custom_admin_dashboard_transactions_management_viewMoreButton = custom_admin_dashboard_transactions_management_createViewMoreButton();
 
     custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_header);
     custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_table);
-    custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_viewMoreButton);
+    // custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_viewMoreButton);
 
     custom_admin_dashboard_transactions_management_fetchData();
     // Add this as a new function in the code
@@ -2075,7 +2091,7 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         </div>
         <div class="winners_wall_Winners_edit_add_form_group" id="winners_wall_Winners_edit_add_ticket_number_group">
             <label for="winners_wall_Winners_edit_add_ticket_number">Ticket Number</label>
-            <input type="text" id="winners_wall_Winners_edit_add_ticket_number" value="${winnerData ? winnerData.ticket_number : ''}">
+            <input type="number" id="winners_wall_Winners_edit_add_ticket_number" value="${winnerData ? winnerData.ticket_number : ''}">
             <div class="winners_wall_Winners_edit_add_error" id="winners_wall_Winners_edit_add_ticket_number_error">Please enter a ticket number</div>
         </div>
         <div class="winners_wall_Winners_edit_add_form_group winners_wall_Winners_edit_add_date_time_group" id="winners_wall_Winners_edit_add_draw_date_group">
@@ -4205,24 +4221,25 @@ function marginal_renderChart(chartData) {
         data: {
             labels: categories,
             datasets: [
-                {
-                    label: 'Sales',
-                    data: salesData,
-                    backgroundColor: 'rgba(78, 115, 223, 0.7)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    borderWidth: 1,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.8
-                },
-                {
-                    label: 'Target',
-                    data: targetData,
-                    backgroundColor: 'rgba(110, 110, 110, 0.7)',
-                    borderColor: 'rgba(110, 110, 110, 1)',
-                    borderWidth: 1,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.8
-                }
+    {
+        label: 'Sales',
+        data: salesData,
+        backgroundColor: 'rgba(255, 184, 34, 0.7)',
+        borderColor: 'rgba(255, 184, 34, 1)',
+        borderWidth: 1,
+        barPercentage: 0.6,
+        categoryPercentage: 0.8
+    },
+    {
+        label: 'Target',
+        data: targetData,
+        backgroundColor: 'rgba(224, 75, 75, 0.7)',
+        borderColor: 'rgba(224, 75, 75, 1)',
+        borderWidth: 1,
+        barPercentage: 0.6,
+        categoryPercentage: 0.8
+    }
+
             ]
         },
         options: {
@@ -4317,10 +4334,10 @@ function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_fu
         </div>
         <div class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_class">
             <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_won_class">
-                <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_color_class" style="background-color: #4BC0C0;"></span> Won : ${data.total_won}
+                <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_color_class" style="background-color: #F69B08;"></span> Won : ${data.total_won}
             </span>
             <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_lost_class">
-                <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_color_class" style="background-color: #FF6384;"></span> Lost : ${data.total_lost}
+                <span class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_legend_color_class" style="background-color: #FF6600;"></span> Lost : ${data.total_lost}
             </span>
             </span>
         </div>
@@ -4354,15 +4371,15 @@ function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_fu
                     {
                         label: 'Won',
                         data: wonData,
-                        backgroundColor: '#4BC0C0',
-                        borderColor: '#4BC0C0',
+                        backgroundColor: '#F69B08',
+                        borderColor: '#F69B08',
                         borderWidth: 1
                     },
                     {
                         label: 'Lost',
                         data: lostData,
-                        backgroundColor: '#FF6384',
-                        borderColor: '#FF6384',
+                        backgroundColor: '#FF6600',
+                        borderColor: '#FF6600',
                         borderWidth: 1
                     }
                 ]
@@ -6909,27 +6926,7 @@ let currentSearchTerm = '';
 let currentCategoryId = '';
 let lottery_Cards = 3; // Set Lottery cards as default
 let lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
-//Dynamically change Lottery cards Per Page
-const lotteryCards=()=>{
-    // Define two media queries: one for max-width 830px and another for min-width 767px
-const mediaQueryMin = window.matchMedia('(min-width: 767px)');
-const mediaQueryMax = window.matchMedia('(max-width: 830px)');
-    if (mediaQueryMin.matches && mediaQueryMax.matches) {
-        lottery_Cards = 4; // Set the number of lotteries per page
-        lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
-    }
-    else{
-        lottery_Cards = 3;
-        lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
-    }
-    fetchLotteryEvents();
-}
 
-if( window.innerWidth>767 && window.innerWidth<830){ // On Load
-    lottery_Cards = 4; // Set the number of lotteries per page
-    lotteryPerPage = lottery_Cards; // Set the number of lotteries per page
-}
-window.addEventListener("resize", lotteryCards);
 $(document).ready(function () {
     // Use event delegation to handle dynamically added input fields
     $(document).on("keyup", ".lottery_events_add_edit_title", function () {
@@ -6956,7 +6953,18 @@ $(document).ready(function () {
         }
     });
 });
-
+function lottery_draw_date_input_formatDateForInput(dateString) {
+    if (!dateString) return ''; // Return empty string for null/undefined dates
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return ''; // Return empty string for invalid dates
+    
+    return date.toISOString().slice(0, 16);
+}
+function add_lottery_draw_date_past_date_validation(){
+    document.getElementById('lottery_draw_date').min = new Date().toISOString().slice(0, 16);
+}
+add_lottery_draw_date_past_date_validation()
 function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     currentPage = page;
 
@@ -7030,8 +7038,12 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
            </p>
            <p>
                Draw Date: <span class="lottery_events_add_draw_date">${event.draw_date}</span>
-               <input type="datetime-local" class="lottery_events_add_edit_draw_date" value="${new Date(event.draw_date).toISOString().slice(0, 16)}" data-original-value="${new Date(event.draw_date).toISOString().slice(0, 16)}" required>
-               <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
+<input type="datetime-local" class="lottery_events_add_edit_draw_date" 
+    value="${lottery_draw_date_input_formatDateForInput(event.draw_date)}" 
+    data-original-value="${lottery_draw_date_input_formatDateForInput(event.draw_date)}" 
+    min="${new Date().toISOString().slice(0, 16)}"
+    required onkeydown="return false;">
+                   <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
            </p>
           <p id="category_Details">Category: <strong class="category_Name" >${event.category.name}</strong>
            <span class="lottery_events_set_category" hidden>${event.category.name}</span>
@@ -8428,6 +8440,7 @@ function addRightScrollArrow() {
     
     rightArrow.style.fontSize = 'x-large';
     rightArrow.style.fontWeight = 'bold';
+    rightArrow.style.zIndex = '2000';
 
     rightArrow.onclick = function () {
         tabsContainer.scrollBy({ left: 100, behavior: 'smooth' });
@@ -8465,6 +8478,12 @@ function setupScrollHandler() {
                     const isActive = tab.dataset.categoryId === categoryId;
                     tab.classList.toggle('active', isActive);
                     tab.querySelector('.tab-indicator').style.display = isActive ? 'block' : 'none';
+                    //Mobile view: MenuBar Slides Right to Left
+                        if ((window.matchMedia("(max-width: 768px)").matches)){ 
+                        const categories_tabs = document.getElementById('categories_tabs');
+                        categoryId >3 ? categories_tabs.scrollBy({ left: 300, behavior: 'smooth' }) :
+                        categories_tabs.scrollBy({ left: -300, behavior: 'smooth' });
+                        }
                 });
             }
         });
@@ -9097,16 +9116,18 @@ function displayCartItems(cart) {
 
         const purchasedQuantity = item.purchased_quantity || 0;
         const remainingTickets = item.max_limit - purchasedQuantity;
-        
+        // <p class="remaining-tickets">Remaining Tickets: ${remainingTickets}</p>
+        //<p class="remaining-tickets">Tickets remaining(updated after purchase): ${remainingTickets}</p>
+        //Available tickets (updated once purchase is completed),Tickets remaining – updated after purchase
         // Ensure the quantity does not exceed the remaining tickets
         const adjustedQuantity = Math.min(item.quantity, remainingTickets);
-        
+        // ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-image" />` : ''}
         cartItem.innerHTML = `
-            ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-image" />` : ''}
+            ${item.image ? `<a href="/lottery_detail/${eventSlug}/"><img src="${item.image}" alt="${item.title}" class="cart-image" /></a>` : ''}
             <div class="item-details">
                 <h3>${item.title}</h3>
                 <p class="cartprice">Per Ticket Price £${item.per_ticket_price}</p>
-                <p class="remaining-tickets">Remaining Tickets: ${remainingTickets}</p>
+                
             </div>
             <div class="quantity-controls">
                 <p>Quantity:</p>
@@ -9714,9 +9735,12 @@ function fetchSimilarLotteryEvents(eventSlug) {
             activeEvents.forEach(event => {
                 const eventElement = document.createElement('div');
                 eventElement.classList.add('similar_category_lottery_event');
-
+                const favoriteClass = event.is_favorite ? 'favorited' : '';
 
                 eventElement.innerHTML = `
+                    <div class="similar_category_lottery_event_favorite" onclick="toggleFavoriteSimilar('${event.slug}')">
+                        <i class="fas fa-heart ${favoriteClass}"></i>
+                    </div>
                     <div class="similar_category_lottery_event_draw_date">${lottery_events_formatDrawDate(event.draw_date)}</div>
                     ${event.image ? `<img src="${event.image}" alt="${event.title}" class="similar_category_lottery_event_img" />` : ''}
                      <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
@@ -9988,13 +10012,22 @@ function privacysecurity() {
 
         $('.privacy-error').text('');
 
-        // Validate DOB
-        const dob = $('#privacy-dob').val();
-        if (!dob) {
-            $('#privacy-dob-error').text("Date of Birth is required.");
+
+    // Validate DOB
+    const dob = $('#privacy-dob').val();
+    if (!dob) {
+        $('#privacy-dob-error').text("Date of Birth is required.");
+        isValid = false;
+    } else {
+        const dobDate = new Date(dob);
+        const year = dobDate.getFullYear();
+        const currentYear = new Date().getFullYear();
+
+        if (year < 1900 || year > currentYear) {
+            $('#privacy-dob-error').text("Enter a valid year between 1900 and " + currentYear + ".");
             isValid = false;
         }
-
+    }
         // Validate phone number
         const phoneNumber = $('#privacy-phone-number').val();
         const phoneRegex = /^\+44\d{10}$/;
@@ -11028,6 +11061,26 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+function toggleFavoriteSimilar(targetSlug) {
+    fetch('/api/add_to_favorites/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": add_csrftoken
+        },
+        body: JSON.stringify({ event_slug: targetSlug }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        updateFavoritesCount();
+        fetchFavorites(); 
+        fetchSimilarLotteryEvents(eventSlug);
+        lottery_events_fetch();
+        fetchCategoryLotteryEvents();
+    })
+    .catch(error => console.error('Error toggling favorite:', error));
+}
 
 
 

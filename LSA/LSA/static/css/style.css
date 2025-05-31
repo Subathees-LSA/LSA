@@ -4423,10 +4423,10 @@ top: 20px;
             color: white;
         }
 
-        .custom_admin_dashboard_sidebar nav ul li a:hover {
+        /* .custom_admin_dashboard_sidebar nav ul li a:hover {
             background-color: #fb6a0a;
             color: white;
-        }
+        } */
 
         .custom_admin_dashboard_sidebar nav ul li a:focus,
         .custom_admin_dashboard_sidebar nav ul li a.active {
@@ -4793,6 +4793,7 @@ top: 20px;
     }
 
     #user_specfic_chat {
+        display: none;
         padding: 8px;
         font-size: 14px;
     }
@@ -4862,6 +4863,10 @@ top: 20px;
     gap: 10px; /* Space between messages */
     padding: 10px;
     margin: 0 auto 20px auto; /* Center the chat container */
+    height: 200px;
+  overflow-y: scroll;
+  overflow-x: auto; /* Optional horizontal scrolling */
+  /* other styles for the container */
     
 }
 
@@ -4970,8 +4975,9 @@ top: 20px;
 .email-item.selected {
     background-color: #979797;
 }
-.email-item:active{
+.email-item.active {
     background-color: orange;
+    font-weight: bold;
 }
 
 .delete-icon {
@@ -5786,7 +5792,7 @@ margin-left: 2%;
             padding: 20px;
         
             justify-items: center;  /* This centers each grid item */
-            align-items: center;    /* Aligns items in grid cells */
+           
             text-align: center;
         
             width: 100%;
@@ -7707,7 +7713,7 @@ margin-left: 2%;
                 top: 0;
                 left: 0;
                 background-color: white;
-                z-index: 1000;
+                /* z-index: 1000; */
                 white-space: nowrap;
             }
 
@@ -8226,7 +8232,7 @@ margin-left: 2%;
             width: 80px;
             padding: 8px;
             font-size: 14px;
-            border: 2px solid #FF6600;
+            border: 2px solid ;
             border-radius: 6px;
             background-color: #fff;
             color: #333;
@@ -9011,7 +9017,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     margin-bottom: -15px;
     font-family: Rajdhani;
     margin-left: 5px;
-    
+    padding-top: 0.3em;
 }
 
 .category_icon {
@@ -9242,7 +9248,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     }
   .view_all_button {
         font-size: 19px;
-        padding: 31px 0px;
+        padding: 69px 0px;
         top: 0;
         right: 0;
     }
@@ -11996,6 +12002,45 @@ background-color: rgba(255, 102, 0, 0.05);
 .lot-detail-similar-events ::-webkit-scrollbar {
     display: none;
 }
+/* Add to your CSS file */
+.similar_category_lottery_event_favorite {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.similar_category_lottery_event_favorite i {
+    /* font-size: 24px;
+    color: #ccc;
+    transition: color 0.3s; */
+    /* position: absolute;
+    top: 25px;
+    right: 5px; */
+    color: gray;
+    cursor: pointer;
+    background: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: opacity 0.3s ease, transform 0.2s ease;
+    z-index: 1;
+    
+}
+
+.similar_category_lottery_event_favorite i.favorited {
+    color: red;
+}
+
+.similar_category_lottery_event {
+    position: relative;
+    /* Ensure this is already in your CSS */
+}
 .similar_category_lottery_event:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -13980,9 +14025,9 @@ background-color: rgba(255, 102, 0, 0.05);
     /* margin-bottom: 40px;  */
 }
 .categories-tabs,.categories-tabs-wrapper{
-    position: relative;
+    position: sticky;
     top: 0; /* Adjust based on your layout */
-    z-index: 0; /* Ensures it stays on top */
+    z-index: 1000; /* Ensures it stays on top */
     display: flex;
     gap: 40px;
     overflow-x: auto;
@@ -14004,6 +14049,7 @@ background-color: rgba(255, 102, 0, 0.05);
     font-size: 20px;
     margin-bottom: -15px;
     font-family: Rajdhani;
+    padding-top: 2em;
 }
 
     .categories-tabs {

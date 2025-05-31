@@ -44,7 +44,7 @@
 
                 <!-- Editable fields -->
                 <label for="privacy-dob">Date of Birth (DOB):</label>
-                <input type="date" id="privacy-dob" name="dob" value="{{ user.userprivacy.dob|date:'Y-m-d' }}" />
+               <input type="date" id="privacy-dob"name="dob"value="{{ user.userprivacy.dob|date:'Y-m-d' }}"min="1900-01-01"max="{{ today|date:'Y-m-d' }}"/>
                 <div id="privacy-dob-error" class="privacy-error"></div>
 
                 <label for="privacy-phone-number">Phone Number (UK):</label>
