@@ -2171,7 +2171,7 @@
                 </div>
                 <div style=" display: none;opacity: 0;position: absolute;"
                     id="custom_admin_dashboard_dynamic_lottery_sales_count_and_bar_chart">
-                    
+                    <h2 class="Report_Analytics">Report & Analytics</h2>
                     <div class="custom_admin_dashboard_overview_statistics_count" id="custom_admin_dashboard_report_and_analytics_statistics_count">
                     </div>
 
@@ -2353,7 +2353,8 @@
                 </div>
 
                 <div class="custom_admin_dashboard_draw_date">
-                    <input type="datetime-local" name="draw_date" required><br>
+                <input type="datetime-local" name="draw_date" id="lottery_draw_date" required onkeydown="return false;"><br>
+
                     <span class="lottery_events_add_drawdate_error"
                         id="lottery_events_add_drawdate_validation"></span><br>
                 </div>
@@ -2526,7 +2527,7 @@
 .report_and_analytics_marginal_chart_heading_class {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #4e73df;
+    
     margin: 0;
 }
 
@@ -2615,11 +2616,11 @@
 }
 
 .legend-color.sales {
-    background-color: #4e73df;
+    background-color:#FFB822;
 }
 
 .legend-color.target {
-    background-color: #6e6e6e;
+    background-color: #E04B4B;
 }
 
 .legend-color.reached {
@@ -2647,7 +2648,8 @@
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
+    margin-top: 89px;
 }
 
 .admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_header_class {
@@ -2662,9 +2664,9 @@
     font-size: 18px;
     color: #333;
 }
-
+.report_and_analytics_marginal_chart_export_button_class,
 .admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_button_class {
-    background: #4CAF50;
+    background: #FF6600;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -2699,4 +2701,24 @@
 
 
 </style>
+
+
+
+
+  <style>
+     /* indicate link for user details page css start  */
+        .view_specfic_user_details {
+  cursor: pointer;
+  color: inherit; /* default text color */
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.view_specfic_user_details:hover {
+  color: #007BFF; /* Bootstrap blue, or choose your own */
+  text-decoration: underline;
+}
+/* indicate link for user details page css end */
+
+    </style>
+
 </html>

@@ -629,8 +629,15 @@ class api_get_lottery_events(APIView):
             category_id = request.query_params.get('category', '')
     
             # Fetch all lottery events from the database
-            lottery_events = LotteryEvent.objects.all().order_by('-id')  # Latest by ID
+            # lottery_events = LotteryEvent.objects.all().order_by('-id')  # Latest by ID
              # Filter by search term if provided
+            now = timezone.now()
+            # Filter active, non-expired events
+            lottery_events = LotteryEvent.objects.filter(
+                is_active=True,
+                draw_date__gte=now
+            ).order_by('-id')
+
             if search_query:
                 lottery_events = lottery_events.filter(title__icontains=search_query)
 
@@ -661,7 +668,15 @@ class APIGetCategoryLotteryEvents(APIView):
     def get(self, request, category_id):
         try:
             category = LotteryCategory.objects.get(id=category_id)
-            events = LotteryEvent.objects.filter(category=category, is_active=True)
+            # events = LotteryEvent.objects.filter(category=category, is_active=True)
+            now = timezone.now()
+
+            # Filter active events whose draw_date has not expired
+            events = LotteryEvent.objects.filter(
+                category=category,
+                is_active=True,
+                draw_date__gte=now
+            )
             favorites_slugs = json.loads(request.COOKIES.get('favorites', '[]'))
             serializer = LotteryEventSerializeradd_get(events, many=True)
             events_data = serializer.data
@@ -1303,14 +1318,33 @@ def user_statistics(request):
         
     })    
 
+# class SimilarLotteryEvents(APIView):
+#     def get(self, request, slug, format=None):
+#         event = get_object_or_404(LotteryEvent, slug=slug)
+#         category = event.category
+#         similar_events = LotteryEvent.objects.filter(category=category).exclude(slug=slug)
+#         serializer = LotteryEventSerializeradd_get(similar_events, many=True)
+#         return Response(serializer.data)
 class SimilarLotteryEvents(APIView):
     def get(self, request, slug, format=None):
         event = get_object_or_404(LotteryEvent, slug=slug)
         category = event.category
-        similar_events = LotteryEvent.objects.filter(category=category).exclude(slug=slug)
+        now = timezone.now()
+        similar_events = LotteryEvent.objects.filter(
+            category=category,
+            is_active=True,
+            draw_date__gte=now
+        ).exclude(slug=slug)
+        
+        favorites_slugs = json.loads(request.COOKIES.get('favorites', '[]'))
         serializer = LotteryEventSerializeradd_get(similar_events, many=True)
-        return Response(serializer.data)
-
+        
+        events_data = serializer.data
+        for event in events_data:
+            event['is_favorite'] = event['slug'] in favorites_slugs
+            
+        return Response(events_data)
+    
 def footer_view(request):
     social_links = SocialLink.objects.all()
 
