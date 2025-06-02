@@ -5068,6 +5068,13 @@ function initializeDashboard() {
                                             document.getElementById('lotteryEventModal').style.display = 'none';
                                         }
                                     };
+                                    function add_lottery_draw_date_past_date_validation(){
+                                        const lottery_draw_date_input_id = document.getElementById('lottery_draw_date');
+                                        if (lottery_draw_date_input_id) {
+                                            document.getElementById('lottery_draw_date').min = new Date().toISOString().slice(0, 16);
+                                        }
+                                    }
+                                    add_lottery_draw_date_past_date_validation()
                                 } else if (tab.type === 'rate') {
                                     const title = document.createElement('h2');
                                     title.className = 'custom_admin_dashboard_table_title';
@@ -6961,10 +6968,7 @@ function lottery_draw_date_input_formatDateForInput(dateString) {
     
     return date.toISOString().slice(0, 16);
 }
-function add_lottery_draw_date_past_date_validation(){
-    document.getElementById('lottery_draw_date').min = new Date().toISOString().slice(0, 16);
-}
-add_lottery_draw_date_past_date_validation()
+
 function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     currentPage = page;
 
@@ -7043,7 +7047,7 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     data-original-value="${lottery_draw_date_input_formatDateForInput(event.draw_date)}" 
     min="${new Date().toISOString().slice(0, 16)}"
     required onkeydown="return false;">
-                   <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
+               <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
            </p>
           <p id="category_Details">Category: <strong class="category_Name" >${event.category.name}</strong>
            <span class="lottery_events_set_category" hidden>${event.category.name}</span>
