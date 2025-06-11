@@ -20,7 +20,7 @@ def cancel(request):
 
 def my_order(request):
     if not request.user.is_authenticated:
-        return redirect('/login/')  # Redirect to login page if not authenticated
+        return redirect('/login/')  
     return render(request, 'myorder.html')
 
 

@@ -5,16 +5,6 @@ from django.utils.timezone import now
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from user_registration.models import *
-class Report(models.Model):
-    year = models.IntegerField()
-    win_lottery = models.FloatField()
-    lost_lottery = models.FloatField()
-
-class RegionalSales(models.Model):
-    region = models.CharField(max_length=100)
-    total_sales = models.FloatField()
-    average = models.FloatField()
-    return_value = models.FloatField()
 
 class LotteryCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -24,7 +14,7 @@ class LotteryCategory(models.Model):
                             
 class LotteryEvent(models.Model):
     title = models.CharField(max_length=255,unique=True)
-    slug = models.SlugField(unique=True, blank=True)  # Slug field
+    slug = models.SlugField(unique=True, blank=True)  
     category = models.ForeignKey(LotteryCategory, related_name='lottery_events', on_delete=models.CASCADE, null=True, blank=True,default=1)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -32,16 +22,15 @@ class LotteryEvent(models.Model):
     image = models.ImageField(upload_to='lottery_images/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     sold_percentage = models.PositiveIntegerField(default=0)
-    total_tickets = models.PositiveIntegerField(default=0)  # New field for total tickets
-    sold_tickets = models.PositiveIntegerField(default=0)   # Field for sold tickets
+    total_tickets = models.PositiveIntegerField(default=0)  
+    sold_tickets = models.PositiveIntegerField(default=0)   
     total_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     revenue_type = models.CharField(max_length=50, choices=[('fixed', 'Fixed'), ('percentage', 'Percentage')], default='fixed')
     revenue_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    per_ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # New Field
-
-    mini_limit = models.PositiveIntegerField(default=1)  # Minimum number of tickets
-    max_limit = models.PositiveIntegerField(default=10)  # Maximum number of tickets
+    per_ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  
+    mini_limit = models.PositiveIntegerField(default=1)  
+    max_limit = models.PositiveIntegerField(default=10)  
     free_postal_description = models.TextField(default="Enter the description for free postal entry.")
     competition_details = models.TextField(default="") 
     created_at = models.DateTimeField(default=timezone.now)  
@@ -56,16 +45,12 @@ class LotteryEvent(models.Model):
             slug = base_slug
             counter = 1
 
-
-            # Ensure slug is unique
             while LotteryEvent.objects.filter(slug=slug).exclude(id=self.id).exists():
                 slug = f"{base_slug}-{counter}"
                 counter += 1
         
             self.slug = slug
 
-
-        # Calculate the sold percentage
         if self.total_tickets > 0:
             self.sold_percentage = (self.sold_tickets / self.total_tickets) * 100
         else:
@@ -88,30 +73,7 @@ class LotteryEventImages(models.Model):
 
     def _str_(self):
         return f"Image for {self.lottery_event.title}" 
-    
-
-class TicketTransaction(models.Model):
-    lottery_event = models.ForeignKey(LotteryEvent, on_delete=models.CASCADE, related_name='transactions')
-    tickets_sold = models.PositiveIntegerField()
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_date = models.DateTimeField(default=now)
-    is_successful = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"{self.lottery_event.title} - {self.tickets_sold} tickets sold"
-
-
-class ConversionRate(models.Model):
-    card_type = models.CharField(max_length=50)  # e.g., iTunes, Amazon, Bitcoin
-    region = models.CharField(max_length=50)    # e.g., USA, UK
-    rate = models.DecimalField(max_digits=10, decimal_places=2)  # e.g., 400.00
-    is_physical = models.BooleanField(default=True)  # Physical or e-code card
-
-    def __str__(self):
-        return f"{self.card_type} ({self.region}) - {'Physical' if self.is_physical else 'E-code'}"
-
-
-
+# Customer Support Contact Messages table    
 class Contact(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
@@ -154,75 +116,39 @@ class Previous_Winner_img(models.Model):
     def __str__(self):
         return self.name
     
-
-class LotteryStatistics(models.Model):
-    month = models.IntegerField() 
-    year = models.IntegerField()
-    won_lottery = models.IntegerField(default=0)
-    lost_lottery = models.IntegerField(default=0)
-    won_percentage = models.FloatField(default=0.0)
-    current_won_percentage = models.FloatField(default=0.0)
-    lost_percentage = models.FloatField(default=0.0)
-
-    def save(self, *args, **kwargs):
-        # Automatically calculate percentages when saving
-        total_lottery = self.won_lottery + self.lost_lottery
-        self.won_percentage = (self.won_lottery / total_lottery) * 100 if total_lottery > 0 else 0
-        self.lost_percentage = (self.lost_lottery / total_lottery) * 100 if total_lottery > 0 else 0
-        super().save(*args, **kwargs)
-
-
-class Leaderboard(models.Model):
-    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
-    points = models.IntegerField(default=0)
-    correct_percentage = models.FloatField(default=0.0)
-    rank = models.IntegerField(default=0)
-    image = models.ImageField(upload_to='lottery_image/', null=True, blank=True)
-
-
-    def __str__(self):
-        return f"{self.user_profile.user.username} - Rank {self.rank}"
-
-
+#admin dashboard content management table
 class admin_dashboard_preview(models.Model):
     name = models.CharField(max_length=100, help_text="Tab name to display")
     dashboard_preview_image = models.ImageField(upload_to='dashboard_preview_image/', blank=True, null=True)
     identifier = models.CharField(max_length=150, unique=True, help_text="Unique identifier for this container (used in frontend)")
     type = models.CharField(
         max_length=100,
-        choices=[(' ', 'Select type'),('charts', 'charts'),('count', 'count'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('rate', 'rate'), ('lotterys', 'lotterys'),('user_leaderboard', 'user_leaderboard'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
+        choices=[(' ', 'Select type'),('charts', 'charts'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('transactions', 'transactions'), ('lotterys', 'lotterys'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
         default='',
         help_text="Type of content"
     )
+    ordering = models.PositiveIntegerField(default=0)  
+
+    class Meta:
+        ordering = ['ordering']  
 
     def __str__(self):
         return self.name
         
 
     def clean(self):
-        # Get the identifiers from the "data" dictionary (mock this part for now if necessary)
         allowed_identifiers = {
             " ",
             "total_users",
             "verified_users",
             "pending_kyc",
-            "total_tickets_sold",
-            "total_transaction_amount",
             "users_table",
-            "conversion_rate",
+            "custom_admin_dashboard_transactions_management_refunded",
+            "custom_admin_dashboard_all_transactions_management",
             "lotterys",
-            "active_users",
-            "won_lottery",
-            "lost_lottery",
-            "won_percentage",
-            "current_won_percentage",
-            "lost_percentage",
-            "user_leaderboard",
             "report_and_analytics_marginal_chart",
             "admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart",
             "total_lottery_won_lost_count",
-            "overview_sales_count_won-lottery-amount",
-            "overview_sales_count_lost-lottery-amount",
             "overview_active_users_count",
             "overview_active_lotteries_count",
             "overview_sales_amount",
@@ -240,26 +166,18 @@ class admin_dashboard_preview(models.Model):
             raise ValidationError(f"The identifier '{self.identifier}' is not valid or doesn't exist in the allowed identifiers.")
 
     def save(self, *args, **kwargs):
-        # Call the clean method for validation
         self.clean()
         super().save(*args, **kwargs)
-
-
-class lottery_sales_bar_chart(models.Model):
-    month = models.CharField(max_length=3)  
-    year = models.IntegerField()
-    activity_count = models.IntegerField(default=0)
-
-
+#admin dashboard nav bar management table
 class admin_navbar_access(models.Model):
     name = models.CharField(max_length=50, unique=True)
     url_name = models.CharField(max_length=100, blank=True)
     identifier = models.CharField(max_length=100, unique=True, blank=True, null=True)
     nav_bar_image = models.ImageField(upload_to='navbar_images/', blank=True, null=True)
-    ordering = models.PositiveIntegerField(default=0)  # Custom ordering field
+    ordering = models.PositiveIntegerField(default=0)  
 
     class Meta:
-        ordering = ['ordering']  # Default ordering
+        ordering = ['ordering'] 
 
     def get_url(self):
         try:
@@ -323,7 +241,6 @@ class Location(models.Model):
     def __str__(self):
         return self.name
 
-# models.py
 class AdminOTP(models.Model):
     admin = models.ForeignKey(adminProfile, on_delete=models.CASCADE)
     otp = models.CharField(max_length=6)
@@ -347,11 +264,8 @@ class Winner(models.Model):
         ('method3', 'range choosen'),
     ]
 
-    #user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     lottery_event = models.ForeignKey(LotteryEvent, on_delete=models.CASCADE)
-    # payment = models.ForeignKey(PaymentLottery, on_delete=models.CASCADE)
     payment = models.ForeignKey(PaymentLottery, on_delete=models.SET_NULL, null=True, blank=True)
     ticket_number = models.CharField(max_length=6, unique=True)
     selection_method = models.CharField(max_length=10, choices=SELECTION_METHODS,default='method1')
@@ -367,12 +281,11 @@ class Winner(models.Model):
     prize_no = models.PositiveIntegerField(unique=True, blank=True, null=True)
     prize_status = models.CharField(max_length=20, choices=PRIZE_STATUS_CHOICES, default='initiated')
     prize_comments = models.TextField(blank=True, null=True)
-    # created_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def generate_unique_prize_no(self):
         while True:
-            random_number = random.randint(100000, 999999)  # Generate a 6-digit number
+            random_number = random.randint(100000, 999999) 
             if not Winner.objects.filter(prize_no=random_number).exists():
                 return random_number
 

@@ -72,30 +72,23 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url']
 
     def get_kyc_image_url(self, obj):
-        # Return the URL for the image view based on the profile ID
         if obj.kyc_image:
             return f"/view_kyc_image/{obj.id}/"
         return None
- 
 from rest_framework import serializers
 from .models import UserProfile, UserPrivacy
 from django.contrib.auth.models import User
-
-
 class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
     user = UserList()  # Nest the UserSerializer to include user details
     kyc_image_url = serializers.SerializerMethodField()
     profile_photo_url = serializers.SerializerMethodField()  # Updated field for profile photo
-
     class Meta:
         model = UserProfile
         fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url', 'ip_address', 'is_blocked', 'profile_photo_url']
-
     def get_kyc_image_url(self, obj):
         if obj.kyc_image:
             return f"/view_kyc_image/{obj.id}/"
         return None
-
     def get_profile_photo_url(self, obj):
         try:
             user_privacy = UserPrivacy.objects.get(user=obj.user)
@@ -103,38 +96,26 @@ class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
                 return user_privacy.profile_photo.url
         except UserPrivacy.DoesNotExist:
             return None
-        return None
-    
+        return None 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
-
     def validate_email(self, value):
         if not User.objects.filter(email=value).exists():
             raise serializers.ValidationError(_("No user is associated with this email address."))
         return value
-
-
 class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password1 = serializers.CharField(write_only=True, validators=[validate_password])
     new_password2 = serializers.CharField(write_only=True)
-
-
     def validate(self, data):
         if data['new_password1'] != data['new_password2']:
             raise serializers.ValidationError({"new_password2": _("The two password fields didn’t match.")})
         return data
-
-
     def save(self, user):
         user.set_password(self.validated_data['new_password1'])
         user.save()
         return user              
-    
-
 from rest_framework import serializers
 from .models import UserPrivacy
-
 class UserPrivacySerializer(serializers.ModelSerializer):
     ip_address = serializers.IPAddressField(protocol='both', required=False, allow_null=True)
     profile_photo_url = serializers.SerializerMethodField()
@@ -150,5 +131,5 @@ class UserPrivacySerializer(serializers.ModelSerializer):
 
     def get_profile_photo_url(self, obj):
         if obj.profile_photo:
-            return obj.profile_photo.url  # Return uploaded image URL
-        return '/media/default-profile.jpg'  # Default profile image
+            return obj.profile_photo.url  
+        return '/media/default-profile.jpg'  

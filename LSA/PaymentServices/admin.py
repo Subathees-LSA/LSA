@@ -11,5 +11,4 @@ for model in app_models:
     try:
         admin.site.register(model)
     except AlreadyRegistered:
-        # Skip if the model is already registered
         pass

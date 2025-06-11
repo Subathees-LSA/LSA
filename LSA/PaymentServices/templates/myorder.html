@@ -10,7 +10,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}"></script>
     <script>
-        var my_orders_csrfToken = "{{ csrf_token }}"; // Store CSRF token globally
+        var my_orders_csrfToken = "{{ csrf_token }}";
     </script>
     <style>
         /* Add these to your style.css */
@@ -45,9 +45,7 @@
 <body class="myorderpage">
     {% include 'header.html' %}
     <div class="myorder-main-container">
-        <!-- Left Sidebar -->
         {% include 'myorder-sidebar.html' %}
-        <!-- Main Content -->
         <div class="myorder-content">
             <div class="myorder-header">
                 <h3 class="myorder-heading">Previous Orders</h3>

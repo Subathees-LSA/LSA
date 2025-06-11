@@ -9,15 +9,6 @@ from .models import Testimonial
 from rest_framework import serializers
 from .models import Testimonial
 
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = ['year', 'win_lottery', 'lost_lottery']
-
-class RegionalSalesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RegionalSales
-        fields = ['region', 'total_sales', 'average', 'return_value']
 
 class api_admin_signup_Serializer(serializers.ModelSerializer):
     admin_username = serializers.CharField(write_only=True)
@@ -37,50 +28,27 @@ class api_admin_signup_Serializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This username already exists. Please provide a different name.")
         return value
 
-    # Email uniqueness validation
     def validate_admin_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("This email is already registered.")
         return value
 
     def create(self, validated_data):
-        # Extract `admin_username`, `admin_email`, and `admin_password`
+       
         username = validated_data.pop('admin_username')
         email = validated_data.pop('admin_email')
         password = validated_data.pop('admin_password')
-
-        # Create the user instance with the mapped values
         user = User(username=username, email=email)
         user.set_password(password)
-        
-        # Set Staff and Superuser status
         user.is_staff = True
         user.is_superuser = True
-        
         user.save()
-
-        # Create the admin profile with an empty role
-        adminProfile.objects.create(user=user, role='')  # Role is set to an empty string by default
-        
+        adminProfile.objects.create(user=user, role='') 
         return user
-
-
-class LeaderboardSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source="user_profile.user.username")
-
-    class Meta:
-        model = Leaderboard
-        fields = ['username', 'points', 'correct_percentage', 'rank','image']
-
-class LotteryStatisticsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LotteryStatistics
-        fields = '__all__'
-
 
 class admin_navbar_accessSerializer(serializers.ModelSerializer):
     resolved_url = serializers.SerializerMethodField()
-    nav_bar_image_url = serializers.SerializerMethodField()  # Serialize the image URL
+    nav_bar_image_url = serializers.SerializerMethodField() 
 
     class Meta:
         model = admin_navbar_access
@@ -92,8 +60,8 @@ class admin_navbar_accessSerializer(serializers.ModelSerializer):
     def get_nav_bar_image_url(self, obj):
         if obj.nav_bar_image:
             request = self.context.get('request')
-            return request.build_absolute_uri(obj.nav_bar_image.url)  # Full image URL
-        return None  # No image uploaded
+            return request.build_absolute_uri(obj.nav_bar_image.url)  
+        return None 
 
 
    
@@ -113,81 +81,58 @@ class LotteryEventSerializer(serializers.ModelSerializer):
         model = LotteryEvent
         fields = '__all__'
    
-        
-    
     def validate_competition_details(self, value):
-       
         if not isinstance(value,str):
             raise serializers.ValidationError("Competition details must be a string.")
         return value
 
-   
     def validate_slug(self, value):
-        if not value:  # Allow slug to be auto-generated if not provided
+        if not value: 
             return value
         if LotteryEvent.objects.filter(slug=value).exists():
             raise serializers.ValidationError("Slug must be unique.")
         return value
 
-
     def get_additional_images(self, obj):
-        # Retrieve all additional images related to this LotteryEvent
         images = LotteryEventImages.objects.filter(lottery_event=obj)
-        # Use LotteryEventImagesSerializer to serialize the images
         return LotteryEventImagesSerializer(images, many=True).data
 
     def validate_image(self, value):
-        # If image is not provided in request data
         if not value:
-            # Check if an instance is already available (for PUT requests)
             instance = getattr(self, 'instance', None)
-            # If instance exists and has an image, pass validation
             if instance and instance.image:
                 return instance.image
-            # Otherwise, raise validation error
             raise serializers.ValidationError("An image is required for the lottery event.")
         return value
 
 class LotteryEventSerializeradd_get(serializers.ModelSerializer):
     additional_images = serializers.SerializerMethodField()
     category = LotteryCategorySerializer()
-
     class Meta:
         model = LotteryEvent
         fields = '__all__'
    
-        
-    
     def validate_competition_details(self, value):
-       
         if not isinstance(value,str):
             raise serializers.ValidationError("Competition details must be a string.")
         return value
 
-   
     def validate_slug(self, value):
-        if not value:  # Allow slug to be auto-generated if not provided
+        if not value: 
             return value
         if LotteryEvent.objects.filter(slug=value).exists():
             raise serializers.ValidationError("Slug must be unique.")
         return value
 
-
     def get_additional_images(self, obj):
-        # Retrieve all additional images related to this LotteryEvent
         images = LotteryEventImages.objects.filter(lottery_event=obj)
-        # Use LotteryEventImagesSerializer to serialize the images
         return LotteryEventImagesSerializer(images, many=True).data
 
     def validate_image(self, value):
-        # If image is not provided in request data
-        if not value:
-            # Check if an instance is already available (for PUT requests)
+        if not value: 
             instance = getattr(self, 'instance', None)
-            # If instance exists and has an image, pass validation
             if instance and instance.image:
                 return instance.image
-            # Otherwise, raise validation error
             raise serializers.ValidationError("An image is required for the lottery event.")
         return value
 
@@ -215,10 +160,6 @@ class BannerSerializer(serializers.ModelSerializer):
         fields = ['title', 'image','show_title', 'show_explore_button']
 
 
-# class PreviousWinnerimgSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Previous_Winner_img
-#         fields = ['id', 'name', 'image'] 
 class PreviousWinnerimgSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
 
@@ -262,16 +203,6 @@ class prize_management_WinnerSerializer(serializers.ModelSerializer):
             "lottery_image": obj.lottery_event.image.url if obj.lottery_event.image else None
         }
 
-from rest_framework import serializers
-from .models import Winner
-
-class WinnerSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-    lottery_title = serializers.CharField(source='lottery_event.title', read_only=True)
-
-    class Meta:
-        model = Winner
-        fields = ['lottery_title', 'username', 'ticket_number', 'created_at']
 
 
 
@@ -300,31 +231,24 @@ class WinnersWallWinnersListSerializer(serializers.ModelSerializer):
     
     def get_draw_date_formatted(self, obj):
         if obj.draw_date:
-            # Format as: December 6, 2024 10:00 PM
             return obj.draw_date.strftime("%B %d, %Y %I:%M %p")
         return "No date specified"
-    
-    # def to_representation(self, instance):
-    #     rep = super().to_representation(instance)
-    #     rep['draw_date'] = instance.draw_date.isoformat() if instance.draw_date else None
-    #     return rep
+   
     def to_representation(self, instance):
         rep = super().to_representation(instance)
 
-        # Handle the image field
         if instance.image:
             rep['image'] = instance.image.url
         else:
             rep['image'] = None
 
-        # Handle the draw_date field
         rep['draw_date'] = instance.draw_date.isoformat() if instance.draw_date else None
 
         return rep
 
 #winners wall testimonials
 class custom_admin_dashboard_winners_wall_testimonials_serializer(serializers.ModelSerializer):
-    image = serializers.ImageField(required=False)  # Make image optional for updates
+    image = serializers.ImageField(required=False)  
     
     class Meta:
         model = Testimonial
@@ -344,7 +268,6 @@ from rest_framework import serializers
 from .models import Winner
 
 class WonLotteryWinnerSerializer(serializers.ModelSerializer):
-    # lottery_event = serializers.StringRelatedField()
     lottery_event = serializers.CharField(source='lottery_event.title')
     
     class Meta:

@@ -1,4 +1,5 @@
  #!------------- api logics ------------!
+ #!------------- signup.html,js line.no:5941 ------------!
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,7 +28,6 @@ from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSer
 from django.contrib.auth import login
 from .serializers import UserPrivacySerializer
 from .utils import generate_otp  # Import the function
-from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -35,12 +35,10 @@ from rest_framework import status
 from django.http import JsonResponse
 from user_agents import parse
 from user_registration.models import UserDeviceHistory
-from django.utils import timezone  # ✅ Add this import
-
+from django.utils import timezone  
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
-
     def create(self, request, *args, **kwargs):
         try:
             # Check if the request comes from a browser
@@ -75,7 +73,6 @@ class RegisterView(generics.CreateAPIView):
                 {"detail": "An unexpected error occurred. Please try again later."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
     @staticmethod
     def get_client_ip(request):
         """Retrieve the client's IP address from the request."""
@@ -85,6 +82,7 @@ class RegisterView(generics.CreateAPIView):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+#login.html js-5577    
 from django.utils.timezone import now
 from user_agents import parse
 from django.contrib.auth import login
@@ -105,18 +103,14 @@ class LoginView(APIView):
     def post(self, request):
         user_agent_string = request.headers.get('User-Agent', '')
         parsed_agent = parse(user_agent_string)
-
         # Extract device info
         device_family = parsed_agent.device.family.strip() if parsed_agent.device.family else "Unknown Device"
         os_family = parsed_agent.os.family.strip() if parsed_agent.os.family else "Unknown OS"
         browser_family = parsed_agent.browser.family.strip() if parsed_agent.browser.family else "Unknown Browser"
-
         # Fix for "Other" device detection
         if device_family.lower() in ["other", "generic"]:
             device_family = "Unknown Device"
-
         device_info = f"{device_family} - {os_family} - {browser_family}"
-
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
@@ -125,32 +119,25 @@ class LoginView(APIView):
                 user = User.objects.get(email=email)
                 user_profile = UserProfile.objects.filter(user=user).first()
                 user_privacy, created = UserPrivacy.objects.get_or_create(user=user)
-
-                # 🚨 Blocked User Check
                 if user_profile and user_profile.is_blocked:
                     return Response({"error": "You are blocked."}, status=status.HTTP_403_FORBIDDEN)
-
-                # 🚀 Check Password
                 if user.check_password(password):
                     ip_address = self.get_client_ip(request)
-
-                    # ✅ Log the user in
+                    # Log the user in
                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-
-                    # ✅ Get session key
+                    # Get session key
                     session_key = request.session.session_key
-
-                    # ✅ Store session details in `UserDeviceHistory`
+                    # Store session details in `UserDeviceHistory`
                     UserDeviceHistory.objects.create(
                         user=user,
                         device_info=device_info,
                         ip_address=ip_address,
                         login_time=now(),
-                        session_key=session_key,  # 💡 Store session key for logout tracking
+                        session_key=session_key,  
                         logout_time=None
                     )
 
-                    # ✅ Update UserPrivacy with latest login details
+                    # Update UserPrivacy with latest login details
                     user_privacy.ip_address = ip_address
                     user_privacy.device_info = device_info
                     user_privacy.last_active = now()
@@ -171,8 +158,7 @@ class LoginView(APIView):
                             "message": "OTP sent to your email.",
                             "user_id": user.id
                         }, status=status.HTTP_200_OK)
-
-                    # ✅ If 2FA is disabled, log in and redirect
+                    # If 2FA is disabled, log in and redirect
                     return Response({
                         "message": "Login successful.",
                         "session_key": session_key,  # 💡 Return session key for frontend tracking
@@ -184,13 +170,12 @@ class LoginView(APIView):
             except User.DoesNotExist:
                 return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     @staticmethod
     def get_client_ip(request):
         """Retrieve the client's IP address from the request."""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
-
+#!-----lottery_events.html-custom.js- function checkKYCStatus();-----!
 class KYCStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -198,8 +183,7 @@ class KYCStatusView(APIView):
         try:
             profile = UserProfile.objects.get(user=request.user)
             kyc_status = profile.kyc_status
-
-            
+           
             status_messages = {
                 'pending': ("KYC Verification", "Please upload a valid ID image for verification."),
                 'rejected': ("KYC Rejected", "Your KYC submission has been rejected. Please upload a valid image."),
@@ -207,9 +191,7 @@ class KYCStatusView(APIView):
                 'waiting': ("KYC Under Review", "Your KYC verification is currently being processed.")
             }
 
-            title, message = status_messages.get(kyc_status, ("Unknown Status", "Unknown KYC status."))
-
-            
+            title, message = status_messages.get(kyc_status, ("Unknown Status", "Unknown KYC status."))      
             show_kyc_window = False
             if kyc_status != 'verified':
                 show_kyc_window = True  
@@ -235,25 +217,25 @@ class KYCStatusView(APIView):
             return Response({'error': 'UserProfile does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+#!-----lottery_events.html-custom.js- function handleKYCForm()-----!
 class KYCUploadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
-            # Fetch the user's profile
+            
             profile = UserProfile.objects.get(user=request.user)
         except UserProfile.DoesNotExist:
             return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Serialize and validate the incoming data
+
         serializer = KYCUploadSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Update the profile with validated data
+
                 serializer.update(profile, serializer.validated_data)
 
-                # Set KYC status to 'waiting'
+                
                 profile.kyc_status = 'waiting'
                 profile.save()
                 return Response({'status': 'success'}, status=status.HTTP_200_OK)
@@ -263,19 +245,19 @@ class KYCUploadView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request):
-        """ Admin can update KYC status to 'rejected' or reset to 'pending' """
+        
         try:
-            # Fetch the user's profile
+
             profile = UserProfile.objects.get(user=request.user)
         except UserProfile.DoesNotExist:
             return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Get the new status from request data
+
         status_update = request.data.get('kyc_status', None)
         if status_update:
             if status_update in ['rejected', 'pending', 'verified']:
                 try:
-                    # Update profile status and reset kyc_window_shown if needed
+                    
                     profile.kyc_status = status_update
                     profile.kyc_window_shown = False if status_update != 'verified' else profile.kyc_window_shown
                     profile.save()
@@ -312,9 +294,6 @@ class UserKycWaitingListView(generics.ListAPIView):
                 {"error": "An error occurred while fetching the KYC waiting list."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
- 
-
-
 class UpdateKYCStatusView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -333,7 +312,7 @@ class UpdateKYCStatusView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
-
+ #!------------- password rest.html ------------!
 class ApiPasswordResetRequestView(APIView):
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -387,7 +366,7 @@ class ApiPasswordResetRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+#password_confirm.html
 class ApiPasswordResetConfirmView(APIView):
     def post(self, request, uidb64, token):
         try:
@@ -395,8 +374,6 @@ class ApiPasswordResetConfirmView(APIView):
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             return Response({"error": "Invalid or expired link"}, status=status.HTTP_400_BAD_REQUEST)
-
-
         if default_token_generator.check_token(user, token):
             serializer = PasswordResetConfirmSerializer(data=request.data)
             if serializer.is_valid():
@@ -406,7 +383,7 @@ class ApiPasswordResetConfirmView(APIView):
 
 
         return Response({"error": "Token expired or invalid"}, status=status.HTTP_400_BAD_REQUEST)
-
+#privacy.html
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -416,7 +393,6 @@ from rest_framework.permissions import IsAuthenticated
 
 class PrivacySecurityView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request):
         user = request.user
         serializer = UserPrivacySerializer(user.userprivacy)
@@ -480,20 +456,17 @@ class ResendOTPView(APIView):
             return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            # Call the service to handle the OTP resend logic
             message = resend_otp_service(user)
             return Response({"message": message}, status=status.HTTP_200_OK)
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
-#google redirection
+#google outh  for signup
 from django.urls import path, re_path
 from django.shortcuts import redirect
 from social_django.views import complete
 from social_core.exceptions import AuthCanceled
 import logging
-
 logger = logging.getLogger(__name__)
-
 # Custom view to handle AuthCanceled error
 def google_auth_complete(request, backend='google-oauth2'):
     try:

@@ -33,6 +33,7 @@ from django.shortcuts import render
 from adminpanel.models import Winner
 def custom_404(request, exception):
     return render(request, '404.html', status=404)
+#!-----cart.html-custom.js-function proceedToCheckout()-----!
 def check_user_authentication(request):
     
     if not request.user.is_authenticated:
@@ -48,7 +49,7 @@ def check_user_authentication(request):
 
 stripe.api_key = settings.STRIPE_API_KEY
 
-
+#!-----cart.html---custom.js-function proceedToCheckout()-----!
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
@@ -77,7 +78,6 @@ def create_checkout_session(request):
         line_items=line_items,
         mode="payment",
         success_url=f"{settings.DOMAIN}/success/",
-        #cancel_url=f"{settings.DOMAIN}/cancel/",
         customer_email=user.email,
         customer_creation='always',
     )
@@ -86,7 +86,7 @@ def create_checkout_session(request):
 
 
 def generate_unique_tickets(count):
-    """Generate a set of unique ticket numbers with database-level locking"""
+    
     with transaction.atomic():
         existing_tickets = set(LotteryTicket.objects.values_list("ticket_number", flat=True))
         new_tickets = set()
@@ -130,7 +130,7 @@ def stripe_webhook(request):
         except Exception as e:
             print(f"Error retrieving receipt_url: {e}")
 
-        with transaction.atomic():  # Ensures atomic database operations
+        with transaction.atomic():  
             for item in line_items["data"]:
                 event_title = item["description"]
                 quantity = item["quantity"]
@@ -145,20 +145,19 @@ def stripe_webhook(request):
                     amount=amount,
                     payment_status='completed',
                     stripe_session_id=stripe_session_id,
-                    payment_at=timezone.now(), 
-                    # payment_intent=payment_intent,
+                    payment_at=timezone.now(),
                     payment_intent=payment_intent_extracted,
                     receipt_url=receipt_url,
                 )
 
                 event.sold_tickets += quantity
                 
-                # Check if all tickets are sold
+                
                 if event.sold_tickets >= event.total_tickets:
                     event.is_active = False
                 event.save()
 
-                # Generate unique tickets safely inside transaction
+
                 unique_ticket_numbers = generate_unique_tickets(quantity)
                 tickets = [
                     LotteryTicket(user=user, lottery_event=event, payment=payment_record, ticket_number=ticket_number)
@@ -169,7 +168,7 @@ def stripe_webhook(request):
         return JsonResponse({"message": "Payment processed successfully"}, status=200)
 
     return JsonResponse({"message": "Unhandled event"}, status=400)
-
+#!-----myorder.html-custom.js-function fetchOrders()-----!
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_order_api(request):
@@ -196,10 +195,10 @@ def my_order_api(request):
         "payment_at": None, 
         "payment_status": None,
         "receipt_url": None,
-        "user_email": request.user.email,  # Add user email
-        "user_name": request.user.username  # Add username
+        "user_email": request.user.email,  
+        "user_name": request.user.username  
     })
-    # Get all winning tickets for this user
+    
     winning_tickets = Winner.objects.filter(user=request.user).values_list('ticket_number', flat=True)
     for payment in user_payments:
         session_id = payment.stripe_session_id
@@ -209,12 +208,12 @@ def my_order_api(request):
             grouped_payments[session_id]["payment_status"] = payment.payment_status
             grouped_payments[session_id]["receipt_url"] = payment.receipt_url
         
-        # Fetch ticket numbers associated with this payment
+        
         tickets = LotteryTicket.objects.filter(payment=payment).values_list('ticket_number', flat=True)
         
         payment_data = PaymentLotterySerializer(payment).data
-        payment_data["ticket_numbers"] = list(tickets)  # Add ticket numbers to response
-        # Add winner information for each ticket
+        payment_data["ticket_numbers"] = list(tickets)  
+        
         payment_data["winning_tickets"] = []
         for ticket in tickets:
             if ticket in winning_tickets:

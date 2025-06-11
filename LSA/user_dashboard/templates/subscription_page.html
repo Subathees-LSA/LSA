@@ -1,73 +1,69 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subscription Plans</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body class="subscription-body">
+  </head>
+  <body class="subscription-body">
     {% include 'header.html' %}
-
     <div class="subscription-main-container">
-        <!-- Sidebar -->
-        <!-- <div class="subscription-sidebar"> -->
-            {% include 'myorder-sidebar.html' %}
-        <!-- </div> -->
-
-        <!-- Content -->
-        <div class="subscription-content">
-            <div class="subscription-header">
-                <h1>Agent Management Subscription</h1>
-                <p class="subtitle">Choose the best plan to boost your freelance career</p>
-            </div>
-
-            <div class="subscription-plans">
-                <div class="plan">
-                    <h2>Personal</h2>
-                    <div class="price">$19</div>
-                    <p>/ month</p>
-                    <ul>
-                        <li>✔ Full Access to Win4All</li>
-                        <li>✔ 100 GB Free Storage</li>
-                        <li>✔ Unlimited Visitors</li>
-                        <li>✔ 10 Agents</li>
-                        <li>✔ Live Chat Support</li>
-                    </ul>
-                    <button>Get 14 Days Free Trial</button>
-                </div>
-                <div class="plan">
-                    <h2>Professional</h2>
-                    <div class="price">$49</div>
-                    <p>/ month</p>
-                    <ul>
-                        <li>✔ Full Access to Win4All</li>
-                        <li>✔ 100 GB Free Storage</li>
-                        <li>✔ Unlimited Visitors</li>
-                        <li>✔ 10 Agents</li>
-                        <li>✔ Live Chat Support</li>
-                    </ul>
-                    <button>Get 14 Days Free Trial</button>
-                </div>
-                <div class="plan">
-                    <h2>Business</h2>
-                    <div class="price">$99</div>
-                    <p>/ month</p>
-                    <ul>
-                        <li>✔ Full Access to Win4All</li>
-                        <li>✔ 100 GB Free Storage</li>
-                        <li>✔ Unlimited Visitors</li>
-                        <li>✔ 10 Agents</li>
-                        <li>✔ Live Chat Support</li>
-                    </ul>
-                    <button>Get 14 Days Free Trial</button>
-                </div>
-            </div>
+      <!-- Sidebar -->
+      {% include 'myorder-sidebar.html' %}
+      <!-- Content -->
+      <div class="subscription-content">
+        <div class="subscription-header">
+          <h1>Agent Management Subscription</h1>
+          <p class="subtitle">
+            Choose the best plan to boost your freelance career
+          </p>
         </div>
+        <div class="subscription-plans">
+          <div class="plan">
+            <h2>Personal</h2>
+            <div class="price">$19</div>
+            <p>/ month</p>
+            <ul>
+              <li>✔ Full Access to Win4All</li>
+              <li>✔ 100 GB Free Storage</li>
+              <li>✔ Unlimited Visitors</li>
+              <li>✔ 10 Agents</li>
+              <li>✔ Live Chat Support</li>
+            </ul>
+            <button>Get 14 Days Free Trial</button>
+          </div>
+          <div class="plan">
+            <h2>Professional</h2>
+            <div class="price">$49</div>
+            <p>/ month</p>
+            <ul>
+              <li>✔ Full Access to Win4All</li>
+              <li>✔ 100 GB Free Storage</li>
+              <li>✔ Unlimited Visitors</li>
+              <li>✔ 10 Agents</li>
+              <li>✔ Live Chat Support</li>
+            </ul>
+            <button>Get 14 Days Free Trial</button>
+          </div>
+          <div class="plan">
+            <h2>Business</h2>
+            <div class="price">$99</div>
+            <p>/ month</p>
+            <ul>
+              <li>✔ Full Access to Win4All</li>
+              <li>✔ 100 GB Free Storage</li>
+              <li>✔ Unlimited Visitors</li>
+              <li>✔ 10 Agents</li>
+              <li>✔ Live Chat Support</li>
+            </ul>
+            <button>Get 14 Days Free Trial</button>
+          </div>
+        </div>
+      </div>
     </div>
-
     {% include 'footer.html' %}
-</body>
+  </body>
 </html>

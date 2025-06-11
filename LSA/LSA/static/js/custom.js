@@ -1,4 +1,6 @@
-// custom_admin_dashboard.html
+//    custom_admin_dashboard.html (adminpanel template)
+//    AdminReply,Contact table (models.py)
+//    UserChatView function (views.py)
 function user_chat_view() {
     const user_chats_message_list = document.getElementById("user_chats_message_list");
     const messageInput = document.getElementById("user_chats_message_input");
@@ -6,18 +8,17 @@ function user_chat_view() {
     const sendButton = document.getElementById("user_chats_send_button");
     const errorMessage = document.getElementById("user_chats_error_message");
 
-    // Fetch and display the user's chats
     const fetchChats = () => {
         fetch("/api/user/chat/", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem('token')}`, // Use your token for authentication
+                "Authorization": `Bearer ${localStorage.getItem('token')}`, 
             },
         })
             .then((response) => response.json())
             .then((data) => {
-                user_chats_message_list.innerHTML = ""; // Clear the chat list
+                user_chats_message_list.innerHTML = "";
                 data.forEach((chat) => {
                     const messageItem = document.createElement("div");
                     messageItem.className = chat.type === "user" ? "user-message" : "admin-message";
@@ -40,7 +41,7 @@ function user_chat_view() {
             .catch((error) => console.error("Error fetching chats:", error));
     };
 
-    // Send a message or file to the admin
+ 
     const sendMessage = () => {
         const message = messageInput.value.trim();
         const file = fileInput.files[0];
@@ -48,7 +49,7 @@ function user_chat_view() {
         errorMessage.innerText = "";
 
         if (!message && !file) {
-            // Display error message if both message and file are empty
+           
             errorMessage.innerText = "Please enter a message or select a file to send.";
             return;
         }
@@ -62,17 +63,17 @@ function user_chat_view() {
         fetch("/api/user/chat/", {
             method: "POST",
             headers: {
-                "X-CSRFToken": user_chats_csrfToken // Include the CSRF token
+                "X-CSRFToken": user_chats_csrfToken 
             },
             body: formData,
         })
             .then((response) => response.json())
             .then((data) => {
                 if (data.message) {
-                    messageInput.value = ""; // Clear the input
-                    fileInput.value = ""; // Clear the file input
+                    messageInput.value = ""; 
+                    fileInput.value = "";
                     errorMessage.innerText = "";
-                    fetchChats(); // Refresh the chat
+                    fetchChats(); 
                 } else {
                     alert("Error sending message.");
                     errorMessage.innerText = "Error sending message.";
@@ -85,10 +86,12 @@ function user_chat_view() {
             });
     };
     sendButton.addEventListener("click", sendMessage);
-    // Fetch chats on page load
+  
     fetchChats();
 }
-
+//    custom_admin_dashboard.html (adminpanel template)
+//    Contact table (models.py)
+//    ContactListView function (views.py)
 function admin_chat_view() {
     const userChat_Icons = document.getElementById("userChat_Icons");
     const specfic_user_chats = document.getElementById("specfic_user_chats");
@@ -97,14 +100,14 @@ function admin_chat_view() {
     const backButton = document.createElement("button");
     backButton.id = "admin_contact_reply_back_button";
     backButton.innerText = "Back";
-    backButton.style.display = "none"; // Initially hidden
+    backButton.style.display = "none"; 
     backButton.onclick = () => showEmailList();
 
     const basketIcon = document.createElement("span");
     basketIcon.id = "basket-icon";
     basketIcon.title = "Delete Selected";
     basketIcon.innerHTML = "🗑️";
-    basketIcon.style.display = "none"; // Initially hidden
+    basketIcon.style.display = "none"; 
     basketIcon.style.cursor = "pointer";
     basketIcon.style.fontSize = "20px";
     basketIcon.style.marginBottom = "10px";
@@ -119,7 +122,6 @@ function admin_chat_view() {
     fetch("/api/admin/messages/")
         .then((response) => response.json())
         .then((data) => {
-            // Convert the object to an array of emails, sorted by created_at
             const sortedEmails = Object.entries(data);
 
             sortedEmails.forEach(([email, messages]) => {
@@ -127,7 +129,7 @@ function admin_chat_view() {
 
                 messages.forEach((message) => {
                     user_name = message.name;
-                    starred = message.starred; // Make sure your message object has this
+                    starred = message.starred; 
     
                 });
 
@@ -141,15 +143,17 @@ function admin_chat_view() {
                 <span class="starred_chat">${starred ? "⭐" : ""}</span>
             `;
                 const lastMessageElement = emailItem.querySelector(".last-message");
-
+                 //    custom_admin_dashboard.html (adminpanel template)
+                //    AdminReply,Contact table (models.py)
+                //    ChatMessagesView function (views.py)
                 fetch(`/api/admin/chat/${email}/`)
                     .then((response) => response.json())
                     .then((messages) => {
-                        const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
+                        const lastMessage = messages[messages.length - 1];
 
                         const lastMessageContent = lastMessage?.file
-                            ? "File Attached" // If a file exists, display "File Attached"
-                            : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
+                            ? "File Attached" 
+                            : lastMessage?.message || "No message"; 
                         lastMessageElement.innerText = `${lastMessageContent}`;
                         if (lastMessageContent.length > 5) {
                             lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
@@ -159,22 +163,22 @@ function admin_chat_view() {
 
 
 
-                // Attach checkbox selection functionality
+              
                 emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
 
-                // Attach delete functionality
+                
                 emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
 
                 const activateEmailItem = () => {
-                    // Remove active class from all email items
+                  
                     document.querySelectorAll(".email-item").forEach((item) => {
                         item.classList.remove("active");
                     });
         
-                    // Add active class to the current item
+                  
                     emailItem.classList.add("active");
         
-                    // Fetch and show messages
+                  
                     fetchMessagesByEmail(email);
                 };
         
@@ -188,26 +192,26 @@ function admin_chat_view() {
                     }
                 };
 
-                // Append the email item to the message list
+              
                 all_users_name.appendChild(emailItem);
 
             });
         })
         .catch((error) => console.error("Error fetching messages:", error));
-
+    //    custom_admin_dashboard.html (adminpanel template)
+    //    AdminReply table (models.py)
+    //    EditdeleteAdminReplyView function (views.py)
     const editAdminMessage = (id, oldMessage) => {
-        // Open the modal
+      
         const modal = document.getElementById("admin_contact_reply_editMessageModal");
         const editMessageInput = document.getElementById("admin_contact_reply_editMessageInput");
         const editMessageFile = document.getElementById("admin_contact_reply_editMessageFile");
         const editMessageForm = document.getElementById("admin_contact_reply_editMessageForm");
 
-        // Populate the existing message
         editMessageInput.value = oldMessage;
-        editMessageFile.value = ""; // Reset file input
+        editMessageFile.value = "";
         modal.style.display = "block";
 
-        // Handle the form submission
         editMessageForm.onsubmit = (e) => {
             e.preventDefault();
 
@@ -227,7 +231,7 @@ function admin_chat_view() {
             fetch(`/api/admin/reply/${id}/edit_delete/`, {
                 method: "PUT",
                 headers: {
-                    "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+                    "X-CSRFToken": admin_chats_csrfToken 
                 },
                 body: formData,
             })
@@ -235,7 +239,7 @@ function admin_chat_view() {
                 .then((data) => {
                     if (data.message) {
                         alert(data.message);
-                        modal.style.display = "none"; // Close the modal
+                        modal.style.display = "none"; 
                         fetchMessagesByEmail(document.getElementById("admin_contact_reply_email").value);
                     } else {
                         alert("Error editing message.");
@@ -248,7 +252,6 @@ function admin_chat_view() {
         };
     };
 
-    // Close the modal when clicking the close button or outside the modal
     document.getElementById("admin_contact_reply_closeEditModal").onclick = () => {
         document.getElementById("admin_contact_reply_editMessageModal").style.display = "none";
     };
@@ -260,13 +263,15 @@ function admin_chat_view() {
         }
     };
 
-
+    //    custom_admin_dashboard.html (adminpanel template)
+    //    AdminReply table (models.py)
+    //    EditdeleteAdminReplyView function (views.py)
     const deleteAdminMessage = (id) => {
         if (confirm("Are you sure you want to delete this message?")) {
             fetch(`/api/admin/reply/${id}/edit_delete/`, {
                 method: "DELETE",
                 headers: {
-                    "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+                    "X-CSRFToken": admin_chats_csrfToken 
                 },
             })
                 .then((response) => response.json())
@@ -284,7 +289,6 @@ function admin_chat_view() {
                 });
         }
     };
-    // Fetch Username and set current username
     const fetchUserName = (email) => {
         const user_Icon = document.createElement("span");
         user_Icon.className = "user-Icon";
@@ -296,12 +300,12 @@ function admin_chat_view() {
         const email_items = document.querySelectorAll(`[data-email="${email}"]`);
         email_items.forEach((item) => {
             let userName = item.nextElementSibling.innerHTML;
-            CurrentUserId.value = userName;// sets unsername in hidden input value temporarly
+            CurrentUserId.value = userName;
             user_Icon.textContent = userName;
         });
 
         if (user_Icon.textContent == '') {
-            user_Icon.textContent = CurrentUserId.value; // set Current username value if unavailable
+            user_Icon.textContent = CurrentUserId.value; 
         }
         userChat_Icons.appendChild(user_Icon);
     };
@@ -319,21 +323,21 @@ function admin_chat_view() {
                 user_specfic_chat.style.display = "block";
             } else {
               
-                all_users_name.style.display = "block"; // Show on larger screens
-                user_specfic_chat.style.display = "block"; // Ensure chat is visible
+                all_users_name.style.display = "block"; 
+                user_specfic_chat.style.display = "block";
                 all_users_searchEmail.style.display = "block";
             }
         }
         
-        // Run function on page load
+      
         hide_and_unhide_user_chat_on_mobile();
         
-        // Run function on window resize
+        
         window.addEventListener("resize", hide_and_unhide_user_chat_on_mobile);
         
-        // Handle back button behavior on mobile
+      
         window.addEventListener("popstate", function () {
-            if (window.innerWidth <= 768) { // Only for mobile view
+            if (window.innerWidth <= 768) { 
                 document.getElementById("all_users_name").style.display = "block";
                 document.getElementById("user_specfic_chat").style.display = "none";
                 all_users_searchEmail.style.display = "block";
@@ -342,19 +346,18 @@ function admin_chat_view() {
         
         // When navigating to chat, push state to history
         function showUserChat() {
-            if (window.innerWidth <= 768) { // Only for mobile
+            if (window.innerWidth <= 768) { 
                 document.getElementById("all_users_name").style.display = "none";
                 all_users_searchEmail.style.display = "none";
                 document.getElementById("user_specfic_chat").style.display = "block";
-                history.pushState(null, null, location.href); // Push a new state so back button works
+                history.pushState(null, null, location.href);
             }
         }
         showUserChat()
-        
-        
-
-
-
+        //    custom_admin_dashboard.html (adminpanel template)
+        //    Contact table (models.py)
+        //    mark_messages_as_read function (views.py)
+    
         fetch(`/api/mark-read/${email}/`, {
             method: "POST",
             headers: {
@@ -369,7 +372,9 @@ function admin_chat_view() {
                 console.log("Messages marked as read.");
             })
             .catch((error) => console.error("Error marking messages as read:", error));
-
+         //    custom_admin_dashboard.html (adminpanel template)
+    //    AdminReply,Contact table (models.py)
+    //    ChatMessagesView function (views.py)    
         fetch(`/api/admin/chat/${email}/`)
             .then((response) => response.json())
             .then((messages) => {
@@ -385,7 +390,7 @@ function admin_chat_view() {
                 const responseMessage = document.getElementById("admin_contact_reply_response_message");
                 responseMessage.innerText='';
                 const admin_contact_reply_form = document.getElementById('admin_contact_reply_form');
-                admin_contact_reply_form.reset(); //Reset Previous Users Forms
+                admin_contact_reply_form.reset(); 
                 }
 
                 const starContainer = document.createElement("div");
@@ -393,10 +398,7 @@ function admin_chat_view() {
                 starContainer.style.display = "flex";
                 starContainer.style.alignItems = "center";
                 starContainer.style.marginBottom = "10px";
-
-
                 const starIcon = document.createElement("span");
-
                 starIcon.className = "star-icon";
                 starIcon.style.cursor = "pointer";
                 starIcon.style.fontSize = "24px";
@@ -411,21 +413,18 @@ function admin_chat_view() {
                 starContainer.appendChild(starIcon);
                 starContainer.appendChild(starLabel);
                 userChat_Icons.appendChild(starContainer);
-                //specfic_user_chats.appendChild(starContainer);
+              
 
                 messages.forEach((message) => {
 
                     const messageItem = document.createElement("div");
                     messageItem.className = message.type === "user" ? "chat-user-message" : "chat-admin-message";
                     if (message.type === "user") {
-                        // Create a star icon element const starIcon = document.createElement("span");
-                        starIcon.innerHTML = message.starred ? "⭐" : "☆"; // Filled or empty star
+                      
+                        starIcon.innerHTML = message.starred ? "⭐" : "☆"; 
 
                     }
-                    let content = (message.type === 'user') ? `<img src="https://img.freepik.com/premium-vector/avatar-profile-icon-flat-style-female-user-profile-vector-illustration-isolated-background-women-profile-sign-business-concept_157943-38866.jpg"
-                    class='userProfiles' alt='userProfiles'>` : `<img src="https://img.freepik.com/premium-vector/personas-icon_1076610-12224.jpg" class='adminProfiles' alt='adminProfiles'>`;
-
-                    content += `<p>${message.message || "File Attached"}</p>`;
+                    let content = `<p>${message.message || "File Attached"}</p>`;
 
                     if (message.file) {
                         const fileExtension = message.file.split(".").pop().toLowerCase();
@@ -440,20 +439,17 @@ function admin_chat_view() {
 
 
                     messageItem.innerHTML = content;
-                    // Add action icons for admin messages
                     if (message.type === "admin") {
                         const actions = document.createElement("div");
                         actions.className = "message-actions";
 
-                        // Edit icon
                         const editIcon = document.createElement("span");
-                        editIcon.innerHTML = "✏️"; // Edit icon
+                        editIcon.innerHTML = "✏️";
                         editIcon.title = "Edit Message";
                         editIcon.onclick = () => editAdminMessage(message.id, message.message);
 
-                        // Delete icon
                         const deleteIcon = document.createElement("span");
-                        deleteIcon.innerHTML = "🗑️"; // Delete icon
+                        deleteIcon.innerHTML = "🗑️"; 
                         deleteIcon.title = "Delete Message";
                         deleteIcon.onclick = () => deleteAdminMessage(message.id);
 
@@ -473,7 +469,7 @@ function admin_chat_view() {
                 const notificationSection = document.getElementById("notification-section");
                 let setCount = notificationSection.childElementCount; 
                 const notificationCount = document.getElementById("notification-count");
-                notificationCount.textContent = setCount;//Sets Actual Count of Notifications
+                notificationCount.textContent = setCount;
 
                 openReplyForm(email);
                 specfic_user_chats_autoScroll();
@@ -492,7 +488,7 @@ function admin_chat_view() {
                     });
                 
                     sendReplyBtn.addEventListener('click', function () {
-                    fileNameDisplay.textContent = ''; // Remove the selected file name
+                    fileNameDisplay.textContent = ''; 
                     });
                 }
                 showSelectedFileOnCustomerSupportPage();
@@ -509,14 +505,15 @@ function admin_chat_view() {
         $("#admin_reply_chat_bot_navbar").addClass('active');
         hidetoggleSidebar();
     }
-
+    //    custom_admin_dashboard.html (adminpanel template)
+    //    Contact table (models.py)
+    //    latest_unread_notifications function (views.py)
     function user_notifications() {
         const notificationCount = document.getElementById("notification-count");
         const notificationSection = document.getElementById("notification-section");
         const noNotificationsMsg = document.getElementById("no-notifications");
         let current_Count = document.querySelector('#notification-count').innerText;
         notificationSection.innerHTML = ""
-        // Fetch notifications when the page loads
         fetch("/api/latest-unread-notifications/")
             .then(response => response.json())
             .then(notifications => {
@@ -530,7 +527,6 @@ function admin_chat_view() {
                     notificationCount.textContent = current_Count === '0'? current_Count=notifications.length : current_Count;
 
 
-                    // Populate notifications (they will be in descending order based on API response)
                     notifications.forEach(notification => {
                         const notificationItem = document.createElement("div");
                         let userName = notification.email.substring(0, notification.email.indexOf("@"));
@@ -553,37 +549,31 @@ function admin_chat_view() {
         const notificationBell = document.getElementById("notification-bell");
         const notificationPopup = document.getElementById("notification-popup");
         
-        // Toggle the notification popup on bell icon click
         notificationBell.addEventListener("click", function(event) {
-            // Get computed styles
             const computedStyle = window.getComputedStyle(notificationPopup);
             if (computedStyle.display === "none") {
-                notificationPopup.style.display = "block"; // Show the popup
+                notificationPopup.style.display = "block"; 
             } else if (computedStyle.display === "block") {
-                notificationPopup.style.display = "none"; // Show the popup
+                notificationPopup.style.display = "none";
             } else {
-                notificationPopup.style.display = "none"; // Hide the popup
+                notificationPopup.style.display = "none"; 
             }
             event.stopPropagation();
         });
-                // Hide the popup when clicking anywhere on the document
             document.addEventListener('click', function(event) {
-            //  alert('click anywhere');
-            // Check if the click is outside the popup, if so, hide it
             if (!notificationPopup.contains(event.target)) {
                 notificationPopup.style.display = 'none';
             }
         });
     }
     display_notificationPopup();
-    // Function to toggle the star status of a chat
     const toggleStarChat = (email, starIcon) => {
         const isStarred = starIcon.innerHTML === "⭐";
         fetch("/api/admin/messages/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+                "X-CSRFToken": admin_chats_csrfToken
             },
             body: JSON.stringify({
                 email: email,
@@ -599,6 +589,9 @@ function admin_chat_view() {
             })
             .catch((error) => console.error("Error toggling star status:", error));
     };
+     //    custom_admin_dashboard.html (adminpanel template)
+    //    AdminReply,Contact table (models.py)
+    //    DeleteContactView function (views.py)
     const deleteContact = (email) => {
         if (confirm(`Are you sure you want to delete all data for ${email}?`)) {
             fetch(`/api/admin/delete-contact/${email}/`, {
@@ -612,9 +605,9 @@ function admin_chat_view() {
                     if (data.message) {
                         alert(data.message);
                         let current_Email = document.getElementById('admin_contact_reply_email').value;
-                        if (email !== current_Email) { //Checks Current Email id
+                        if (email !== current_Email) { 
                             fetchMessagesByEmail(current_Email);
-                            showEmailList(); // Refresh the email list
+                            showEmailList(); 
                         }
                         else {
                             document.getElementById('Chat_UserId').value = '';
@@ -639,10 +632,11 @@ function admin_chat_view() {
             selectedEmails = selectedEmails.filter((selectedEmail) => selectedEmail !== email);
         }
 
-        // Show or hide the basket icon based on selections
         basketIcon.style.display = selectedEmails.length > 0 ? "inline-block" : "none";
     };
-
+    //    custom_admin_dashboard.html (adminpanel template)
+    //    AdminReply,Contact table (models.py)
+    //    DeleteContactView function (views.py)
     const deleteSelectedContacts = () => {
         if (selectedEmails.length === 0) {
             alert("No emails selected.");
@@ -665,15 +659,15 @@ function admin_chat_view() {
                     let current_Email = document.getElementById('admin_contact_reply_email').value;
 
                     if (selectedEmails.includes(current_Email)) {
-                        selectedEmails = []; // Clear the selected emails
-                        document.getElementById('Chat_UserId').value = ''; //Empty the username
+                        selectedEmails = [];
+                        document.getElementById('Chat_UserId').value = ''; 
                         
                         document.getElementById("user_email").innerText = "";
-                        showEmailList();// Refresh the email list
+                        showEmailList();
                     }
                     else {
                         fetchMessagesByEmail(current_Email);
-                        showEmailList(); // Refresh the email list
+                        showEmailList(); 
                     }
                 })
                 .catch((error) => {
@@ -682,20 +676,21 @@ function admin_chat_view() {
                 });
         }
     };
-
+     //    custom_admin_dashboard.html (adminpanel template)
+    //    AdminReply,Contact table (models.py)
+    //    ChatMessagesView function (views.py)
     const showEmailList = () => {
         all_users_name.innerHTML = "";
         specfic_user_chats.innerHTML = "";
         userChat_Icons.innerHTML = "";
         backButton.style.display = "none";
-        basketIcon.style.display = "none"; // Hide the basket icon when returning to the list
+        basketIcon.style.display = "none"; 
         const replyForm = document.getElementById("admin_contact_reply_form_container");
         replyForm.style.display = "none";
 
         fetch("/api/admin/messages/")
             .then((response) => response.json())
             .then((data) => {
-                // Convert the object to an array of emails, sorted by created_at
                 const sortedEmails = Object.entries(data);
 
                 sortedEmails.forEach(([email, messages]) => {
@@ -713,15 +708,17 @@ function admin_chat_view() {
                 <span class="delete-icon" title="Delete Email">🗑️</span>
             `;
                     const lastMessageElement = emailItem.querySelector(".last-message");
-
+                    //    custom_admin_dashboard.html (adminpanel template)
+                    //    AdminReply,Contact table (models.py)
+                    //    ChatMessagesView function (views.py)
                     fetch(`/api/admin/chat/${email}/`)
                         .then((response) => response.json())
                         .then((messages) => {
-                            const lastMessage = messages[messages.length - 1]; // Assuming messages are sorted by created_at
+                            const lastMessage = messages[messages.length - 1];
 
                             const lastMessageContent = lastMessage?.file
-                                ? "File Attached" // If a file exists, display "File Attached"
-                                : lastMessage?.message || "No message"; // Otherwise, show the message or "No message"
+                                ? "File Attached" 
+                                : lastMessage?.message || "No message"; 
                             lastMessageElement.innerText = `${lastMessageContent}`;
                             if (lastMessageContent.length > 5) {
                                 lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
@@ -731,13 +728,10 @@ function admin_chat_view() {
 
 
 
-                    // Attach checkbox selection functionality
                     emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
 
-                    // Attach delete functionality
                     emailItem.querySelector(".delete-icon").onclick = () => deleteContact(email);
 
-                    // Open chat on click (excluding the delete icon and checkbox)
                     emailItem.querySelector(".email-text").onclick = () => fetchMessagesByEmail(email);
                     emailItem.onclick = (e) => {
                         const target = e.target;
@@ -745,7 +739,6 @@ function admin_chat_view() {
                         fetchMessagesByEmail(email);
                         }
                     };
-                    // Append the email item to the message list
 
                     all_users_name.appendChild(emailItem);
 
@@ -764,7 +757,9 @@ function admin_chat_view() {
 
 
 
-
+     //    custom_admin_dashboard.html (adminpanel template)
+    //    AdminReply,Contact table (models.py)
+    //    AdminReplyView function (views.py)
     document.getElementById("admin_contact_reply_form").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -774,7 +769,6 @@ function admin_chat_view() {
         const fileInput = document.getElementById("admin_contact_reply_file");
         const responseMessage = document.getElementById("admin_contact_reply_response_message");
 
-        // Frontend validation: Check if the replyMessage is empty
         if (!replyMessage && !fileInput.files.length) {
             responseMessage.innerText = "Reply message or file is required.";
             responseMessage.style.color = "red";
@@ -800,7 +794,7 @@ function admin_chat_view() {
             if (data.message) {
                 responseMessage.innerText = data.message;
                 responseMessage.style.color = "green";
-                adminreplyMessage.value = ""; // Reset replyMessage input
+                adminreplyMessage.value = ""; 
                 fileInput.value = "";
                 fetchMessagesByEmail(email);
             } else {
@@ -832,7 +826,6 @@ function filterEmails() {
         }
     });
 
-    // Show or hide the "No user found" message
     if (visibleCount === 0) {
         noUsersMsg.style.display = "block";
     } else {
@@ -841,17 +834,14 @@ function filterEmails() {
 }
 
 
-// custom_admin_dashboard.html
 
-// Global function to handle receipt clicks
+
 function handleReceiptClick(receiptUrl) {
-    // Check if the URL is missing or invalid
     if (!receiptUrl || !isValidUrl(receiptUrl)) {
         alert("Receipt not available");
         return;
     }
 
-    // Open the receipt URL in a centered window
     const width = 800;
     const height = 600;
     const left = (window.innerWidth - width) / 2;
@@ -863,12 +853,10 @@ function handleReceiptClick(receiptUrl) {
         `width=${width},height=${height},top=${top},left=${left}`
     );
 
-    // Focus the new window
     if (receiptWindow) {
         receiptWindow.focus();
     }
 
-    // Listen for clicks outside the window
     let isWindowClosed = false;
     const checkWindowClosed = setInterval(() => {
         if (receiptWindow.closed) {
@@ -880,7 +868,6 @@ function handleReceiptClick(receiptUrl) {
    
 }
 
-// Helper function to validate URLs
 function isValidUrl(url) {
     try {
         new URL(url);
@@ -889,6 +876,9 @@ function isValidUrl(url) {
         return false;
     }
 }
+//    custom_admin_dashboard.html (adminpanel template)
+//    PaymentLottery table (models.py)
+//    api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetch_paid_amount_view function (views.py)
 function handleRefundClick(paymentIntent) {
     if (!paymentIntent) {
         alert("Payment intent not available");
@@ -905,20 +895,17 @@ function handleRefundClick(paymentIntent) {
             }
 
             const paidAmount = data.paid_amount;
-            const refundedAmount = data.refunded_amount; // Retrieved from Stripe
+            const refundedAmount = data.refunded_amount; 
             const paymentStatus = data.payment_status ? data.payment_status.toLowerCase() : "";
-            const lotteryDetails = data.lottery_details; // List of lottery details
+            const lotteryDetails = data.lottery_details; 
 
-            // Remove existing popup if any
             document.querySelector(".refund-popup")?.remove();
 
-            // Open the "Refund Successful - Refund Details" popup if already refunded
             if (paymentStatus === "refunded") {
                 openRefundSuccessPopup(paymentIntent, refundedAmount, lotteryDetails);
                 return;
             }
 
-            // Create refund popup container
             const refundPopup = document.createElement("div");
             refundPopup.classList.add("refund-popup");
 
@@ -931,7 +918,6 @@ function handleRefundClick(paymentIntent) {
                 }
             });
 
-            // 🎯 Show Lottery Event Details in a Table Format
             let lotteryInfoHtml = `
                 <h3>Transaction Details</h3>
                 <table class="refund-table">
@@ -988,7 +974,9 @@ function handleRefundClick(paymentIntent) {
                     confirmRefundButton.disabled = false;
                 }
             });
-
+            //    custom_admin_dashboard.html (adminpanel template)
+            //    PaymentLottery table (models.py)
+            //    api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refund_payment_view function (views.py)
             confirmRefundButton.addEventListener("click", () => {
                 const refundValue = parseFloat(refundInput.value);
                 if (isNaN(refundValue) || refundValue <= 0 || refundValue > paidAmount) {
@@ -1011,9 +999,7 @@ function handleRefundClick(paymentIntent) {
                             alert(getFriendlyErrorMessage(data.error));
                             return;
                         }
-                        //alert(`Refund successful! Refund ID: ${data.refund_id}`);
 
-                        //  Instead of just showing an alert, open the refund success popup
                         refundPopup.remove();
                         openRefundSuccessPopup(paymentIntent, refundValue, lotteryDetails);
                         updatePaymentStatus(paymentIntent);
@@ -1052,7 +1038,6 @@ function openRefundSuccessPopup(paymentIntent, refundedAmount, lotteryDetails) {
         }
     });
 
-     // Show Lottery Event Details in a Table Format
      let lotteryInfoHtml = `
      <h3>Transaction Details</h3>
      <table class="refund-table">
@@ -1096,10 +1081,8 @@ function openRefundSuccessPopup(paymentIntent, refundedAmount, lotteryDetails) {
 
 
 function updatePaymentStatus(paymentIntent) {
-    // Find all rows with the same payment_intent
     const statusCells = document.querySelectorAll(`td[data-payment-intent="${paymentIntent}"]`);
 
-    // Update status to "Refunded" for all matching rows
     statusCells.forEach(statusCell => {
         statusCell.innerHTML = `<span class="custom_admin_dashboard_transactions_management_status_refunded">refunded</span>`;
     });
@@ -1121,10 +1104,9 @@ function getFriendlyErrorMessage(errorMessage) {
     if (errorMessage.includes("Invalid refund amount")) {
         return "Invalid refund amount.";
     }
-    return "Something went wrong. Please try again."; // Default generic error
+    return "Something went wrong. Please try again."; 
 }
 
-// Helper function to get CSRF token
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -1142,38 +1124,40 @@ function getCookie(name) {
 
 function custom_admin_dashboard_transactions_management_function(email = null, status = null) {
 
-// Add these with your other variables
 let custom_admin_dashboard_transactions_management_filteredData = null;
 let custom_admin_dashboard_transactions_management_isSearching = false;
 let custom_admin_dashboard_transactions_management_isFiltering = false;
-   // Determine the container based on the status parameter
-   const containerId = status === "refunded" 
-   ? "custom_admin_dashboard_transactions_management_refunded" 
-   : "custom_admin_dashboard_transactions_management";
+  let containerId;
+
+if (status === "all_transactions") {
+  containerId = "custom_admin_dashboard_all_transactions_management";
+} else if (status === "refunded") {
+  containerId = "custom_admin_dashboard_transactions_management_refunded";
+}  else {
+  containerId = "custom_admin_dashboard_transactions_management";
+}
+
 
     const custom_admin_dashboard_transactions_management_container = document.getElementById(containerId);
     if (!custom_admin_dashboard_transactions_management_container) return;
 
-    custom_admin_dashboard_transactions_management_container.innerHTML = ""; // Clear previous content
+    custom_admin_dashboard_transactions_management_container.innerHTML = ""; 
 
     let custom_admin_dashboard_transactions_management_page = 1;
-    const custom_admin_dashboard_transactions_management_rowsPerPage = 10; // Set rows per page to 10
+    const custom_admin_dashboard_transactions_management_rowsPerPage = 10; 
     let custom_admin_dashboard_transactions_management_allData = [];
 
-    // Create Header
     function custom_admin_dashboard_transactions_management_createHeader() {
         const custom_admin_dashboard_transactions_management_header = document.createElement("div");
         custom_admin_dashboard_transactions_management_header.classList.add("custom_admin_dashboard_transactions_management_header");
 
-        // Change heading based on parameters
         if (email) {
             custom_admin_dashboard_transactions_management_header.textContent = "";
         } else if (status === "refunded") {
             custom_admin_dashboard_transactions_management_header.textContent = "Refund Management";
-        } else {
+        } else if (status === "all_transactions") {
             custom_admin_dashboard_transactions_management_header.textContent = "Transactions Management > Transaction Details";
         }
-        // Add this inside the custom_admin_dashboard_transactions_management_createHeader function, after setting the header text
 const searchContainer = document.createElement("div");
 searchContainer.classList.add("transactions_management_search_container");
 
@@ -1187,7 +1171,6 @@ searchInput.addEventListener("input", (e) => {
 
 searchContainer.appendChild(searchInput);
 custom_admin_dashboard_transactions_management_header.appendChild(searchContainer);
-// Add this inside the custom_admin_dashboard_transactions_management_createHeader function, after the search input
 const filterContainer = document.createElement("div");
 filterContainer.classList.add("transactions_management_filter_container");
 
@@ -1195,7 +1178,6 @@ const filterSelect = document.createElement("select");
 filterSelect.id = "transactions_management_filter_select";
 filterSelect.classList.add("transactions_management_filter_select");
 
-// Create filter options
 const options = [
     { value: "all", text: "All Transactions" },
     { value: "completed", text: "Completed" },
@@ -1219,7 +1201,6 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
         return custom_admin_dashboard_transactions_management_header;
     }
 
-    // Create Table Structure
     function custom_admin_dashboard_transactions_management_createTable() {
         const custom_admin_dashboard_transactions_management_table = document.createElement("table");
         custom_admin_dashboard_transactions_management_table.classList.add("custom_admin_dashboard_transactions_management_table");
@@ -1236,17 +1217,20 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
         custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_thead);
 
         const custom_admin_dashboard_transactions_management_tbody = document.createElement("tbody");
-        if (status === "refunded") {
+        if (status === "all_transactions") {
+            custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body_all_transactions";
+        } else if (status === "refunded") {
             custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body_refunded";
-        } else {
+        }else {
             custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body";
         }
         custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_tbody);
 
         return { custom_admin_dashboard_transactions_management_table, custom_admin_dashboard_transactions_management_tbody };
     }
-
-    // Fetch Data from API
+    //    custom_admin_dashboard.html (adminpanel template)
+    //    PaymentLottery table (models.py)
+    //    api_admin_dashboard_payment_lottery_list_view_transactions_and_refund function (views.py)
     function custom_admin_dashboard_transactions_management_fetchData() {
         let apiUrl = "/api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/";
         if (email) {
@@ -1256,7 +1240,6 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
         fetch(apiUrl)
             .then(response => response.json())
             .then(data => {
-                // Filter data based on status parameter
                 if (status === "refunded") {
                     custom_admin_dashboard_transactions_management_allData = data.filter(transaction => transaction.payment_status === "refunded");
                 } else {
@@ -1274,23 +1257,21 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
         const total_number_of_transactions_count_user_details_management_element_id = document.getElementById("total_number_of_transactions_count_user_details_management");
 
         if (total_number_of_transactions_count_user_details_management_element_id) {
-            //  Assign count to the given ID if it exists
             total_number_of_transactions_count_user_details_management_element_id.textContent = `${custom_admin_dashboard_transactions_management_allData.length}`;
         } else {
-            // Fallback: Show transaction count elsewhere (if needed)
             console.log(`Total Transactions: ${custom_admin_dashboard_transactions_management_allData.length}`);
         }
     }
 
-    // Display Transactions Dynamically
     function custom_admin_dashboard_transactions_management_displayData() {
-        if (status === "refunded") {
+        if (status === "all_transactions") {
+            var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions");
+        } else if (status === "refunded") {
             var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded");
         } else {
             var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body");
         }
     
-        // Get data based on search and filter
         let dataToDisplay = [...custom_admin_dashboard_transactions_management_allData];
         
         if (custom_admin_dashboard_transactions_management_isSearching && custom_admin_dashboard_transactions_management_filteredData) {
@@ -1303,7 +1284,6 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
     
         
         if (!dataToDisplay || dataToDisplay.length === 0) {
-            // Display "No transactions" message if no data is available
             const noTransactionsRow = document.createElement("tr");
             const noTransactionsCell = document.createElement("td");
             noTransactionsCell.setAttribute("colspan", "8");
@@ -1357,10 +1337,11 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
         custom_admin_dashboard_transactions_management_updateViewMoreButton();
     }
 
-    // Create and Manage "View More" Button
     function custom_admin_dashboard_transactions_management_createViewMoreButton() {
         const custom_admin_dashboard_transactions_management_viewMoreButton = document.createElement("button");
-        if (status === "refunded") {
+         if (status === "all_transactions") {
+            custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button_all_transactions";
+        } else if (status === "refunded") {
             custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button_refunded";
         } else {
             custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button";
@@ -1376,10 +1357,10 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
         return custom_admin_dashboard_transactions_management_viewMoreButton;
     }
 
-    // Update "View More" Button Visibility
-    // Replace the updateViewMoreButton function with this version
 function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
-    if (status === "refunded") {
+     if (status === "all_transactions") {
+        var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button_all_transactions");
+    } else if (status === "refunded") {
         var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button_refunded");
     } else {
         var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button");
@@ -1403,27 +1384,23 @@ function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
    
 }
 
-    // Initialize Table and UI
     const custom_admin_dashboard_transactions_management_header = custom_admin_dashboard_transactions_management_createHeader();
     const { custom_admin_dashboard_transactions_management_table } = custom_admin_dashboard_transactions_management_createTable();
-    // const custom_admin_dashboard_transactions_management_viewMoreButton = custom_admin_dashboard_transactions_management_createViewMoreButton();
 
     custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_header);
     custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_table);
-    // custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_viewMoreButton);
 
     custom_admin_dashboard_transactions_management_fetchData();
-    // Add this as a new function in the code
-// Replace the existing search handler function with this updated version
 function custom_admin_dashboard_transactions_management_handleSearch(searchTerm) {
     searchTerm = searchTerm.toLowerCase().trim();
-    custom_admin_dashboard_transactions_management_page = 1; // Reset to first page
+    custom_admin_dashboard_transactions_management_page = 1; 
     
     if (!searchTerm) {
-        // If search is empty, clear filtered state and show all data
         custom_admin_dashboard_transactions_management_filteredData = null;
     custom_admin_dashboard_transactions_management_isSearching = false;
-        if (status === "refunded") {
+        if (status === "all_transactions") {
+            document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions").innerHTML = "";
+        } else if (status === "refunded") {
             document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
         } else {
             document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
@@ -1432,7 +1409,6 @@ function custom_admin_dashboard_transactions_management_handleSearch(searchTerm)
         return;
     }
 
-    // Filter the data
     custom_admin_dashboard_transactions_management_filteredData = custom_admin_dashboard_transactions_management_allData.filter(transaction => {
         const paymentId = transaction.payment_intent ? transaction.payment_intent.toLowerCase() : '';
         const paymentquantity = transaction.quantity ? transaction.quantity.toString().toLowerCase() : '';
@@ -1446,19 +1422,18 @@ function custom_admin_dashboard_transactions_management_handleSearch(searchTerm)
 
   custom_admin_dashboard_transactions_management_isSearching = true;
     
-    // Clear current table
-    if (status === "refunded") {
+     if (status === "all_transactions") {
+        document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions").innerHTML = "";
+    }  else if (status === "refunded") {
         document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
     } else {
         document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
     }
     
-    // Display filtered results
     custom_admin_dashboard_transactions_management_displayData();
 }
-// Add this as a new function
 function custom_admin_dashboard_transactions_management_handleFilter(filterValue) {
-    custom_admin_dashboard_transactions_management_page = 1; // Reset to first page
+    custom_admin_dashboard_transactions_management_page = 1;
     
     if (filterValue === "all") {
         custom_admin_dashboard_transactions_management_filteredData = null;
@@ -1470,22 +1445,21 @@ function custom_admin_dashboard_transactions_management_handleFilter(filterValue
         custom_admin_dashboard_transactions_management_isFiltering = true;
     }
     
-    // Clear current table
-    if (status === "refunded") {
+    if (status === "all_transactions") {
+        document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions").innerHTML = "";
+    }else if (status === "refunded") {
         document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
     } else {
         document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
     }
     
-    // Display filtered results
     custom_admin_dashboard_transactions_management_displayData();
 }
 
 }
 
-// prize_management_page js code starting
+// admin dash board prize management_page js code.
 
-// Add this to your existing JavaScript code
 
 function renderPrizeManagementHTML() {
     let container = document.getElementById("custom_admin_dashboard_prize_management_id");
@@ -1550,7 +1524,6 @@ function renderPrizeManagementHTML() {
         </div>
     `;
 }
-// Updated pagination functions
 function paginateData(data, currentPage, itemsPerPage) {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -1560,7 +1533,6 @@ function paginateData(data, currentPage, itemsPerPage) {
 function createPrizeManagementPagination(totalPages, currentPage) {
     const paginationElement = document.querySelector("#prize_management_pagination ul");
     
-    // Don't show pagination if there's only one page
     if (totalPages <= 1) {
         paginationElement.innerHTML = '';
         return;
@@ -1570,14 +1542,12 @@ function createPrizeManagementPagination(totalPages, currentPage) {
     let beforePage = Math.max(currentPage - 1, 1);
     let afterPage = Math.min(currentPage + 1, totalPages);
 
-    // Previous button
     if (currentPage > 1) {
         liTag += `<li class="prize_management_btn prize_management_prev" onclick="fetchWinners(${currentPage - 1})">
                     <span><i class="fas fa-angle-left"></i> Prev</span>
                   </li>`;
     }
 
-    // First page
     if (currentPage > 2) {
         liTag += `<li class="prize_management_numb" onclick="fetchWinners(1)">
                     <span>1</span>
@@ -1587,7 +1557,6 @@ function createPrizeManagementPagination(totalPages, currentPage) {
         }
     }
 
-    // Pages around current page
     for (let plength = beforePage; plength <= afterPage; plength++) {
         if (plength < 1 || plength > totalPages) continue;
         
@@ -1597,7 +1566,6 @@ function createPrizeManagementPagination(totalPages, currentPage) {
                   </li>`;
     }
 
-    // Last page
     if (currentPage < totalPages - 1) {
         if (currentPage < totalPages - 2) {
             liTag += `<li class="prize_management_dots"><span>...</span></li>`;
@@ -1607,7 +1575,6 @@ function createPrizeManagementPagination(totalPages, currentPage) {
                   </li>`;
     }
 
-    // Next button
     if (currentPage < totalPages) {
         liTag += `<li class="prize_management_btn prize_management_next" onclick="fetchWinners(${currentPage + 1})">
                     <span>Next <i class="fas fa-angle-right"></i></span>
@@ -1616,8 +1583,9 @@ function createPrizeManagementPagination(totalPages, currentPage) {
 
     paginationElement.innerHTML = liTag;
 }
-
-// Updated fetchWinners function
+//    custom_admin_dashboard.html (adminpanel template)
+//    Winner table (models.py)
+//    api_admin_dashboard_prize_management_winner_list_api_view function (views.py)
 function fetchWinners(page = 1) {
     fetch("/api_admin_dashboard_prize_management_winner_list_api_view/")
         .then(response => response.json())
@@ -1626,7 +1594,6 @@ function fetchWinners(page = 1) {
             const totalPages = Math.ceil(data.length / itemsPerPage);
             const paginationElement = document.getElementById("prize_management_pagination");
             
-            // Hide pagination if there are 10 or fewer winners
             if (data.length <= itemsPerPage) {
                 paginationElement.classList.add("prize_management_hidden");
             } else {
@@ -1647,7 +1614,6 @@ function fetchWinners(page = 1) {
                 document.getElementById("prize_management_no_winners").classList.add("prize_management_hidden");
             }
 
-            // Rest of your existing table population logic...
             paginatedData.forEach(winner => {
                 totalWinners++;
                 if (winner.prize_status === "delivered") deliveredWinners++;
@@ -1681,12 +1647,10 @@ function fetchWinners(page = 1) {
             document.getElementById("prize_management_delivered_winners").innerText = deliveredWinners;
             document.getElementById("prize_management_cancelled_winners").innerText = cancelledWinners;
 
-            // Create pagination only if needed
             if (data.length > itemsPerPage) {
                 createPrizeManagementPagination(totalPages, page);
             }
 
-            // Rest of your event listeners...
             document.querySelectorAll(".prize_management_status").forEach(select => {
                 select.addEventListener("change", updateWinnerStatus);
             });
@@ -1724,7 +1688,9 @@ function updateSummaryCounts() {
     document.getElementById("prize_management_delivered_winners").innerText = delivered;
     document.getElementById("prize_management_cancelled_winners").innerText = cancelled;
 }
-
+//    custom_admin_dashboard.html (adminpanel template)
+//    Winner table (models.py)
+//    api_admin_dashboard_prize_management_update_winner_status function (views.py)
 function updateWinnerStatus(event) {
     let winnerId = event.target.dataset.id;
     const winner_row = event.target.closest("tr");
@@ -1735,7 +1701,7 @@ function updateWinnerStatus(event) {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": admin_chats_csrfToken // Include the CSRF token
+            "X-CSRFToken": admin_chats_csrfToken 
         },
         body: JSON.stringify({
             prize_status: prizeStatus,
@@ -1744,27 +1710,23 @@ function updateWinnerStatus(event) {
     })
     .then(response => {
         if (response.ok) {
-            updateSummaryCounts(); //  Update counts without full refresh
+            updateSummaryCounts(); 
         } else {
             alert("Failed to update status.");
         }
     });
 }
 
-// prize_management_page js code ending
 
-// custom_admin_dashboard_winners_wall_winners page winners list js code staring***
-//  winners_wall_Winners_list_Pagination JavaScript start
+// custom_admin_dashboard_winners_wall_winners page winners list js code.
 function winners_wall_Winners_section_setupPagination(totalItems, itemsPerPage = 6, currentPage = 1, containerSelector = '#winners_wall_winners_list_items') {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     
-    // Only show pagination if we have more than one page
     if (totalPages <= 1) {
         document.querySelector('.winners_wall_Winners_section_pagination')?.remove();
         return;
     }
     
-    // Create or update pagination container
     let paginationContainer = document.querySelector('.winners_wall_Winners_section_pagination');
     if (!paginationContainer) {
         paginationContainer = document.createElement('div');
@@ -1779,41 +1741,33 @@ function winners_wall_Winners_section_setupPagination(totalItems, itemsPerPage =
 
 function winners_wall_Winners_section_createPagination(totalPages, currentPage) {
     let liTag = '';
-    const maxVisiblePages = 5; // Maximum pages to show around current page
+    const maxVisiblePages = 5; 
     let startPage, endPage;
 
-    // Calculate the range of pages to show
     if (totalPages <= maxVisiblePages) {
-        // Show all pages if total pages is less than max visible
         startPage = 1;
         endPage = totalPages;
     } else {
-        // Calculate start and end pages
         const maxPagesBeforeCurrent = Math.floor(maxVisiblePages / 2);
         const maxPagesAfterCurrent = Math.ceil(maxVisiblePages / 2) - 1;
         
         if (currentPage <= maxPagesBeforeCurrent) {
-            // Near the beginning
             startPage = 1;
             endPage = maxVisiblePages;
         } else if (currentPage + maxPagesAfterCurrent >= totalPages) {
-            // Near the end
             startPage = totalPages - maxVisiblePages + 1;
             endPage = totalPages;
         } else {
-            // Somewhere in the middle
             startPage = currentPage - maxPagesBeforeCurrent;
             endPage = currentPage + maxPagesAfterCurrent;
         }
     }
 
-    // Previous button
     if (currentPage > 1) {
         liTag += `<li class="winners_wall_Winners_section_btn winners_wall_Winners_section_prev" onclick="winners_wall_Winners_section_handlePaginationClick(${currentPage - 1})">
             <span><i class="fas fa-angle-left"></i> Prev</span></li>`;
     }
 
-    // First page and ellipsis
     if (startPage > 1) {
         liTag += `<li class="winners_wall_Winners_section_numb winners_wall_Winners_section_first" onclick="winners_wall_Winners_section_handlePaginationClick(1)">
             <span>1</span></li>`;
@@ -1822,14 +1776,12 @@ function winners_wall_Winners_section_createPagination(totalPages, currentPage) 
         }
     }
 
-    // Page numbers
     for (let i = startPage; i <= endPage; i++) {
         const active = currentPage === i ? "winners_wall_Winners_section_active" : "";
         liTag += `<li class="winners_wall_Winners_section_numb ${active}" onclick="winners_wall_Winners_section_handlePaginationClick(${i})">
             <span>${i}</span></li>`;
     }
 
-    // Last page and ellipsis
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
             liTag += `<li class="winners_wall_Winners_section_dots"><span>...</span></li>`;
@@ -1838,7 +1790,6 @@ function winners_wall_Winners_section_createPagination(totalPages, currentPage) 
             <span>${totalPages}</span></li>`;
     }
 
-    // Next button
     if (currentPage < totalPages) {
         liTag += `<li class="winners_wall_Winners_section_btn winners_wall_Winners_section_next" onclick="winners_wall_Winners_section_handlePaginationClick(${currentPage + 1})">
             <span>Next <i class="fas fa-angle-right"></i></span></li>`;
@@ -1848,14 +1799,12 @@ function winners_wall_Winners_section_createPagination(totalPages, currentPage) 
 }
 
 function winners_wall_Winners_section_handlePaginationClick(page) {
-    // Get current search term
     const searchTerm = document.getElementById('winners_wall_winners_list_search').value;
-    // Fetch winners with pagination
     custom_admin_dashboard_winners_wall_fetchWinners(searchTerm, page);
 }
-//  winners_wall_Winners_list_Pagination JavaScript end
-
-//  fetchWinners function to support pagination and winners list main function start
+//    custom_admin_dashboard.html (adminpanel template)
+//    WinnersWallWinnersList table (models.py)
+//    custom_admin_dashboard_winner_wall_winners_list function (views.py)
 function custom_admin_dashboard_winners_wall_fetchWinners(searchTerm = '', page = 1, itemsPerPage = 6) {
     const winnersContainer = document.getElementById('winners_wall_winners_list_items');
     winnersContainer.innerHTML = '<div class="winners_wall_winners_list_loading">Loading...</div>';
@@ -1871,12 +1820,10 @@ function custom_admin_dashboard_winners_wall_fetchWinners(searchTerm = '', page 
                 return;
             }
             
-            // Calculate pagination slice
             const startIndex = (page - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const paginatedData = data.slice(startIndex, endIndex);
             
-            // Display only the current page's winners
             paginatedData.forEach(winner => {
                 const winnerCard = document.createElement('div');
                 winnerCard.className = `winners_wall_winners_list_card ${winner.flag ? '' : 'winners_wall_winners_list_hidden'}`;
@@ -1915,16 +1862,13 @@ function custom_admin_dashboard_winners_wall_fetchWinners(searchTerm = '', page 
                 winnersContainer.appendChild(winnerCard);
             });
             
-            // Setup pagination with total items count
             winners_wall_Winners_section_setupPagination(data.length, itemsPerPage, page);
-            // Add event listeners for edit buttons
             document.querySelectorAll('.winners_wall_winners_list_edit_btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     custom_admin_dashboard_winners_wall_add_winners_function(this.dataset.id);
                 });
             });
             
-            // Add event listeners for toggle buttons
             document.querySelectorAll('.winners_wall_winners_list_toggle_btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const winnerId = this.dataset.id;
@@ -1957,8 +1901,6 @@ function custom_admin_dashboard_winners_wall_fetchWinners(searchTerm = '', page 
             console.error('Error:', error);
         });
 }
-//  fetchWinners function to support pagination and winners list main function end
-// custom_admin_dashboard_winners_wall_function to use pagination with page initial function start
 function custom_admin_dashboard_winners_wall_function() {
     const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
     container.innerHTML = '';
@@ -2017,28 +1959,22 @@ function custom_admin_dashboard_winners_wall_function() {
         custom_admin_dashboard_winners_wall_fetchWinners(e.target.value);
     });
     
-    // Initial fetch with pagination
     custom_admin_dashboard_winners_wall_fetchWinners();
 }
-// custom_admin_dashboard_winners_wall_function to use pagination with page initial function end
-// custom_admin_dashboard_winners_wall_winners page winners list js code ending***
 
-// custom_admin_dashboard_winners_wall_winners page winners list edit and add js code staring***
-// Function to show edit/add winner popup start
+//    custom_admin_dashboard.html (adminpanel template)
+//    WinnersWallWinnersList table (models.py)
+//    custom_admin_dashboard_winner_wall_winners_list function (views.py)
 function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = null) {
-    // Create overlay
     const overlay = document.createElement('div');
     overlay.className = 'winners_wall_Winners_edit_add_overlay';
     overlay.id = 'winners_wall_Winners_edit_add_overlay';
     
-    // Create popup container
     const popup = document.createElement('div');
     popup.className = 'winners_wall_Winners_edit_add_container';
     
-    // Determine title based on mode
     const title = mode === 'add' ? 'Add Winner' : 'Edit Winner';
     
-    // Popup header
     const header = document.createElement('div');
     header.className = 'winners_wall_Winners_edit_add_header';
     header.innerHTML = `
@@ -2050,11 +1986,9 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         <button class="winners_wall_Winners_edit_add_close">&times;</button>
     `;
     
-    // Popup content
     const content = document.createElement('div');
     content.className = 'winners_wall_Winners_edit_add_content';
     
-    // Image upload section
     const imageSection = document.createElement('div');
     imageSection.className = 'winners_wall_Winners_edit_add_image_section';
     imageSection.innerHTML = `
@@ -2075,7 +2009,6 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         </div>
     `;
     
-    // Form section
     const form = document.createElement('form');
     form.className = 'winners_wall_Winners_edit_add_form';
     form.innerHTML = `
@@ -2104,7 +2037,6 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         </div>
     `;
     
-    // Buttons section
     const buttons = document.createElement('div');
     buttons.className = 'winners_wall_Winners_edit_add_buttons';
     buttons.innerHTML = `
@@ -2114,7 +2046,6 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         </button>
     `;
     
-    // Assemble popup
     content.appendChild(imageSection);
     content.appendChild(form);
     content.appendChild(buttons);
@@ -2122,23 +2053,18 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
     popup.appendChild(content);
     overlay.appendChild(popup);
     
-    // Add to document
     document.body.appendChild(overlay);
     
-    // Add event listeners
-    // Close button
     const closeBtn = popup.querySelector('.winners_wall_Winners_edit_add_close');
     closeBtn.addEventListener('click', () => {
         document.body.removeChild(overlay);
     });
     
-    // Cancel button
     const cancelBtn = popup.querySelector('.winners_wall_Winners_edit_add_cancel_btn');
     cancelBtn.addEventListener('click', () => {
         document.body.removeChild(overlay);
     });
     
-    // Title navigation
     const winnersWallTitle = popup.querySelector('#winners_wall_Winners_edit_add_title_winners_wall');
     const winnersTitle = popup.querySelector('#winners_wall_Winners_edit_add_title_winners');
     
@@ -2150,7 +2076,6 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         document.body.removeChild(overlay);
     });
     
-    // Image upload preview
     const fileInput = popup.querySelector('#winners_wall_Winners_edit_add_image_upload');
     const imagePreview = popup.querySelector('#winners_wall_Winners_edit_add_image_preview');
     
@@ -2166,7 +2091,6 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         }
     });
     
-    // Helper functions for validation
     function showError(fieldId, errorId) {
         const field = document.getElementById(fieldId);
         const error = document.getElementById(errorId);
@@ -2187,7 +2111,6 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         }
     }
     
-    // Validate individual fields
     function validateField(fieldId, errorId) {
         const field = document.getElementById(fieldId);
         if (!field.value.trim()) {
@@ -2199,7 +2122,6 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         }
     }
     
-    // Validate date and time
     function validateDateTime() {
         const dateField = document.getElementById('winners_wall_Winners_edit_add_draw_date');
         const timeField = document.getElementById('winners_wall_Winners_edit_add_draw_time');
@@ -2213,8 +2135,34 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
             return true;
         }
     }
+    function validateTicketNumber() {
+    const input = document.getElementById('winners_wall_Winners_edit_add_ticket_number');
+    const errorDiv = document.getElementById('winners_wall_Winners_edit_add_ticket_number_error');
+    const value = input.value.trim();
+
+    if (value === '') {
+        errorDiv.textContent = 'Please enter a ticket number';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+
+    if (!/^\d+$/.test(value)) {
+        errorDiv.textContent = 'Ticket number must be numeric';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+
+    if (value.length > 7) {
+        errorDiv.textContent = 'Ticket number must be 7 digits';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+
+    errorDiv.style.display = 'none';
+    return true;
+}
+
     
-    // Add input event listeners for validation
     document.getElementById('winners_wall_Winners_edit_add_lottery_name').addEventListener('input', function() {
         validateField('winners_wall_Winners_edit_add_lottery_name', 'winners_wall_Winners_edit_add_lottery_name_error');
     });
@@ -2230,15 +2178,12 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
     document.getElementById('winners_wall_Winners_edit_add_draw_date').addEventListener('change', validateDateTime);
     document.getElementById('winners_wall_Winners_edit_add_draw_time').addEventListener('change', validateDateTime);
     
-    // Submit button
     const submitBtn = popup.querySelector('#winners_wall_Winners_edit_add_submit_btn');
     submitBtn.addEventListener('click', function() {
-        // Validate all fields
         const isLotteryNameValid = validateField('winners_wall_Winners_edit_add_lottery_name', 'winners_wall_Winners_edit_add_lottery_name_error');
         const isWinnerNameValid = validateField('winners_wall_Winners_edit_add_winner_name', 'winners_wall_Winners_edit_add_winner_name_error');
-        const isTicketNumberValid = validateField('winners_wall_Winners_edit_add_ticket_number', 'winners_wall_Winners_edit_add_ticket_number_error');
         const isDateTimeValid = validateDateTime();
-        
+        const isTicketNumberValid = validateTicketNumber(); 
         if (!isLotteryNameValid || !isWinnerNameValid || !isTicketNumberValid || !isDateTimeValid) {
             return;
         }
@@ -2275,7 +2220,7 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         .then(response => response.json())
         .then(data => {
             if (data.id) {
-                custom_admin_dashboard_winners_wall_fetchWinners(); // Refresh the winners list
+                custom_admin_dashboard_winners_wall_fetchWinners(); 
                 document.body.removeChild(overlay);
             } else {
                 alert('Error saving winner: ' + (data.error || 'Unknown error'));
@@ -2287,13 +2232,12 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         });
     });
 }
-// Function to show edit/add winner popup start end
 
-
-//  function to use the new popup fetch ajax to winner details start
+//    custom_admin_dashboard.html (adminpanel template)
+//    WinnersWallWinnersList table (models.py)
+//    custom_admin_dashboard_winner_wall_winner_detail function (views.py)
 function custom_admin_dashboard_winners_wall_add_winners_function(winnerId = null) {
     if (winnerId) {
-        // Edit mode - fetch winner data first
         fetch(`/api/custom_admin_dashboard_winner_wall_winner_detail/${winnerId}/`)
             .then(response => response.json())
             .then(data => {
@@ -2304,23 +2248,16 @@ function custom_admin_dashboard_winners_wall_add_winners_function(winnerId = nul
                 alert('Error loading winner data');
             });
     } else {
-        // Add mode
         winners_wall_Winners_edit_add_show_popup('add');
     }
 }
-//  function to use the new popup fetch ajax to winner details end
-// custom_admin_dashboard_winners_wall_winners page winners list edit and add js code ending***
 
 
-// custom_admin_dashboard_winners_wall_testimonials page testimonials list  js code also delete code js testimonialending***
-
-// Main controller function(custom_admin_dashboard_winners_wall_testimonial_function) for testimonials management page is  starting 
-// Main controller function with pagination support
+// Main controller function(custom_admin_dashboard_winners_wall_testimonial_function) for testimonials management page. 
 function custom_admin_dashboard_winners_wall_testimonial_function() {
     const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
     container.innerHTML = '';
     
-    // Create navigation header (same as before)
     const navHeader = document.createElement('div');
     navHeader.className = 'winners_wall_testimonial_nav_header';
     navHeader.innerHTML = `
@@ -2344,7 +2281,6 @@ function custom_admin_dashboard_winners_wall_testimonial_function() {
     `;
     container.appendChild(navHeader);
     
-    // Add event listeners (same as before)
     document.getElementById('winners_wall_testimonial_section_select').addEventListener('change', function() {
         if (this.value === 'winners') custom_admin_dashboard_winners_wall_function();
     });
@@ -2361,37 +2297,32 @@ function custom_admin_dashboard_winners_wall_testimonial_function() {
         }, 300);
     });
     
-    // Load testimonials initially
     winners_wall_testimonial_load_testimonials();
 }
 
-// Global variables for pagination
 let winners_wall_testimonial_current_page = 1;
 const winners_wall_testimonial_items_per_page = 10;
 let winners_wall_testimonial_total_items = 0;
 let winners_wall_testimonial_all_data = [];
-
-// Modified load testimonials function with pagination
+//    custom_admin_dashboard.html (adminpanel template)
+//    Testimonial table (models.py)
+//    custom_admin_dashboard_winners_wall_testimonials_list function (views.py)
 function winners_wall_testimonial_load_testimonials(searchQuery = '') {
     const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
     
-    // Clear existing content
     const existingContent = container.querySelector('.winners_wall_testimonial_content_container');
     if (existingContent) container.removeChild(existingContent);
     
-    // Create loading state
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'winners_wall_testimonial_loading';
     loadingDiv.textContent = 'Loading testimonials...';
     container.appendChild(loadingDiv);
     
-    // Build API URL
     let url = '/api/custom_admin_dashboard_winners_wall_testimonials_list/';
     if (searchQuery) {
         url += `?search=${encodeURIComponent(searchQuery)}`;
     }
     
-    // Fetch testimonials
     fetch(url)
         .then(response => {
             if (!response.ok) throw new Error('Network response was not ok');
@@ -2400,24 +2331,19 @@ function winners_wall_testimonial_load_testimonials(searchQuery = '') {
         .then(data => {
             container.removeChild(loadingDiv);
             
-            // Store all data and total items count
             winners_wall_testimonial_all_data = data;
             winners_wall_testimonial_total_items = data.length;
             
-            // Reset to page 1 when search changes
             if (searchQuery) {
                 winners_wall_testimonial_current_page = 1;
             }
             
-            // Create content container
             const contentContainer = document.createElement('div');
             contentContainer.className = 'winners_wall_testimonial_content_container';
             container.appendChild(contentContainer);
             
-            // Display testimonials for current page
             winners_wall_testimonial_display_page(contentContainer, searchQuery);
             
-            // Create pagination if needed
             if (winners_wall_testimonial_total_items > winners_wall_testimonial_items_per_page) {
                 winners_wall_testimonial_create_pagination(contentContainer);
             }
@@ -2433,22 +2359,18 @@ function winners_wall_testimonial_load_testimonials(searchQuery = '') {
         });
 }
 
-// Function to display testimonials for current page
 function winners_wall_testimonial_display_page(container, searchQuery = '') {
-    // Clear previous content
     const existingSection = container.querySelector('.winners_wall_testimonial_table_section');
     if (existingSection) container.removeChild(existingSection);
     
     const section = document.createElement('div');
     section.className = 'winners_wall_testimonial_table_section';
     
-    // Add heading
     const heading = document.createElement('h3');
     heading.className = 'winners_wall_testimonial_heading';
     heading.textContent = 'Current Testimonial';
     section.appendChild(heading);
     
-    // Calculate pagination bounds
     const startIndex = (winners_wall_testimonial_current_page - 1) * winners_wall_testimonial_items_per_page;
     const endIndex = Math.min(startIndex + winners_wall_testimonial_items_per_page, winners_wall_testimonial_total_items);
     const pageData = winners_wall_testimonial_all_data.slice(startIndex, endIndex);
@@ -2464,11 +2386,9 @@ function winners_wall_testimonial_display_page(container, searchQuery = '') {
         return;
     }
     
-    // Create table
     const table = document.createElement('table');
     table.className = 'winners_wall_testimonial_table';
     
-    // Table header
     const thead = document.createElement('thead');
     thead.innerHTML = `
         <tr>
@@ -2479,10 +2399,8 @@ function winners_wall_testimonial_display_page(container, searchQuery = '') {
     `;
     table.appendChild(thead);
     
-    // Table body
     const tbody = document.createElement('tbody');
     
-    // Add testimonials as rows
     pageData.forEach(testimonial => {
         const row = document.createElement('tr');
         row.className = 'winners_wall_testimonial_row';
@@ -2517,8 +2435,7 @@ function winners_wall_testimonial_display_page(container, searchQuery = '') {
     container.appendChild(section);
 }
 
-// Pagination creation function winners wall testimonials pagination code 
-// Updated pagination creation function with duplicate page number fix
+
 function winners_wall_testimonial_create_pagination(container) {
     const totalPages = Math.ceil(winners_wall_testimonial_total_items / winners_wall_testimonial_items_per_page);
     const paginationContainer = document.createElement('div');
@@ -2530,14 +2447,12 @@ function winners_wall_testimonial_create_pagination(container) {
     let liTag = '';
     const currentPage = winners_wall_testimonial_current_page;
     
-    // Previous button
     if (currentPage > 1) {
         liTag += `<li class="winners_wall_testimonial_btn winners_wall_testimonial_prev" 
                      onclick="winners_wall_testimonial_change_page(${currentPage - 1})">
                      <span><i class="fas fa-angle-left"></i> Prev</span></li>`;
     }
     
-    // Always show first page
     if (totalPages > 1) {
         const active = currentPage === 1 ? 'winners_wall_testimonial_active' : '';
         liTag += `<li class="winners_wall_testimonial_numb ${active}" 
@@ -2545,12 +2460,10 @@ function winners_wall_testimonial_create_pagination(container) {
                       <span>1</span></li>`;
     }
     
-    // Show dots and previous page if needed
     if (currentPage > 3 && totalPages > 3) {
         liTag += `<li class="winners_wall_testimonial_dots"><span>...</span></li>`;
     }
     
-    // Show pages around current page
     const startPage = Math.max(2, currentPage - 1);
     const endPage = Math.min(totalPages - 1, currentPage + 1);
     
@@ -2563,12 +2476,10 @@ function winners_wall_testimonial_create_pagination(container) {
                       <span>${i}</span></li>`;
     }
     
-    // Show dots and next page if needed
     if (currentPage < totalPages - 2 && totalPages > 3) {
         liTag += `<li class="winners_wall_testimonial_dots"><span>...</span></li>`;
     }
     
-    // Always show last page if there is one
     if (totalPages > 1) {
         const active = currentPage === totalPages ? 'winners_wall_testimonial_active' : '';
         liTag += `<li class="winners_wall_testimonial_numb ${active}" 
@@ -2576,7 +2487,6 @@ function winners_wall_testimonial_create_pagination(container) {
                       <span>${totalPages}</span></li>`;
     }
     
-    // Next button
     if (currentPage < totalPages) {
         liTag += `<li class="winners_wall_testimonial_btn winners_wall_testimonial_next" 
                      onclick="winners_wall_testimonial_change_page(${currentPage + 1})">
@@ -2587,29 +2497,24 @@ function winners_wall_testimonial_create_pagination(container) {
     container.appendChild(paginationContainer);
 }
 
-// Updated function to handle page changes and empty states
 function winners_wall_testimonial_change_page(newPage) {
     const container = document.querySelector('.winners_wall_testimonial_content_container');
     const totalPages = Math.ceil(winners_wall_testimonial_total_items / winners_wall_testimonial_items_per_page);
     
-    // Handle case where deletion leaves us on an empty page
     if (newPage > totalPages) {
         newPage = Math.max(1, totalPages);
     }
     
     winners_wall_testimonial_current_page = newPage;
     
-    // Check if current page would be empty
     const startIndex = (newPage - 1) * winners_wall_testimonial_items_per_page;
     if (startIndex >= winners_wall_testimonial_total_items && winners_wall_testimonial_total_items > 0) {
-        // Move to previous page if current would be empty
         winners_wall_testimonial_current_page = Math.max(1, newPage - 1);
         winners_wall_testimonial_display_page(container);
     } else {
         winners_wall_testimonial_display_page(container);
     }
     
-    // Update pagination controls
     const paginationContainer = document.querySelector('.winners_wall_testimonial_pagination');
     if (paginationContainer) {
         container.removeChild(paginationContainer);
@@ -2620,7 +2525,6 @@ function winners_wall_testimonial_change_page(newPage) {
 }
 
 
-// Function to show image in lightbox testimonial winner full show js code
 function winners_wall_testimonial_show_image(imageUrl) {
     const lightbox = document.createElement('div');
     lightbox.className = 'winners_wall_testimonial_lightbox';
@@ -2634,8 +2538,7 @@ function winners_wall_testimonial_show_image(imageUrl) {
     document.body.appendChild(lightbox);
 }
 
-// Function to delete testimonial
-// Updated delete function with proper pagination handling
+
 function winners_wall_testimonial_delete(testimonialId) {
     if (!confirm('Are you sure you want to delete this testimonial?')) {
         return;
@@ -2650,29 +2553,23 @@ function winners_wall_testimonial_delete(testimonialId) {
     })
     .then(response => {
         if (response.ok) {
-            // Remove the deleted testimonial from our local data
             winners_wall_testimonial_all_data = winners_wall_testimonial_all_data.filter(
                 item => item.id !== testimonialId
             );
             winners_wall_testimonial_total_items = winners_wall_testimonial_all_data.length;
             
-            // Calculate the current page's range
             const itemsPerPage = winners_wall_testimonial_items_per_page;
             const currentPage = winners_wall_testimonial_current_page;
             const startIndex = (currentPage - 1) * itemsPerPage;
             
-            // Check if current page would be empty after deletion
             if (startIndex >= winners_wall_testimonial_total_items && currentPage > 1) {
-                // Move to previous page if current would be empty
                 winners_wall_testimonial_current_page = currentPage - 1;
             }
             
-            // Refresh the display
             const container = document.querySelector('.winners_wall_testimonial_content_container');
             if (container) {
                 winners_wall_testimonial_display_page(container);
                 
-                // Update pagination controls if they exist
                 const paginationContainer = document.querySelector('.winners_wall_testimonial_pagination');
                 if (paginationContainer) {
                     container.removeChild(paginationContainer);
@@ -2691,23 +2588,16 @@ function winners_wall_testimonial_delete(testimonialId) {
     });
 }
 
-// custom_admin_dashboard_winners_wall_testimonials page testimonials list  js code also deletecode js testimonial ending***
 
-// custom_admin_dashboard_winners_wall_testimonials page testimonials list edit and add js code ending***
-
-// Function to show add/edit testimonial popup
 function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonialId = null) {
     const container = document.getElementById('custom_admin_dashboard_winners_wall_management_winners_and_testimonials');
     container.innerHTML = '';
     
-    // Determine if we're in add or edit mode
     const isEditMode = testimonialId !== null;
     
-    // Create popup container
     const popupContainer = document.createElement('div');
     popupContainer.className = 'winners_wall_testimonial_popup_container';
     
-    // Create navigation header
     const navHeader = document.createElement('div');
     navHeader.className = 'winners_wall_testimonial_nav_header';
     navHeader.innerHTML = `
@@ -2721,16 +2611,13 @@ function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonia
     `;
     popupContainer.appendChild(navHeader);
     
-    // Create main content container
     const contentContainer = document.createElement('div');
     contentContainer.className = 'winners_wall_testimonial_popup_content';
     
-    // Create form
     const form = document.createElement('form');
     form.id = 'winners_wall_testimonial_form';
     form.className = 'winners_wall_testimonial_form';
     
-    // Image upload section
     const imageSection = document.createElement('div');
     imageSection.className = 'winners_wall_testimonial_image_section';
     imageSection.innerHTML = `
@@ -2752,7 +2639,6 @@ function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonia
     form.appendChild(imageSection);
     
     
-    // Form fields section
     const fieldsSection = document.createElement('div');
     fieldsSection.className = 'winners_wall_testimonial_fields_section';
     fieldsSection.innerHTML = `
@@ -2769,7 +2655,6 @@ function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonia
     `;
     form.appendChild(fieldsSection);
     
-    // Buttons section
     const buttonsSection = document.createElement('div');
     buttonsSection.className = 'winners_wall_testimonial_buttons_section';
     buttonsSection.innerHTML = `
@@ -2784,7 +2669,6 @@ function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonia
     popupContainer.appendChild(contentContainer);
     container.appendChild(popupContainer);
     
-    // Set up image preview functionality
     document.getElementById('winners_wall_testimonial_image_input').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -2796,18 +2680,15 @@ function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonia
         }
     });
     
-    // If in edit mode, load the testimonial data
     if (isEditMode) {
         winners_wall_testimonial_load_testimonial_data(testimonialId);
     }
     
-    // Set up submit button functionality
     document.getElementById('winners_wall_testimonial_submit_btn').addEventListener('click', function() {
         winners_wall_testimonial_handle_submit(isEditMode, testimonialId);
     });
 }
 
-// Function to load testimonial data for editing
 function winners_wall_testimonial_load_testimonial_data(testimonialId) {
     fetch(`/api/custom_admin_dashboard_winners_wall_testimonial_detail/${testimonialId}/`)
         .then(response => {
@@ -2815,11 +2696,9 @@ function winners_wall_testimonial_load_testimonial_data(testimonialId) {
             return response.json();
         })
         .then(data => {
-            // Populate form fields
             document.getElementById('winners_wall_testimonial_name_input').value = data.name || '';
             document.getElementById('winners_wall_testimonial_quote_input').value = data.quote || '';
             
-            // Set image preview if image exists
             if (data.image) {
                 document.getElementById('winners_wall_testimonial_image_preview').src = data.image;
             }
@@ -2829,40 +2708,35 @@ function winners_wall_testimonial_load_testimonial_data(testimonialId) {
             alert('Error loading testimonial data. Please try again.');
         });
 }
-
-// Function to handle form submission
+//    custom_admin_dashboard.html (adminpanel template)
+//    Testimonial table (models.py)
+//    custom_admin_dashboard_winners_wall_testimonial_detail function (views.py)
 function winners_wall_testimonial_handle_submit(isEditMode, testimonialId = null) {
     const name = document.getElementById('winners_wall_testimonial_name_input').value.trim();
     const quote = document.getElementById('winners_wall_testimonial_quote_input').value.trim();
     const imageInput = document.getElementById('winners_wall_testimonial_image_input');
     
-    // Basic validation
     if (!name || !quote ) {
         alert('Please fill in all required fields');
         return;
     }
     
-    // Prepare form data
     const formData = new FormData();
     formData.append('name', name);
     formData.append('quote', quote);
     
-    // Add image if selected
     if (imageInput.files.length > 0) {
         formData.append('image', imageInput.files[0]);
     }
     
-    // Determine the API endpoint and method
     const url = isEditMode ? `/api/custom_admin_dashboard_winners_wall_testimonial_detail/${testimonialId}/` : '/api/custom_admin_dashboard_winners_wall_testimonials_list/';
     const method = isEditMode ? 'PUT' : 'POST';
     
-    // Show loading state
     const submitBtn = document.getElementById('winners_wall_testimonial_submit_btn');
     const originalBtnText = submitBtn.textContent;
     submitBtn.textContent = 'Processing...';
     submitBtn.disabled = true;
     
-    // Make the API request
     fetch(url, {
         method: method,
         headers: {
@@ -2875,7 +2749,6 @@ function winners_wall_testimonial_handle_submit(isEditMode, testimonialId = null
         return response.json();
     })
     .then(data => {
-        // Return to testimonial list
         custom_admin_dashboard_winners_wall_testimonial_function();
     })
     .catch(error => {
@@ -2889,23 +2762,19 @@ function winners_wall_testimonial_handle_submit(isEditMode, testimonialId = null
 }
 
 
-// custom_admin_dashboard_winners_wall_testimonials page testimonials list edit and add js code ending***
 
 function showSpecificDiv(id) {
-    // Select the section and the specific div by id
     const section = document.querySelector(".custom_admin_dashboard_dashboard");
     const specificDiv = document.getElementById(id);
     toggleSidebar() 
 
     if (specificDiv) {
-        // Hide all children of the section using opacity and z-index
         Array.from(section.children).forEach(child => {
             child.style.display = "none";
             child.style.opacity = "0";
             child.style.position = "absolute";
         });
 
-        // Show only the specific div
         specificDiv.style.display = "block";
         if (id === "draw-lottery-container") {
             specificDiv.style.display = "flex";
@@ -2913,7 +2782,6 @@ function showSpecificDiv(id) {
         specificDiv.style.opacity = "1";
         specificDiv.style.position = "relative";
 
-        // Ensure the section itself is visible
         section.style.display = "block";
     } else {
         console.error(`Element with id "${id}" not found.`);
@@ -2921,12 +2789,7 @@ function showSpecificDiv(id) {
     if (id === "custom_admin_dashboard_prize_management_id") {
         renderPrizeManagementHTML(); 
         fetchWinners(1);
-    } else if (id === "custom_admin_dashboard_transactions_management_refunded") {
-        custom_admin_dashboard_transactions_management_function(null, "refunded");
-       
-    } else if (id === "custom_admin_dashboard_transactions_management") {
-        custom_admin_dashboard_transactions_management_function();  
-    } else if (id === "draw-lottery-container") {
+    }else if (id === "draw-lottery-container") {
         custom_admin_dashboard_lottery_draw_winners_management_function();  
     }  else if (id === "custom_admin_dashboard_winners_wall_management_winners_and_testimonials") {
         custom_admin_dashboard_winners_wall_function();
@@ -2939,8 +2802,8 @@ function showSpecificDiv(id) {
     }
 
 }
-let salesChart; // Store chart instance for dynamic updates
-async function exportToExcel() {
+let salesChart;
+async function report_and_analytics_monthly_sales_bar_chart_exportToExcel() {
     if (!salesChart) {
         alert("No data available to export.");
         return;
@@ -2953,7 +2816,6 @@ async function exportToExcel() {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Monthly Sales");
 
-    // Main Title
     sheet.mergeCells('A1:B1');
     const titleRow = sheet.getRow(1);
     titleRow.getCell(1).value = `Monthly Sales Chart – ${selectedYear}`;
@@ -2961,10 +2823,8 @@ async function exportToExcel() {
     titleRow.getCell(1).alignment = { horizontal: 'center' };
     titleRow.height = 20;
 
-    // Empty spacer row
     sheet.addRow([]);
 
-    // Header Row
     const headerRow = sheet.addRow(['Month', 'Sales Amount']);
     headerRow.font = { bold: true };
     headerRow.alignment = { horizontal: 'center' };
@@ -2982,7 +2842,6 @@ async function exportToExcel() {
         };
     });
 
-    // Add data rows
     for (let i = 0; i < labels.length; i++) {
         const row = sheet.addRow([labels[i], data[i]]);
         row.eachCell(cell => {
@@ -2996,13 +2855,11 @@ async function exportToExcel() {
         });
     }
 
-    // Adjust column widths
     sheet.columns = [
         { width: 20 },
         { width: 20 }
     ];
 
-    // Download Excel file
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -3014,9 +2871,10 @@ async function exportToExcel() {
     link.click();
 }
 
-
-// Function to fetch and display sales data
-function fetchSalesData(year) {
+//    custom_admin_dashboard.html (adminpanel template)
+//    PaymentLottery table (models.py)
+//    lottery_sales_bar_chart_View function (views.py)
+function report_and_analytics_sales_chart_fetchSalesData(year) {
     $.ajax({
         url: `/api/lottery_sales_bar_chart/`,
         method: 'GET',
@@ -3025,13 +2883,11 @@ function fetchSalesData(year) {
             const labels = data.map(item => item.month);
             const salesamount = data.map(item => item.sales_amount);
 
-            // If the chart already exists, update it
             if (salesChart) {
                 salesChart.data.labels = labels;
                 salesChart.data.datasets[0].data = salesamount;
                 salesChart.update();
             } else {
-                // Create the chart for the first time
                 const ctx = document.getElementById('salesChart').getContext('2d');
                 salesChart = new Chart(ctx, {
                     type: 'bar',
@@ -3040,17 +2896,17 @@ function fetchSalesData(year) {
                         datasets: [{
                             label: 'Sales',
                             data: salesamount,
-                            backgroundColor: 'rgba(255, 87, 34, 0.8)', // Matching orange color
+                            backgroundColor: 'rgba(255, 87, 34, 0.8)', 
                             borderColor: 'rgba(255, 87, 34, 1)',
-                            borderWidth: 0, // No border for clean design
-                            borderRadius: 8, // Rounded bars
-                            barPercentage: 0.6, // Adjust bar width
-                            hoverBackgroundColor: 'rgba(255, 87, 34, 1)' // Slightly darker hover color
+                            borderWidth: 0, 
+                            borderRadius: 8,
+                            barPercentage: 0.6, 
+                            hoverBackgroundColor: 'rgba(255, 87, 34, 1)' 
                         }]
                     },
                     options: {
                         responsive: true,
-                         // 🔧 FIX TOOLTIP ISSUES ON SMALL BARS
+                       
 
             interaction: {
 
@@ -3069,10 +2925,10 @@ function fetchSalesData(year) {
             },
                         plugins: {
                             legend: {
-                                display: false // Hiding the legend for simplicity
+                                display: false 
                             },
                             tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)', // Dark tooltip
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)', 
                                 titleColor: '#fff',
                                 bodyColor: '#fff',
                                 padding: 10,
@@ -3083,7 +2939,7 @@ function fetchSalesData(year) {
                             x: {
                                 title: {
                                     display: true,
-                                    text: 'Months', // X-axis label
+                                    text: 'Months', 
                                     color: '#555',
                                     font: {
                                         size: 14,
@@ -3091,10 +2947,10 @@ function fetchSalesData(year) {
                                     }
                                 },
                                 grid: {
-                                    display: false // Hide grid lines on x-axis
+                                    display: false 
                                 },
                                 ticks: {
-                                    color: '#888', // Grey text for months
+                                    color: '#888', 
                                     font: {
                                         size: 12,
                                         weight: 'bold'
@@ -3104,7 +2960,7 @@ function fetchSalesData(year) {
                             y: {
                                 title: {
                                     display: true,
-                                    text: 'lottery Sales', // Y-axis label
+                                    text: 'lottery Sales', 
                                     color: '#555',
                                     font: {
                                         size: 14,
@@ -3112,7 +2968,7 @@ function fetchSalesData(year) {
                                     }
                                 },
                                 grid: {
-                                    color: 'rgba(200, 200, 200, 0.3)' // Light grid lines
+                                    color: 'rgba(200, 200, 200, 0.3)' 
                                 },
                                 ticks: {
                                     beginAtZero: true,
@@ -3133,30 +2989,28 @@ function fetchSalesData(year) {
         }
     });
 }
-// Function to populate the year dropdown dynamically
-function populateYearDropdown() {
+//    custom_admin_dashboard.html (adminpanel template)
+//    PaymentLottery table (models.py)
+//    lottery_sales_availableYearsView function (views.py)
+function report_and_analytics_sales_chart_populateYearDropdown() {
     $.ajax({
-        url: `/api/lottery_sales_available_years/`, // API endpoint for years
+        url: `/api/lottery_sales_available_years/`,
         method: 'GET',
         success: function (data) {
             const years = data.years;
             const yearSelect = $("#yearSelect");
-            const currentYear = new Date().getFullYear(); // Get the current year
+            const currentYear = new Date().getFullYear();
 
-            // Clear existing options
             yearSelect.empty();
 
-            // Populate options
             years.forEach(year => {
                 yearSelect.append(new Option(year, year));
             });
 
-            // Set the current year as default if available, otherwise the first year
             const defaultYear = years.includes(currentYear) ? currentYear : years[0];
             yearSelect.val(defaultYear);
 
-            // Fetch and display data for the default year
-            fetchSalesData(defaultYear);
+            report_and_analytics_sales_chart_fetchSalesData(defaultYear);
         },
         error: function (error) {
             console.error('Error fetching available years:', error);
@@ -3164,135 +3018,23 @@ function populateYearDropdown() {
         }
     });
 }
-// Event listener for year selection
 function dynamic_lottery_sales_bar_chart() {
-    // Populate year dropdown on page load
-    populateYearDropdown();
+    report_and_analytics_sales_chart_populateYearDropdown();
 
-    // Update chart when a new year is selected
     $("#yearSelect").on("change", function () {
         const selectedYear = $(this).val();
-        fetchSalesData(selectedYear);
+        report_and_analytics_sales_chart_fetchSalesData(selectedYear);
     });
 }
 
-function fetchStatistics(month, year) {
-    $.ajax({
-        url: `/api/statistics/`, // API endpoint
-        method: 'GET',
-        data: {
-            month: month,
-            year: year
-        },
-        success: function (data) {
-
-            $("#active_users").text(`${data.active_users} / ${data.total_users}`);
-            $("#won_lottery").text(data.won_lottery);
-            $("#lost_lottery").text(data.lost_lottery);
-            $("#won_percentage").text(data.won_percentage.toFixed(2) + " %");
-            $("#current_won_percentage").text(data.current_won_percentage.toFixed(2) + " %");
-            $("#lost_percentage").text(data.lost_percentage.toFixed(2) + " %");
-        },
-        error: function (error) {
-            console.error('Error fetching data:', error);
-            alert('Failed to fetch data.');
-        }
-    });
-}
-// Event listener for the filter button
-function lottery_sales_count() {
-    $("#filterBtn").on("click", function () {
-        const month = $("#month").val();
-        const year = $("#year").val();
-        fetchStatistics(month, year);
-    });
-
-    // Fetch initial data for the current month and year
-    const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
-    const currentYear = new Date().getFullYear();
-    $("#month").val(currentMonth);
-    $("#year").val(currentYear);
-    fetchStatistics(currentMonth, currentYear);
-}
-// Fetch leaderboard data using AJAX
-function user_leaderboard() {
-    $.ajax({
-        url: '/api/leaderboard/', // Replace with your Django API endpoint
-        method: 'GET',
-        success: function (data) {
-            const leaderboard = $('#leaderboard');
-            leaderboard.empty(); // Clear existing data
-
-            // Populate leaderboard with fetched data
-            data.forEach((item) => {
-                leaderboard.append(`
-              <div class="leaderboard-item">
-                <div class="user-info">
-                  <img src="${item.image || 'https://via.placeholder.com/50'}" alt="User Image">
-                  <div>
-                    <span class="username">${item.username}</span>
-                    <div class="correct-percentage">${item.correct_percentage.toFixed(2)}% Correct</div>
-                  </div>
-                </div>
-                <div class="points">
-                  <span class="rank">${item.rank} ${item.rank_change > 0 ? '<span class="arrow-up">▲</span>' : '<span class="arrow-down">▼</span>'}</span><br>
-                  <span>${item.points} Points</span>
-                </div>
-              </div>
-            `);
-            });
-        },
-        error: function (xhr, status, error) {
-            console.error('Error fetching leaderboard data:', error);
-        }
-    });
-}
-
-async function fetchReports() {
-    const response = await fetch('/reports/');
-    return await response.json();
-}
-
-async function fetchRegionalSales() {
-    const response = await fetch('/regional-sales/');
-    return await response.json();
-}
-
-
-
-function lottery_won_and_lost_total_calculation() {
-    fetch('/api/lottery-summary/')
-        .then(response => response.json())
-        .then(data => {
-            const ids = {
-                'inactive_users': data.inactive_users,
-                'new_users_this_month': data.new_users_this_month,
-                'overview_active_users_count': data.active_users,
-                'overview_active_lotteries_count': data.active_lotteries,
-                'overview_sales_amount': '£' + data.sales_amount
-            };
-
-            Object.entries(ids).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) element.innerText = value;
-            });
-        })
-        .catch(error => console.error('Error fetching data:', error));
-}
 function toggleSidebar() {
     const sidebar = document.querySelector(".custom_admin_dashboard_sidebar");
     const hamburger = document.getElementById("custom_admin_dashboard_hamburger_menu_id");
-
-
-    // Toggle sidebar visibility
     sidebar.classList.toggle("show");
-
-
-    // Change the icon based on sidebar visibility
     if (sidebar.classList.contains("show")) {
-        hamburger.innerHTML = "✖"; // Change to cross icon
+        hamburger.innerHTML = "✖"; 
     } else {
-        hamburger.innerHTML = "☰"; // Change back to hamburger
+        hamburger.innerHTML = "☰"; 
     }
 }
 function hidetoggleSidebar() {
@@ -3300,31 +3042,27 @@ function hidetoggleSidebar() {
     const hamburger = document.getElementById("custom_admin_dashboard_hamburger_menu_id");
 
 
-    // Toggle sidebar visibility
     sidebar.classList.remove("show");
 
 
-    // Change the icon based on sidebar visibility
     if (sidebar.classList.contains("show")) {
-        hamburger.innerHTML = "✖"; // Change to cross icon
+        hamburger.innerHTML = "✖"; 
     } else {
-        hamburger.innerHTML = "☰"; // Change back to hamburger
+        hamburger.innerHTML = "☰"; 
     }
 }
 
 
 function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
-    // Fetch data from API
-    fetch('/api/draws-stats/')  // You'll need to create this API endpoint
+    fetch('/api/report_and_analytics_Pending_vs_completed_draws_pie_chart/')  
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('report_and_analytics_Pending_vs_completed_draws_pie_chart');
             
-            // Clear previous content
+          
             container.innerHTML = '';
              
             
-            // Create header section
             const headerDiv = document.createElement('div');
             headerDiv.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_header';
             
@@ -3340,17 +3078,14 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
             headerDiv.appendChild(exportBtn);
             container.appendChild(headerDiv);
             
-            // Create chart container
             const chartContainer = document.createElement('div');
             chartContainer.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_container';
             
-            // Create pie chart using Chart.js
             const canvas = document.createElement('canvas');
             canvas.id = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_canvas';
             chartContainer.appendChild(canvas);
             container.appendChild(chartContainer);
             
-            // Create legend
             const legendDiv = document.createElement('div');
             legendDiv.className = 'report_and_analytics_Pending_vs_completed_draws_pie_chart_legend';
             
@@ -3366,7 +3101,6 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
             legendDiv.appendChild(pendingLegend);
             container.appendChild(legendDiv);
             
-            // Initialize chart
             const ctx = canvas.getContext('2d');
             new Chart(ctx, {
                 type: 'pie',
@@ -3387,7 +3121,7 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: false // We're using our custom legend
+                            display: false 
                         }
                     }
                 }
@@ -3400,17 +3134,16 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
         });
 }
 
-
+//    custom_admin_dashboard.html (adminpanel template)
+//    Winner,LotteryEvent table (models.py)
+//    api_report_and_analytics_Pending_vs_completed_draws_pie_chart function (views.py)
 function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_function() {
-    // Fetch data again for export
-    fetch('/api/draws-stats/')
+    fetch('/api/report_and_analytics_Pending_vs_completed_draws_pie_chart/')
         .then(response => response.json())
         .then(data => {
-            // Create a new workbook
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Draws Report');
             
-            // Add title with merged cells and styling
             worksheet.mergeCells('A1:B1');
             const titleCell = worksheet.getCell('A1');
             titleCell.value = 'Pending vs Completed Draws';
@@ -3422,7 +3155,7 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_functi
             titleCell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FF4e73df' } // Blue background
+                fgColor: { argb: 'FF4e73df' } 
             };
             titleCell.alignment = { 
                 vertical: 'middle', 
@@ -3435,14 +3168,11 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_functi
                 right: { style: 'thin' }
             };
             
-            // Add empty row for spacing
             worksheet.addRow([]);
             
-            // Add data headers
             const headers = ['Status', 'Count'];
             const headerRow = worksheet.addRow(headers);
             
-            // Style headers
             headerRow.eachCell((cell) => {
                 cell.font = {
                     bold: true,
@@ -3451,7 +3181,7 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_functi
                 cell.fill = {
                     type: 'pattern',
                     pattern: 'solid',
-                    fgColor: { argb: 'FF1cc88a' } // Green background
+                    fgColor: { argb: 'FF1cc88a' } 
                 };
                 cell.alignment = { 
                     vertical: 'middle', 
@@ -3465,7 +3195,6 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_functi
                 };
             });
             
-            // Add data rows
             const dataRows = [
                 ['Completed Draws', data.completed_draws],
                 ['Pending Draws', data.pending_draws]
@@ -3474,7 +3203,6 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_functi
             dataRows.forEach(rowData => {
                 const row = worksheet.addRow(rowData);
                 
-                // Style data cells
                 row.eachCell((cell) => {
                     cell.alignment = { 
                         vertical: 'middle', 
@@ -3489,11 +3217,9 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_functi
                 });
             });
             
-            // Set column widths
             worksheet.getColumn(1).width = 20;
             worksheet.getColumn(2).width = 15;
             
-            // Generate Excel file
             workbook.xlsx.writeBuffer().then(buffer => {
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const url = window.URL.createObjectURL(blob);
@@ -3512,19 +3238,18 @@ function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_functi
 
 
 
-
+//    custom_admin_dashboard.html (adminpanel template)
+//    Winner,PaymentLottery table (models.py)
+//    WinnersVsLosersChartAPI function (views.py)
 function report_and_analytics_winners_vs_losers_chart_function() {
     const container = document.getElementById('report_and_analytics_winners_vs_losers_chart');
     if (!container) return;
 
-    // Fetch data from API
     fetch('/api/winners-vs-losers-chart/')
         .then(response => response.json())
         .then(data => {
-            // Clear container
             container.innerHTML = '';
             
-            // Create header with export button
             const header = document.createElement('div');
             header.className = 'report_and_analytics_winners_vs_losers_chart_header';
             header.style.display = 'flex';
@@ -3553,7 +3278,6 @@ function report_and_analytics_winners_vs_losers_chart_function() {
             header.appendChild(exportBtn);
             container.appendChild(header);
             
-            // Create today's counts section
             const todayCounts = document.createElement('div');
             todayCounts.style.display = 'flex';
             todayCounts.style.marginBottom = '20px';
@@ -3575,19 +3299,16 @@ function report_and_analytics_winners_vs_losers_chart_function() {
             todayCounts.appendChild(losersDiv);
             container.appendChild(todayCounts);
             
-            // Create chart container
             const chartContainer = document.createElement('div');
             chartContainer.style.position = 'relative';
             chartContainer.style.height = '135px';
             chartContainer.style.marginBottom = '30px';
             container.appendChild(chartContainer);
             
-            // Prepare chart data
             const labels = data.weekly_data.map(item => item.date);
             const winnersData = data.weekly_data.map(item => item.winners);
             const losersData = data.weekly_data.map(item => item.losers);
             
-            // Create line chart
             const ctx = document.createElement('canvas');
             chartContainer.appendChild(ctx);
             
@@ -3639,7 +3360,6 @@ function report_and_analytics_winners_vs_losers_chart_function() {
                 }
             });
             
-            // Create totals section
             const totalsDiv = document.createElement('div');
             totalsDiv.style.display = 'flex';
             totalsDiv.style.gap = '20px';
@@ -3671,17 +3391,16 @@ function report_and_analytics_winners_vs_losers_chart_function() {
         });
 }
 
-
+//    custom_admin_dashboard.html (adminpanel template)
+//    Winner,PaymentLottery table (models.py)
+//    WinnersVsLosersChartAPI function (views.py)
 function report_and_analytics_winners_vs_losers_chart_export_function() {
-    // Fetch data from API
     fetch('/api/winners-vs-losers-chart/')
         .then(response => response.json())
         .then(data => {
-            // Create a new workbook
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Winners vs Losers');
             
-            // 1. Add main title with styling
             worksheet.mergeCells('A1:C1');
             const titleRow = worksheet.getCell('A1');
             titleRow.value = 'Number of Winners and Losers Report';
@@ -3706,7 +3425,6 @@ function report_and_analytics_winners_vs_losers_chart_export_function() {
                 right: { style: 'thin' }
             };
             
-            // 2. Add Today's Count section
             worksheet.mergeCells('A3:B3');
             const todayTitle = worksheet.getCell('A3');
             todayTitle.value = "Today's Count";
@@ -3717,7 +3435,6 @@ function report_and_analytics_winners_vs_losers_chart_export_function() {
             worksheet.getCell('A5').value = 'Today Losers:';
             worksheet.getCell('B5').value = data.today_losers;
             
-            // 3. Add Weekly Totals section
             worksheet.mergeCells('A7:B7');
             const weeklyTitle = worksheet.getCell('A7');
             weeklyTitle.value = "Weekly Totals";
@@ -3728,18 +3445,15 @@ function report_and_analytics_winners_vs_losers_chart_export_function() {
             worksheet.getCell('A9').value = 'Total Losers:';
             worksheet.getCell('B9').value = data.total_losers;
             
-            // 4. Add Daily Breakdown section
             worksheet.mergeCells('A11:C11');
             const dailyTitle = worksheet.getCell('A11');
             dailyTitle.value = "Daily Breakdown (Last 7 Days)";
             applySectionHeaderStyle(dailyTitle);
             
-            // Column headers
             worksheet.getCell('A12').value = 'Date';
             worksheet.getCell('B12').value = 'Winners';
             worksheet.getCell('C12').value = 'Losers';
             
-            // Style column headers
             ['A12', 'B12', 'C12'].forEach(cellAddress => {
                 const cell = worksheet.getCell(cellAddress);
                 cell.font = { bold: true };
@@ -3760,14 +3474,12 @@ function report_and_analytics_winners_vs_losers_chart_export_function() {
                 };
             });
             
-            // Add daily data rows
             data.weekly_data.forEach((dayData, index) => {
                 const row = 13 + index;
                 worksheet.getCell(`A${row}`).value = dayData.date;
                 worksheet.getCell(`B${row}`).value = dayData.winners;
                 worksheet.getCell(`C${row}`).value = dayData.losers;
                 
-                // Apply borders to data cells
                 [`A${row}`, `B${row}`, `C${row}`].forEach(cellAddress => {
                     const cell = worksheet.getCell(cellAddress);
                     cell.border = {
@@ -3777,21 +3489,18 @@ function report_and_analytics_winners_vs_losers_chart_export_function() {
                         right: { style: 'thin' }
                     };
                     
-                    // Right-align numbers
                     if (cellAddress.startsWith('B') || cellAddress.startsWith('C')) {
                         cell.alignment = { horizontal: 'right' };
                     }
                 });
             });
             
-            // Set column widths
             worksheet.columns = [
                 { key: 'date', width: 20 },
                 { key: 'winners', width: 12 },
                 { key: 'losers', width: 12 }
             ];
             
-            // Generate Excel file
             workbook.xlsx.writeBuffer().then(buffer => {
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const link = document.createElement('a');
@@ -3807,7 +3516,6 @@ function report_and_analytics_winners_vs_losers_chart_export_function() {
         });
 }
 
-// Helper function to style section headers
 function applySectionHeaderStyle(cell) {
     cell.font = {
         bold: true,
@@ -3830,17 +3538,17 @@ function applySectionHeaderStyle(cell) {
         right: { style: 'thin' }
     };
 }
-
-// report_and_analytics_overall_transaction_report_chart_function start
+//    custom_admin_dashboard.html (adminpanel template)
+//    PaymentLottery table (models.py)
+//    OverallTransactionReportView function (views.py)
+// report_and_analytics_overall_transaction_report_chart_function
 function report_and_analytics_overall_transaction_report_chart_function() {
     const container = document.getElementById('report_and_analytics_overall_transaction_report_chart');
     if (!container) return;
 
-    // Fetch data from API
     fetch('/api/report_and_analytics/overall_transaction_report/')
         .then(response => response.json())
         .then(data => {
-            // Inject HTML structure
             container.innerHTML = `
                 <div class="report_and_analytics_overall_transaction_report_chart_header_class">
                     <h2>Overall Transaction Report</h2>
@@ -3861,7 +3569,6 @@ function report_and_analytics_overall_transaction_report_chart_function() {
                 </div>
             `;
 
-            // Initialize chart
             const ctx = document.getElementById('report_and_analytics_overall_transaction_report_chart_canvas').getContext('2d');
             window.report_and_analytics_overall_transaction_report_chart_instance = new Chart(ctx, {
                 type: 'line',
@@ -3920,24 +3627,22 @@ function report_and_analytics_overall_transaction_report_chart_function() {
             container.innerHTML = '<p>Error loading transaction report data</p>';
         });
 }
-// report_and_analytics_overall_transaction_report_chart_function end
 
 
-
-// report_and_analytics_overall_transaction_report_chart_export_function  Export function to Excel with raw data table start
+//    custom_admin_dashboard.html (adminpanel template)
+//    PaymentLottery table (models.py)
+//    OverallTransactionReportView function (views.py)
+// report_and_analytics_overall_transaction_report_chart_export_function  Export function to Excel with raw data table 
 async function report_and_analytics_overall_transaction_report_chart_export_function() {
     try {
-        // Load ExcelJS library dynamically
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js');
         
-        // Fetch the data again for export
         const response = await fetch('/api/report_and_analytics/overall_transaction_report/');
         const data = await response.json();
         
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet("Transaction Report");
         
-        // Add main heading
         sheet.mergeCells('A1:D1');
         const titleRow = sheet.getRow(1);
         titleRow.getCell(1).value = 'Overall Transaction Report';
@@ -3945,7 +3650,6 @@ async function report_and_analytics_overall_transaction_report_chart_export_func
         titleRow.getCell(1).alignment = { horizontal: 'center' };
         titleRow.height = 25;
         
-        // Add current month/year and profits
         const currentDate = new Date();
         const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
         const currentYear = currentDate.getFullYear();
@@ -3957,10 +3661,8 @@ async function report_and_analytics_overall_transaction_report_chart_export_func
         subtitleRow.getCell(1).alignment = { horizontal: 'center' };
         subtitleRow.height = 20;
         
-        // Add empty row for spacing
         sheet.addRow([]);
         
-        // Add table headers
         const headerRow = sheet.getRow(4);
         headerRow.values = ['Month', 'Successful (£)', 'Refunded (£)', 'Net (£)'];
         headerRow.font = { bold: true };
@@ -3979,7 +3681,6 @@ async function report_and_analytics_overall_transaction_report_chart_export_func
             };
         });
         
-        // Add data rows
         data.months.forEach((month, index) => {
             const successful = data.successful[index] || 0;
             const refunded = data.refunded[index] || 0;
@@ -3999,13 +3700,12 @@ async function report_and_analytics_overall_transaction_report_chart_export_func
                     bottom: { style: 'thin' },
                     right: { style: 'thin' }
                 };
-                if (cell.col === 4) { // Net column
+                if (cell.col === 4) { 
                     cell.font = { bold: true };
                     cell.numFmt = '£#,##0.00;[Red]-£#,##0.00';
                 }
             });
             
-            // Highlight current month
             if (month === currentMonth.slice(0, 3)) {
                 row.eachCell(cell => {
                     cell.fill = {
@@ -4017,7 +3717,6 @@ async function report_and_analytics_overall_transaction_report_chart_export_func
             }
         });
         
-        // Format columns
         sheet.columns = [
             { key: 'month', width: 15 },
             { key: 'successful', width: 18 },
@@ -4025,35 +3724,13 @@ async function report_and_analytics_overall_transaction_report_chart_export_func
             { key: 'net', width: 18 }
         ];
         
-        // Format numbers
         for (let i = 5; i <= sheet.rowCount; i++) {
             sheet.getCell(`B${i}`).numFmt = '£#,##0.00';
             sheet.getCell(`C${i}`).numFmt = '£#,##0.00';
             sheet.getCell(`D${i}`).numFmt = '£#,##0.00;[Red]-£#,##0.00';
         }
         
-        // // Add totals row
-        // const totalRow = sheet.addRow([
-        //     'TOTAL',
-        //     `=SUM(B5:B${sheet.rowCount})`,
-        //     `=SUM(C5:C${sheet.rowCount})`,
-        //     `=SUM(D5:D${sheet.rowCount})`
-        // ]);
-        
-        // totalRow.font = { bold: true };
-        // totalRow.eachCell(cell => {
-        //     cell.border = {
-        //         top: { style: 'double' },
-        //         bottom: { style: 'thin' },
-        //         left: { style: 'thin' },
-        //         right: { style: 'thin' }
-        //     };
-        //     if (cell.col > 1) {
-        //         cell.numFmt = '£#,##0.00;[Red]-£#,##0.00';
-        //     }
-        // });
-        
-        // Generate and download Excel file
+       
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -4069,7 +3746,6 @@ async function report_and_analytics_overall_transaction_report_chart_export_func
     }
 }
 
-// Helper function to load scripts dynamically (unchanged)
 function loadScript(src) {
     return new Promise((resolve, reject) => {
         if (document.querySelector(`script[src="${src}"]`)) {
@@ -4084,9 +3760,8 @@ function loadScript(src) {
         document.head.appendChild(script);
     });
 }
-// report_and_analytics_overall_transaction_report_chart_export_function  Export function to Excel with raw data table start
 
-// report_and_analytics_monthly_sales_bar_chart_function start
+// report_and_analytics_monthly_sales_bar_chart_function 
 function report_and_analytics_monthly_sales_bar_chart_function() {
 	const custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container = document.getElementById("report_and_analytics_monthly_sales_bar_chart");
 	custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container.innerHTML = `
@@ -4096,7 +3771,7 @@ function report_and_analytics_monthly_sales_bar_chart_function() {
         <!-- Year Selection Dropdown -->
         <label for="yearSelect">Select Year:</label>
         <select id="yearSelect"></select>
-        <button onclick="exportToExcel()">Export to Excel</button>
+        <button onclick="report_and_analytics_monthly_sales_bar_chart_exportToExcel()">Export to Excel</button>
 
 
     </div>
@@ -4106,9 +3781,12 @@ function report_and_analytics_monthly_sales_bar_chart_function() {
 	 `;
 
  }
-// report_and_analytics_monthly_sales_bar_chart_function end
 
-// report_and_analytics_marginal_chart_function start
+
+// report_and_analytics_marginal_chart_function 
+//    custom_admin_dashboard.html (adminpanel template)
+//    LotteryEvent,PaymentLottery,LotteryCategory table (models.py)
+//    MarginalChartDataView function (views.py)
 function report_and_analytics_marginal_chart_function(marginal_year, marginal_month) {
     const container = document.getElementById('report_and_analytics_marginal_chart');
     container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
@@ -4127,7 +3805,6 @@ function report_and_analytics_marginal_chart_function(marginal_year, marginal_mo
 function renderMarginalChart(data) {
     const container = document.getElementById('report_and_analytics_marginal_chart');
     
-    // Prepare HTML
     let html = `
         <div class="report_and_analytics_marginal_chart_header_class">
             <h3 class="report_and_analytics_marginal_chart_heading_class">Margin Chart</h3>
@@ -4179,18 +3856,13 @@ function renderMarginalChart(data) {
     
     container.innerHTML = html;
     
-    // Add event listeners for dropdowns
     document.getElementById('report_and_analytics_marginal_chart_year_select').addEventListener('change', function() {
         const year = this.value;
-        fetch(`/api/marginal-chart-data/?year=${year}`)
-            .then(response => response.json())
-            .then(data => {
-                const monthSelect = document.getElementById('report_and_analytics_marginal_chart_month_select');
-                monthSelect.innerHTML = data.months.map(month => 
-                    `<option value="${month.value}">${month.name}</option>`
-                ).join('');
-                report_and_analytics_marginal_chart_function(year, 'all');
-            });
+        const monthSelect = document.getElementById('report_and_analytics_marginal_chart_month_select');
+        monthSelect.innerHTML = data.months.map(month => 
+            `<option value="${month.value}">${month.name}</option>`
+        ).join('');
+        report_and_analytics_marginal_chart_function(year, 'all');   
     });
     
     document.getElementById('report_and_analytics_marginal_chart_month_select').addEventListener('change', function() {
@@ -4199,7 +3871,6 @@ function renderMarginalChart(data) {
         report_and_analytics_marginal_chart_function(year, month);
     });
     
-    // Render chart if data exists
     if (data.data && data.data.length > 0) {
         marginal_renderChart(data.data);
     } else {
@@ -4245,7 +3916,6 @@ function marginal_renderChart(chartData) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            // 🔧 FIX TOOLTIP ISSUES ON SMALL BARS
 
             interaction: {
 
@@ -4306,21 +3976,24 @@ function marginal_renderChart(chartData) {
         }
     });
 }
-
+//    custom_admin_dashboard.html (adminpanel template)
+//    LotteryCategory,PaymentLottery,LotteryEvent table (models.py)
+//    MarginalChartExportView function (views.py)
 function report_and_analytics_marginal_chart_export_function() {
     const year = document.getElementById('report_and_analytics_marginal_chart_year_select').value;
     const month = document.getElementById('report_and_analytics_marginal_chart_month_select').value;
     
     window.location.href = `/api/marginal-chart-export/?year=${year}&month=${month}`;
 }
-// report_and_analytics_marginal_chart_function end
 
 
-// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function start
+// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function
+//    custom_admin_dashboard.html (adminpanel template)
+//    Winner table (models.py)
+//    overall_won_and_lost_lotteries_report_LotteryReportAPI function (views.py)
 function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function() {
     const container = document.getElementById('admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart');
-    // Fetch data from API
-    fetch('/api/lottery-report/')
+    fetch('/api/overall_won_and_lost_lotteries_report_LotteryReportAPI/')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -4402,7 +4075,6 @@ function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_fu
                         }
                     }
                 },
-                // 🔧 FIX TOOLTIP ISSUES ON SMALL BARS
 
             interaction: {
 
@@ -4444,21 +4116,23 @@ function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_fu
         });
     }
 }
-// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function end
 
-// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function start
-
+// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function
+// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function
+//    custom_admin_dashboard.html (adminpanel template)
+//    Winner table (models.py)
+//    overall_won_and_lost_lotteries_report_LotteryReportExportAPI function (views.py)
 function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function() {
-    // Create a temporary link to trigger download
     const link = document.createElement('a');
-    link.href = '/api/lottery-report-export/';
+    link.href = '/api/overall_won_and_lost_lotteries_report_LotteryReportExportAPI/';
     link.download = 'Lottery_Report.xlsx';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
-// admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_function end
-
+//    custom_admin_dashboard.html (adminpanel template)
+//    adminProfile,UserProfile,LotteryEvent,PaymentLottery table (models.py)
+//    api_dashboard_preview_admin_view,api_navbar_access_tabsView function (views.py)
 function initializeDashboard() {
     try {
 
@@ -4476,8 +4150,7 @@ function initializeDashboard() {
                 .then(data => {
                     try {
                         const sidebar = document.querySelector(".custom_admin_dashboard_sidebar nav ul");
-                        sidebar.innerHTML = ""; // Clear existing tabs
-
+                        sidebar.innerHTML = ""; 
                         data.forEach(tab => {
                             const li = document.createElement("li");
                             let active = tab.identifier === null ? "active" : "";
@@ -4509,38 +4182,11 @@ function initializeDashboard() {
                 .then(response => response.json())
                 .then(({ data, tabs, table_data }) => {
                     try {
-                        const dashboard = document.querySelector('.custom_admin_dashboard_overview_count');
-                        const Statistics_count_dashboard = document.querySelector('.custom_admin_dashboard_overview_statistics_count');
-                        const tableContainer = document.querySelector('.custom_admin_dashboard_user_table');
-                        const custom_admin_dashboard_conversion_rate_Container = document.querySelector('.custom_admin_dashboard_conversion_rate');
 
                         tabs.forEach(tab => {
+                           
                             try {
-                                if (tab.type === 'count') {
-                                    const container = document.createElement('div');
-                                    container.className = 'custom_admin_dashboard_card';
-                                    container.innerHTML = `
-                                            <h2>${tab.name}</h2>
-                                            <p id="${tab.identifier}">${data[tab.identifier] || 0}</p>
-                                        `;
-                                    dashboard.appendChild(container);
-                                }
-                                else if (tab.type === 'overview_notification_bell') {
-                                    document.getElementById("notification-bell-container").hidden = false;
-                                }
-                                 else if (tab.type === 'Statistics_count') {
-                                    const custom_admin_dashboard_report_and_analytics_statistics_count_container = document.createElement('div');
-                                    custom_admin_dashboard_report_and_analytics_statistics_count_container.className = 'custom_admin_dashboard_card';
-                                    const custom_admin_dashboard_report_and_analytics_statistics_count = document.getElementById("custom_admin_dashboard_report_and_analytics_statistics_count");
-                                    
-                                    custom_admin_dashboard_report_and_analytics_statistics_count_container.innerHTML = `
-                                            <h2>${tab.name}</h2>
-                                            <p id="${tab.identifier}">${data[tab.identifier] || 0}</p>
-                                        `;
-                                        custom_admin_dashboard_report_and_analytics_statistics_count.appendChild(custom_admin_dashboard_report_and_analytics_statistics_count_container);
-                                    // lottery_sales_count();
-                                }  else if (tab.type === 'overview_counts') {
-
+                               if (tab.type === 'overview_counts') {
                                     const custom_admin_dashboard_overview_lottery_won_lost_count = document.getElementById("custom_admin_dashboard_overview_lottery_won_lost_count");
                                     const lottery_won_lost_container = document.createElement('div');
                                     lottery_won_lost_container.className = 'overview_sales_count_card';
@@ -4550,53 +4196,44 @@ function initializeDashboard() {
                                     lottery_won_lost_container.innerHTML = `
                                                  
                                                 <p>${imageHtml} ${tab.name}</p>
-                                                <h2 id="${tab.identifier}"></h2>
-                                               
-                                           
+                                                <h2 id="${tab.identifier}">${data[tab.identifier] || 0}</h2> 
                                         `;
                                     custom_admin_dashboard_overview_lottery_won_lost_count.appendChild(lottery_won_lost_container);
-                                    lottery_won_and_lost_total_calculation();
-                                } else if (tab.type === 'charts') {
-                                    if (tab.identifier === 'report_and_analytics_monthly_sales_bar_chart') {
+                                }  else if (tab.type === 'charts') {
+                                    if (tab.identifier === 'admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart') {
+                                         admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function();
+                                    } else if (tab.identifier === 'report_and_analytics_marginal_chart') {
+                                        const currentDate = new Date();
+                                        report_and_analytics_marginal_chart_function(currentDate.getFullYear(), 'all');
+                                    } else if (tab.identifier === 'report_and_analytics_monthly_sales_bar_chart') {
                                         report_and_analytics_monthly_sales_bar_chart_function();
-                                        dynamic_lottery_sales_bar_chart(); // If needed with it
+                                        dynamic_lottery_sales_bar_chart(); 
                                     } else if (tab.identifier === 'report_and_analytics_Pending_vs_completed_draws_pie_chart') {
                                         report_and_analytics_Pending_vs_completed_draws_pie_chart_function();
                                     } else if (tab.identifier === 'report_and_analytics_winners_vs_losers_chart') {
                                         report_and_analytics_winners_vs_losers_chart_function();
                                     } else if (tab.identifier === 'report_and_analytics_overall_transaction_report_chart') {
                                         report_and_analytics_overall_transaction_report_chart_function();
-                                    } else if (tab.identifier === 'admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart') {
-                                         admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function();
-                                    } else if (tab.identifier === 'report_and_analytics_marginal_chart') {
-                                        const currentDate = new Date();
-                                        report_and_analytics_marginal_chart_function(currentDate.getFullYear(), 'all');
-                                    }
-                                    
+                                    } 
                 
-                                } else if (tab.type === 'user_leaderboard') {
-                                    const leaderboard_container = document.getElementById("leaderboard");
-                                    leaderboard_container.style.display = "block";
-                                    const leaderboard_title = document.getElementById("leaderboard_title");
-                                    leaderboard_title.className = 'custom_admin_dashboard_leaderboard_title';
-                                    leaderboard_title.textContent = tab.name;
-                                    user_leaderboard();
+                                } else if (tab.type === 'overview_notification_bell') {
+                                    document.getElementById("notification-bell-container").hidden = false;
                                 } else if (tab.type === 'table') {
-                                    let rows = [];  // All user rows from the server
-                                    let currentIndex = 10;  // Start after showing the first 3 users
+                                    let rows = []; 
+                                    let currentIndex = 10;  
                                     const rowsPerPage = 10;
-                                    let selectedFilter = "All Users"; // Default filter
+                                    let selectedFilter = "All Users"; 
                                     const container = document.querySelector(".custom_admin_dashboard_user_table");
 
                                     function user_management_table() {
 
-                                        // Create search input container
+                                       
                                         const searchContainer = document.createElement("div");
                                         searchContainer.style.display = "flex";
                                         searchContainer.style.alignItems = "center";
                                         searchContainer.style.gap = "10px";
 
-                                        // Create search input
+                                       
                                         const searchInput = document.createElement('input');
                                         searchInput.type = "text";
                                         searchInput.id = "searchUserInput";
@@ -4604,14 +4241,14 @@ function initializeDashboard() {
                                         searchInput.onkeyup = searchUsers;
                                         searchContainer.appendChild(searchInput);
 
-                                        // Create filter dropdown (select element)
+                                      
                                         const filterDropdown = document.createElement('select');
                                         filterDropdown.id = "filterDropdown";
                                         filterDropdown.style.padding = "5px";
                                         filterDropdown.style.borderRadius = "4px";
                                         filterDropdown.style.border = "1px solid #ccc";
 
-                                        // Add options to the dropdown
+                                      
                                         const options = ["All Users", "Blocked Users"];
                                         options.forEach(option => {
                                             const optionElement = document.createElement('option');
@@ -4620,29 +4257,29 @@ function initializeDashboard() {
                                             filterDropdown.appendChild(optionElement);
                                         });
 
-                                        // Set default selected option
+                                       
                                         filterDropdown.value = selectedFilter;
 
-                                        // Add event listener to handle filter changes
+                                       
                                         filterDropdown.addEventListener('change', (event) => {
                                             selectedFilter = event.target.value;
-                                            searchUsers(); // Re-filter the users
+                                            searchUsers();
                                         });
 
                                         searchContainer.appendChild(filterDropdown);
 
-                                        const user_management_title_textElement = document.createElement("span"); // Create a span element
-                                        user_management_title_textElement.textContent = "User Management"; // Set text content
+                                        const user_management_title_textElement = document.createElement("span"); 
+                                        user_management_title_textElement.textContent = "User Management"; 
 
-                                        // Apply styles for size increase and bottom space
-                                        user_management_title_textElement.style.fontSize = "24px"; // Increase font size
-                                        user_management_title_textElement.style.display = "block"; // Make it block-level for spacing
-                                        user_management_title_textElement.style.marginBottom = "20px"; // Add bottom space
+                                       
+                                        user_management_title_textElement.style.fontSize = "24px"; 
+                                        user_management_title_textElement.style.display = "block"; 
+                                        user_management_title_textElement.style.marginBottom = "20px"; 
 
-                                        container.appendChild(user_management_title_textElement); // Append it to the container
+                                        container.appendChild(user_management_title_textElement); 
                                         container.appendChild(searchContainer);
 
-                                        // Create table
+                                       
                                         const table = document.createElement('table');
                                         table.className = "custom_admin_dashboard_custom_table";
                                         table.innerHTML = `
@@ -4666,7 +4303,6 @@ function initializeDashboard() {
                                         noUserMessage.textContent = "user not found";
                                         container.appendChild(noUserMessage);
 
-                                        // Create user count display
                                         const userCountContainer = document.createElement('div');
                                         userCountContainer.id = "userCountContainer";
                                         userCountContainer.style.marginTop = "10px";
@@ -4680,9 +4316,7 @@ function initializeDashboard() {
                                         container.appendChild(user_management_button);
 
                                         createViewMoreLessButtons(container);
-                                        // Fetch and render initial data
                                         fetchAndRenderUsers(true);
-                                        // Set up menu event listeners
                                         setupMenuEventListeners();
                                     }
 
@@ -4713,20 +4347,17 @@ function initializeDashboard() {
                                     }
 
                                     function fetchAndRenderUsers(renderInitialuser = false) {
-                                        fetch(api_dashboard_preview_admin_view_url)
-                                            .then(response => response.json())
-                                            .then(({ table_data }) => {
-                                                rows = table_data.users_table;
+                                    
+                                                rows = table_data[tab.identifier];
                                                 currentIndex = 10;
                                                 if (renderInitialuser) {
-                                                    
+        
                                                     renderInitialRows(); 
                                                 }
                                                
                                                 updateUserCount();
                                                 toggleViewMoreLessButtons(rows.filter(row => selectedFilter === "Blocked Users" ? row.is_blocked : true));
-                                            })
-                                            .catch(error => console.error("Error fetching users:", error));
+                                          
                                     }
 
                                     function renderInitialRows() {
@@ -4736,7 +4367,6 @@ function initializeDashboard() {
 
                                         let filteredRows = rows;
 
-                                        // Apply filter: Show only blocked users if selected
                                         if (selectedFilter === "Blocked Users") {
                                             filteredRows = rows.filter(row => row.is_blocked);
                                         }
@@ -4817,21 +4447,21 @@ function initializeDashboard() {
                                             <div class="users_management_user_details_page_user_statistics">
                                            
                                         <div class="users_management_user_details_page_statistic_container">
-                                            <img src="http://127.0.0.1:8000/media/dashboard_preview_image/icon-park-solid_ticket.png">
+                                            <img src="/media/dashboard_preview_image/icon-park-solid_ticket.png">
                                             <div>
                                                 <h3>Total Number Of Transactions</h3>
                                                 <p id="total_number_of_transactions_count_user_details_management">0</p>
                                             </div>
                                         </div>
                                         <div class="users_management_user_details_page_statistic_container">
-                                            <img src="http://127.0.0.1:8000/media/dashboard_preview_image/solar_money-bag-bold.png">
+                                            <img src="/media/dashboard_preview_image/solar_money-bag-bold.png">
                                             <div>
                                                 <h3>Total Amount Earned</h3>
                                                 <p>5.2M</p>
                                             </div>
                                         </div>
                                         <div class="users_management_user_details_page_statistic_container">
-                                            <img src="http://127.0.0.1:8000/media/dashboard_preview_image/solar_wallet-bold.png">
+                                            <img src="/media/dashboard_preview_image/solar_wallet-bold.png">
                                             <div>
                                                 <h3>Total Amount in Wallet</h3>
                                                 <p>£ 50000</p>
@@ -4841,30 +4471,29 @@ function initializeDashboard() {
                                     }
                                     $(document).on('change', '.user_kyc_waiting_list-kyc-statusselect', function () {
                                         try {
-                                            const userId = $(this).data('user-id'); // Get the user ID from the data attribute
-                                            const newStatus = $(this).val(); // Get the selected status
+                                            const userId = $(this).data('user-id'); 
+                                            const newStatus = $(this).val();
                                     
-                                            // Update the background color based on the selected status
+                                         
                                             updateSelectColor($(this), newStatus);
                                     
-                                            // Perform an AJAX POST request to update the KYC status
                                             $.ajax({
-                                                url: adminupdaetkycapprovalUrl, // The URL to handle KYC approval updates
+                                                url: adminupdaetkycapprovalUrl, 
                                                 type: 'POST',
-                                                data: JSON.stringify({ user_id: userId, kyc_status: newStatus }), // Send the user ID and new status
+                                                data: JSON.stringify({ user_id: userId, kyc_status: newStatus }),
                                                 contentType: 'application/json',
-                                                headers: { 'X-CSRFToken': csrfToken }, // Include CSRF token for security
+                                                headers: { 'X-CSRFToken': csrfToken }, 
                                                 success: function (response) {
-                                                    // Update the `rows` array with the new status
+                                                  
                                                     const userIndex = rows.findIndex(row => row.user?.id === userId);
                                                     if (userIndex !== -1) {
-                                                        rows[userIndex].kyc_status = newStatus; // Update the status in the `rows` array
+                                                        rows[userIndex].kyc_status = newStatus;
                                                     }
                                     
-                                                    alert(`KYC status updated to ${newStatus}`); // Notify the user of success
+                                                    alert(`KYC status updated to ${newStatus}`);
                                                 },
                                                 error: function (xhr, status, error) {
-                                                    alert(`Failed to update KYC status: ${error}`); // Notify the user of failure
+                                                    alert(`Failed to update KYC status: ${error}`); 
                                                 }
                                             });
                                         } catch (error) {
@@ -4899,7 +4528,9 @@ function initializeDashboard() {
                                     }
                                  
                                    
-                                   
+                                //    custom_admin_dashboard.html (adminpanel template)
+                                //    userprofile table (models.py)
+                                //    block_user function (views.py)
                                     $(document).on('click', '.block-user-btn', function () {
                                         let button = $(this);
                                         let userId = button.data('user-id');
@@ -4907,25 +4538,20 @@ function initializeDashboard() {
 
                                         axios.post('/block-user/',
                                             { user_id: userId, action: action },
-                                            { headers: { 'X-CSRFToken': admin_chats_csrfToken } }  // CSRF Token header
+                                            { headers: { 'X-CSRFToken': admin_chats_csrfToken } }  
                                         )
                                             .then(response => {
-
                                                 alert(response.data.message);
-                                    
-                                                // Update the button text
                                                 button.text(action === "block" ? "Unblock User" : "Block User");
                                     
-                                                // Update the user's block status in the `rows` array
                                                 const userIndex = rows.findIndex(row => row.user?.id === userId);
                                                 if (userIndex !== -1) {
                                                     rows[userIndex].is_blocked = action === "block";
                                                 }
                                     
-                                                // Refresh the table if the "Blocked Users" filter is active
                                                 if (selectedFilter === "Blocked Users") {
-                                                    renderInitialRows(); // Re-render the initial rows
-                                                    toggleViewMoreLessButtons(rows.filter(row => row.is_blocked)); // Recalculate button visibility
+                                                    renderInitialRows();
+                                                    toggleViewMoreLessButtons(rows.filter(row => row.is_blocked)); 
                                                 }
                                             })
                                             .catch(error => {
@@ -4940,12 +4566,10 @@ function initializeDashboard() {
                                         const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
                                         let filteredRows = rows;
 
-                                        // Apply filter: Show only blocked users if selected
                                         if (selectedFilter === "Blocked Users") {
                                             filteredRows = rows.filter(row => row.is_blocked);
                                         }
 
-                                        // Apply comprehensive search filter
                                         const matchingRows = filteredRows.filter(row =>
                                         (row.user?.username?.toLowerCase().includes(searchValue) ||
                                             row.user?.email?.toLowerCase().includes(searchValue) ||
@@ -4954,10 +4578,10 @@ function initializeDashboard() {
                                         );
 
                                         const endIndex = Math.min(currentIndex + rowsPerPage, matchingRows.length);
-                                        renderRows(currentIndex, endIndex, matchingRows); // Render additional rows
-                                        currentIndex = endIndex; // Update the currentIndex
+                                        renderRows(currentIndex, endIndex, matchingRows); 
+                                        currentIndex = endIndex; 
                                       
-                                        toggleViewMoreLessButtons(matchingRows); // Update the button visibility
+                                        toggleViewMoreLessButtons(matchingRows); 
                                     }
 
                                     function viewLessRows() {
@@ -4988,18 +4612,16 @@ function initializeDashboard() {
                                     function searchUsers() {
                                         const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
                                         const tbody = document.getElementById('userTableBody');
-                                        const noUserMessage = document.getElementById('noUserMessage'); // Element for "User not found"
+                                        const noUserMessage = document.getElementById('noUserMessage'); 
 
-                                        currentIndex = 10; // Reset the currentIndex to 3
+                                        currentIndex = 10; 
 
                                         let filteredRows = rows;
 
-                                        // Apply filter: Show only blocked users if selected
                                         if (selectedFilter === "Blocked Users") {
                                             filteredRows = rows.filter(row => row.is_blocked);
                                         }
 
-                                        // Apply comprehensive search filter
                                         const matchingRows = filteredRows.filter(row =>
                                             (row.user?.username?.toLowerCase().includes(searchValue) ||
                                             row.user?.email?.toLowerCase().includes(searchValue) ||
@@ -5007,14 +4629,14 @@ function initializeDashboard() {
                                             row.ip_address?.toLowerCase().includes(searchValue))
                                         );
 
-                                        tbody.innerHTML = ''; // Clear the table body
+                                        tbody.innerHTML = ''; 
 
                                         if (matchingRows.length === 0) {
-                                            noUserMessage.style.display = 'block'; // Show "User not found" message
+                                            noUserMessage.style.display = 'block'; 
                                         } else {
-                                            noUserMessage.style.display = 'none'; // Hide the message if users are found
-                                            matchingRows.slice(0, 10).forEach(row => appendRow(row)); // Render the first 3 matching rows
-                                            toggleViewMoreLessButtons(matchingRows); // Update the button visibility based on matching rows
+                                            noUserMessage.style.display = 'none'; 
+                                            matchingRows.slice(0, 10).forEach(row => appendRow(row)); 
+                                            toggleViewMoreLessButtons(matchingRows); 
                                         }
                                     }
                                     function setupMenuEventListeners() {
@@ -5028,7 +4650,6 @@ function initializeDashboard() {
                                             }
                                         });
                                     }
-                                    // Initialize the dashboard UI on page load
                                     user_management_table();
 
                                 } else if (tab.type === 'lotterys') {
@@ -5052,9 +4673,6 @@ function initializeDashboard() {
                                     if (add_lottery_icon) {
                                         add_lottery_icon.style.display = 'inline-block';
                                     }
-
-
-
                                     document.getElementById('custom_admin_dashboard_openFormButton').onclick = function () {
                                         document.getElementById('lotteryEventModal').style.display = 'block';
                                     };
@@ -5075,37 +4693,24 @@ function initializeDashboard() {
                                         }
                                     }
                                     add_lottery_draw_date_past_date_validation()
-                                } else if (tab.type === 'rate') {
-                                    const title = document.createElement('h2');
-                                    title.className = 'custom_admin_dashboard_table_title';
-                                    title.textContent = tab.name;
-
-                                    custom_admin_dashboard_conversion_rate_Container.appendChild(title);
-
-                                    const table = document.createElement('table');
-                                    table.className = 'custom_admin_dashboard_custom_table';
-                                    table.innerHTML = `
-                                            <thead>
-                                                <tr>
-                                                    <th>Card Type</th>
-                                                    <th>Region</th>
-                                                    <th>Type</th>
-                                                    <th>Rate (₦)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${table_data[tab.identifier]?.map(row => `
-                                                    <tr>
-                                                        <td>${row.card_type}</td>
-                                                        <td>${row.region}</td>
-                                                        <td>${row.is_physical ? 'Physical' : 'E-Code'}</td>
-                                                        <td>${row.rate}</td>
-                                                    </tr>
-                                                `).join('') || ''}
-                                            </tbody>
+                                } else if (tab.type === 'transactions') {
+                                    if (tab.identifier === "custom_admin_dashboard_all_transactions_management") {
+                                        custom_admin_dashboard_transactions_management_function(null, "all_transactions");
+                                    } else if (tab.identifier === "custom_admin_dashboard_transactions_management_refunded") {
+                                        custom_admin_dashboard_transactions_management_function(null, "refunded");
+                                    } 
+                                }  else if (tab.type === 'Statistics_count') {
+                                    const custom_admin_dashboard_report_and_analytics_statistics_count_container = document.createElement('div');
+                                    custom_admin_dashboard_report_and_analytics_statistics_count_container.className = 'custom_admin_dashboard_card';
+                                    const custom_admin_dashboard_report_and_analytics_statistics_count = document.getElementById("custom_admin_dashboard_report_and_analytics_statistics_count");
+                                    
+                                    custom_admin_dashboard_report_and_analytics_statistics_count_container.innerHTML = `
+                                            <h2>${tab.name}</h2>
+                                            <p id="${tab.identifier}">${data[tab.identifier] || 0}</p>
                                         `;
-                                    custom_admin_dashboard_conversion_rate_Container.appendChild(table);
-                                }
+                                        custom_admin_dashboard_report_and_analytics_statistics_count.appendChild(custom_admin_dashboard_report_and_analytics_statistics_count_container);
+                                   
+                                } 
                             } catch (error) {
                                 console.error(`Error processing tab: ${tab.name}`, error);
                             }
@@ -5157,23 +4762,21 @@ try {
 
     $(document).on('change', '.user_kyc_waiting_list-kyc-statusselec', function () {
         try {
-            const userId = $(this).data('user-id'); // Get the user ID from the data attribute
-            const newStatus = $(this).val(); // Get the selected status
-            // Update the background color based on the selected status
+            const userId = $(this).data('user-id');
+            const newStatus = $(this).val();
             updateSelectColor($(this), newStatus);
 
-            // Perform an AJAX POST request to update the KYC status
             $.ajax({
-                url: adminupdaetkycapprovalUrl, // The URL to handle KYC approval updates
+                url: adminupdaetkycapprovalUrl, 
                 type: 'POST',
-                data: JSON.stringify({ user_id: userId, kyc_status: newStatus }), // Send the user ID and new status
+                data: JSON.stringify({ user_id: userId, kyc_status: newStatus }), 
                 contentType: 'application/json',
-                headers: { 'X-CSRFToken': csrfToken }, // Include CSRF token for security
+                headers: { 'X-CSRFToken': csrfToken }, 
                 success: function (response) {
-                    alert(`KYC status updated to ${newStatus}`); // Notify the user of success
+                    alert(`KYC status updated to ${newStatus}`);
                 },
                 error: function (xhr, status, error) {
-                    alert(`Failed to update KYC status: ${error}`); // Notify the user of failure
+                    alert(`Failed to update KYC status: ${error}`);
                 }
             });
         } catch (error) {
@@ -5182,13 +4785,12 @@ try {
         }
     });
 
-    // Function to apply background color based on the selected option
     function updateSelectColor(selectElement, status) {
         const colorMap = {
-            "verified": "#28B446",   // Orange
-            "pending": "#FFAD33",    // Light Orange
-            "rejected": "red",       // Red
-            "waiting": "yellow"      // Yellow
+            "verified": "#28B446",  
+            "pending": "#FFAD33",   
+            "rejected": "red",      
+            "waiting": "yellow"      
         };
 
         selectElement.css({
@@ -5197,7 +4799,6 @@ try {
         });
     }
 
-    // Apply colors when the page loads
     function user_management_account_status_update_color() {
         $('.user_kyc_waiting_list-kyc-statusselect').each(function () {
             updateSelectColor($(this), $(this).val());
@@ -5208,7 +4809,7 @@ try {
     console.error('Unexpected Error:', error);
 }
 
-// faq
+// faq page.html
 document.addEventListener("DOMContentLoaded", () => {
     const faqItems = document.querySelectorAll('.faq-item');
     const faqTitleMain = document.getElementById('faq-title-main');
@@ -5231,13 +4832,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "faq10": "Log in to your account, navigate to the “Payments” section, and add or update your preferred payment methods.",
         "faq11": "Your account may be blocked due to suspicious activity, multiple failed logins, or policy violations. Unauthorized automation or unpaid dues can also restrict access. If this is a mistake, contact gurutech2620@gmail.com for help."
     };
-
-
-
     // Determine the default FAQ based on the blocked status
     let defaultFaq = isBlocked === "true" ? "faq11" : "faq1";
     let defaultFaqItem = document.querySelector(`[data-target="${defaultFaq}"]`);
-
     // Display the default FAQ
     if (defaultFaqItem) {
         defaultFaqItem.classList.add('expanded');
@@ -5245,7 +4842,6 @@ document.addEventListener("DOMContentLoaded", () => {
         faqTitleMain.textContent = defaultFaqItem.querySelector('.faq-title').textContent;
         faqText.textContent = faqContent[defaultFaq];
     }
-
     // Add click event listeners to each FAQ item
     faqItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -5414,9 +5010,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
-/*-----------------navbar-------*/
-
-
+/*-----------------navbar.html-------*/
 function toggleMenu() {
     const navbarLinks = document.querySelector('.navbar-links');
     navbarLinks.classList.toggle('active');
@@ -5574,7 +5168,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     
 });
-
+//login.html
 // Function to get CSRF token from cookies
 function getCookie(name) {
     let cookieValue = null;
@@ -5604,12 +5198,6 @@ $(document).ready(function () {
         $('#login-email').on('focusout', function () {
             const email = $(this).val().trim();
             const errorElement = $('#login-email-error');
-    
-            // if (email === '') {
-            //     errorElement.text('').removeClass('login-error login-valid'); // Clear error message
-            //     return;
-            // }
-    
             if (!validateEmail(email)) {
                 errorElement.text('Invalid email address.').addClass('login-error').removeClass('login-valid');
             } else {
@@ -5623,37 +5211,7 @@ $(document).ready(function () {
     $('#login-password').on('input', function () {
         validatePassword($(this).val(), 'login-password-error');
     });
-
-    // // Toggle password visibility
-    // function togglePasswordVisibility(toggleButtonId, passwordFieldId) {
-    //     $(toggleButtonId).on('click', function () {
-    //         const passwordField = $(passwordFieldId);
-    //         // const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
-    //         // passwordField.attr('type', type);
-    //         // $(this).text(type === 'password' ? '🙈' : '👁️');
-
-    //         const icon = $(this).find("img");
-    //     const isPassword = passwordField.attr('type') === 'password';
-
-    //     // Toggle password visibility
-    //     passwordField.attr('type', isPassword ? 'text' : 'password');
-
-    //     // Toggle the eye icon between `eye.svg` and `eye-slash.svg`
-    //     const newIconSrc = isPassword ? "/media/images/eye-slash.svg" : "/media/images/eye.svg";
-    //     icon.attr("src", newIconSrc);
-    //     });
-    // }
-    togglePasswordVisibility('#login-toggle-password', '#login-password');
-
-
-    // Function to get cookie value by name
-    // function getCookie(name) {
-    //     const value = '; ' + document.cookie;
-    //     const parts = value.split('; ' + name + '=');
-    //     if (parts.length === 2) return parts.pop().split(';').shift();
-    //     return null;
-    // }
-
+    togglePasswordVisibility('#login-toggle-password', '#login-password');  
     $.ajaxSetup({
         headers: {
             'X-CSRFToken': getCookie('csrftoken') // Use the getCookie function
@@ -5788,8 +5346,6 @@ $(document).ready(function () {
         saveCookies(); // Save cookies before submitting
         // Clear previous login error message
         $('#login-error').text('');
-
-
         $.ajax({
             type: 'POST',
             url: loginUrl,
@@ -5818,12 +5374,10 @@ $(document).ready(function () {
             }
         });
     });
-
        // Block User Modal Close Handling
        $('.login_blocked-close').on('click', function () {
         $('#login_blocked-modal').hide();
     });
-
     // Close modal when clicking outside
     $(window).on('click', function (event) {
         if ($(event.target).is('#login_blocked-modal')) {
@@ -5834,26 +5388,12 @@ $(document).ready(function () {
     populateFormFields();
     handleLogout('#logout-button', '/login/');
 });
-
-
-
-//signup.html
-// Toggle password visibility
+//signup.html for form submitting
 togglePasswordVisibility('#signup-toggle-password', '#signup-password');
-
-
-// Username validation and availability check
 $('#signup-username').on('focusout', function () {
     const username = $(this).val().trim();
     const errorElement = $('#signup-username-error');
     const suggestionElement = $('#signup-username-suggestion');
- // Clear messages if input is empty
-//  if (username === '') {
-//     errorElement.text('').removeClass('signup-error signup-valid');
-//     suggestionElement.hide();
-//     return;
-// }
-
     if (!validateUsername(username)) {
         errorElement.text("Invalid username. Only letters, digits, @/./+/-/_ are allowed (max 20 characters).")
             .addClass('signup-error')
@@ -5861,9 +5401,6 @@ $('#signup-username').on('focusout', function () {
         suggestionElement.hide();
         return;
     }
-
-
-    // Check username availability
     $.ajax({
         type: 'GET',
         url: checkusernameUrl,
@@ -5890,22 +5427,16 @@ $('#signup-username').on('focusout', function () {
         }
     });
 });
-
-let isEmailValid = false; // Track email validity
-// Email validation and availability check
+let isEmailValid = false; 
 $('#signup-email').on('focusout', function () {
     const email = $(this).val().trim();
     const errorElement = $('#signup-email-error');
-
-
     if (!validateEmail(email)) {
         errorElement.text("Invalid email address.")
             .addClass('signup-error')
             .removeClass('signup-valid');
         return;
     }
-
-
     $.ajax({
         type: 'GET',
         url: checkemailUrl,
@@ -5916,7 +5447,7 @@ $('#signup-email').on('focusout', function () {
                     .text("Email already exists. Choose another one.")
                     .addClass('signup-error')
                     .removeClass('signup-valid');
-                isEmailValid = false; // Mark email as invalid
+                isEmailValid = false; 
             } else {
                 errorElement
                     .text("Email available.")
@@ -5934,29 +5465,22 @@ $('#signup-email').on('focusout', function () {
         }
     });
 });
-
-
 // Password validation
-
 $(document).ready(function () {
     var passwordInput = $("#signup-password");
-
     // Show validation message box when clicking the password field
     passwordInput.on("focus", function () {
         $("#password-message").slideDown(200);
     });
-
     // Hide message box when clicking outside
     $(document).on("click", function (event) {
         if (!$(event.target).closest("#signup-password, #password-message").length) {
             $("#password-message").slideUp(200);
         }
     });
-
     // Password validation logic
     passwordInput.on("input", function () {
         var password = passwordInput.val();
-
         // Validate conditions
         validateRequirement(password, /[A-Z]/, "#password-uppercase");  // Uppercase letter
         validateRequirement(password, /[a-z]/, "#password-lowercase");  // Lowercase letter
@@ -5964,7 +5488,6 @@ $(document).ready(function () {
         validateRequirement(password, /[\W_]/, "#password-special");    // Special character
         validateRequirement(password.length >= 8, true, "#password-length"); // Length
     });
-
     // Function to validate and update UI
     function validateRequirement(password, regex, elementId) {
         if (password && (regex instanceof RegExp ? regex.test(password) : password)) {
@@ -5974,19 +5497,13 @@ $(document).ready(function () {
         }
     }
 });
-
-
 // Clear error message when correcting input
 $('#signup-username, #signup-email, #signup-password').on('input', function () {
     $('#signup-form-error-message').text('').removeClass('signup-error');
 });
-
-
 // Form submission
 $('#signup').on('submit', function (e) {
     e.preventDefault();
-
-
     // Validate before submitting the form
     const username = $('#signup-username').val().trim();
     const email = $('#signup-email').val().trim();
@@ -6005,8 +5522,6 @@ $('#signup').on('submit', function (e) {
             .addClass('signup-error');
         return; // Stop form submission if email is invalid
     }
-
-
     const formData = {
         username,
         email,
@@ -6015,8 +5530,6 @@ $('#signup').on('submit', function (e) {
             newsletter: $('#signup-newsletter').is(':checked')
         }
     };
-
-
     $.ajax({
         type: "POST",
         url: registerUrl,
@@ -6035,7 +5548,7 @@ $('#signup').on('submit', function (e) {
     });
 });
 
-//user_welcome_page.html
+
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -6086,7 +5599,7 @@ if (typeof googleEmail !== "undefined" && googleEmail) {
         sessionStorage.setItem("google_merge_alert_shown", "true");
     }
 }
-
+//lottery_events.html--user_registrartion module--views.py function class KYCStatusView(APIView):
 function checkKYCStatus() {
     if (typeof kycStatusUrl === "undefined") {
 
@@ -6143,51 +5656,8 @@ function kycimage_validateFileSize() {
         errorMessageElement.textContent = "";
     }
 }
-// document.addEventListener("DOMContentLoaded", function () {
 
-//     const kycUploadForm = document.getElementById("kycUploadForm");
-//     if (kycUploadForm) {
-//         kycUploadForm.onsubmit = function (e) {
-//             e.preventDefault();
-//             const errorMessageElement = document.getElementById("error-message");
-//             const imageFile = document.getElementById("kycImage")?.files[0];
-
-//             if (imageFile && imageFile.size <= 500 * 1024) {
-//                 const formData = new FormData();
-//                 formData.append("image", imageFile);
-
-//                 fetch(kycUploadUrl, {
-//                     method: "POST",
-//                     headers: {
-//                         "X-CSRFToken": csrfToken,
-//                     },
-//                     body: formData,
-//                 })
-//                     .then(response => response.json())
-//                     .then(data => {
-//                         if (data.status === "success") {
-//                             alert("KYC image uploaded successfully.");
-//                             closeKYCModal();
-//                             if (typeof kycStatusUrl !== "undefined") {
-//                                 checkKYCStatus();
-//                             }
-//                         } else if (data.image) {
-//                             errorMessageElement.textContent = data.image[0];
-//                         } else {
-//                             console.error("KYC upload error:", data);
-//                         }
-//                     })
-//                     .catch(error => console.error("Error uploading KYC image:", error));
-//             } else {
-//                 errorMessageElement.textContent = "File size must be less than 500KB.";
-//             }
-//         };
-//     } else {
-
-//     }
-// });
-
-
+//lottery_events.html--user_registrartion module--views.py function class KYCUploadView(APIView):
 function handleKYCForm() {
     const kycUploadForm = document.getElementById("kycUploadForm");
     if (kycUploadForm) {
@@ -6743,7 +6213,9 @@ $(document).ready(function () {
 
 
     togglePasswordVisibility('#admin_signup_toggle_password', '#admin_signup_password_id');
-
+    //    admin_signup.html (adminpanel template)
+    //    User,adminprofile table (models.py)
+    //    api_admin_signup function (views.py)
     $('#admin_signup_form').submit(function (e) {
         e.preventDefault();
         const username = $('#admin_signup_username_id').val();
@@ -6821,7 +6293,9 @@ $(document).ready(function () {
             $('#custom_admin_login_errorMessage').text('');
         });
 
-        // Form submission with AJAX
+         //    custom_admin_login.html (adminpanel template)
+        //    user,adminprofile table (models.py)
+        //    api_admin_login function (views.py)
         $('#custom_admin_login_form').submit(function (e) {
             e.preventDefault();
             const admin_email = $('#custom_admin_login_email_id').val();
@@ -6969,6 +6443,9 @@ function lottery_draw_date_input_formatDateForInput(dateString) {
     return date.toISOString().slice(0, 16);
 }
 
+ //    custom_admin_dashboard.html (adminpanel template)
+//    LotteryEvent table (models.py)
+//    api_get_lottery_events function (views.py)
 function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     currentPage = page;
 
@@ -7047,7 +6524,7 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     data-original-value="${lottery_draw_date_input_formatDateForInput(event.draw_date)}" 
     min="${new Date().toISOString().slice(0, 16)}"
     required onkeydown="return false;">
-               <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
+                   <div class="lottery_events_add_error_message lottery_edit_draw_date_error">Draw Date is required</div>
            </p>
           <p id="category_Details">Category: <strong class="category_Name" >${event.category.name}</strong>
            <span class="lottery_events_set_category" hidden>${event.category.name}</span>
@@ -7559,11 +7036,6 @@ function lottery_events_cancelEdit(button) {
          card.querySelector('.add-additionalimages-container').innerHTML=''; // clear all additional image fields
          $(".add-additionalimages-container").children().remove();
      }
-    // Optionally remove dynamically added image fields
-    // const additionalImagesContainer = card.querySelector('.additional-images-container');
-    // if (additionalImagesContainer) {
-    //     additionalImagesContainer.innerHTML = ''; // Clear all dynamically added image fields
-    // }
 }
 
 // Validate required fields and show error messages below each field
@@ -7615,15 +7087,6 @@ function lottery_events_edit_validateFields(card) {
     } else {
         card.querySelector('.lottery_edit_description_error').style.display = 'none';
     }
-
-    // if (!price || isNaN(price) || price <= 0) {
-    //     card.querySelector('.lottery_edit_price_error').style.display = 'block';
-    //     isValid = false;
-    //     card.querySelector('.lottery_edit_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    // } else {
-    //     card.querySelector('.lottery_edit_price_error').style.display = 'none';
-    // }
-
     if (!drawDate) {
         card.querySelector('.lottery_edit_draw_date_error').style.display = 'block';
         isValid = false;
@@ -7663,19 +7126,6 @@ function lottery_events_edit_validateFields(card) {
     } else {
         card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'none';
     }
-    // Mini Limit validation
-    // if (!miniLimit || miniLimit <= 0) {
-    //     card.querySelector('.lottery_edit_minilimit_error').textContent = 'Mini Limit must be greater than 0.';
-    //     card.querySelector('.lottery_edit_minilimit_error').style.display = 'block';
-    //     isValid = false;
-    // } else if (maxLimit && parseInt(miniLimit) > parseInt(maxLimit)) {
-    //     card.querySelector('.lottery_edit_minilimit_error').textContent = 'Mini Limit must be less than or equal to Max Limit.';
-    //     card.querySelector('.lottery_edit_minilimit_error').style.display = 'block';
-    //     isValid = false;
-    // } else {
-    //     card.querySelector('.lottery_edit_minilimit_error').style.display = 'none';
-    // }
-
     // Max Limit validation
     if (!maxLimit || maxLimit <= 0) {
         card.querySelector('.lottery_edit_maxlimit_error').textContent = 'Max Limit must be greater than 0.';
@@ -7702,6 +7152,9 @@ function lottery_events_edit_validateFields(card) {
 }
 
 // Save changes made to a lottery event
+//    custom_admin_dashboard.html (adminpanel template)
+//    LotteryEvent table (models.py)
+//    api_edit_delete_lottery_events function (views.py)
 function lottery_events_edit_saveChanges(button) {
     const card = button.closest('.lottery-event-card');
 
@@ -7878,6 +7331,9 @@ function lottery_events_edit_saveChanges(button) {
 }
 
 // Delete a lottery event
+//    custom_admin_dashboard.html (adminpanel template)
+//    LotteryEvent table (models.py)
+//    api_edit_delete_lottery_events function (views.py)
 function deleteLotteryEvent(id) {
     if (confirm('Are you sure you want to delete this event?')) {
         const url = apiEditDeleteLotteryEventsUrl.replace('0', id);
@@ -7916,7 +7372,9 @@ function fetchLotteryCategories() {
         .catch(error => console.error('Error fetching categories:', error));
 }
 
-// Add new lottery event
+//    custom_admin_dashboard.html (adminpanel template)
+//    LotteryEvent table (models.py)
+//    api_lottery_events_add function (views.py)
 function submitAddLotteryEvent() {
     // Clear previous error messages
     clear_lottery_events_add_inputs_errors();
@@ -7948,8 +7406,6 @@ function submitAddLotteryEvent() {
     var image = document.getElementsByName('image')[0].files[0];
     var isActive = document.getElementsByName('is_active')[0].checked;
     var perTicketPrice = document.getElementById('lottery_events_add_perTicketPrice').value;
-    // Get form field values      
-    // var slug = document.getElementsByName('slug')[0].value;
     var miniLimit = document.getElementsByName('mini_limit')[0].value;
     var maxLimit = document.getElementsByName('max_limit')[0].value;
     var competitionDetails = document.getElementsByName('competition_details')[0].value;
@@ -7980,21 +7436,7 @@ function submitAddLotteryEvent() {
     }
 
 
-    // Validate Slug
-    // if (slug && !/^[a-z0-9-]+$/.test(slug)) {
-    //     showValidationError('lottery_events_add_slug_validation', 'Slug must contain only lowercase letters, numbers, and hyphens.');
-    // } else {
-    //     clearValidationError('lottery_events_add_slug_validation');
-    // }
-
-    // Validate Minimum Tickets
-    // if (!miniLimit || miniLimit <= 0) {
-    //     showValidationError('lottery_events_add_minilimit_validation', 'Minimum Tickets must be greater than zero.');
-    // } else {
-    //     clearValidationError('lottery_events_add_minilimit_validation');
-    // }
-
-    // Validate Maximum Tickets
+      // Validate Maximum Tickets
     if (!maxLimit || maxLimit <= 0 || parseInt(maxLimit) < parseInt(miniLimit)) {
         showValidationError('lottery_events_add_maxlimit_validation', 'Maximum Tickets must be greater than zero and not less than Minimum Tickets.');
     } else {
@@ -8058,12 +7500,6 @@ function submitAddLotteryEvent() {
         clearValidationError('lottery_events_add_description_validation');
     }
 
-    // Validate Price
-    // if (price === '' || price <= 0) {
-    //     showValidationError('lottery_events_add_price_validation', 'Price must be greater than zero.');
-    // } else {
-    //     clearValidationError('lottery_events_add_price_validation');
-    // }
 
     // Validate Draw Date
     if (drawDate === '') {
@@ -8152,8 +7588,6 @@ function clear_lottery_events_add_inputs_errors() {
     document.getElementById('lottery_events_add_minilimit_validation').textContent = '';
     document.getElementById('lottery_events_add_maxlimit_validation').textContent = '';
     document.getElementById('lottery_events_add_competitiondetails_validation').textContent = '';
-    // document.getElementById('lottery_events_add_slug_validation').textContent = '';
-
 }
 
 
@@ -8173,13 +7607,13 @@ function validate_lottery_events_add_inputs(errors) {
 }
 
 
-// Function to fetch lottery events data from the API
+//lottery_events.html--adminpanel module--views.py function class api_get_lottery_events(APIView):  
 function lottery_events_fetch() {
     try {
 
         if (typeof api_get_lottery_events_url === 'undefined' || !api_get_lottery_events_url) {
 
-            return; // Exit the function if the variable is not defined
+            return; 
         }
 
         fetch(api_get_lottery_events_url)
@@ -8197,7 +7631,7 @@ function lottery_events_fetch() {
     }
 }
 
-// Function to format the draw date
+
 function lottery_events_formatDrawDate(drawDate) {
     const now = new Date();
     const drawDay = new Date(drawDate);
@@ -8220,22 +7654,8 @@ function lottery_events_formatDrawDate(drawDate) {
 
     return `Draw on ${drawDay.toLocaleDateString()} at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 }
-// function scrollToCenterCategory() {
-//     const categories = document.querySelectorAll('.category_section');
-//     const centerIndex = Math.floor(categories.length / 2); // Calculate center index
-//     const centerCategory = categories[centerIndex];
 
-//     if (centerCategory) {
-//         centerCategory.scrollIntoView({ behavior: 'smooth', block: 'center' });
-//     }
-// }
-// function scrollToFirstCategory() {
-//     const firstCategory = document.querySelector('.category_section'); // Get the first category section
-//     if (firstCategory) {
-//         firstCategory.scrollIntoView({ behavior: 'smooth', block: 'start' });
-//     }
-// }
-
+//favorite.html--adminpanel module--views.py function def get_favorites
 function updateFavoritesCount() {
     fetch('/api/get_favorites/')
         .then(response => response.json())
@@ -8246,21 +7666,23 @@ function updateFavoritesCount() {
         })
         .catch(error => console.error('Error fetching favorites count:', error));
 }
+//cart.html--adminpanel module--views.py function def get_cart(request):
 function updateCartCount() {
-    fetch('/api/get-cart/') // Fetch the updated cart data from your backend API
+    fetch('/api/get-cart/') 
         .then(response => response.json())
         .then(data => {
-            const cartCount = Object.keys(data).length; // Count the unique items in the cart
-            document.getElementById('cart-item-count').innerText = cartCount; // Update the cart count display
+            const cartCount = Object.keys(data).length; 
+            document.getElementById('cart-item-count').innerText = cartCount; 
         })
         .catch(error => console.error('Error fetching cart count:', error));
 }
+//cart.html--adminpanel module--views.py function def get_cart(request):
 function updateCartCount_cartpage() {
-    fetch('/api/get-cart/') // Fetch the updated cart data from your backend API
+    fetch('/api/get-cart/') 
         .then(response => response.json())
         .then(data => {
-            const cartCount = Object.keys(data).length; // Count the unique items in the cart
-            document.getElementById('cart-item-count-cartpage').innerText = cartCount; // Update the cart count display
+            const cartCount = Object.keys(data).length; 
+            document.getElementById('cart-item-count-cartpage').innerText = cartCount;
         })
         .catch(error => console.error('Error fetching cart count:', error));
 }
@@ -8292,9 +7714,9 @@ function header_navbar_fetchCategories() {
 
 function header_navbar_displayCategories(categories) {
     const dropdownMenu = document.getElementById("categories_dropdown_competitions");
-    if (!dropdownMenu) return; // Prevent errors if the element is missing
+    if (!dropdownMenu) return;
 
-    dropdownMenu.innerHTML = ""; // Clear previous categories
+    dropdownMenu.innerHTML = "";
 
     if (categories.length === 0) {
         dropdownMenu.innerHTML = '<div class="dropdown-item_competitions">No categories available</div>';
@@ -8319,7 +7741,7 @@ function adjustDropdownPosition() {
     dropdown.style.width = "auto";
 }
 
-// Show an error message in the dropdown
+
 function displayFetchError() {
     const dropdownMenu = document.getElementById("categories_dropdown_competitions");
     if (!dropdownMenu) return;
@@ -8327,25 +7749,25 @@ function displayFetchError() {
     dropdownMenu.innerHTML = '<div class="dropdown-item_competitions" style="color:red;">Error loading categories</div>';
 }
 
-// Run functions on page load and resize event
+
 document.addEventListener("DOMContentLoaded", header_navbar_fetchCategories);
 window.addEventListener("resize", adjustDropdownPosition);
-/*function for navbar dropdown menu*/
+
 function setupDropdown(dropdownBtnSelector, dropdownContentSelector) {
     const dropdownBtn = document.querySelector(dropdownBtnSelector);
     const dropdownContent = document.querySelector(dropdownContentSelector);
 
     if (!dropdownBtn || !dropdownContent) {
-        // console.error("Dropdown button or content not found.");
+
         return;
     }
 
     dropdownBtn.addEventListener("click", function (event) {
-        event.stopPropagation(); // Prevents event from bubbling up
+        event.stopPropagation();
         dropdownContent.classList.toggle("show-dropdown");
     });
 
-    // Close the dropdown when clicking outside
+    
     document.addEventListener("click", function (event) {
         if (!dropdownBtn.contains(event.target) && !dropdownContent.contains(event.target)) {
             dropdownContent.classList.remove("show-dropdown");
@@ -8353,16 +7775,16 @@ function setupDropdown(dropdownBtnSelector, dropdownContentSelector) {
     });
 }
 
-// Call the function after ensuring elements exist
+
 setupDropdown(".dropbtn_competitions", ".dropdown-content_competitions");
 
 
 function scrollToFirstCategory() {
-    const firstCategory = document.querySelector('.category_section'); // Get the first category section
-    const categoriesTabs = document.querySelector('.categories-tabs'); // Get the categories tabs section
+    const firstCategory = document.querySelector('.category_section'); 
+    const categoriesTabs = document.querySelector('.categories-tabs');
     const adjustheight = 20;
     if (firstCategory) {
-        // Scroll to position where the first category is just below the categories-tabs
+        
         window.scrollTo({
             top: firstCategory.offsetTop - categoriesTabs.offsetHeight - adjustheight,
             behavior: 'smooth'
@@ -8370,39 +7792,7 @@ function scrollToFirstCategory() {
         console.log('Scrolling to position:', firstCategory.offsetTop - categoriesTabs.offsetHeight - adjustheight);
     }
 }
-// function populateCategoryTabs(categories) {
-//     const tabsContainer = document.getElementById('categories_tabs');
-//     tabsContainer.innerHTML = ''; // Clear the tabs container
 
-//     categories.forEach((category, index) => {
-//         const tab = document.createElement('button');
-//         tab.classList.add('category-tab');
-//         tab.textContent = category.name;
-
-//         if (index === 0) {
-//             tab.classList.add('active'); // Set the first tab as active by default
-//         }
-
-//         const indicator = document.createElement('div');
-//         indicator.classList.add('tab-indicator');
-//         tab.appendChild(indicator);
-
-//         tab.onclick = function () {
-//             // Remove active class from all tabs
-//             document.querySelectorAll('.category-tab').forEach((t) => t.classList.remove('active'));
-//             tab.classList.add('active');
-
-//             // Scroll to the category section
-//             const categorySection = document.getElementById(`category_${category.id}`);
-//             if (categorySection) {
-//                 categorySection.scrollIntoView({ behavior: 'smooth' });
-//             }
-//         };
-
-//         tabsContainer.appendChild(tab);
-//     });
-// }
-// Update populateCategoryTabs to include data attributes
 function populateCategoryTabs(categories) {
     const tabsContainer = document.getElementById('categories_tabs');
     tabsContainer.innerHTML = '';
@@ -8411,7 +7801,7 @@ function populateCategoryTabs(categories) {
         const tab = document.createElement('button');
         tab.classList.add('category-tab');
         tab.textContent = category.name;
-        tab.dataset.categoryId = category.id; // Link tab with category ID
+        tab.dataset.categoryId = category.id; 
         if (index === 0) tab.classList.add('active');
         const indicator = document.createElement('div');
         indicator.classList.add('tab-indicator');
@@ -8424,10 +7814,10 @@ function populateCategoryTabs(categories) {
         };
         tabsContainer.appendChild(tab);
     });
-     // Add right arrow for scrolling
+     
     addRightScrollArrow();
 }
-
+/*Right arrow for scroll the category in mobile view */
 function addRightScrollArrow() {
     let rightArrow = document.getElementById('scroll-right-arrow');
     const tabsContainer = document.getElementById('categories_tabs');
@@ -8454,7 +7844,7 @@ function addRightScrollArrow() {
         const isOverflowing = tabsContainer.scrollWidth > tabsContainer.clientWidth;
         const isScrolledToEnd = tabsContainer.scrollLeft >= (tabsContainer.scrollWidth - tabsContainer.clientWidth - 1);
         
-        // Show arrow only if scrolling is possible and not fully scrolled
+        
         rightArrow.style.display = (isOverflowing && !isScrolledToEnd) ? 'block' : 'none';
     }
 
@@ -8471,7 +7861,7 @@ function setupScrollHandler() {
     const observerOptions = {
         root: null,
         rootMargin: `-${navbarHeight}px 0px 0px 0px`,
-        threshold: 0.5 // Adjust if needed (0.5 means 50% visible)
+        threshold: 0.5 
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -8496,24 +7886,24 @@ function setupScrollHandler() {
     sections.forEach(section => observer.observe(section));
 }
 
-// Function to display the lottery events
+
 function displayLotteryEvents(events) {
     const container = document.getElementById('lottery_events_container');
-    container.innerHTML = ''; // Clear the container
+    container.innerHTML = ''; 
     if (events.length === 0) {
         container.innerHTML = '<p>No lottery events available.</p>';
         return;
     }
-    // Filter out inactive events
+
     events = events.filter(event => event.is_active);
-    // Group unique categories by ID
+
     const categoriesMap = {};
 
     events.forEach(event => {
         if (event.category && event.category.id) {
             const categoryId = event.category.id;
             const categoryName = event.category.name || 'Unknown Category';
-            const categoryLogo = event.category.category_logo || ''; // Get the category logo 
+            const categoryLogo = event.category.category_logo || ''; 
             if (!categoriesMap[categoryId]) {
                 categoriesMap[categoryId] = { id: categoryId, name: categoryName, logo: categoryLogo };
             }
@@ -8521,10 +7911,9 @@ function displayLotteryEvents(events) {
     });
 
 
-    // Convert categories map to an array and sort by ID
     const categories = Object.values(categoriesMap).sort((a, b) => a.id - b.id);
 
-    // Populate the tabs with categories
+
     populateCategoryTabs(categories);
 
     categories.forEach(category => {
@@ -8539,7 +7928,7 @@ function displayLotteryEvents(events) {
 
         const viewAllButton = document.createElement('button');
         viewAllButton.classList.add('view_all_button');
-        // Set inner HTML with image inside the button
+        
         viewAllButton.innerHTML = `
 View all 
 <img src="/media/lottery_images/arrow (1).png" alt="Arrow Icon1">
@@ -8553,8 +7942,6 @@ View all
         const categoryEventsContainer = document.createElement('div');
         categoryEventsContainer.classList.add('lottery_events_displayed_container');
 
-
-        // Filter events for this category
         const filteredEvents = events.filter(event =>
             event.category && event.category.id === category.id
         ).slice(0, 4);
@@ -8588,7 +7975,7 @@ View all
                 ${event.image ? `<img src="${event.image}" alt="${event.title}" class="similar_category_lottery_event_img" />` : ''}
                 <div style="color: #FF6600; font-size: 14px; font-family: Rajdhani; font-weight: 600; word-wrap: break-word">Automated Draw</div>
                    <h3 class="lottery_title">${event.title}</h3>
-               <div class="lt-p"> <p> ${event.description}</p><div>
+               <p class="lt-p">${event.description}</p>
                
                 <div class="lottery_events_per_ticket_price"> £${event.per_ticket_price}</div>
                 <div class="lottery_events_soldpercentage">SOLD: ${event.sold_percentage}%</div>
@@ -8612,10 +7999,10 @@ View all
     });
 
     setupScrollHandler();
-    attachAddToCartListeners(); // Attach listeners for "Add to Cart" buttons
+    attachAddToCartListeners(); 
 }
 
-
+//lottery_events.html--adminpanel module--views.py function class BannerView(APIView):
 async function fetchBanner() {
     try {
         const response = await fetch(bannerUrl, {
@@ -8694,7 +8081,7 @@ async function fetchBanner() {
     }
 }
 
-
+//lottery_events.html--adminpanel module--views.py function class PreviousWinnersimgAPIView(APIView):
 async function fetchWinners_mainpage() {
     try {
         const response = await fetch(winnersUrl_mainpage);
@@ -8702,7 +8089,7 @@ async function fetchWinners_mainpage() {
             throw new Error(`Error fetching winners: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
-        // Initially display the first 8 images
+
         const initialWinners = data.winners.slice(0, 8);
         renderWinners_mainpage(initialWinners, false, [3, 3, 3]);
     } catch (error) {
@@ -8711,13 +8098,13 @@ async function fetchWinners_mainpage() {
 }
 
 function toggleWinners_mainpage() {
-    // Instead of loading more winners, redirect to the winners page
+
     window.location.href = '/winners';
 }
 
 function renderWinners_mainpage(winners, append, rowLimit) {
     const container = document.getElementById("previous_winner_section");
-    container.innerHTML = ""; // Always clear existing content
+    container.innerHTML = "";
 
     let rowIndex = 0;
     let count = 0;
@@ -8744,89 +8131,7 @@ function renderWinners_mainpage(winners, append, rowLimit) {
         count++;
     });
 }
-/*
-async function fetchWinners_mainpage() {
-    try {
-        const response = await fetch(winnersUrl_mainpage);
-        if (!response.ok) {
-            throw new Error(`Error fetching winners: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        // Initially display the first 8 images in the order of 2, 3, 3
-        const initialWinners = data.winners.slice(0, 8);
-        renderWinners_mainpage(initialWinners, false, [3, 3, 3]);
-    } catch (error) {
-        console.error("Failed to fetch winners:", error);
-    }
-}
-
-async function toggleWinners_mainpage() {
-    const button = document.getElementById("view_all_button_previous_winner_mainpage");
-    try {
-        const response = await fetch(winnersUrl_mainpage);
-        if (!response.ok) {
-            throw new Error(`Error fetching winners: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        if (isShowingAll_previous_winner) {
-            // If currently showing all, restore the initial 8 images
-            const initialWinners = data.winners.slice(0, 8);
-            renderWinners_mainpage(initialWinners, false, [3, 3, 3]);
-            button.textContent = "View All Winners"; // Change button text
-        } else {
-            // Show remaining winners
-            const remainingWinners = data.winners.slice(8);
-            renderWinners_mainpage(remainingWinners, true, [3]); // Append in rows of 3
-            button.textContent = "Show Less"; // Change button text
-        }
-        isShowingAll_previous_winner = !isShowingAll_previous_winner; // Toggle state
-    } catch (error) {
-        console.error("Failed to toggle winners:", error);
-    }
-}
-
-
-function renderWinners_mainpage(winners, append, rowLimit) {
-    const container = document.getElementById("previous_winner_section");
-
-    if (!append) {
-        container.innerHTML = ""; // Clear existing content if not appending
-    }
-
-    let rowIndex = 0;
-    let count = 0;
-    let row;
-
-    winners.forEach((winner, index) => {
-        if (count === rowLimit[rowIndex]) {
-            rowIndex = append ? 0 : rowIndex + 1; // Reset to 0 for appending
-            count = 0;
-        }
-
-        if (count === 0) {
-            row = document.createElement("div");
-            row.className = "previous-mainpage-winner-row";
-            container.appendChild(row);
-        }
-
-        const winnerDiv = document.createElement("div");
-        winnerDiv.className = "previous-mainpage-winner";
-        winnerDiv.innerHTML = `
-            <img src="${winner.image}" alt="${winner.name}" class="previous-mainpage-winner-image">
-
-        `;
-        row.appendChild(winnerDiv);
-        count++;
-    });
-
-    // Update the displayedCount only when appending
-    if (!append) {
-        displayedCount_previous_winner = winners.length;
-    } else {
-        displayedCount_previous_winner += winners.length;
-    }
-}
-*/
+//category_lottery_events.html--adminpanel module--views.py class BannerView(APIView):
 async function category_fetchBanner() {
     try {
         const response = await fetch(bannerUrl, {
@@ -8865,7 +8170,7 @@ async function category_fetchBanner() {
         bannerContainer.innerHTML = `<p class="error-message">Unable to load banner at this time.</p>`;
     }
 }
-
+//category_lottery_events.html--adminpanel module--views.py function class APIGetCategoryLotteryEvents(APIView):
 function fetchCategoryLotteryEvents() {
     fetch(api_get_category_lottery_events_url, {
         method: 'GET',
@@ -8885,19 +8190,19 @@ function displayCategoryLotteryEvents(events) {
     const loadMoreWrapper = document.getElementById('load-more-wrapper');
     const loadMoreButton = document.getElementById('load-more-button');
 
-    container.innerHTML = ''; // Clear existing events
+    container.innerHTML = '';
 
     if (events.length === 0) {
         container.innerHTML = '<p>No lottery events available in this category.</p>';
-        loadMoreWrapper.style.display = 'none'; // Hide button if no events exist
+        loadMoreWrapper.style.display = 'none';
         return;
     }
 
-    events = events.filter(event => event.is_active); // Only show active events
-    let visibleCount = 8; // Initial number of events displayed
+    events = events.filter(event => event.is_active); 
+    let visibleCount = 8; 
 
     function renderEvents() {
-        container.innerHTML = ''; // Clear before rendering
+        container.innerHTML = ''; 
 
         events.slice(0, visibleCount).forEach(event => {
             const eventElement = document.createElement('div');
@@ -8939,30 +8244,30 @@ function displayCategoryLotteryEvents(events) {
             container.appendChild(eventElement);
         });
 
-        // Show/hide "Load More" button based on remaining events
+        
         if (visibleCount < events.length) {
-            loadMoreWrapper.style.display = 'block'; // Show button if more events exist
+            loadMoreWrapper.style.display = 'block';
         } else {
-            loadMoreWrapper.style.display = 'none'; // Hide button when all events are loaded
+            loadMoreWrapper.style.display = 'none'; 
         }
     }
 
-    // Handle "Load More" button click
+    
     loadMoreButton.onclick = function () {
-        visibleCount += 4; // Increase visible events
+        visibleCount += 4;
         renderEvents();
     };
 
-    // Initial render
+    
     renderEvents();
 
-    // Ensure button is shown/hidden properly on resize
+
     window.addEventListener('resize', renderEvents);
 }
 
 
-//cart.html
 
+//lottery_detail.html--adminpanel module--views.py function def add_to_cart(request):
 function addToCart(event, redirectToCart = false) {
     event.preventDefault();
     const eventSlug = event.target.getAttribute('data-event-slug');
@@ -8990,23 +8295,23 @@ function addToCart(event, redirectToCart = false) {
         })
         .then(data => {
             if (data.success) {
-                // Update cart count in header
+                
                 updateCartCount();
                 if (redirectToCart) {
-                    // Redirect to cart page after adding to cart
+                    
                     window.location.href = cartUrl;
                 } else {
-                    // Show success modal
+                    
                     showModal(data.message);
                 }
             }
         })
         .catch(error => {
-            showModal(error.message); // Show error modal
+            showModal(error.message); 
             console.error('Error adding to cart:', error);
         });
 }
-// Show modal function
+
 function showModal(message) {
     const modal = document.getElementById('cart-modal');
     const modalMessage = document.getElementById('cart-modal-message');
@@ -9015,45 +8320,45 @@ function showModal(message) {
     modal.classList.remove('hiddencart');
     modal.style.display = 'flex';
 
-    // Close modal when clicking the close button (X)
+    
     const closeButton = document.querySelector('.cart-modal-close');
     closeButton.addEventListener('click', () => {
         closeModal(modal);
     });
 
-    // Close modal when clicking outside the modal content
+    
     modal.addEventListener('click', (event) => {
         if (event.target === modal) {
             closeModal(modal);
         }
     });
 
-    // Keep Shopping Button
+    
     const keepShoppingButton = document.getElementById('cart-keep-shopping');
     keepShoppingButton.addEventListener('click', () => {
         closeModal(modal);
     });
 
-    // View Cart Button
+    
     const viewCartButton = document.getElementById('cart-view-cart');
     viewCartButton.addEventListener('click', () => {
         window.location.href = cartUrl;
     });
 }
 
-// Close modal function
+
 function closeModal(modal) {
     modal.style.display = 'none';
 }
 
-// Utility function to get CSRF token
+
 function getCSRFToken() {
     return document.cookie.split('; ')
         .find(row => row.startsWith('csrftoken='))
         ?.split('=')[1];
 }
 
-// Function to attach "Add to Cart" event listeners dynamically
+
 function attachAddToCartListeners() {
     const addToCartButtons = document.querySelectorAll('.add-to-cart-button');
     addToCartButtons.forEach(button => {
@@ -9062,21 +8367,20 @@ function attachAddToCartListeners() {
     const buyNowButton = document.getElementById('buy-now-button');
     if (buyNowButton) {
         buyNowButton.addEventListener('click', function (event) {
-            addToCart(event, true); // Pass true to redirect to cart
+            addToCart(event, true); 
         });
     }
 }
 
-// Call functions on page load
+
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof lottery_events_fetch === 'function') {
-        lottery_events_fetch(); // Fetch and display lottery events if applicable
+        lottery_events_fetch(); 
     }
-    attachAddToCartListeners(); // Attach listeners to "Add to Cart" buttons
+    attachAddToCartListeners(); 
 });
 
-//finish---------cart.html
-
+//cart.html--adminpanel module--views.py function def get_cart(request):
 function fetchCartItems() {
     fetch(api_get_cart_url)
         .then(response => response.json())
@@ -9096,20 +8400,20 @@ function displayCartItems(cart) {
     const container = document.getElementById('cart_items_container');
     const totalElement = document.getElementById('cart_total');
     const subtotalElement = document.getElementById('totalsub');
-    container.innerHTML = ''; // Clear existing items
+    container.innerHTML = ''; 
     let total = 0;
     
     if (Object.keys(cart).length === 0) {
         container.innerHTML = '<p id="empty-cart-page">Your cart is empty</p>';
-        totalElement.textContent = '0.00';
-        subtotalElement.textContent = '0.00';
+        totalElement.textContent = '£0.00';
+        subtotalElement.textContent = '£0.00';
         return;
     }
 
     for (const [eventSlug, item] of Object.entries(cart)) {
         
         const itemTotal = parseFloat(item.per_ticket_price) * item.quantity;
-        // Skip items with zero quantity
+        
         if (item.quantity === 0) {
             continue;
         }
@@ -9119,13 +8423,8 @@ function displayCartItems(cart) {
         cartItem.classList.add('cart_item');
 
         const purchasedQuantity = item.purchased_quantity || 0;
-        const remainingTickets = item.max_limit - purchasedQuantity;
-        // <p class="remaining-tickets">Remaining Tickets: ${remainingTickets}</p>
-        //<p class="remaining-tickets">Tickets remaining(updated after purchase): ${remainingTickets}</p>
-        //Available tickets (updated once purchase is completed),Tickets remaining – updated after purchase
-        // Ensure the quantity does not exceed the remaining tickets
+        const remainingTickets = item.max_limit - purchasedQuantity;       
         const adjustedQuantity = Math.min(item.quantity, remainingTickets);
-        // ${item.image ? `<img src="${item.image}" alt="${item.title}" class="cart-image" />` : ''}
         cartItem.innerHTML = `
             ${item.image ? `<a href="/lottery_detail/${eventSlug}/"><img src="${item.image}" alt="${item.title}" class="cart-image" /></a>` : ''}
             <div class="item-details">
@@ -9160,7 +8459,7 @@ function displayCartItems(cart) {
 
     attachCartEventListeners(cart);
 
-    // Add focus-out event listener for quantity inputs
+
     const quantityInputs = container.querySelectorAll('.quantity-input');
     quantityInputs.forEach(input => {
         input.addEventListener('blur', event => {
@@ -9172,84 +8471,29 @@ function displayCartItems(cart) {
             const messageSpan = parentElement.querySelector('.max-limit-message');
 
             if (newQuantity > maxLimit) {
-                event.target.value = ''; // Reset value
+                event.target.value = ''; 
                 messageSpan.textContent = `Exceeds max limit of ${maxLimit}. Please enter a valid quantity.`;
                 messageSpan.style.color = 'red';
                 messageSpan.style.fontSize = '16px';
-            // } else if (newQuantity < 1) {
-            //     event.target.value = 1; // Reset to minimum limit
+            
         } else if (newQuantity < 1) {
-            event.target.value = 1; // Reset to minimum limit
+            event.target.value = 1;
             const parentElement = event.target.closest('.cart_item');
             const totalInput = parentElement.querySelector('.total-input');
             const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
             
-            // Update total input field when quantity changes
             totalInput.value = (1 * perTicketPrice).toFixed(2);
         
             cart[eventSlug].quantity = 1;
             updateCart_total_and_subtotal(cart);
         }else {
-                messageSpan.textContent = ''; // Clear message
+                messageSpan.textContent = ''; 
                 updateCartQuantity(event, cart, newQuantity - cart[eventSlug].quantity);
             }
         });
     });
 
-    // // Add focus-out event listener for total inputs
-    
-//     const totalInputs = container.querySelectorAll('.total-input');
-
-// totalInputs.forEach(input => {
-//     input.addEventListener('blur', event => {
-//         const eventSlug = event.target.getAttribute('data-event-slug');
-//         const newTotal = parseFloat(event.target.value);
-//         const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
-//         const maxLimit = parseInt(cart[eventSlug].max_limit);
-//         const maxTotal = perTicketPrice * maxLimit;
-
-//         const parentElement = event.target.closest('.cart_item');
-//         const messageSpan = parentElement.querySelector('.max-limit-message');
-//         const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
-
-        
-        
-
-//         if (newTotal > maxTotal) {
-//             event.target.value = maxTotal.toFixed(2); // Reset to max total
-//             messageSpan.textContent = `Total exceeds max allowable amount (£${maxTotal.toFixed(2)}).`;
-//             messageSpan.style.color = 'red';
-//             messageSpan.style.fontSize = '16px';
-//             messageSpan.style.display = 'inline';
-
-//             // Set quantity to max limit and update cart
-//             const maxQuantity = maxLimit;
-//             quantityInputs.value = maxQuantity;
-//             updateCartQuantityFromTotal(cart, eventSlug, maxQuantity);
-//             return;
-//         } else {
-//             // Clear error message and update quantity dynamically
-//             messageSpan.textContent = '';
-//             const calculatedQuantity = Math.floor(newTotal / perTicketPrice); // Calculate based on valid total
-
-//             if (calculatedQuantity >= 1) {
-//                 quantityInputs.value = calculatedQuantity; // Update quantity input
-//                 cart[eventSlug].quantity = calculatedQuantity; // Update cart object
-
-//                 // Update cart cookie
-//                 fetch('/api/update-cart/', {
-//                     method: 'POST',
-//                     headers: {
-//                         'Content-Type': 'application/json',
-//                         'X-CSRFToken': getCSRFToken(),
-//                     },
-//                     body: JSON.stringify({ event_slug: eventSlug, quantity: calculatedQuantity }),
-//                 }).then(() => fetchCartItems()); // Refresh cart display
-//             }
-//         }
-//     });
-// });
-// // Add focus-out event listener for total inputs
+   
 const totalInputs = container.querySelectorAll('.total-input');
 
 
@@ -9262,24 +8506,23 @@ totalInputs.forEach(input => {
         const maxTotal = perTicketPrice * maxLimit;
        
         const purchasedQuantity = cart[eventSlug].purchased_quantity || 0;
-        const remainingTickets = maxLimit - purchasedQuantity; // Remaining tickets
-        const maxAllowedTotal = perTicketPrice * remainingTickets; // Remaining tickets total
+        const remainingTickets = maxLimit - purchasedQuantity; 
+        const maxAllowedTotal = perTicketPrice * remainingTickets; 
 
         const parentElement = event.target.closest('.cart_item');
         const messageSpan = parentElement.querySelector('.max-limit-message');
-        const quantityInputs = parentElement.querySelector('.quantity-input'); // Quantity input field
+        const quantityInputs = parentElement.querySelector('.quantity-input'); 
 
         let calculatedQuantity = Math.floor(newTotal / perTicketPrice);
 
-        // ✅ Fix: If total input is 0 or empty, set it to the remaining ticket price
+        
         if (isNaN(newTotal) || newTotal <= 0) {
             calculatedQuantity = remainingTickets;
             newTotal = remainingTickets * perTicketPrice;
-            event.target.value = newTotal.toFixed(2);  // Update the total input field
+            event.target.value = newTotal.toFixed(2);  
         }
 
-      //   // ✅ Fix: Update calculated quantity based on the corrected total
-      //   calculatedQuantity = Math.floor(newTotal / perTicketPrice);
+    
 
         if (calculatedQuantity > remainingTickets) {
             event.target.value = maxAllowedTotal.toFixed(2);
@@ -9307,7 +8550,7 @@ totalInputs.forEach(input => {
             quantityInputs.value = calculatedQuantity;
             cart[eventSlug].quantity = calculatedQuantity;
 
-            // Update cart cookie
+//cart.html--adminpanel module--views.py function def update_cart(request):            
             fetch('/api/update-cart/', {
                 method: 'POST',
                 headers: {
@@ -9361,7 +8604,7 @@ function attachCartEventListeners(cart) {
         button.addEventListener('click', event => updateCartQuantity(event, cart, -1));
     });
 }
-
+//cart.html--adminpanel module--views.py function def update_cart(request):
 function updateCartQuantity(event, cart, delta) {
     const eventSlug = event.target.getAttribute('data-event-slug');
     const currentQuantity = parseInt(cart[eventSlug].quantity);
@@ -9386,7 +8629,7 @@ function updateCartQuantity(event, cart, delta) {
 
     if (newQuantity >= 1) {
         cart[eventSlug].quantity = newQuantity;
-
+//cart.html--adminpanel module--views.py function def update_cart(request):
         fetch('/api/update-cart/', {
             method: 'POST',
             headers: {
@@ -9397,42 +8640,7 @@ function updateCartQuantity(event, cart, delta) {
         }).then(() => fetchCartItems());
     }
 }
-// function updateCartQuantityFromTotal(cart, eventSlug, newQuantity) {
-//     const perTicketPrice = parseFloat(cart[eventSlug].per_ticket_price);
-//     const maxLimit = parseInt(cart[eventSlug].max_limit);
-//     const newTotal = newQuantity * perTicketPrice;
-
-//     // Handle error if maxTotal exceeds maxLimit
-//     if (newTotal > maxTotal) {
-//         messageSpan.textContent = `Error: Max total amount exceeds the limit of ${maxTotal.toFixed(2)}!`;
-//         messageSpan.style.color = 'red';
-//         messageSpan.style.fontSize = '16px';
-//         messageSpan.style.display = 'inline';
-//         quantityInputs.value = 1; // Reset quantity to a default value like 1
-//         updateCartQuantityFromTotal(cart, eventSlug, 1); // Reset to a safe quantity
-//         return; // Stop execution if max total exceeds limit
-//     }
-
-//     if (newQuantity > maxLimit) {
-//         newQuantity = maxLimit; // Enforce max limit
-//     }
-
-//     // Update cart object
-//     cart[eventSlug].quantity = newQuantity;
-
-//     // Update cart cookie
-//     fetch('/api/update-cart/', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'X-CSRFToken': getCSRFToken(),
-//         },
-//         body: JSON.stringify({ event_slug: eventSlug, quantity: newQuantity }),
-//     }).then(() => fetchCartItems()); // Refresh cart display
-// }
-
-
-
+//cart.html--adminpanel module--views.py function def remove_from_cart(request):
 function removeFromCart(event) {
     const eventSlug = event.target.getAttribute('data-event-slug');
 
@@ -9471,6 +8679,7 @@ function getCartData() {
     });
     return cart;
 }
+//cart.html--Payment Service module--views.py function def create_checkout_session,def create_checkout_session
 function proceedToCheckout() {
     const cartData = getCartData();
     if (Object.keys(cartData).length === 0) {
@@ -9478,7 +8687,7 @@ function proceedToCheckout() {
         return;
     }
 
-    // First, check if the user is authenticated
+    
     fetch(`/check-user-authentication/`, {
         method: 'GET',
         headers: {
@@ -9490,10 +8699,10 @@ function proceedToCheckout() {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            // Redirect to login page if user is not authenticated
+            
             window.location.href = data.redirect_url;
         } else {
-            // If user is authenticated, proceed to create checkout session
+            
             fetch(`/create-checkout-session/`, {
                 method: 'POST',
                 headers: {
@@ -9836,41 +9045,34 @@ window.addEventListener('resize', function () {
 
 
 
-//favorite.html
-// Function to fetch the list of favorite events from the server
+//favorite.html--adminpanel module--views.py function def get_favorites
 function fetchFavorites() {
     fetch('/api/get_favorites/')
         .then(response => response.json())
         .then(data => {
-            allFavorites = data.favorites; // Store all favorites
-            displayFavorites(); // Display the first batch
+            allFavorites = data.favorites; 
+            displayFavorites(); 
         })
         .catch(error => console.error('Error fetching favorites:', error));
 }
 
-
-// Function to display the favorites (initially 4)
 function displayFavorites() {
     const container = document.getElementById('favorites_container');
     const loadMoreBtn = document.getElementById('load_more_button');
-    container.innerHTML = ''; // Clear existing content
+    container.innerHTML = ''; 
 
-
-    // // Determine how many events to show
-    // let favoritesToShow = allFavorites.slice(0, displayedCount);
     const isMobile = window.innerWidth <= 768;
-
 
     let favoritesToShow = isMobile ? allFavorites : allFavorites.slice(0, displayedCount);
 
 
     if (favoritesToShow.length === 0) {
         container.innerHTML = '<p style="text-align: center;font-weight:bold; font-size: 44px;">No favorites added yet</p>';
-        loadMoreBtn.style.display = 'none'; // Hide Load More button when no favorites exist
+        loadMoreBtn.style.display = 'none'; 
         container.style.minHeight = "70vh";
         return;
     }
-    container.style.minHeight = "auto"; // Reset height if there are favorites
+    container.style.minHeight = "auto"; 
 
     favoritesToShow.forEach(event => {
         const favoriteElement = document.createElement('div');
@@ -9881,7 +9083,6 @@ function displayFavorites() {
         const favoriteClass = event.is_favorite ? 'favorited' : '';
 
 
-        // Construct event HTML
         favoriteElement.innerHTML = `
             <div class="favorite_lottery_events_favorite" onclick="toggleFavorite('${event.slug}')">
                 <i class="fas fa-heart ${favoriteClass}"></i> 
@@ -9909,9 +9110,6 @@ function displayFavorites() {
     });
 
 
-    
-    // Modified load more button logic
-
     if (!isMobile && allFavorites.length > displayedCount) {
         loadMoreBtn.style.display = 'block';
     } else {
@@ -9920,16 +9118,13 @@ function displayFavorites() {
 }
 
 
-// Function to load more events
 function loadMoreFavorites() {
-    displayedCount += 4; // Increase the count by 4
-    displayFavorites(); // Refresh display
+    displayedCount += 4; 
+    displayFavorites(); 
 }
 
-
-// Add resize listener to handle window size changes
 window.addEventListener('resize', displayFavorites);
-
+//favorite.html--adminpanel module--views.py function def add_to_favorites
 function toggleFavorite(eventSlug) {
     const favoriteIcon = document.querySelector(`#favorite-icon-${eventSlug}`);
     fetch('/api/add_to_favorites/', {
@@ -9944,16 +9139,16 @@ function toggleFavorite(eventSlug) {
         .then(data => {
             alert(data.message);
             updateFavoritesCount()
-            fetchFavorites(); // Refresh the favorites list
+            fetchFavorites(); 
             lottery_events_fetch();
             fetchCategoryLotteryEvents();
-            // Toggle the class on the icon based on the response
             if (data.success) {
-                favoriteIcon.classList.toggle('favorited'); // Add or remove 'favorited' class
+                favoriteIcon.classList.toggle('favorited'); 
             }
         })
         .catch(error => console.error('Error toggling favorite:', error));
 }
+
 /*Userdashboard*/
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("chatbotPopup").style.display = "block";
@@ -10082,8 +9277,7 @@ $(document).ready(function () {
 
 /** Loader Start**/
 $(document).ready(function () {
-    // console.log("Loader.js is loaded!");
-    // Create the preloader HTML dynamically
+    
     let preloaderHTML = `
         <div id="preloader">
             <div id="ep-preloader" class="ep-preloader">
@@ -10094,27 +9288,27 @@ $(document).ready(function () {
             </div>
         </div>
     `;
-    // Append preloader to the body
+    
     $("body").prepend(preloaderHTML);
-    // Ensure loader is visible initially
+    
     $("#preloader").show();
 });
 $(window).on('load', function () {
-    // console.log("Page fully loaded! Hiding loader...");
+    
     setTimeout(function () {
-        // Fade out the preloader once the page is fully loaded
+        
         $("#preloader").fadeOut(500);
-    }, 1000); // Delay 1 second for a smoother transition
+    }, 1000); 
 });
 
-//my-orders.html
+//my-orders.html--Payment Service module--views.py function def my_order_api
 $(document).ready(function () {
     function fetchOrders(filter) {
         $.ajax({
             url: `/api/my-orders/?filter=${filter}`,
             type: "GET",
             dataType: "json",
-            headers: { "X-CSRFToken": my_orders_csrfToken }, // Use a global csrfToken variable
+            headers: { "X-CSRFToken": my_orders_csrfToken }, 
             success: function (data) {
                 let container = $("#myorders-container");
                 container.empty();
@@ -10125,7 +9319,7 @@ $(document).ready(function () {
                 }
 
                 $.each(data, function (sessionId, group) {
-                    // Find all winning lotteries in this group
+
                     let winningLotteries = [];
                     group.payments.forEach(payment => {
                         if (payment.winning_tickets && payment.winning_tickets.length > 0) {
@@ -10133,7 +9327,7 @@ $(document).ready(function () {
                         }
                     });
                     
-                    // Remove duplicates
+                    
                     winningLotteries = [...new Set(winningLotteries)];
                     
                     let orderHTML = `
@@ -10168,7 +9362,7 @@ $(document).ready(function () {
                             ticketNumbers += ` , etc...`;
                         }
                         
-                        // Check if this payment has winning tickets
+                        
                         let winnerIndicator = '';
                         if (payment.winning_tickets && payment.winning_tickets.length > 0) {
                             winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER!</span>';
@@ -10220,13 +9414,13 @@ $(document).ready(function () {
                             }
                             return ticket;
                         }).join(", ");
-                        // Check if this payment has winning tickets
+                        
                         let winnerIndicator = '';
                         if (payment.winning_tickets && payment.winning_tickets.length > 0) {
                             winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER!</span>';
                         }
                         
-                        // Highlight the entire row if it contains winning tickets
+                        
                         let rowClass = '';
                         if (payment.winning_tickets && payment.winning_tickets.length > 0) {
                             rowClass = 'class="winning-row"';
@@ -10254,22 +9448,22 @@ $(document).ready(function () {
         });
     }
 
-    // Initial load
+    
     fetchOrders("all");
-        // Update the Get Help button in custom.js
+        
         window.getHelp = function(sessionId) {
-        // Store the sessionId in localStorage
+        
         localStorage.setItem('help_session_id', sessionId);
-        // Redirect to contact page
+        
         window.location.href = '/contact/';
     }
-    // Event listener for filter change
+    
     $("#myorder-filter").change(function () {
         let selectedFilter = $(this).val();
         fetchOrders(selectedFilter);
     });
 
-//     // Global functions for modal handling
+
     window.showModal = function (sessionId) {
         $("#myorder-modal-" + sessionId).show();
     }
@@ -10277,7 +9471,7 @@ $(document).ready(function () {
     window.closeModal = function (sessionId) {
         $("#myorder-modal-" + sessionId).hide();
     }
-    // Close modal when clicking outside of it
+    
     $(document).on("click", function (event) {
         $(".myorder-modal").each(function () {
             if ($(event.target).closest(".myorder-modal-content").length === 0 && $(event.target).hasClass("myorder-modal")) {
@@ -10286,19 +9480,19 @@ $(document).ready(function () {
         });
     });
 });
-//for scroll right btn for sidebar
+
 function initializeMenuScroll() {
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector(".myorder-sidebar");
         const menu = document.querySelector(".myorder-menu");
 
-        // Create the scroll button
+        
         const scrollButton = document.createElement("button");
         scrollButton.classList.add("scroll-right");
         scrollButton.innerHTML = "▶";
         sidebar.appendChild(scrollButton);
 
-        // Function to check if scrolling is needed
+        
         function checkScrollVisibility() {
             if (menu.scrollWidth > menu.clientWidth) {
                 scrollButton.style.display = "block";
@@ -10307,7 +9501,7 @@ function initializeMenuScroll() {
             }
         }
 
-        // Scroll event to hide button when at the end
+        
         scrollButton.addEventListener("click", function () {
             menu.scrollBy({ left: 200, behavior: "smooth" });
         });
@@ -10320,10 +9514,10 @@ function initializeMenuScroll() {
             }
         });
 
-        // Initial check
+        
         checkScrollVisibility();
 
-        // Scroll active menu item into view after short delay
+        
         setTimeout(() => {
             const activeItem = menu.querySelector(".active");
             if (activeItem) {
@@ -10335,7 +9529,7 @@ function initializeMenuScroll() {
             }
         }, 100);
 
-        // Recheck on window resize
+        
         window.addEventListener("resize", checkScrollVisibility);
     }
 }
@@ -10785,8 +9979,6 @@ if (status === 200) {
 console.error("Fetch Error:", error);
 });
 }
-
-
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -10799,7 +9991,7 @@ console.error("Fetch Error:", error);
             }
             return cookieValue;
         }
-
+/*login_security.html*/
 function logoutDevice(sessionKey, button) {
     fetch('/api/logout-device/', {
         method: 'POST',
@@ -10849,7 +10041,6 @@ function showToast(messages, isSuccess = false) {
     toast.classList.remove("hidden");
       setTimeout(hideToast, 5000);
 }
-
 function hideToast() {
     const toast = document.getElementById("unique-toast");
     toast.className = "unique-toast hidden";
@@ -10886,7 +10077,6 @@ function updatePassword() {
     if (newPassword !== confirmPassword) {
         errors.push("Confirm password does not match");
     }
-
     if (errors.length > 0) {
         showToast(errors);
         return;
@@ -10922,7 +10112,7 @@ function updatePassword() {
     });
 }
 
-//winner.html page
+//winner.html--adminpanel module--views.py function def WinnersWallListView
 $(document).ready(function () {
     let winnersData = [];
     let drawDates = [];
@@ -10931,7 +10121,7 @@ $(document).ready(function () {
 
     function fetchWinnersusersdraw() {
         $.ajax({
-            url: "/api/winners-wall/",  // Update the endpoint
+            url: "/api/winners-wall/", 
             method: "GET",
             dataType: "json",
             success: function (response) {
@@ -10995,8 +10185,7 @@ $(document).ready(function () {
         } else {
             if (currentPage <= 2) {
                 pageNumbers = [1, 2, 3];
-            // } else if (currentPage >= totalPages - 1) {
-            //     pageNumbers = [totalPages - 2, totalPages - 1, totalPages];
+            
         } else if (currentPage === totalPages) {
             pageNumbers = [1, totalPages - 1, totalPages]; // First
             } else {
@@ -11022,13 +10211,12 @@ $(document).ready(function () {
 
     fetchWinnersusersdraw();
 });
-
+//my_won_lottery_page.html--adminpanel module--views.py function def my_won_lottery
 document.addEventListener("DOMContentLoaded", function () {
     fetch("/api/my-won-lottery/", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            // "X-CSRFToken": getCookie("csrftoken"),
             "X-CSRFToken":mywon_lottery,
         },
         credentials: "include"
@@ -11064,7 +10252,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(error => console.error("Error fetching won lotteries:", error));
 });
 
-
+//favorite.html--adminpanel module--views.py function def add_to_favorites
 function toggleFavoriteSimilar(targetSlug) {
     fetch('/api/add_to_favorites/', {
         method: 'POST',

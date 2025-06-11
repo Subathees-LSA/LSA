@@ -9,8 +9,6 @@ from .models import *
 
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'newsletter', 'is_verified', 'kyc_status', 'view_kyc_image')
-
-
     def view_kyc_image(self, obj):
         if obj.kyc_image:
 
