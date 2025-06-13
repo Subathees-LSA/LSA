@@ -1,130 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
     <title>Login</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}" defer></script>
 
     <script>
-        var isBlockedUser = false; // Default to false
-    
-        function updateBlockedStatus(isBlocked) {
-            isBlockedUser = isBlocked;
-            updateFAQLink(); // Call function to update FAQ link
-        }
+      var isBlockedUser = false; // Default to false
+      function updateBlockedStatus(isBlocked) {
+        isBlockedUser = isBlocked;
+        updateFAQLink(); // Call function to update FAQ link
+      }
     </script>
+  </head>
 
-</head>
-
-<body>
-
+  <body>
     <div class="login-container">
-        <div class="login-background-wrapper">
-            <div class="login-background"></div>
-            <div class="login-orange-background">
-                <div class="login-blue-background">
-                    <div class="login-blue-background-overlay"></div>
-                </div>
-            </div>
-            <div class="login-text-section">
-                <h1 class="login-welcome-text">Welcome to our community</h1>
-                <p class="login-description-text">Clarity gives you the blocks & components you need to create a truly
-                    professional website.</p>
-            </div>
-            <div class="login-form-section">
-                <div class="login-header-wrapper">
-                    <h1 class="login-header">Welcome Back !</h1>
-                    <p class="login-description">Clarity gives you the blocks and components you need to create a
-                        truly
-                        professional website.</p>
-                </div>
-                <div class="login-form-wrapper">
-                    <form id="login-form" class="login-form" data-url="{% url 'login' %}"
-                        data-redirect-url="{% url 'user_welcome_page' %}">
-                        <h3
-                            style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
-                            E-mail</h3>
-                        <input type="email" id="login-email" class="login-input-email" placeholder="Email" required>
-                        <span id="login-email-error" class="login-error-text"></span>
-                        <div class="custom_admin_login_input_container">
-                            <h3
-                                style="width: 100%; color: #090914; font-size: 16px; font-family: Rajdhani; font-weight: 500; line-height: 24px; word-wrap: break-word">
-                                Password</h3>
-                            <input type="password" id="login-password" class="login-input-password"
-                                placeholder="Password" required>
-                            <span id="login-toggle-password" class="login-toggle-password">
-                                <img src="/media/images/eye-slash.png" alt="Show Password"
-                                    class="admin1-toggle-eye-icon">
-
-                            </span>
-                        </div>
-                        {% comment %} <span id="login-password-error" class="login-error-text"></span> {% endcomment %}
-                        <span id="login-error" class="login-error-text"></span>
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center;">
-                                <input type="checkbox" id="remember-me-checkbox"
-                                    style="width: 20px; height: 20px; border-radius: 5px; border: 1px #94A3B8 solid;" />
-                                <h4 class="remember"
-                                    style="color: #18181B; font-size: 14px; font-family: Rajdhani; font-weight: 500; line-height: 22px; word-wrap: break-word; margin-left: 8px;">
-                                    Remember me
-                                </h4>
-                            </div>
-
-                            <a href="{% url 'password_reset_page' %}" class="login-forgot-password"
-                                style="font-size: 14px; color: #FF6600;">
-                                Forgot password?
-                            </a>
-                        </div>
-
-                        <button type="submit" class="login-button">Login</button>
-                        <div class="login-separator-container">
-                            <div class="login-separator-line"></div>
-                            <p class="login-separator-text">
-                                or do it via other accounts
-                            </p>
-                            <div class="login-separator-line"></div>
-                        </div>
-
-                        <div class="google-signin-custom">
-                            <a href="{% url 'social:begin' 'google-oauth2' %}" class="submit-btn-custom1">
-                                <img src="/media/banner-footer/banner-footer (2).png" alt="Google Signin"
-                                    class="google-signin-img">
-                                Gmail
-                            </a>
-                        </div>
-                        <p class="signin-link-custom">Don't  have an account? <a href="{% url 'user_signup'%}">Signup here</a>
-                        </p>
-        
-                    </form>
-                </div>
-            </div>
-            <img src="/media/lottery_images/image%201209.png" class="lottery-image" />
-
-            <img src="/media/lottery_images/image%2030.png" class="small-lottery-image" />
-
+      <div class="login-background-wrapper">
+        <div class="login-background"></div>
+        <div class="login-orange-background">
+          <div class="login-blue-background">
+            <div class="login-blue-background-overlay"></div>
+          </div>
         </div>
+        <div class="login-text-section">
+          <h1 class="login-welcome-text">Welcome to our community</h1>
+          <p class="login-description-text">
+            Clarity gives you the blocks & components you need to create a truly
+            professional website.
+          </p>
+        </div>
+        <div class="login-form-section">
+          <div class="login-header-wrapper">
+            <h1 class="login-header">Welcome Back !</h1>
+            <p class="login-description">
+              Clarity gives you the blocks and components you need to create a
+              truly professional website.
+            </p>
+          </div>
+          <div class="login-form-wrapper">
+            <form
+              id="login-form"
+              class="login-form"
+              data-url="{% url 'login' %}"
+              data-redirect-url="{% url 'user_login' %}"
+            >
+              <h3
+                style="
+                  width: 100%;
+                  color: #090914;
+                  font-size: 16px;
+                  font-family: Rajdhani;
+                  font-weight: 500;
+                  line-height: 24px;
+                  word-wrap: break-word;
+                "
+              >
+                E-mail
+              </h3>
+              <input
+                type="email"
+                id="login-email"
+                class="login-input-email"
+                placeholder="Email"
+                required
+              />
+              <span id="login-email-error" class="login-error-text"></span>
+              <div class="custom_admin_login_input_container">
+                <h3
+                  style="
+                    width: 100%;
+                    color: #090914;
+                    font-size: 16px;
+                    font-family: Rajdhani;
+                    font-weight: 500;
+                    line-height: 24px;
+                    word-wrap: break-word;
+                  "
+                >
+                  Password
+                </h3>
+                <input
+                  type="password"
+                  id="login-password"
+                  class="login-input-password"
+                  placeholder="Password"
+                  required
+                />
+                <span id="login-toggle-password" class="login-toggle-password">
+                  <img
+                    src="/media/images/eye-slash.png"
+                    alt="Show Password"
+                    class="admin1-toggle-eye-icon"
+                  />
+                </span>
+              </div>
+              {% comment %}
+              <span id="login-password-error" class="login-error-text"></span>
+              {% endcomment %}
+              <span id="login-error" class="login-error-text"></span>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                "
+              >
+                <div style="display: flex; align-items: center">
+                  <input
+                    type="checkbox"
+                    id="remember-me-checkbox"
+                    style="
+                      width: 20px;
+                      height: 20px;
+                      border-radius: 5px;
+                      border: 1px #94a3b8 solid;
+                    "
+                  />
+                  <h4
+                    class="remember"
+                    style="
+                      color: #18181b;
+                      font-size: 14px;
+                      font-family: Rajdhani;
+                      font-weight: 500;
+                      line-height: 22px;
+                      word-wrap: break-word;
+                      margin-left: 8px;
+                    "
+                  >
+                    Remember me
+                  </h4>
+                </div>
 
-    </div>
-    
-    <div id="otp-container" class="otp-container hidden-element">
-        <div class="otp-inner-container">
-            <h2>Enter OTP</h2>
-            <p>An OTP has been sent to your email. Please enter it below to verify your login.</p>
-            <div id="otp-timer">Time remaining: <span id="timer">05:00</span></div>
-            <form id="otp-form" class="otp-form" data-url="{% url 'verify_otp' %}">
-                <input type="hidden" id="user-id">
-                <input type="text" id="otp-code" class="otp-input" placeholder="Enter OTP" required><br>
-                <span id="otp-error" style="color: red;"></span><br>
-                <button type="submit" class="otp-button">Verify OTP</button>
+                <a
+                  href="{% url 'password_reset_page' %}"
+                  class="login-forgot-password"
+                  style="font-size: 14px; color: #ff6600"
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              <button type="submit" class="login-button">Login</button>
+              <div class="login-separator-container">
+                <div class="login-separator-line"></div>
+                <p class="login-separator-text">or do it via other accounts</p>
+                <div class="login-separator-line"></div>
+              </div>
+
+              <div class="google-signin-custom">
+                <a
+                  href="{% url 'social:begin' 'google-oauth2' %}"
+                  class="submit-btn-custom1"
+                >
+                  <img
+                    src="/media/banner-footer/banner-footer (2).png"
+                    alt="Google Signin"
+                    class="google-signin-img"
+                  />
+                  Gmail
+                </a>
+              </div>
+              <p class="signin-link-custom">
+                Don't have an account?
+                <a href="{% url 'user_signup'%}">Signup here</a>
+              </p>
             </form>
-            <button id="resend-otp-button" class="otp-resend-button" disabled>Resend OTP</button>
-            <button id="otp-cancel-button" class="otp-cancel-button">Cancel</button>
+          </div>
         </div>
+        <img
+          src="/media/lottery_images/image%201209.png"
+          class="lottery-image"
+        />
+
+        <img
+          src="/media/lottery_images/image%2030.png"
+          class="small-lottery-image"
+        />
+      </div>
+    </div>
+
+    <div id="otp-container" class="otp-container hidden-element">
+      <div class="otp-inner-container">
+        <h2>Enter OTP</h2>
+        <p>
+          An OTP has been sent to your email. Please enter it below to verify
+          your login.
+        </p>
+        <div id="otp-timer">Time remaining: <span id="timer">05:00</span></div>
+        <form id="otp-form" class="otp-form" data-url="{% url 'verify_otp' %}">
+          <input type="hidden" id="user-id" />
+          <input
+            type="text"
+            id="otp-code"
+            class="otp-input"
+            placeholder="Enter OTP"
+            required
+          /><br />
+          <span id="otp-error" style="color: red"></span><br />
+          <button type="submit" class="otp-button">Verify OTP</button>
+        </form>
+        <button id="resend-otp-button" class="otp-resend-button" disabled>
+          Resend OTP
+        </button>
+        <button id="otp-cancel-button" class="otp-cancel-button">Cancel</button>
+      </div>
     </div>
 
 
@@ -134,13 +222,22 @@
         <span class="login_blocked-close">&times;</span>
         <h2>Account Blocked</h2>
         <p>
-            Access to your account is restricted. Kindly contact 
-            <a href="mailto:gurutech2620@gmail.com" class="blocked_user_modal_hyperlink">gurutech2620@gmail.com</a> 
-            for further details.
+          Access to your account is restricted. Kindly contact
+          <a
+            href="mailto:gurutech2620@gmail.com"
+            class="blocked_user_modal_hyperlink"
+            >gurutech2620@gmail.com</a
+          >
+          for further details.
         </p>
         <p>
-            Check our <a href="{% url 'faq_page' %}?blocked=true" class="blocked_user_modal_hyperlink">FAQ</a> 
-            for more information.
+          Check our
+          <a
+            href="{% url 'faq_page' %}?blocked=true"
+            class="blocked_user_modal_hyperlink"
+            >FAQ</a
+          >
+          for more information.
         </p>
     </div>
 </div>
@@ -153,25 +250,26 @@
         <span class="close" onclick="closePopupgoogle()">&times;</span>
         <h2>Account Blocked</h2>
         <p id="popupText">
-            {% for message in messages %}
-                {{ message }} Kindly contact 
-                <a href="mailto:gurutech2620@gmail.com" class="blocked_user_modal_hyperlink">gurutech2620@gmail.com</a> 
-                for further details.
-            {% endfor %}
+          {% for message in messages %} {{ message }} Kindly contact
+          <a
+            href="mailto:gurutech2620@gmail.com"
+            class="blocked_user_modal_hyperlink"
+            >gurutech2620@gmail.com</a
+          >
+          for further details. {% endfor %}
         </p>
        
         <p>
-            Check our <a href="{% url 'faq_page' %}?blocked=true"  class="blocked_user_modal_hyperlink">FAQ</a> 
-            for more information.
+          Check our
+          <a
+            href="{% url 'faq_page' %}?blocked=true"
+            class="blocked_user_modal_hyperlink"
+            >FAQ</a
+          >
+          for more information.
         </p>
+      </div>
     </div>
-</div>
-{% endif %}
-
-    
-
- 
-
-</body>
-
+    {% endif %}
+  </body>
 </html>

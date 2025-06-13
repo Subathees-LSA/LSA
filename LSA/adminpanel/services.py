@@ -33,7 +33,6 @@ def admin_logout_view(request):
         logout(request)
         return render(request, 'custom_admin_login.html')
     except Exception as e:
-        # Return an error page or a generic response
         return HttpResponseServerError(f"An error occurred during logout.")
 
 
@@ -54,21 +53,14 @@ from django.http import HttpResponseServerError
 def lottery_events(request):
     try:
         email = request.session.get("google_user_email", None)
-        events = LotteryEvent.objects.all()  # Fetch lottery events
-        testimonials = Testimonial.objects.all()  # Fetch testimonials
+        events = LotteryEvent.objects.all()  
+        testimonials = Testimonial.objects.all()  
 
         return render(request, 'lottery_events.html', {"events": events, "testimonials": testimonials,"email":email  })
     except Exception as e:
         return HttpResponseServerError(f"Error rendering lottery events page: {str(e)}")
 
-def lottery_events_add(request):
-    try:
-        if request.user.is_staff:  # or use another role check if you have a 'role' field in your model
-            return render(request, 'lottery_events_add.html')
-        else:
-            return HttpResponseForbidden("You do not have permission to access this page.")
-    except Exception as e:
-        return HttpResponseServerError(f"Error rendering lottery events add page")
+
 
 
 def cart(request):
@@ -108,17 +100,10 @@ def custom_404(request, exception):
     except Exception as e:
         return HttpResponseServerError("Sorry, the 404 page page is currently unavailable. Please try again later.")
 
-@login_required(login_url='custom_admin_login')
-def admin_contact_reply_page(request):
-    """
-    Renders the admin contact reply page for processing user messages.
-    """
-    if not request.user.is_staff:
-        return HttpResponseForbidden("You do not have permission to access this page.")
-    return render(request, 'admin_contact_reply.html')
+
 
 def get_lottery_categories(request):
-    categories = LotteryCategory.objects.all()    # Get all categories
+    categories = LotteryCategory.objects.all()
     category_data = [{"id": category.id, "name": category.name} for category in categories]    
     return JsonResponse(category_data, safe=False)
 
@@ -144,5 +129,5 @@ def winners_page(request):
 
 def my_won_lottery_page(request):
     if not request.user.is_authenticated:
-        return redirect('/login/')  # Redirect to login page if not authenticated
+        return redirect('/login/')  
     return render(request, 'my_won_lottery_page.html')

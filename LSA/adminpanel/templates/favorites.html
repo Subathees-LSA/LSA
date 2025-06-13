@@ -11,7 +11,7 @@
     {% include 'header.html' %}
     <h1 style="text-align: center;font-family: Rajdhani;">Your Favorite Lotteries</h1>
     <div id="favorites_container">
-        <!-- This will be populated with the list of favorite events -->
+        
     </div>
     <button id="load_more_button" onclick="loadMoreFavorites()" style="display: none; padding: 10px 20px; background-color: #ff6600; color: white; border: none;  cursor: pointer; margin: 20px auto; display: block;">
         Load More
@@ -20,9 +20,8 @@
     <script>const add_csrftoken="{{ csrf_token}}"; </script>
     <script src="{% static 'js/custom.js' %}"></script>
     <script>
-        let allFavorites = []; // Store all favorites globally
-        let displayedCount = 4; // Number of initially displayed items
-        // Fetch the favorites when the page loads
+        let allFavorites = []; 
+        let displayedCount = 4;
         window.onload = function() {
             fetchFavorites();
             updateCartCount(); 

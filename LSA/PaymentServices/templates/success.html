@@ -5,12 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% comment %} <meta http-equiv="refresh" content="5;url=/lottery-events/"> {% endcomment %}
     <meta http-equiv="refresh" content="5;url=/my-orders/">
-    
     <title>success </title>
-    
-    <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
@@ -97,12 +93,10 @@
         <a href="/my-orders/" class="btn btn-custom">Go to My Orders</a>
     </div>
 
-    <script>
-        // Prevent the user from going back to the success page
+    <script>  
         history.pushState(null, document.title, location.href);
         window.addEventListener('popstate', function (event) {
             history.pushState(null, document.title, location.href);
-            //window.location.href = '/lottery-events/';
             window.location.href = '/my-orders/';
             
         });

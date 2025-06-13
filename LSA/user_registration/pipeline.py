@@ -1,3 +1,4 @@
+"""this pipeline for google outh process"""
 from django.contrib.auth import get_user_model
 from .models import UserProfile
 from django.db import transaction
@@ -58,7 +59,7 @@ def save_user_profile(backend, user, response, *args, **kwargs):
                 token = default_token_generator.make_token(user)
                 return redirect(f"/password-reset-confirm/{uidb64}/{token}/")  # Updated
 
-            
+"""link_to_existing_user while signup"""            
 def link_to_existing_user(backend, user, response, *args, **kwargs):
     if backend.name == 'google-oauth2':
         email = response.get('email', '')
@@ -73,7 +74,7 @@ def link_to_existing_user(backend, user, response, *args, **kwargs):
                 return {'user': existing_user} 
             
 
-
+"""block user by google outh"""
 def block_user_check(backend, user, response, *args, **kwargs):
     request = kwargs.get('request')  # Extract the request object
     if backend.name == 'google-oauth2' and hasattr(user, 'userprofile') and user.userprofile.is_blocked:
@@ -81,9 +82,6 @@ def block_user_check(backend, user, response, *args, **kwargs):
         from django.shortcuts import redirect
         messages.error(request, "Access to your account is restricted.")
         return redirect('user_login')
-
-
-# app1/pipeline.py
 
 from user_agents import parse
 from django.utils.timezone import now
@@ -119,7 +117,6 @@ def save_login_session_details(strategy, details, backend, user=None, request=No
             login_time=now(),
             session_key=session_key
         )
-
         # Update UserPrivacy
         user_privacy, _ = UserPrivacy.objects.get_or_create(user=user)
         user_privacy.device_info = device_info

@@ -16,7 +16,7 @@ class LotteryEventAdmin(admin.ModelAdmin):
     list_display = ('title', 'is_active', 'draw_date')
     list_filter = ('is_active', 'draw_date')
     search_fields = ('title', 'description')
-    inlines = [LotteryEventImagesInline]  # Add the inline for images
+    inlines = [LotteryEventImagesInline] 
 
 @admin.register(LotteryEventImages)
 class LotteryEventImagesAdmin(admin.ModelAdmin):
@@ -25,19 +25,20 @@ class LotteryEventImagesAdmin(admin.ModelAdmin):
     search_fields = ('lottery_event__title',)
 
 
-admin.site.register(TicketTransaction)
 
 @admin.register(admin_dashboard_preview)
 class admindashboardpreviewAdmin(admin.ModelAdmin):
-    list_display = ['name','identifier']
+    list_display = ['name','identifier','type', 'ordering']
+    list_editable = ('ordering',)
+    ordering = ['ordering']
     #readonly_fields = ['type']
     #exclude = ['type']
 
 @admin.register(admin_navbar_access)
 class admin_navbar_accessAdmin(admin.ModelAdmin):
-    list_display = ('name', 'url_name', 'ordering', 'resolved_url')  # Show ordering field
-    list_editable = ('ordering',)  # Allow inline editing of the ordering field
-    ordering = ['ordering']  # Ensure objects are displayed in custom order
+    list_display = ('name', 'url_name', 'ordering', 'resolved_url') 
+    list_editable = ('ordering',) 
+    ordering = ['ordering'] 
 
     def resolved_url(self, obj):
         return obj.get_url()
@@ -48,19 +49,19 @@ class AdminProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'role')
     filter_horizontal = ('navbar_access','dashboard_preview',)
 
-admin.site.register(ConversionRate)
+
 
 
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'email', 'description', 'created_at')  # Display message in list view
-    search_fields = ('name', 'email', 'description')  # Search includes message content
-    list_filter = ('created_at',)  # Filter by creation date
-    readonly_fields = ('created_at',)  # Makes created_at read-only
-    ordering = ('-created_at',)  # Orders by newest first
+    list_display = ('id', 'name', 'email', 'description', 'created_at') 
+    search_fields = ('name', 'email', 'description') 
+    list_filter = ('created_at',) 
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
 
-    # Add a custom action to mark messages as "processed"
+   
     actions = ['mark_as_processed']
 
     def mark_as_processed(self, request, queryset):
@@ -88,7 +89,6 @@ class WinnerAdmin(admin.ModelAdmin):
     list_filter = ('selection_method',)
 
 
-# Get all models in the 'adminpanel' app
 app_config = apps.get_app_config('adminpanel')
 app_models = app_config.get_models()
 
@@ -97,5 +97,4 @@ for model in app_models:
     try:
         admin.site.register(model)
     except AlreadyRegistered:
-        # Skip if the model is already registered
         pass

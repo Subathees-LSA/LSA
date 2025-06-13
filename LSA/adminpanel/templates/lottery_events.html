@@ -14,8 +14,8 @@
         const cartUrl = "{% url 'cart' %}";  
         const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
         const bannerUrl = "{% url 'api_banner' %}";
-        let displayedCount_previous_winner = 0; // Tracks the number of winners already displayed
-        let isShowingAll_previous_winner = false; // Tracks whether "View All Winners" is currently expanded
+        let displayedCount_previous_winner = 0; 
+        let isShowingAll_previous_winner = false; 
         const winnersUrl_mainpage = "{% url 'api_get_previous_winners' %}"; 
         const api_get_categories_url = "{% url 'api_get_lottery_categories' %}";
          const csrfToken = "{{ csrf_token }}";
@@ -38,35 +38,28 @@
 </head>
 <body class="lotterybody">
     {% include 'header.html' %}
-     {% comment %} <button class="explore-button" onclick="scrollToCenterCategory()">Explore Now</button> {% endcomment %}
      
-     {% comment %} <button class="explore-button" onclick="scrollToFirstCategory()">Explore Now</button> {% endcomment %}
-    
      <div class="banner-container" id="banner_container">
 
-        
-        <!-- Banner will be dynamically loaded here -->
+    
     </div>  
-     
-    {% comment %} <h1 class="lottery_events_title">Lottery Events</h1> {% endcomment %}
+    
 <br>
 <div class="categories-tabs-wrapper">
     <div class="categories-tabs" id="categories_tabs">
-        <!-- Tabs will be dynamically inserted here -->
+        
     </div>
     <button id="scroll-right-arrow" class="scroll-arrow">➜</button>
 </div>
     <div class="categories-container" id="categories_container">
-        <!-- Categories will be dynamically added here -->
+       
     </div>
     <div class="lottery-events-container" id="lottery_events_container">
-        <!-- Events corresponding to the selected category will be displayed here -->
+        
     </div>
     <br>
     <div class="how-to-play_why-choose-us_container"id="how-to-play">
-        <!-- <img src="/media/lottery_images/how_play.png" alt="how play" class="how-play-image"> -->
-      
-        <!-- How to Play Section -->
+        
          <div class="how-to-play">
             <h2>How to Play</h2>
             <div class="how-to-playsteps">
@@ -89,7 +82,7 @@
             </div>
         </div>
     
-        <!-- Why Choose Us Section -->
+        
         <div class="why-choose-us">
             <img src="/media/lottery_images/why_choose_us.png" alt="Why Choose Us" class="why-choose-us-image">
         </div>
@@ -128,13 +121,13 @@
 </div>
 
     <div id="previous_winner_section" class="previous-winners-container">
-        <!-- Winner rows will be dynamically rendered here -->
+
     </div>
     
     <button id="view_all_button_previous_winner_mainpage" class="view-all-button-previous-winner-mainpage" onclick="toggleWinners_mainpage()">View All Winners</button> 
-    <!-- Subscription Section -->
+    
     <div class="db-container"id="db_Subscription">
-            <!-- Star Images -->
+            
     <img src="/media/star/star (1).png" class="db-star star-top-left" alt="Star">
     <img src="/media/star/star (2).png" class="db-star star-top-right" alt="Star">
     <img src="/media/star/star (3).png" class="db-star star-bottom-left" alt="Star">
@@ -156,11 +149,7 @@
             </div>
             <div class="db-subscription">
                 <p class="db-text">Get Subscription now receive offers from us</p>
-                <!-- <input type="email" id="db-email" required > -->
-                <!-- <div class="db-checkbox">
-                    <input type="checkbox" id="db-notify" checked>
-                    <label for="db-notify" class="db-text">Notify me news and blog information</label>
-                </div> -->
+                
                 <button class="db-btn" onclick="  window.location.href='{% url 'subscription_page' %}';">
                     Subscribe Now
                 </button>
@@ -170,21 +159,12 @@
 
 
 
-<!-- paymentlabel -->
+
     <div class="db-payment-label">
         <img src="/media/lottery_images/payment_label.png" alt="paymentlabel" class="db-payment-label-image">
     </div>
 
- <!-- Payment Icons Section -->
- <!-- <div class="payment-icons">
-    <img src="/media/lottery_images/arrows (1).svg" alt="Visa">
-    <img src="mastercard.png" alt="Mastercard">
-    <img src="paypal.png" alt="PayPal">
-    <img src="gpay.png" alt="Google Pay">
-    <img src="applepay.png" alt="Apple Pay">
-</div> -->
-
-<!-- Chatbot Widget -->
+ 
 <div class="chatbot-container">
     <div class="chatbot-popup" id="chatbotPopup">
         <button class="chatbot-close-btn" onclick="closeChatbot()">✖</button>
@@ -213,51 +193,4 @@
         <p>We found that this account already exists (<span id="google-user-email"></span>). We are linking it to your existing account.</p>
     </div>    
 </body> 
-{% comment %} <script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        const kycUploadForm = document.getElementById("kycUploadForm");
-        if (kycUploadForm) {
-            kycUploadForm.onsubmit = function (e) {
-                e.preventDefault();
-                const errorMessageElement = document.getElementById("error-message");
-                const imageFile = document.getElementById("kycImage")?.files[0];
-    
-                if (imageFile && imageFile.size <= 500 * 1024) {
-                    const formData = new FormData();
-                    formData.append("image", imageFile);
-    
-                    fetch(kycUploadUrl, {
-                        method: "POST",
-                        headers: {
-                            "X-CSRFToken": csrfToken,
-                        },
-                        body: formData,
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === "success") {
-                                alert("KYC image uploaded successfully.");
-                                closeKYCModal();
-                                if (typeof kycStatusUrl !== "undefined") {
-                                    checkKYCStatus();
-                                }
-                            } else if (data.image) {
-                                errorMessageElement.textContent = data.image[0];
-                            } else {
-                                console.error("KYC upload error:", data);
-                            }
-                        })
-                        .catch(error => console.error("Error uploading KYC image:", error));
-                } else {
-                    errorMessageElement.textContent = "File size must be less than 500KB.";
-                }
-            };
-        } else {
-    
-        }
-    });
-    
-</script> {% endcomment %}
-
 </html>

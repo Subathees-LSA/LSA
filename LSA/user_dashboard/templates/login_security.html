@@ -17,13 +17,11 @@
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector(".myorder-sidebar");
         const menu = document.querySelector(".myorder-menu");
-
         // Create the scroll button
         const scrollButton = document.createElement("button");
         scrollButton.classList.add("scroll-right");
         scrollButton.innerHTML = "▶";
         sidebar.appendChild(scrollButton);
-
         // Function to check if scrolling is needed
         function checkScrollVisibility() {
             if (menu.scrollWidth > menu.clientWidth) {
@@ -32,12 +30,10 @@
                 scrollButton.style.display = "none";
             }
         }
-
         // Scroll event to hide button when at the end
         scrollButton.addEventListener("click", function () {
             menu.scrollBy({ left: 200, behavior: "smooth" });
         });
-
         menu.addEventListener("scroll", function () {
             if (menu.scrollLeft + menu.clientWidth >= menu.scrollWidth) {
                 scrollButton.style.display = "none";
@@ -45,10 +41,8 @@
                 scrollButton.style.display = "block";
             }
         });
-
         // Initial check
         checkScrollVisibility();
-
         // Scroll active menu item into view after short delay
         setTimeout(() => {
             const activeItem = menu.querySelector(".active");
@@ -60,31 +54,22 @@
                 });
             }
         }, 100);
-
         // Recheck on window resize
         window.addEventListener("resize", checkScrollVisibility);
     }
 }
-
 document.addEventListener("DOMContentLoaded", initializeMenuScroll);
-
-    </script>
-    
+    </script> 
 </head>
 <body class="unique-body">
-
     {% include 'header.html' %}
-
-    <div class="unique-container">
-    
+    <div class="unique-container"> 
         <!-- Sidebar -->
         {% include 'myorder-sidebar.html' %}
-    
-        <!-- Content Section -->
+            <!-- Content Section -->
         <div class="unique-content-section">
             <h1 class="unique-title-main">Login and Security</h1>
-    
-            <!-- Change Password Section -->
+                <!-- Change Password Section -->
             <h2 class="unique-title-sub">Change Password</h2>
             <form id="unique-password-form">
                 <div class="unique-form-group">
@@ -104,9 +89,7 @@ document.addEventListener("DOMContentLoaded", initializeMenuScroll);
                             <img src="/media/images/eye-slash.png" alt="Toggle Password" />
                         </button>
                     </div>
-                </div>
-               
-
+                </div>              
                 <div class="unique-form-group">
                     <label for="unique-confirm-password" class="unique-label">Confirm Password</label>
                     <div class="password-wrapper">
@@ -120,12 +103,9 @@ document.addEventListener("DOMContentLoaded", initializeMenuScroll);
                 <div class="unique-form-group">
                     <button type="button" class="unique-update-btn" onclick="updatePassword()">Update Password</button>
                 </div>
-             
-            </form>
-    
-            <hr>
-    
-            <!-- Active Sessions Section -->
+                         </form>
+                <hr>
+                <!-- Active Sessions Section -->
             <h2 class="unique-title-sub">Active Sessions</h2>
             {% if device_history|length == 0 %}
             <p>No active sessions.</p>
@@ -143,16 +123,12 @@ document.addEventListener("DOMContentLoaded", initializeMenuScroll);
                         <button type="button" class="unique-logout-btn" onclick="logoutDevice('{{ device.session_key }}', this)">
                             Log out device
                         </button>
-                    </div>
-                    
-                    
-                    {% endif %}
+                    </div>              
+                   {% endif %}
                 {% endfor %}
             {% endif %}
         </div>
     </div>
-    
     {% include 'footer.html' %}
-
 </body>
 </html>

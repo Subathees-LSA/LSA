@@ -28,7 +28,7 @@ def user_chats(request):
         return render(request, 'user_chats.html')
     except Exception as e:
         return HttpResponseServerError(f"Error rendering user chat page")
-
+ #!------------- contact.html ------------!
 def contact_page(request):
     try:
         if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
@@ -36,40 +36,29 @@ def contact_page(request):
         return render(request, 'contact.html')
     except Exception as e:
         return HttpResponseServerError("Sorry, the Contact Us page is currently unavailable. Please try again later.")
-
+ #!------------- signup.html ------------!
 def user_signup(request):
     return render(request, 'signup.html')
 
-
+ #!------------- login.html ------------!
 def user_login(request):
     return render(request, 'login.html')
 
 
-@user_passes_test(lambda u: u.is_staff)
-def user_list_details(request):
-    return render(request, 'user_list_details.html')
 
-@user_passes_test(lambda u: u.is_staff)
-def user_kyc_waiting_list_details(request):
-    return render(request, 'user_kyc_waiting_list_details.html')
 
-def user_welcome_page(request):
-    email = request.session.get("google_user_email", None)
-    # Check if user is authenticated and exists in User table
-    if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
-        return redirect('/login/')  # Redirects unauthenticated users or those not in User table
+# def user_welcome_page(request):
+#     email = request.session.get("google_user_email", None)
     
-    return render(request, 'user_welcome_page.html',{'email':email})
+#     if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
+#         return redirect('/login/')  
+    
+#     return render(request, 'user_welcome_page.html',{'email':email})
 
-#try exceptionssssss
+
 def user_logout(request):
     logout(request)  # Logs out the user
     return redirect('/login/')  # Redirects to the login page after logout
-
-
-
-
-
 def check_username(request):
     try:
         username = request.GET.get('username')
@@ -87,8 +76,6 @@ def check_username(request):
         return JsonResponse({'exists': exists, 'suggestion': suggestion})
     except Exception as e:
         return JsonResponse({'error': f"An error occurred: {str(e)}"}, status=500)
-
-
 def check_email(request):
     try:
         email = request.GET.get('email', None)
@@ -99,9 +86,6 @@ def check_email(request):
         return JsonResponse({'exists': exists})
     except Exception as e:
         return JsonResponse({'error': f"An error occurred: {str(e)}"}, status=500)
-
-
-
 def view_image(request, profile_id):
     try:
         # Get the user profile object
@@ -119,7 +103,6 @@ def view_image(request, profile_id):
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}", status=500)
 
-
 def view_kyc_image(self, obj):
     try:
         if obj.kyc_image:
@@ -132,15 +115,9 @@ def view_kyc_image(self, obj):
     except Exception as e:
         return f"An error occurred: {str(e)}"
 view_kyc_image.short_description = "KYC Image"
-
-
-
-
-
+ #!------------- passwordrest.html------------!
 def password_reset_request_page(request):
     return render(request, 'password_reset.html')
-
-
 def password_reset_confirm_page(request, uidb64, token):
     try:
         # Decode the uid
@@ -148,8 +125,6 @@ def password_reset_confirm_page(request, uidb64, token):
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
-
-
     try:
         # Check if the token is valid
         if user is not None and default_token_generator.check_token(user, token):
@@ -158,13 +133,9 @@ def password_reset_confirm_page(request, uidb64, token):
     except Exception as e:
         messages.error(request, f"An error occurred: {str(e)}")
         return redirect(reverse('password_reset_page'))  # Assuming the URL name for password reset request is 'password_reset_request'
-
-
     # Token is invalid, redirect to the reset request page with error message
     messages.error(request, "The reset link is invalid. Please request a new one.")
     return redirect(reverse('password_reset_page'))
-
-
 
 def check_reset_token(uidb64, token):
     try:
@@ -173,25 +144,15 @@ def check_reset_token(uidb64, token):
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         return False
 
-
     try:
         return default_token_generator.check_token(user, token)
     except Exception:
         return False
-
-
-
-
+ #!------------- privacy.html ------------!
 def privacy_security_page(request):
     user = request.user  # Get the currently logged-in user
-
-    # Check if the user exists in the User table
-    # if not User.objects.filter(id=user.id).exists():
-    #     return redirect("login")
     if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
         return redirect('/login/')  # Redirects unauthenticated users or those not in User table
-    
-    # Prepare user data to be passed to the template
     context = {
         "username": user.username,
         "email": user.email,
@@ -203,19 +164,14 @@ def privacy_security_page(request):
     
     return render(request, "privacy_security.html", context)
 
-
-
-
 from django.utils import timezone
 from user_registration.utils import generate_otp
 from django.core.mail import send_mail
-
 def resend_otp_service(user):
     try:
         user_privacy = user.userprivacy  # Access the related `userprivacy` instance
     except AttributeError:
         raise ValueError("User privacy details not found.")
-
     # Generate a new OTP and set its expiration time
     otp = generate_otp()
     user_privacy.otp = otp
@@ -227,11 +183,9 @@ def resend_otp_service(user):
 
     return "A new OTP has been sent to your email."
 
-
 def send_otp_email(email, otp):
     subject = "Your OTP Code"
     message = f"Your OTP code is {otp}. It is valid for the next 5 minutes."
     from_email = "noreply@example.com"  # Replace with your sender email
     recipient_list = [email]
-
     send_mail(subject, message, from_email, recipient_list)

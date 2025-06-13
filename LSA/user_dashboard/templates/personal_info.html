@@ -1,100 +1,122 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personal Info</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/custom.js' %}" defer></script>
     <script>
-        window.onload = function() {
-            piValidateForm();
-            piPreviewImage(event);
-            piUpdateProfile();
-        };
-        </script>
-</head>
-<body>
+      window.onload = function () {
+        piValidateForm();
+        piPreviewImage(event);
+        piUpdateProfile();
+      };
+    </script>
+  </head>
+  <body>
     {% include 'header.html' %}
     <div class="pi-container">
         {% include 'myorder-sidebar.html' %}    
     <div class="pi-content">
         <h2>Personal Info</h2>
         <form id="pi-profile-form" enctype="multipart/form-data">
-            <div class="pi-form-section">
-                <label>Username <span class="pi-required">*</span></label>
-                <input type="text" id="pi-username"  class="fixed-username"
-                value="{{ user.username }}" 
-                placeholder="Enter your name" 
-                required>
-                <small class="pi-error-message" id="pi-username-error"></small>
+          <div class="pi-form-section">
+            <label>Username <span class="pi-required">*</span></label>
+            <input
+              type="text"
+              id="pi-username"
+              class="fixed-username"
+              value="{{ user.username }}"
+              placeholder="Enter your name"
+              required
+            />
+            <small class="pi-error-message" id="pi-username-error"></small>
+          </div>
+          <!-- Profile Picture Upload -->
+          <div class="pi-profile-photo-section">
+            <label>Upload Profile Photo</label>
+            <div class="pi-upload-box">
+              <input
+                type="file"
+                id="pi-profile-photo"
+                name="profile_photo"
+                hidden
+                onchange="piPreviewImage(event)"
+              />
+              <label for="pi-profile-photo" class="pi-upload-label">+</label>
+              <img
+                id="pi-profile-preview"
+                src="{{ user_privacy.profile_photo.url|default:'/media/default-profile.jpg' }}"
+                width="100"
+                alt="Profile Photo"
+              />
             </div>
-
-            <!-- Profile Picture Upload -->
-            <div class="pi-profile-photo-section">
-                <label>Upload Profile Photo</label>
-                <div class="pi-upload-box">
-                    <input type="file" id="pi-profile-photo" name="profile_photo" hidden onchange="piPreviewImage(event)">
-
-                    <label for="pi-profile-photo" class="pi-upload-label">+</label>
-                    <img id="pi-profile-preview" 
-                    src="{{ user_privacy.profile_photo.url|default:'/media/default-profile.jpg' }}" 
-                    width="100" 
-                    alt="Profile Photo">
-                </div>
-                <small class="pi-error-message" id="pi-profile-photo-error"></small>
+            <small class="pi-error-message" id="pi-profile-photo-error"></small>
+          </div>
+          <div class="pi-form-row">
+            <div class="pi-form-section half-width">
+              <label>Phone Number <span class="pi-required">*</span></label>
+              <input
+                type="text"
+                id="pi-phone-number"
+                value="{{ user_privacy.phone_number|default_if_none:'' }}"
+                placeholder="Enter a valid phone number"
+                required
+              />
+              <small class="pi-error-message" id="pi-phone-error"></small>
             </div>
-            <div class="pi-form-row">
-                <div class="pi-form-section half-width">
-                    <label>Phone Number <span class="pi-required">*</span></label>
-                    <input type="text" id="pi-phone-number" 
-                           value="{{ user_privacy.phone_number|default_if_none:'' }}" 
-                           placeholder="Enter a valid phone number" required>
-                    <small class="pi-error-message" id="pi-phone-error"></small>
-                </div>
-            
-                <div class="pi-form-section half-width">
-                    <label>Email</label>
-                    <input type="email" value="{{ user.email }}" disabled>
-                </div>
+            <div class="pi-form-section half-width">
+              <label>Email</label>
+              <input type="email" value="{{ user.email }}" disabled />
             </div>
+          </div>
+          <div class="pi-form-section">
+            <label>Your Address <span class="pi-required">*</span></label>
+            <textarea id="pi-address" placeholder="Enter your address" required>
+{{ user_privacy.address|default_if_none:'' }}</textarea
+            >
 
-            <div class="pi-form-section">
-                <label>Your Address <span class="pi-required">*</span></label>
-                <textarea id="pi-address" placeholder="Enter your address" required>{{ user_privacy.address|default_if_none:'' }}</textarea>
-
-                   <small class="pi-error-message" id="pi-address-error"></small>
+            <small class="pi-error-message" id="pi-address-error"></small>
+          </div>
+          <!-- Social Media -->
+          <h3>Social</h3>
+          <div class="pi-form-row">
+            <div class="pi-form-section half-width">
+              <label>Website</label>
+              <input
+                type="url"
+                id="pi-website"
+                value="{{ user_privacy.website|default_if_none:'' }}"
+                placeholder="Enter your website URL"
+              />
+              <small class="pi-error-message" id="pi-website-error"></small>
             </div>
-
-            <!-- Social Media -->
-            <h3>Social</h3>
-            <div class="pi-form-row">
-                <div class="pi-form-section half-width">
-                    <label>Website</label>
-                    <input type="url" id="pi-website" 
-                           value="{{ user_privacy.website|default_if_none:'' }}" 
-                           placeholder="Enter your website URL">
-                    <small class="pi-error-message" id="pi-website-error"></small>
-                </div>
-            
-                <div class="pi-form-section half-width">
-                    <label>Twitter</label>
-                    <input type="text" id="pi-twitter" 
-                           value="{{ user_privacy.twitter|default_if_none:'' }}" 
-                           placeholder="Enter your Twitter handle">
-                </div>
+            <div class="pi-form-section half-width">
+              <label>Twitter</label>
+              <input
+                type="text"
+                id="pi-twitter"
+                value="{{ user_privacy.twitter|default_if_none:'' }}"
+                placeholder="Enter your Twitter handle"
+              />
             </div>
-            <div class="pi-form-row">
-            <button type="button" class="pi-update-btn" onclick="piUpdateProfile()">Update Profile</button>
+          </div>
+          <div class="pi-form-row">
+            <button
+              type="button"
+              class="pi-update-btn"
+              onclick="piUpdateProfile()"
+            >
+              Update Profile
+            </button>
             <button type="reset" class="pi-clear-btn">Clear all</button>
-            </div>
+          </div>
         </form>
+      </div>
     </div>
-</div>
-    
-  
-</body>
-{% include 'footer.html' %}
+  </body>
+  {% include 'footer.html' %}
 </html>

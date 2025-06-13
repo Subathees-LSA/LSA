@@ -1,3 +1,4 @@
+"""personal.html--js-function piValidateForm()"""
 from rest_framework import permissions
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -24,8 +25,8 @@ class UserPrivacyView(APIView):
             serializer.save()
             return Response({"message": "Profile updated successfully", "data": serializer.data}, status=200)
 
-        return Response({"error": serializer.errors}, status=400)  # ✅ Always return JSON, not Django error page
-
+        return Response({"error": serializer.errors}, status=400) 
+"""login_security.html--js-function logoutDevice(sessionKey, button)"""
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -33,14 +34,6 @@ from user_registration.models import UserPrivacy  # Corrected import
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
-from django.http import JsonResponse
-from django.utils.timezone import now
-from django.contrib.sessions.models import Session
-from django.contrib.auth import logout
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from user_registration.models import UserDeviceHistory
 from django.utils.timezone import now
 from django.contrib.sessions.models import Session
 from django.contrib.auth import logout
@@ -136,8 +129,7 @@ def update_password(request):
 
     return JsonResponse({"success": False, "message": "Invalid request."})
 
-    # user_dashboard/views.py
+"""subscription_page.html"""
 from django.shortcuts import render
-
 def subscription_page(request):
     return render(request, 'subscription_page.html')

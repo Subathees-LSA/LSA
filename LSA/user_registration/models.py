@@ -28,10 +28,6 @@ class UserPrivacy(models.Model):
     two_factor_auth_enabled = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, blank=True, null=True)
     otp_expiration = models.DateTimeField(blank=True, null=True)
-
-    # Personal Information
-    # first_name = models.CharField(max_length=50, blank=True, null=True)
-    # last_name = models.CharField(max_length=50, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)  # Date of Birth
     phone_number = models.CharField(
         max_length=15,

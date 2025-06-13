@@ -1,133 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">    <title>Signup</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Signup</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        const checkusernameUrl = "{% url 'check_username' %}";
-        const checkemailUrl = "{% url 'check_email' %}";
-        const registerUrl = "{% url 'register' %}";
-        const userloginUrl = "{% url 'user_login' %}";
+      const checkusernameUrl = "{% url 'check_username' %}";
+      const checkemailUrl = "{% url 'check_email' %}";
+      const registerUrl = "{% url 'register' %}";
+      const userloginUrl = "{% url 'user_login' %}";
     </script>
     <script src="{% static 'js/custom.js' %}" defer></script>
-</head>
+  </head>
 
-<body class="signup-body">
+  <body class="signup-body">
     <div class="signup-main-container-custom">
-        <div class="signup-inner-container-custom">
-            <div class="signup-background-custom"></div>
-            <div class="signup-orange-background-custom"></div>
-            <div class="signup-dark-background-custom">
-                <div class="signup-circle1-custom"></div>
-                <div class="signup-circle2-custom"></div>
-            </div>
+      <div class="signup-inner-container-custom">
+        <div class="signup-background-custom"></div>
+        <div class="signup-orange-background-custom"></div>
+        <div class="signup-dark-background-custom">
+          <div class="signup-circle1-custom"></div>
+          <div class="signup-circle2-custom"></div>
         </div>
-        <div class="signup-welcome-message-custom">
-            <h1 class="signup-welcome-title-custom">Welcome !</h1>
-            <p class="signup-welcome-subtitle-custom">
-                Clarity gives you the blocks and components you need to create a truly professional website.
+      </div>
+      <div class="signup-welcome-message-custom">
+        <h1 class="signup-welcome-title-custom">Welcome !</h1>
+        <p class="signup-welcome-subtitle-custom">
+          Clarity gives you the blocks and components you need to create a truly
+          professional website.
+        </p>
+      </div>
+
+      <!-- Signup Form Container -->
+      <div class="signup-container-custom">
+        <h3 class="signup-fullname-label">Full name</h3>
+
+        <form id="signup" class="signup-form">
+          <div class="signup-form-group-custom">
+            <input
+              class="signup-input"
+              type="text"
+              id="signup-username"
+              placeholder="Username"
+              required
+            />
+            <span id="signup-username-error" class="signup-error-custom"></span
+            ><br />
+            <span
+              id="signup-username-suggestion"
+              class="signup-suggestion-custom"
+            ></span
+            ><br />
+          </div>
+          <h3 class="signup-email-label">Email address</h3>
+          <div class="signup-form-group-custom">
+            <input
+              class="signup-input"
+              type="email"
+              id="signup-email"
+              placeholder="Email"
+              required
+            />
+            <span id="signup-email-error" class="signup-error-custom"></span
+            ><br />
+          </div>
+          <h3 class="signup-password-label">Password</h3>
+          <div class="signup-form-group-custom">
+            <input
+              class="signup-input"
+              type="password"
+              id="signup-password"
+              placeholder="Password (min 8 characters)"
+              required
+            />
+            <span id="signup-toggle-password" class="signup-toggle-password">
+              <img
+                src="media/images/eye-slash.png"
+                alt="Show Password"
+                class="signup-toggle-eye-icon"
+              />
+            </span>
+            <span id="signup-password-error" class="signup-error-custom"></span
+            ><br />
+          </div>
+          <!-- Password validation messages -->
+          <div id="password-message" class="password-message">
+            <p id="password-uppercase" class="invalid">
+              ❌ Password must contain at least one uppercase letter
             </p>
-        </div>
+            <p id="password-number" class="invalid">
+              ❌ Password must contain at least four number
+            </p>
+            <p id="password-special" class="invalid">
+              ❌ Password must contain at least one special character
+            </p>
+            <p id="password-length" class="invalid">
+              ❌ Password must be at least 8 characters long
+            </p>
+          </div>
+          <!-- Error message for form submission -->
+          <div
+            id="signup-form-error-message"
+            class="signup-form-error-msg"
+          ></div>
+          <div class="signup-form-submit-custom">
+            <button type="submit" class="signup-submit-btn-custom">
+              Sign Up
+            </button>
+          </div>
+          <div class="signup-separator-container">
+            <div class="signup-separator-line"></div>
+            <p class="signup-separator-text">
+              or do signup-it via other accounts
+            </p>
+            <div class="signup-separator-line"></div>
+          </div>
 
-        <!-- Signup Form Container -->
-        <div class="signup-container-custom">
-            <!-- <h2 class="signup-title-custom">Signup</h2> -->
-            <h3 class="signup-fullname-label">
-                Full name
-            </h3>
+          <div class="google-signin-custom">
+            <a
+              href="{% url 'social:begin' 'google-oauth2' %}"
+              class="submit-btn-custom1"
+            >
+              <img
+                src="/media/banner-footer/banner-footer (2).png"
+                alt="Google Signin"
+                class="google-signin-img"
+              />
+              Gmail
+            </a>
+          </div>
 
-
-            <form id="signup" class="signup-form">
-                <div class="signup-form-group-custom">
-                    <input class="signup-input" type="text" id="signup-username" placeholder="Username" required>
-                    <span id="signup-username-error" class="signup-error-custom"></span><br>
-                    <span id="signup-username-suggestion" class="signup-suggestion-custom"></span><br>
-                </div>
-                <h3 class="signup-email-label">
-                    Email address
-                </h3>
-                <div class="signup-form-group-custom">
-                    <input class="signup-input" type="email" id="signup-email" placeholder="Email" required>
-                    <span id="signup-email-error" class="signup-error-custom"></span><br>
-                </div>
-                <h3 class="signup-password-label">
-                    Password
-                </h3>
-                <div class="signup-form-group-custom">
-                    <input class="signup-input" type="password" id="signup-password" placeholder="Password (min 8 characters)" required>
-                    <span id="signup-toggle-password" class="signup-toggle-password">
-                        <img src="media/images/eye-slash.png" alt="Show Password" class="signup-toggle-eye-icon">
-                    </span>
-                    <span id="signup-password-error" class="signup-error-custom"></span><br>
-                </div>
-
-        <!-- Password Validation Message Box -->
-        <!-- Password validation messages -->
-        <div id="password-message" class="password-message">
-         <p id="password-uppercase" class="invalid">❌ Password must contain at least one uppercase letter</p>
-         <p id="password-number" class="invalid">❌ Password must contain at least four number</p>
-         <p id="password-special" class="invalid">❌ Password must contain at least one special character</p>
-         <p id="password-length" class="invalid">❌ Password must be at least 8 characters long</p>
-        </div>
- 
-                <!-- <div class="form-group-custom">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="signup-newsletter">
-                        <label for="signup-newsletter">Subscribe to newsletter</label>
-                    </div>
-                </div> -->
-
-                <!-- Error message for form submission -->
-                <div id="signup-form-error-message" class="signup-form-error-msg"></div>
-
-                <div class="signup-form-submit-custom">
-                    <button type="submit" class="signup-submit-btn-custom">Sign Up</button>
-                </div>
-                <div class="signup-separator-container">
-                    <div class="signup-separator-line"></div>
-                    <p class="signup-separator-text">
-                        or do signup-it via other accounts
-                    </p>
-                    <div class="signup-separator-line"></div>
-                </div>
-
-                <div class="google-signin-custom">
-                    <a href="{% url 'social:begin' 'google-oauth2' %}" class="submit-btn-custom1">
-                        <img src="/media/banner-footer/banner-footer (2).png" alt="Google Signin" class="google-signin-img">
-                        Gmail
-                    </a>
-                </div>
-
-
-
-
-                <p class="login-link-custom">Already have an account? <a href="{% url 'user_login' %}">Login here</a>
-                </p>
-
-
-            </form>
-        </div>
-
-        <!-- Other account option -->
-        <div class="account-option-custom"></div>
+          <p class="login-link-custom">
+            Already have an account?
+            <a href="{% url 'user_login' %}">Login here</a>
+          </p>
+        </form>
+      </div>
+      <!-- Other account option -->
+      <div class="account-option-custom"></div>
     </div>
-
     <div class="signup-left-text">
-        <h1 class="signup-welcome-text">
-            Welcome to our community
-        </h1>
-        <h3 class="description-text">
-            Clarity gives you the blocks & components you need to create a truly professional website.
-        </h3>
+      <h1 class="signup-welcome-text">Welcome to our community</h1>
+      <h3 class="description-text">
+        Clarity gives you the blocks & components you need to create a truly
+        professional website.
+      </h3>
     </div>
-    <img class="lottery-image" src="media/lottery_images/image%201209.png" alt="Lottery Image" />
-    <img class="small-lottery-image" src="media/lottery_images/image%2030.png" alt="Lottery Image" />
-
-</body>
-
+    <img
+      class="lottery-image"
+      src="media/lottery_images/image%201209.png"
+      alt="Lottery Image"
+    />
+    <img
+      class="small-lottery-image"
+      src="media/lottery_images/image%2030.png"
+      alt="Lottery Image"
+    />
+  </body>
 </html>
