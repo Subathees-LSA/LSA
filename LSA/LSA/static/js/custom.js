@@ -6198,7 +6198,7 @@ $(document).ready(function () {
 
 
 
-    $('#admin_signup_username_id').on('input', function () {
+    $('#admin_signup_username_id').on('focusout', function () {
         validateUsername($(this).val(), 'admin_signup_username_error');
     });
 
@@ -6300,7 +6300,7 @@ $(document).ready(function () {
             e.preventDefault();
             const admin_email = $('#custom_admin_login_email_id').val();
             const admin_password = $('#custom_admin_login_password_id').val();
-            if (validateEmail(admin_email, 'custom_admin_login_email_error') && validatePassword(admin_password, 'custom_admin_login_password_error')) {
+            if (validateEmail(admin_email, 'custom_admin_login_email_error') ) {
 
 
                 $.ajax({
@@ -6319,7 +6319,7 @@ $(document).ready(function () {
                     },
                     error: function (xhr) {
                         const response = xhr.responseJSON;
-                        $('#custom_admin_login_errorMessage').text(response && response.message ? response.message : 'Incorrect email or password.');
+                        $('#custom_admin_login_errorMessage').text(response && response.message ? response.message : 'Invalid email or password.');
                     }
                 });
             }
@@ -9303,6 +9303,7 @@ $(window).on('load', function () {
 
 //my-orders.html--Payment Service module--views.py function def my_order_api
 $(document).ready(function () {
+// if (typeof my_orders_csrfToken !== 'undefined' && $("#myorders-container").length > 0) {
     function fetchOrders(filter) {
         $.ajax({
             url: `/api/my-orders/?filter=${filter}`,
@@ -9479,6 +9480,7 @@ $(document).ready(function () {
             }
         });
     });
+    // }
 });
 
 function initializeMenuScroll() {

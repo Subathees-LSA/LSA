@@ -473,7 +473,7 @@ class api_admin_login(APIView):
                         )
                 else:
                     return Response(
-                        {"success": False, "message": "Incorrect email or password."},
+                        {"success": False, "message": "Invalid email or password."},
                         status=status.HTTP_400_BAD_REQUEST
                     )
             else:
@@ -1320,6 +1320,7 @@ class AdminLotteryDrawView(APIView):
 
     def get(self, request):
         events = LotteryEvent.objects.all()
+        # events = LotteryEvent.objects.all().order_by('-id')  
         current_date = timezone.now()
         return Response({
             "events": [
