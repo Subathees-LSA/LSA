@@ -135,6 +135,7 @@ function admin_chat_view() {
 
                 const emailItem = document.createElement("div");
                 emailItem.className = "email-item";
+                emailItem.setAttribute("data-email", `${email}`);
                 emailItem.innerHTML = `
                 <input type="checkbox" class="email-checkbox" data-email="${email}">
                 <span class="email-text">${email}</span>
@@ -155,13 +156,11 @@ function admin_chat_view() {
                             ? "File Attached" 
                             : lastMessage?.message || "No message"; 
                         lastMessageElement.innerText = `${lastMessageContent}`;
-                        if (lastMessageContent.length > 5) {
-                            lastMessageElement.innerText = `${lastMessageContent.substring(0, 5)}...`;
+                        if (lastMessageContent.length > 15) {
+                            lastMessageElement.innerText = `${lastMessageContent.substring(0, 15)}...`;
                         }
                     })
                     .catch((error) => console.error("Error fetching messages by email:", error));
-
-
 
               
                 emailItem.querySelector(".email-checkbox").onclick = (e) => handleCheckboxSelection(e, email);
@@ -495,9 +494,24 @@ function admin_chat_view() {
             })
             .catch((error) => console.error("Error fetching messages by email:", error));
     };
+    function setActiveEmail(email) {
+    // Get all elements with the class 'email-item' inside 'all_users_name'
+    const allItems = document.querySelectorAll('#all_users_name .email-item');
+
+    allItems.forEach(item => {
+        // Check if the data-email attribute matches the passed email
+        if (item.getAttribute('data-email') === email) {
+            item.classList.add('active'); // Add 'active' class
+        } else {
+            item.classList.remove('active'); // Remove from others
+        }
+    });
+}
+
     function user_NotificationsMsg(emailid) {
         user_notifications();
         fetchMessagesByEmail(emailid)
+        setActiveEmail(emailid);
         const notificationPopup_chat = document.getElementById("notification-popup");
         notificationPopup_chat.style.display = "none";
         showSpecificDiv('admin_reply_chat_bot');
@@ -988,7 +1002,7 @@ function handleRefundClick(paymentIntent) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRFToken": getCookie("csrftoken"),
+                        "X-CSRFToken": custom_admin_dashboard_csrfToken,
                     },
                     body: JSON.stringify({ refund_amount: refundValue }),
                 })
@@ -1107,20 +1121,7 @@ function getFriendlyErrorMessage(errorMessage) {
     return "Something went wrong. Please try again."; 
 }
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === name + "=") {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
+
 
 function custom_admin_dashboard_transactions_management_function(email = null, status = null) {
 
@@ -1194,8 +1195,10 @@ options.forEach(option => {
 filterSelect.addEventListener("change", (e) => {
     custom_admin_dashboard_transactions_management_handleFilter(e.target.value);
 });
+if (status !== "refunded") {
+    filterContainer.appendChild(filterSelect);
+}
 
-filterContainer.appendChild(filterSelect);
 custom_admin_dashboard_transactions_management_header.appendChild(filterContainer);
 
         return custom_admin_dashboard_transactions_management_header;
@@ -1258,9 +1261,7 @@ custom_admin_dashboard_transactions_management_header.appendChild(filterContaine
 
         if (total_number_of_transactions_count_user_details_management_element_id) {
             total_number_of_transactions_count_user_details_management_element_id.textContent = `${custom_admin_dashboard_transactions_management_allData.length}`;
-        } else {
-            console.log(`Total Transactions: ${custom_admin_dashboard_transactions_management_allData.length}`);
-        }
+        } 
     }
 
     function custom_admin_dashboard_transactions_management_displayData() {
@@ -2152,8 +2153,8 @@ function winners_wall_Winners_edit_add_show_popup(mode = 'add', winnerData = nul
         return false;
     }
 
-    if (value.length > 7) {
-        errorDiv.textContent = 'Ticket number must be 7 digits';
+    if (value.length > 6) {
+        errorDiv.textContent = 'Ticket number must be 6 digits';
         errorDiv.style.display = 'block';
         return false;
     }
@@ -2300,10 +2301,15 @@ function custom_admin_dashboard_winners_wall_testimonial_function() {
     winners_wall_testimonial_load_testimonials();
 }
 
-let winners_wall_testimonial_current_page = 1;
-const winners_wall_testimonial_items_per_page = 10;
-let winners_wall_testimonial_total_items = 0;
-let winners_wall_testimonial_all_data = [];
+
+
+
+
+var winners_wall_testimonial_current_page = winners_wall_testimonial_current_page || 1;
+var winners_wall_testimonial_items_per_page = 10;
+var winners_wall_testimonial_total_items = winners_wall_testimonial_total_items || 0;
+var winners_wall_testimonial_all_data = winners_wall_testimonial_all_data || [];
+
 //    custom_admin_dashboard.html (adminpanel template)
 //    Testimonial table (models.py)
 //    custom_admin_dashboard_winners_wall_testimonials_list function (views.py)
@@ -2802,7 +2808,7 @@ function showSpecificDiv(id) {
     }
 
 }
-let salesChart;
+var salesChart;
 async function report_and_analytics_monthly_sales_bar_chart_exportToExcel() {
     if (!salesChart) {
         alert("No data available to export.");
@@ -3258,7 +3264,7 @@ function report_and_analytics_winners_vs_losers_chart_function() {
             header.style.marginBottom = '20px';
             
             const title = document.createElement('h2');
-            title.textContent = 'Number of Winners Today';
+            title.textContent = 'Number of Winners Week';
             title.style.margin = '0';
             
             const exportBtn = document.createElement('button');
@@ -3558,7 +3564,7 @@ function report_and_analytics_overall_transaction_report_chart_function() {
                     </button>
                 </div>
                 <div class="report_and_analytics_overall_transaction_report_chart_amount_class">
-                    ${data.current_month} <span>${data.current_amount}</span>
+                    Current Month: ${data.current_month} <span>${data.current_amount}</span>
                 </div>
                 <div class="report_and_analytics_overall_transaction_report_chart_canvas_container_class">
                     <canvas id="report_and_analytics_overall_transaction_report_chart_canvas"></canvas>
@@ -3767,19 +3773,14 @@ function report_and_analytics_monthly_sales_bar_chart_function() {
 	custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container.innerHTML = `
 	 <div id="custom_admin_dashboard_bar_chart_filter">
         <h1>Monthly Sales Chart</h1>
-
-        <!-- Year Selection Dropdown -->
         <label for="yearSelect">Select Year:</label>
         <select id="yearSelect"></select>
-        <button onclick="report_and_analytics_monthly_sales_bar_chart_exportToExcel()">Export to Excel</button>
-
-
+        <button onclick="report_and_analytics_monthly_sales_bar_chart_exportToExcel()">Export</button>
     </div>
     <div class="admin-dashboard-report-container" style="width: 50%;height: 50%;">
         <canvas class="admin-dashboard-report" id="salesChart" width="800" height="400"></canvas>
     </div>
 	 `;
-
  }
 
 
@@ -3828,16 +3829,16 @@ function renderMarginalChart(data) {
             <div class="report_and_analytics_marginal_chart_summary_class">
                 <div class="summary-item">
                     <span class="summary-label">Total Sales:</span>
-                    <span class="summary-value">€${data.overall.total_sales.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <span class="summary-value">£${data.overall.total_sales.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                      <span class="summary-label">Margin:</span>
                     <span class="summary-value ${data.overall.margin >= 0 ? 'text-success' : 'text-danger'}">
-                        €${Math.abs(data.overall.margin).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        £${Math.abs(data.overall.margin).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         (${data.overall.margin >= 0 ? '+' : '-'})
                     </span>
                 </div>
                 <div class="summary-item">
                     <span class="summary-label">Total Target:</span>
-                    <span class="summary-value">€${data.overall.total_target.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <span class="summary-value">£${data.overall.total_target.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                     <span class="summary-label">Status:</span>
                     <span class="summary-value ${data.overall.margin_status === 'Reached' ? 'text-success' : 'text-danger'}">
                         ${data.overall.margin_status}
@@ -3940,7 +3941,7 @@ function marginal_renderChart(chartData) {
                             if (label) {
                                 label += ': ';
                             }
-                            label += context.parsed.y.toLocaleString('en-US', {style: 'currency', currency: 'EUR'});
+                            label += context.parsed.y.toLocaleString('en-US', {style: 'currency', currency: 'GBP'});
                             return label;
                         },
                         afterLabel: function(context) {
@@ -3948,7 +3949,7 @@ function marginal_renderChart(chartData) {
                             const margin = marginData[dataIndex];
                             const status = margin >= 0 ? 'Reached' : 'Not Reached';
                             return [
-                                `Margin: ${margin.toLocaleString('en-US', {style: 'currency', currency: 'EUR'})}`,
+                                `Margin: ${margin.toLocaleString('en-US', {style: 'currency', currency: 'GBP'})}`,
                                 `Status: ${status}`
                             ];
                         }
@@ -3963,7 +3964,7 @@ function marginal_renderChart(chartData) {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '€' + value.toLocaleString('en-US');
+                            return '£' + value.toLocaleString('en-US');
                         }
                     }
                 },
@@ -4421,7 +4422,7 @@ function initializeDashboard() {
                                         const custom_admin_dashboard_user_detail_page_container = document.getElementById("custom_admin_dashboard_user_detail_page");
                                         custom_admin_dashboard_user_detail_page_container.innerHTML = `
                                             <div class="users_management_user_details_page_gotousermanagement">
-                                                <span onclick="goToUserManagement()">Users Management</span> > <span>User Details</span>
+                                                <span class="user_management_span" onclick="goToUserManagement()">Users Management</span> > <span>User Details</span>
                                             </div>
                                             <div class="users_management_user_details_page_user_details_card">
                                                 <div class="users_management_user_details_page_profile_section">
@@ -4482,7 +4483,7 @@ function initializeDashboard() {
                                                 type: 'POST',
                                                 data: JSON.stringify({ user_id: userId, kyc_status: newStatus }),
                                                 contentType: 'application/json',
-                                                headers: { 'X-CSRFToken': csrfToken }, 
+                                                headers: { 'X-CSRFToken': custom_admin_dashboard_csrfToken }, 
                                                 success: function (response) {
                                                   
                                                     const userIndex = rows.findIndex(row => row.user?.id === userId);
@@ -4760,30 +4761,7 @@ try {
         }
     });
 
-    $(document).on('change', '.user_kyc_waiting_list-kyc-statusselec', function () {
-        try {
-            const userId = $(this).data('user-id');
-            const newStatus = $(this).val();
-            updateSelectColor($(this), newStatus);
-
-            $.ajax({
-                url: adminupdaetkycapprovalUrl, 
-                type: 'POST',
-                data: JSON.stringify({ user_id: userId, kyc_status: newStatus }), 
-                contentType: 'application/json',
-                headers: { 'X-CSRFToken': csrfToken }, 
-                success: function (response) {
-                    alert(`KYC status updated to ${newStatus}`);
-                },
-                error: function (xhr, status, error) {
-                    alert(`Failed to update KYC status: ${error}`);
-                }
-            });
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred while updating the KYC status.');
-        }
-    });
+   
 
     function updateSelectColor(selectElement, status) {
         const colorMap = {
@@ -4917,7 +4895,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         orderDetailsHTML += `<li>
                             <strong>${payment.quantity}x ${payment.lottery_event_title}</strong>
                             ${payment.winning_tickets && payment.winning_tickets.length > 0 ? 
-                              '<span class="contact-winner-badge">WINNER!</span>' : ''}
+                              '<span class="contact-winner-badge">WINNER</span>' : ''}
                             <p>Ticket Numbers: ${payment.ticket_numbers.join(', ')}</p>
                         </li>`;
                         
@@ -5019,7 +4997,7 @@ function toggleMenu() {
     hamburger.classList.toggle('active');
 }
 /*----------addimages-----*/
-document.addEventListener('DOMContentLoaded', function () {
+function admin_lottery_add_additional_images () {
     const addImageButton = document.getElementById('add-image-button');
     const imagesContainer = document.getElementById('additional-images-container');
 
@@ -5073,10 +5051,10 @@ document.addEventListener('DOMContentLoaded', function () {
             button.parentElement.remove();
         });
     });
-});
+}
 
 //lottery_events_add.html
-document.addEventListener('DOMContentLoaded', function () {
+function lottery_events_add_budget_calculation(){
     const totalBudgetInput = document.getElementById('lottery_events_add_totalBudget');
     const revenueTypeSelect = document.getElementById('lottery_events_add_revenueType');
     const fixedRevenueInput = document.getElementById('lottery_events_add_fixedRevenue');
@@ -5167,7 +5145,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     
-});
+}
 //login.html
 // Function to get CSRF token from cookies
 function getCookie(name) {
@@ -5552,9 +5530,12 @@ $('#signup').on('submit', function (e) {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    if (typeof kycStatusUrl !== "undefined") {
-        checkKYCStatus();
+    // if (typeof kycStatusUrl !== "undefined") {
+    //     checkKYCStatus();
         
+    // }
+    if (typeof kycStatusUrl !== "undefined" && userIsAuthenticated) {
+        checkKYCStatus();
     }
     handleKYCForm();
     lottery_events_fetch();
@@ -5602,7 +5583,10 @@ if (typeof googleEmail !== "undefined" && googleEmail) {
 //lottery_events.html--user_registrartion module--views.py function class KYCStatusView(APIView):
 function checkKYCStatus() {
     if (typeof kycStatusUrl === "undefined") {
-
+        
+        return;
+    }
+    if (!userIsAuthenticated) {  
         return;
     }
     fetch(kycStatusUrl, {
@@ -6288,10 +6272,7 @@ $(document).ready(function () {
             validateEmail($(this).val(), 'custom_admin_login_email_error');
             $('#custom_admin_login_errorMessage').text('');
         });
-        $('#custom_admin_login_password_id').on('input', function () {
-            validatePassword($(this).val(), 'custom_admin_login_password_error');
-            $('#custom_admin_login_errorMessage').text('');
-        });
+        
 
          //    custom_admin_login.html (adminpanel template)
         //    user,adminprofile table (models.py)
@@ -6311,7 +6292,6 @@ $(document).ready(function () {
                     success: function (response) {
                         if (response.success) {
                             $('#custom_admin_login_errorMessage').text('');
-                            //alert('Login successful');
                             window.location.href = custom_admin_dashboard_url;
                         } else {
                             $('#custom_admin_login_errorMessage').text(response.message);
@@ -6375,15 +6355,6 @@ $(document).ready(function () {
 //lottery_events_add.html
 
 function filterCategories() {
-    // Initially hide the dropdown
-    document.getElementById('category-filter').style.display = 'none';
-
-    // Show the dropdown when the filter icon is clicked
-    document.getElementById('filter-icon').addEventListener('click', () => {
-        document.getElementById('category-filter').style.display = 'inline-block';
-    });
-
-    // Fetch categories and populate the dropdown
     fetchCategories();
 }
 function fetchCategories() {
@@ -6445,7 +6416,7 @@ function lottery_draw_date_input_formatDateForInput(dateString) {
 
  //    custom_admin_dashboard.html (adminpanel template)
 //    LotteryEvent table (models.py)
-//    api_get_lottery_events function (views.py)
+//    api_get_lottery_events_admin function (views.py)
 function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     currentPage = page;
 
@@ -6458,7 +6429,7 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
     if (currentCategoryId === '') currentCategoryId = '';
 
     const encodedSearchTerm = encodeURIComponent(currentSearchTerm);
-    const apiUrl = `${api_get_lottery_events_url}?search=${encodedSearchTerm}&category=${currentCategoryId}`;
+    const apiUrl = `${api_get_lottery_events_url_admin}?search=${encodedSearchTerm}&category=${currentCategoryId}`;
 
     fetch(apiUrl)
         .then(response => response.json())
@@ -7688,7 +7659,6 @@ function updateCartCount_cartpage() {
 }
 function header_navbar_fetchCategories() {
     if (typeof api_get_categories_url === "undefined") {
-        console.error("API URL for fetching categories is not defined.");
         return;
     }
 
@@ -7983,9 +7953,7 @@ View all
                     <div class="lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
                 </div>
 
-               <div class="lottery_events_ticket_info">
-        <p> ${event.total_tickets - event.sold_tickets} tickets remaining</p>
-    </div>
+
                 ${enterNowButton}
             `;
 
@@ -8235,9 +8203,7 @@ function displayCategoryLotteryEvents(events) {
                 <div class="category_lottery_sold_percentage">
                     <div class="category_lottery_sold_bar" style="width: ${event.sold_percentage}%"></div>
                 </div>
-                <div class="category_lottery_events_ticket_info">
-                    <p>${event.total_tickets - event.sold_tickets} tickets remaining</p>
-                </div>
+                
                 ${enterNowButton}
             `;
 
@@ -8393,7 +8359,10 @@ function fetchCartItems() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetchCartItems();
+    // fetchCartItems();
+    if (document.getElementById("cart_items_container")) {
+        fetchCartItems();
+    }
     
 });
 function displayCartItems(cart) {
@@ -8761,7 +8730,7 @@ function fetchLotteryEventDetails(eventSlug) {
             // Populate Event Details
             document.getElementById("lot-detail-event-title").textContent = data.title || "N/A";
             document.getElementById("lot-detail-event-description").textContent = data.description || "N/A";
-            document.getElementById("lot-detail-event-price").textContent = `Prize: £${data.price || 0}`;
+            
             document.getElementById("lot-detail-event-per-ticket-price").textContent = `Per ticket price: £${data.per_ticket_price || 0}`;
             document.getElementById("event-sold-percentage").textContent = `Sold: ${data.sold_percentage || 0}%`;
             document.getElementById("lot-detail-ticket-max-limit").textContent = maxLimit;
@@ -8960,10 +8929,11 @@ function fetchSimilarLotteryEvents(eventSlug) {
                     <h3 class="similar_category_lottery_title">${event.title}</h3>
                     <p class="similar_category_lottery_description">${event.description}</p>
                     <div class="similar_category_lottery_per_ticket_price">£${event.per_ticket_price}</div>
+                    <div class="favorite_lottery_events_soldpercentage">SOLD: ${event.sold_percentage}%</div>
                     <div class="similar_category_lottery_sold_percentage">
                         <div class="similar_category_lottery_sold_bar" style="width: ${event.sold_percentage}%"></div>
                     </div>
-                    <div class="similar_category_lottery_events_ticket_info"><p>${event.total_tickets - event.sold_tickets} tickets remaining</p></div>
+                    
                     <a href="/lottery_detail/${event.slug}/" class="similar_category_lottery_enter_button">
                     <img src="${event.category.category_logo}" alt="${event.category.name} Logo" class="similar_category_lottery_enter_icon"> 
                     Enter now
@@ -9099,7 +9069,7 @@ function displayFavorites() {
             <div class="favorite_lottery_events_sold_percentage">
                 <div class="favorite_lottery_events_sold_bar" style="width: ${event.sold_percentage}%"></div>
             </div>
-            <div class="favorite_lottery_events_ticket_info">${event.total_tickets - event.sold_tickets} tickets remaining</div>
+            
        <a href="${event.enter_now_button}" class="favorite_lottery_events_enter_button">
                 Enter Now <img src="/media/lottery_images/arrow (2).png" alt="Arrow Icon">
             </a>
@@ -9303,7 +9273,7 @@ $(window).on('load', function () {
 
 //my-orders.html--Payment Service module--views.py function def my_order_api
 $(document).ready(function () {
-// if (typeof my_orders_csrfToken !== 'undefined' && $("#myorders-container").length > 0) {
+if (typeof my_orders_csrfToken !== 'undefined' && $("#myorders-container").length > 0) {
     function fetchOrders(filter) {
         $.ajax({
             url: `/api/my-orders/?filter=${filter}`,
@@ -9334,11 +9304,11 @@ $(document).ready(function () {
                     let orderHTML = `
                         <div class="myorder-group">
                             <h4>Order ID: <strong>${group.payment_id}</strong></h4>
-                            <span class="myorder-status-badge ${group.payment_status === 'completed' ? 'myorder-completed' : 'myorder-canceled'}">
+                            <span class="myorder-status-badge ${group.payment_status === 'completed' ? 'myorder-completed' : 'myorder-refund'}">
                                 ${group.payment_status.charAt(0).toUpperCase() + group.payment_status.slice(1)}
                             </span>
                             ${winningLotteries.length > 0 ? 
-                              '<span class="myorder-winner-badge">WINNER!</span>' : ''}
+                              '<span class="myorder-winner-badge">WINNER</span>' : ''}
                             <p><i class="fa fa-calendar"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleDateString() : 'N/A'}
                                 &nbsp; <i class="fa fa-clock"></i> ${group.payment_at ? new Date(group.payment_at).toLocaleTimeString() : 'N/A'}</p>
                             <p>Total Amount: £${parseFloat(group.total_amount).toFixed(2)}</p>`;
@@ -9366,7 +9336,7 @@ $(document).ready(function () {
                         
                         let winnerIndicator = '';
                         if (payment.winning_tickets && payment.winning_tickets.length > 0) {
-                            winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER!</span>';
+                            winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER</span>';
                         }
                         
                         orderHTML += `
@@ -9418,7 +9388,7 @@ $(document).ready(function () {
                         
                         let winnerIndicator = '';
                         if (payment.winning_tickets && payment.winning_tickets.length > 0) {
-                            winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER!</span>';
+                            winnerIndicator = '<span class="myorder-ticket-winner-indicator">WINNER</span>';
                         }
                         
                         
@@ -9480,7 +9450,7 @@ $(document).ready(function () {
             }
         });
     });
-    // }
+    }
 });
 
 function initializeMenuScroll() {
@@ -9563,14 +9533,17 @@ $(document).ready(function () {
 });
 
 
-function custom_admin_dashboard_lottery_draw_winners_management_function () {
+function custom_admin_dashboard_lottery_draw_winners_management_function() { 
     let currentEventId = null;
     let currentMethod = null;
     let currentTicketStart = null;
     let currentTicketEnd = null;
     let isAdminVerified = false;
     let isErrorModal = false;
-    let currentWinnerDetails = null; // Store winner details
+    let currentWinnerDetails = null;
+    let currentPage = 1;
+    let totalPages = 1;
+    const itemsPerPage = 3;
 
     function showModaldrawwinner(message, showPublish = true) {
         $("#draw-winner-modal-message").html(message);
@@ -9631,100 +9604,120 @@ function custom_admin_dashboard_lottery_draw_winners_management_function () {
         }
     });
 
-    $("#publish-winner").change(function() {
-        if ($(this).is(":checked")) {
-            $("#draw-winner-close-modal").hide();
-            $("#draws-otp-verification-container").show();
-            $("#draws-otp-input").val("");
-            $("#draws-otp-status").text("");
-            
-            $.ajax({
-                url: "/api/admin/send-otp/",
-                type: "POST",
-                headers: {
-                    //"X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
-                    "X-CSRFToken": pubish_winner_csrfToken
-                },
-                success: function(response) {
-                    $("#draws-otp-status").text("OTP sent to your email").css("color", "green");
-                },
-                error: function(xhr) {
-                    $("#draws-otp-status").text("Failed to send OTP").css("color", "red");
-                }
-            });
-        } else {
-            $("#draws-otp-verification-container").hide();
-            $("#draw-winner-close-modal").show();
-            isAdminVerified = false;
+    function createPaginationControls(totalItems) {
+        totalPages = Math.ceil(totalItems / itemsPerPage);
+        
+        if (totalPages <= 1) {
+            return '';
         }
-    });
 
-    $("#draws-otp-input").blur(function() {
-        const otp = $(this).val();
-        if (otp.length === 6) {
-            $.ajax({
-                url: "/api/admin/verify-otp/",
-                type: "POST",
-                headers: {
-                    // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
-                    "X-CSRFToken": pubish_winner_csrfToken
-                },
-                data: { otp: otp },
-                success: function(response) {
-                    if (response.verified) {
-                        $("#draws-otp-status").text("OTP verified successfully").css("color", "green");
-                        isAdminVerified = true;
-                        $("#draw-winner-close-modal").show();
-                        $("#draws-resend-otp").prop("disabled", true);
-                    } else {
-                        $("#draws-otp-status").text("Invalid OTP").css("color", "red");
-                        isAdminVerified = false;
-                        $("#draws-resend-otp").prop("disabled", false);
-                    }
-                },
-                error: function(xhr) {
-                    $("#draws-otp-status").text("Error verifying OTP").css("color", "red");
-                    isAdminVerified = false;
-                    $("#draws-resend-otp").prop("disabled", false);
-                }
-            });
-        }
-    });
+        let paginationHtml = `<div class="pagination-wrapper">`;
+        
+        // Previous button
+        paginationHtml += `
+            <button class="pagination-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">
+                Prev
+            </button>
+        `;
 
-    $("#draws-resend-otp").click(function() {
-        $.ajax({
-            url: "/api/admin/send-otp/",
-            type: "POST",
-            headers: {
-                // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
-                "X-CSRFToken": pubish_winner_csrfToken
-            },
-            success: function(response) {
-                $("#draws-otp-status").text("New OTP sent to your email").css("color", "green");
-                $("#draws-otp-input").val("");
-            },
-            error: function(xhr) {
-                $("#draws-otp-status").text("Failed to resend OTP").css("color", "red");
-                $("#draws-resend-otp").prop("disabled", false);
+        // Simplified pagination logic
+        if (totalPages <= 7) {
+            // Show all pages if total pages is 7 or less
+            for (let i = 1; i <= totalPages; i++) {
+                paginationHtml += `
+                    <button class="pagination-btn page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">
+                        ${i}
+                    </button>
+                `;
             }
-        });
-    });
+        } else {
+            // For more than 7 pages, use ellipsis logic
+            let showFirst = true;
+            let showLast = true;
+            let startPage, endPage;
 
-    if ($("#draw-lottery-container").length > 0) {
+            if (currentPage <= 4) {
+                // Near the beginning
+                startPage = 1;
+                endPage = 5;
+                showFirst = false;
+            } else if (currentPage >= totalPages - 3) {
+                // Near the end
+                startPage = totalPages - 4;
+                endPage = totalPages;
+                showLast = false;
+            } else {
+                // In the middle
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+
+            // Add first page and ellipsis if needed
+            if (showFirst && startPage > 1) {
+                paginationHtml += `<button class="pagination-btn page-btn" data-page="1">1</button>`;
+                if (startPage > 2) {
+                    paginationHtml += `<span class="pagination-ellipsis">...</span>`;
+                }
+            }
+
+            // Add page number buttons
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <button class="pagination-btn page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            // Add ellipsis and last page if needed
+            if (showLast && endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHtml += `<span class="pagination-ellipsis">...</span>`;
+                }
+                paginationHtml += `<button class="pagination-btn page-btn" data-page="${totalPages}">${totalPages}</button>`;
+            }
+        }
+
+        // Next button
+        paginationHtml += `
+            <button class="pagination-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">
+                Next
+            </button>
+        `;
+
+        paginationHtml += `</div>`;
+        
+        return paginationHtml;
+    }
+
+    function loadLotteryEvents(page = 1) {
+        currentPage = page;
+        
+        // Show loading state
+        let container = $("#draw-lottery-container");
+        container.html('<div class="pagination-loading"><div class="spinner"></div>Loading lottery events...</div>');
+        
         $.ajax({
-            url: "/api/admin/lottery-draw/",
+            url: `/api/admin/lottery-draw/?page=${page}&page_size=${itemsPerPage}`,
             type: "GET",
             success: function (response) {
-                let container = $("#draw-lottery-container");
                 container.empty();
-                // Create a wrapper div to ensure the heading stays above
-                let wrapper = $(`
-                    <div style="width: 100%;">
-                        <h2 style="text-align: center; width: 100%;">Lottery Draw</h2>
+                
+                // Create main content wrapper to ensure proper layout
+                let contentWrapper = $('<div class="lottery-content-wrapper" style="width: 100%; display: flex; flex-direction: column;"></div>');
+                
+                // Create wrapper with heading
+                let headerWrapper = $(`
+                    <div style="width: 100%; margin-bottom: 20px;">
+                        <h2 style="text-align: center; width: 100%; margin: 0;">Lottery Draw</h2>
                     </div>
                 `);
-                container.append(wrapper); // Append the wrapper first
+                contentWrapper.append(headerWrapper);
 
+                // Create cards container
+                let cardsContainer = $('<div class="lottery-cards-container" style="width: 100%;"></div>');
+                
+                // Create lottery cards
                 response.events.forEach(event => {
                     let drawDate = new Date(event.draw_date);
                     let currentDate = new Date();
@@ -9756,72 +9749,186 @@ function custom_admin_dashboard_lottery_draw_winners_management_function () {
                             </label><br>
                             <input type="text" id="ticket-start-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
                             <input type="text" id="ticket-end-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
-                            <button class="draws-draw-btn" data-id="${event.id}">Draw Winner</button>
+                            ${event.winner_chosen 
+                                ? `<button class="draws-draw-btn" style="background-color: #28a745; color: white;" disabled>Winner Chosen</button>` 
+                                : `<button class="draws-draw-btn" data-id="${event.id}">Draw Winner</button>`
+                            }
                         </div>
                     `;
-                    container.append(card);
+                    cardsContainer.append(card);
                 });
+                
+                contentWrapper.append(cardsContainer);
 
-                $("input[type=radio]").change(function () {
-                    let eventId = $(this).attr("name").split("-")[2];
-                    let isMethod3 = $(this).val() === "method3";
-                    $(`#ticket-start-${eventId}, #ticket-end-${eventId}`).prop("disabled", !isMethod3);
-                });
+                // Add pagination controls at the bottom only
+                if (response.total_count > itemsPerPage) {
+                    let paginationContainer = $('<div class="pagination-container" style="width: 100%; margin-top: 20px;"></div>');
+                    paginationContainer.html(createPaginationControls(response.total_count));
+                    contentWrapper.append(paginationContainer);
+                }
 
-                $(".draws-draw-btn").click(function () {
-                    currentEventId = $(this).data("id");
-                    currentMethod = $(`input[name='draw-method-${currentEventId}']:checked`).val();
-                    currentTicketStart = $(`#ticket-start-${currentEventId}`).val();
-                    currentTicketEnd = $(`#ticket-end-${currentEventId}`).val();
+                // Append the complete content wrapper to container
+                container.append(contentWrapper);
 
-                    if (!currentMethod) {
-                        showModaldrawwinner("Please select a method.", false);
-                        return;
-                    }
-
-                    if (currentMethod === "method3") {
-                        let ticketRegex = /^\d{6}$/;
-                        if (!ticketRegex.test(currentTicketStart) || !ticketRegex.test(currentTicketEnd)) {
-                            showModaldrawwinner("Please enter a valid 6-digit ticket number in both fields.", false);
-                            return;
-                        }
-                    }
-
-                    $.ajax({
-                        url: "/api/admin/lottery-draw/",
-                        type: "POST",
-                        contentType: "application/json",
-                        headers: {
-                            // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
-                            "X-CSRFToken": pubish_winner_csrfToken
-                        },
-                        data: JSON.stringify({ 
-                            event_id: currentEventId, 
-                            method: currentMethod,
-                            ticket_start: currentTicketStart, 
-                            ticket_end: currentTicketEnd,
-                            publish: false // Don't publish yet
-                        }),
-                        success: function (response) {
-                            currentWinnerDetails = response; // Store winner details
-                            let message = "";
-                            
-                            if (currentMethod === "method1" || currentMethod === "method2") {
-                                message = `Winner Selected: ${response.winner.ticket_number} (User: ${response.winner.user}) - ${response.winner.selection_method}`;
-                            } else if (currentMethod === "method3") {
-                                message = `Winner Selected: ${response.ticket_number} (User: ${response.user}) - ${response.selection_method}`;
-                            }
-                            
-                            showModaldrawwinner(message, true);
-                        },
-                        error: function (xhr) {
-                            showModaldrawwinner(xhr.responseJSON.error, false);
-                        }
-                    });
-                });
+                // Attach event handlers
+                attachEventHandlers();
+            },
+            error: function(xhr, status, error) {
+                console.error("Error loading lottery events:", error);
+                $("#draw-lottery-container").html("<p>Error loading lottery events. Please try again.</p>");
             }
         });
     }
+
+    function attachEventHandlers() {
+        // Radio button change handler
+        $("input[type=radio]").change(function () {
+            let eventId = $(this).attr("name").split("-")[2];
+            let isMethod3 = $(this).val() === "method3";
+            $(`#ticket-start-${eventId}, #ticket-end-${eventId}`).prop("disabled", !isMethod3);
+        });
+
+        // Draw winner button handler
+        $(".draws-draw-btn").click(function () {
+            currentEventId = $(this).data("id");
+            currentMethod = $(`input[name='draw-method-${currentEventId}']:checked`).val();
+            currentTicketStart = $(`#ticket-start-${currentEventId}`).val();
+            currentTicketEnd = $(`#ticket-end-${currentEventId}`).val();
+
+            if (!currentMethod) {
+                showModaldrawwinner("Please select a method.", false);
+                return;
+            }
+
+            if (currentMethod === "method3") {
+                let ticketRegex = /^\d{6}$/;
+                if (!ticketRegex.test(currentTicketStart) || !ticketRegex.test(currentTicketEnd)) {
+                    showModaldrawwinner("Please enter a valid 6-digit ticket number in both fields.", false);
+                    return;
+                }
+            }
+
+            $.ajax({
+                url: "/api/admin/lottery-draw/",
+                type: "POST",
+                contentType: "application/json",
+                headers: {
+                    "X-CSRFToken": pubish_winner_csrfToken
+                },
+                data: JSON.stringify({ 
+                    event_id: currentEventId, 
+                    method: currentMethod,
+                    ticket_start: currentTicketStart, 
+                    ticket_end: currentTicketEnd,
+                    publish: false
+                }),
+                success: function (response) {
+                    currentWinnerDetails = response;
+                    let message = "";
+                    
+                    if (currentMethod === "method1" || currentMethod === "method2") {
+                        message = `Winner Selected: ${response.winner.ticket_number} (User: ${response.winner.user}) - ${response.winner.selection_method}`;
+                    } else if (currentMethod === "method3") {
+                        message = `Winner Selected: ${response.ticket_number} (User: ${response.user}) - ${response.selection_method}`;
+                    }
+                    
+                    showModaldrawwinner(message, true);
+                },
+                error: function (xhr) {
+                    showModaldrawwinner(xhr.responseJSON.error, false);
+                }
+            });
+        });
+
+        // Pagination button handlers
+        $(".pagination-btn").click(function() {
+            if ($(this).prop('disabled') || $(this).hasClass('active')) {
+                return;
+            }
+            
+            let targetPage = $(this).data('page');
+            if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
+                loadLotteryEvents(targetPage);
+            }
+        });
+    }
+
+    // OTP handling (unchanged)
+    $("#publish-winner").change(function() {
+        if ($(this).is(":checked")) {
+            $("#draw-winner-close-modal").hide();
+            $("#draws-otp-verification-container").show();
+            $("#draws-otp-input").val("");
+            $("#draws-otp-status").text("");
+            
+            $.ajax({
+                url: "/api/admin/send-otp/",
+                type: "POST",
+                headers: {
+                    "X-CSRFToken": pubish_winner_csrfToken
+                },
+                success: function(response) {
+                    $("#draws-otp-status").text("OTP sent to your email").css("color", "green");
+                },
+                error: function(xhr) {
+                    $("#draws-otp-status").text("Failed to send OTP").css("color", "red");
+                }
+            });
+        } else {
+            $("#draws-otp-verification-container").hide();
+            $("#draw-winner-close-modal").show();
+            isAdminVerified = false;
+        }
+    });
+
+    $("#draws-otp-input").blur(function() {
+        const otp = $(this).val();
+        if (otp.length === 6) {
+            $.ajax({
+                url: "/api/admin/verify-otp/",
+                type: "POST",
+                headers: {
+                    "X-CSRFToken": pubish_winner_csrfToken
+                },
+                data: { otp: otp },
+                success: function(response) {
+                    if (response.verified) {
+                        $("#draws-otp-status").text("OTP verified successfully").css("color", "green");
+                        isAdminVerified = true;
+                        $("#draw-winner-close-modal").show();
+                        $("#draws-resend-otp").prop("disabled", true);
+                    } else {
+                        $("#draws-otp-status").text("Invalid OTP").css("color", "red");
+                        isAdminVerified = false;
+                        $("#draws-resend-otp").prop("disabled", false);
+                    }
+                },
+                error: function(xhr) {
+                    $("#draws-otp-status").text("Error verifying OTP").css("color", "red");
+                    isAdminVerified = false;
+                    $("#draws-resend-otp").prop("disabled", false);
+                }
+            });
+        }
+    });
+
+    $("#draws-resend-otp").click(function() {
+        $.ajax({
+            url: "/api/admin/send-otp/",
+            type: "POST",
+            headers: {
+                "X-CSRFToken": pubish_winner_csrfToken
+            },
+            success: function(response) {
+                $("#draws-otp-status").text("New OTP sent to your email").css("color", "green");
+                $("#draws-otp-input").val("");
+            },
+            error: function(xhr) {
+                $("#draws-otp-status").text("Failed to resend OTP").css("color", "red");
+                $("#draws-resend-otp").prop("disabled", false);
+            }
+        });
+    });
 
     // Updated OK button handler
     $("#draw-winner-close-modal").off("click").on("click", function() {
@@ -9837,13 +9944,11 @@ function custom_admin_dashboard_lottery_draw_winners_management_function () {
             return;
         }
 
-        // Send the stored winner details to be published
         $.ajax({
             url: "/api/admin/publish-winner/",
             type: "POST",
             contentType: "application/json",
             headers: {
-                // "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
                 "X-CSRFToken": pubish_winner_csrfToken
             },
             data: JSON.stringify({
@@ -9854,12 +9959,19 @@ function custom_admin_dashboard_lottery_draw_winners_management_function () {
                 closeModaldrawwinner();
                 showSuccessModal("Winner published successfully!");
                 isAdminVerified = false;
+                // Reload current page to update the UI
+                loadLotteryEvents(currentPage);
             },
             error: function(xhr) {
                 showModaldrawwinner(xhr.responseJSON.error, false);
             }
         });
     });
+
+    // Initialize the lottery events when container exists
+    if ($("#draw-lottery-container").length > 0) {
+        loadLotteryEvents(1);
+    }
 }
 /*peronal info .html */
 function GetCSRFToken() {
@@ -10215,6 +10327,9 @@ $(document).ready(function () {
 });
 //my_won_lottery_page.html--adminpanel module--views.py function def my_won_lottery
 document.addEventListener("DOMContentLoaded", function () {
+    if (typeof mywon_lottery === 'undefined') {
+        return;  
+    }
     fetch("/api/my-won-lottery/", {
         method: "GET",
         headers: {

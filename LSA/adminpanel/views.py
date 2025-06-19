@@ -483,9 +483,6 @@ class api_admin_login(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
        
 #!-----lottery_events.html-custom.js- function lottery_events_fetch()----!
-#custom admin dashboard lottery section fetch lottery view functions 
-# custom_admin_dashboard.html (adminpanel template)
-# custom.js (JavaScript handling the function fetchLotteryEvents function)
 class api_get_lottery_events(APIView):  
     def get(self, request):
         try:
@@ -503,6 +500,34 @@ class api_get_lottery_events(APIView):
                 is_active=True,
                 draw_date__gte=now
             ).order_by('-id')
+            if search_query:
+                lottery_events = lottery_events.filter(title__icontains=search_query)
+            if category_id:
+                lottery_events = lottery_events.filter(category_id=category_id)
+            favorites_slugs = json.loads(request.COOKIES.get('favorites', '[]'))
+            serializer = LotteryEventSerializeradd_get(lottery_events, many=True)
+            events_data = serializer.data
+            for event in events_data:
+                event['is_favorite'] = event['slug'] in favorites_slugs
+            return Response(events_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#custom admin dashboard lottery section fetch lottery view functions 
+# custom_admin_dashboard.html (adminpanel template)
+# custom.js (JavaScript handling the function fetchLotteryEvents function)
+class api_get_lottery_events_admin(APIView):  
+    def get(self, request):
+        try:
+            user_agent = request.headers.get('User-Agent', '')
+            if not user_agent or 'Mozilla' not in user_agent:
+                return Response(
+                    {"detail": "Access denied. This endpoint is restricted to browsers only."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            search_query = request.query_params.get('search', '').strip()
+            category_id = request.query_params.get('category', '')
+          
+            lottery_events = LotteryEvent.objects.order_by('-id')
             if search_query:
                 lottery_events = lottery_events.filter(title__icontains=search_query)
             if category_id:
@@ -1314,14 +1339,44 @@ from django.core.mail import send_mail
 from django.conf import settings
 from datetime import timedelta
 from .models import AdminOTP, adminProfile
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class AdminLotteryDrawView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
-        events = LotteryEvent.objects.all()
-        # events = LotteryEvent.objects.all().order_by('-id')  
-        current_date = timezone.now()
+        page = request.GET.get('page', 1)
+        page_size = request.GET.get('page_size', 3)
+        
+        try:
+            page = int(page)
+            page_size = int(page_size)
+        except ValueError:
+            page = 1
+            page_size = 3
+
+        
+        if page_size > 50:
+            page_size = 50
+        elif page_size < 1:
+            page_size = 3
+
+        events = LotteryEvent.objects.all().order_by('-id')
+        
+        paginator = Paginator(events, page_size)
+        
+        try:
+            paginated_events = paginator.page(page)
+        except PageNotAnInteger:
+            
+            paginated_events = paginator.page(1)
+            page = 1
+        except EmptyPage:
+            
+            paginated_events = paginator.page(paginator.num_pages)
+            page = paginator.num_pages
+
+        current_date = timezone.now()        
         return Response({
             "events": [
                 {
@@ -1331,9 +1386,21 @@ class AdminLotteryDrawView(APIView):
                     "draw_date": event.draw_date.strftime("%Y-%m-%d %H:%M:%S"),
                     "is_active": event.is_active,
                     "sold_percentage": event.sold_percentage,
+                    "winner_chosen": Winner.objects.filter(lottery_event=event).exists()  
                 }
-                for event in events
-            ]
+                for event in paginated_events
+            ],
+            "pagination": {
+                "current_page": page,
+                "total_pages": paginator.num_pages,
+                "page_size": page_size,
+                "total_count": paginator.count,
+                "has_next": paginated_events.has_next(),
+                "has_previous": paginated_events.has_previous(),
+                "next_page": paginated_events.next_page_number() if paginated_events.has_next() else None,
+                "previous_page": paginated_events.previous_page_number() if paginated_events.has_previous() else None
+            },
+            "total_count": paginator.count  
         })
 
     def post(self, request):
@@ -1350,13 +1417,18 @@ class AdminLotteryDrawView(APIView):
         if not event:
             return Response({"error": "Invalid event"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check if winner already exists (only if publishing)
+        
         if Winner.objects.filter(lottery_event=event).exists():
             return Response({"error": "Winner has already been chosen for this lottery"}, 
                           status=status.HTTP_400_BAD_REQUEST)
-
+        
+        valid_tickets = LotteryTicket.objects.filter(
+            lottery_event=event,
+            payment__payment_status='completed'
+        )
+        
         if method == "method1":
-            tickets = list(LotteryTicket.objects.filter(lottery_event=event))
+            tickets = list(valid_tickets)
             if not tickets:
                 return Response({"error": "No tickets found for this lottery"}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -1371,7 +1443,7 @@ class AdminLotteryDrawView(APIView):
 
         elif method == "method2":
             user_ticket_counts = {}
-            for ticket in LotteryTicket.objects.filter(lottery_event=event):
+            for ticket in valid_tickets:
                 user_ticket_counts[ticket.user] = user_ticket_counts.get(ticket.user, 0) + 1
 
             if not user_ticket_counts:
@@ -1380,8 +1452,7 @@ class AdminLotteryDrawView(APIView):
             max_tickets = max(user_ticket_counts.values())
             top_users = [user for user, count in user_ticket_counts.items() if count == max_tickets]
             selected_user = random.choice(top_users)
-            winner_ticket = random.choice(LotteryTicket.objects.filter(user=selected_user, lottery_event=event))
-            
+            winner_ticket = random.choice(LotteryTicket.objects.filter(user=selected_user,lottery_event=event,payment__payment_status='completed'))
             return Response({
                 "winner": {
                     "ticket_number": winner_ticket.ticket_number,
@@ -1400,8 +1471,7 @@ class AdminLotteryDrawView(APIView):
             except ValueError:
                 return Response({"error": "Invalid ticket range"}, status=status.HTTP_400_BAD_REQUEST)
 
-            winner_ticket = LotteryTicket.objects.filter(lottery_event=event, ticket_number=selected_ticket).first()
-            
+            winner_ticket = valid_tickets.filter(ticket_number=selected_ticket).first()
             if winner_ticket:
                 return Response({
                     "ticket_number": winner_ticket.ticket_number,
@@ -1418,12 +1488,11 @@ class AdminLotteryDrawView(APIView):
         else:
             return Response({"error": "Invalid selection method"}, status=400)
 
-
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function fetchWinners function)	
 class api_admin_dashboard_prize_management_winner_list_api_view(generics.ListAPIView):
     permission_classes = [IsAdminUser]
-    queryset = Winner.objects.all()
+    queryset =  Winner.objects.order_by('-created_at')
     serializer_class = prize_management_WinnerSerializer
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function updateWinnerStatus function)    
@@ -1967,7 +2036,7 @@ class MarginalChartExportView(APIView):
         })
         
         money_format = workbook.add_format({
-            'num_format': '€#,##0.00',
+            'num_format': '£#,##0.00',
             'border': 1,
             'align': 'center',
             'valign': 'vcenter'

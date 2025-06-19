@@ -7,9 +7,7 @@ urlpatterns = [
     #!------------- html urls ------------!
     path('',user_signup, name='user_signup'),  
     path('login/',user_login, name='user_login'), 
-    # path('user_welcome_page/',user_welcome_page, name='user_welcome_page'),
-    path('user_logout/', user_logout, name='user_logout'),  
-    
+    path('user_logout/', user_logout, name='user_logout'),   
     path('check-username/', check_username, name='check_username'),
     path('check-email/', check_email, name='check_email'),
     path('view_kyc_image/<int:profile_id>/', view_image, name='view_kyc_image'),

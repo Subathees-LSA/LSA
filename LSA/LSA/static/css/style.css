@@ -3238,39 +3238,30 @@ top: 20px;
 
         .admin-signup-welcome-title {
             width: 383px;
-            left: 28px;
-            top: 0px;
-            position: absolute;
-            color: #090914;
-            font-size: 52px;
-            font-family: Rajdhani;
-            font-weight: 600;
-            line-height: 62px;
-            word-wrap: break-word;
+    font-size: 52px;
+    font-family: Rajdhani;
+    font-weight: 600;
+    line-height: 62px;
+    color: #090914;
         }
 
         .admin-signup-welcome-description {
             width: 496px;
-            left: 28px;
-            top: 77px;
-            position: absolute;
-            color: #52525B;
             font-size: 18px;
             font-family: Rajdhani;
             font-weight: 500;
             line-height: 30px;
-            word-wrap: break-word;
+        margin-top: 15px;
+            color: #52525B;
         }
 
         .admin-signup-container {
-            width: 540px;
-            margin-top: -25px;
-            height: auto;
-            left: 720px;
-            top: 225px;
-            position: absolute;
-             padding: 24px;
-            border-radius: 12px;
+            width: 500px;
+    height: 600px;
+    left: 700px;
+    top: 225px;
+    position: absolute;
+    padding: 20px;
 
         }
 
@@ -3293,31 +3284,25 @@ top: 20px;
 
         .admin-signup-username-input
        {
-            width: 100%;
-            padding: 22px;
-            margin-top: -12px;
-            margin-bottom: 5px;
-            border: 1px solid #CBD5E1;
-            border-radius: 8px;
+        width: 95%;
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px #CBD5E1 solid;
         }
          
         .admin-signup-email-id-input
        {
-            width: 100%;
-            padding: 22px;
-            margin-top: -12px;
-            margin-bottom: 5px;
-            border: 1px solid #CBD5E1;
-            border-radius: 8px;
+        width: 95%;
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px #CBD5E1 solid;
         }
   
         .admin-signup-password-input {
-            width: 100%;
-            padding: 22px;
-            margin-top: -12px;
-            margin-bottom: 5px;
-            border: 1px solid #CBD5E1;
+            width: 95%;
+            padding: 25px;
             border-radius: 8px;
+            border: 1px #CBD5E1 solid;
         }
 
         .admin-signup-error {
@@ -3339,7 +3324,7 @@ top: 20px;
         }
 
         .admin-signup-submit-button {
-            width: 109%;
+            width: 105%;
             padding: 12px;
             margin-top: 15px;
             background-color: #FF6600;
@@ -3564,13 +3549,14 @@ top: 20px;
         left: 0;
         padding: 10px;
         box-sizing: border-box;
+        overflow-x: hidden;
     }
 
     .admin-signup-welcome-title {
         font-size: 32px;
         line-height: 40px;
         width: 100%;
-        margin-top: 20px;
+        margin-left: 20px;
     }
 
     .admin-signup-welcome-description {
@@ -3580,6 +3566,7 @@ top: 20px;
         width: 100%;
         padding: 0 10px;
         box-sizing: border-box;
+        margin-left: 25px;
     }
 
     /* Form Container */
@@ -3590,7 +3577,7 @@ top: 20px;
         left: 0;
         margin-top: -20px;
         background: white;
-       
+       overflow-x: hidden;
         box-sizing: border-box;
     }
 
@@ -3647,11 +3634,18 @@ top: 20px;
 
     /* Additional Links */
     .admin-signup-form-class p {
-        text-align: center; 
+        text-align: justify; 
         font-size: 14px;
         color: #52525B;
         margin-top: 15px;
         margin-left: 0px;
+    }
+    .admin-login-here{
+        text-align: center !important;
+        font-size: 14px;
+        color: #52525B;
+        margin-top: 15px;
+        margin-left: 20px;
     }
 
     .admin-signup-form-class a {
@@ -3767,14 +3761,11 @@ top: 20px;
         }
 
         .custom_admin_login_container {
-            position: absolute;
-            left: 695.40px;
-            top: 210px;
-            width: 200%;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            border-radius: 8px;
+            width: 507.20px;
+            height: 518px;
+            left: 729.40px;
+            top: 250px;
+                        position: absolute;
         }
 
         .custom_admin_login_title {
@@ -3790,22 +3781,24 @@ top: 20px;
         }
 
         .custom_admin_login_form_class input {
-            width: 130%;
-            padding: 30px;
+            width: 100%;
+            padding: 20px;
             margin-bottom: 10px;
+            border-radius: 6px;
             border: 1px solid #ccc;
-            border-radius: 8px;
+            font-family: Rajdhani; 
         }
 
         .custom_admin_login_button {
-            width: 147%;
-            padding: 16px;
+            width: 110%;
+            font-family: Rajdhani;
+            padding: 12px;
             background-color: #FF6600;
             color: white;
             border: none;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
         }
 
@@ -3832,9 +3825,16 @@ top: 20px;
     align-items: center;
 }
 
+.admin-toggle-eye-icon {
+    width: 20px;
+    height: 20px;
+    margin-top: 10px;
+    margin-left: -150px;
+}
 .toggle-eye-icon {
     width: 20px;
     height: 20px;
+    margin-top: 15px;
 }
 
 
@@ -3856,7 +3856,7 @@ top: 20px;
     align-items: center; 
     justify-content: space-between; 
     width: 100%;
-    margin-top: 20px;
+    margin-top: 0px;
     gap: 10px;
     flex-wrap: nowrap; 
 }
@@ -3892,20 +3892,23 @@ top: 20px;
         }
 
         .admin-login-welcome-message-custom {
+            top: 50px;
             width: 496px;
             height: 137px;
-            left: 720px;
-            top: 10px;
             position: absolute;
+            left: 730px;
         }
 
         .admin-login-welcome-title-custom {
-            width: 383px;
-            font-size: 52px;
-            font-family: Rajdhani;
-            font-weight: 600;
-            line-height: 62px;
-            color: #090914;
+            width: 404px;
+    color: #090914;
+    font-size: 52px;
+    font-family: Rajdhani;
+    font-weight: 600;
+    line-height: 62px;
+    margin-left: -40px;
+    word-wrap: break-word;
+    text-align: center;
         }
 
         .admin-login-welcome-subtitle-custom {
@@ -3916,6 +3919,9 @@ top: 20px;
             line-height: 30px;
             margin-top: -20px;
             color: #52525B;
+        }
+        .admin_password-message{
+            margin-left: -160px;
         }
         /* **********END OF ADMIN LOGIN DESK VIEW**************** */
 
@@ -4069,6 +4075,18 @@ top: 20px;
     .small-lottery-image{
         display: none;
     }
+    .admin_password-message {
+        margin-left: 0;
+        text-align: justify;
+        display: block;
+        width: 100%;
+    }
+    .admin-toggle-eye-icon {
+        width: 20px;
+        height: 20px;
+        margin-top: 10px;
+        margin-left: -15px;
+    }
     .admin-login-welcome-message-custom {
     position: absolute; 
     left: 50%;
@@ -4214,10 +4232,10 @@ top: 20px;
         }
 
         .admin-dashboard-small-lottery-image {
-            width: 221px;
-            height: 64px;
-            left: 22px;
-            top: 10px;
+            width: 180px;
+            height: 50px;
+            left: 27px;
+            top: 15px;
             position: absolute;
         }
 
@@ -4684,7 +4702,7 @@ top: 20px;
     padding: 10px;
     margin: 0 auto 20px auto;
     height: 200px;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: auto; 
     
 }
@@ -4785,6 +4803,8 @@ top: 20px;
     border-radius: 5px;
     background-color: #FFFFFF;
     position: relative;
+
+    
 }
 
 .email-item:hover {
@@ -4814,6 +4834,11 @@ top: 20px;
 .email-text {
     flex-grow: 1;
     cursor: pointer;
+     overflow: hidden; 
+     word-break: break-word; 
+     white-space: normal; 
+     flex-wrap: wrap; 
+     box-sizing: border-box; 
 }
 #basket-icon {
     float: right;
@@ -5453,8 +5478,8 @@ top: 20px;
             color: white;
             background-color: #FF6600;
             border-radius: 50px;
-            width: auto;
-            height: auto;
+            width: 10%;
+            height: 10%;
             padding: 8px 16px;
             display: flex;
             align-items: center;
@@ -5469,8 +5494,8 @@ top: 20px;
             color: white;
             background-color: #FF6600;
             border-radius: 50px;           
-             width: auto;
-            height: auto;
+             width: 10%;
+            height: 10%;
             padding: 8px 16px;
             display: flex;
             align-items: center;
@@ -5478,6 +5503,8 @@ top: 20px;
             text-align: center;
             margin: auto;
             border: none;
+            font-weight: bold;
+            font-size: 16px;
         }
 
         .user_management_button_class {
@@ -5494,6 +5521,9 @@ top: 20px;
             margin: auto;
             border: none;
             margin-bottom: 10px;
+            font-weight: bold;
+            padding: 10px;
+            font-size: 14px;
         }
 
         #searchUserInput {
@@ -5934,11 +5964,12 @@ margin-left: 2%;
     font-size: 14px;
     font-family: Rajdhani, sans-serif;
     font-weight: 700;
-    color: #fff;
-    background-color: #FF6600;
+    color: #000000;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    background-color: rgb(255, 254, 253);
+    border: 1px solid rgba(0, 0, 0, 0.5);
 }
 
 #lottery_sales_dynamic_count_filter button:hover,
@@ -6086,16 +6117,18 @@ margin-left: 2%;
 
 .overview_sales_count_card p {
    
-    align-items: center;
-    justify-content: center; 
-    font-size: 16px; 
+    display: flex;
+    align-items: center;         
+    justify-content: center;     
+    font-size: 16px;
     font-weight: 400;
-    margin: 0 auto;
-    gap: 10px;
+    gap: 10px;                   
     text-align: center;
-    margin-bottom: -10px;
+    margin: 0 auto;
     width: 100%;
-    margin-left: -10px;
+    padding: 10px; 
+    margin-left: -16px;
+
 }
 @media (max-width: 768px) {
     #custom_admin_dashboard_overview_lottery_won_lost_count {
@@ -6338,7 +6371,7 @@ margin-left: 2%;
 
 
 .admin_contact_reply_container {
-    width: 100%;
+    width: 95%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
@@ -6489,14 +6522,18 @@ margin-left: 2%;
 }
 
 #admin_contact_reply_message {
-    width: 95%;
-    height: 30px;
+    width: 100%;
     font-family: Rajdhani;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-bottom: 8px;
+
+    resize: vertical;        
+    max-width: 100%;         
+    box-sizing: border-box;  
 }
+
 #admin_contact_reply_file {
     margin-bottom: 8px;
     font-family: Rajdhani;
@@ -6511,7 +6548,8 @@ margin-left: 2%;
 .delete-icon {
     cursor: pointer;
     color: #ff0000;
-    font-size: 16px;
+    font-size: 16px; 
+    
 }
 
 
@@ -6555,12 +6593,14 @@ margin-left: 2%;
     }
 
     .email-item {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
+        display: flex;             
+        flex-direction: row;       
+        align-items: center;       
+        width: 94%;
         padding: 10px;
         font-size: 14px;
     }
+    
 
     .chat-user-message,
     .chat-admin-message {
@@ -6748,8 +6788,441 @@ margin-left: 2%;
             background-color: #cc0000;
         }
 /* **********Draw Lottery Page Code Starts*********** */
-
+/* Main container for lottery cards - Row layout */
 .draws-lottery-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+/* Individual lottery card styling */
+.draws-lottery-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    margin: 0; /* Remove auto margin for row layout */
+    
+    /* Flex properties for row layout */
+    flex: 1 1 calc(33.333% - 20px); /* 3 cards per row with gap */
+    min-width: 286px; /* Minimum width before wrapping */
+    max-width: 286px; /* Maximum width to prevent cards from being too wide */
+    
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.draws-lottery-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.draws-lottery-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    margin-top: 30px;
+    border-radius: 8px;
+}
+
+.draws-lottery-card input[type="radio"] {
+    margin-right: 8px;
+}
+
+.draws-ticket-range {
+    width: 100px;
+    padding: 5px;
+    margin: 5px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    
+}
+
+.draws-draw-btn {
+    display: block;
+    width: 80%;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: #ff6600;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: auto; /* Push button to bottom of card */
+}
+
+.draws-draw-btn:hover {
+    background-color: #e55a00;
+}
+
+.draws-draw-btn:disabled {
+    background-color: #28a745;
+    cursor: not-allowed;
+}
+
+/* Status and date positioning */
+.draws-lottery-card > p:first-child {
+    position: absolute;
+    top: 15px;
+    left: 10px;
+    margin: 0;
+    font-weight: bold;
+    text-align: left;
+    font-size: 14px;
+}
+
+.admin_lottery_draw_date {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff6600;
+    color: #fff;
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: 20px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Modal styles */
+.draws-lottery-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+
+.draws-lottery-close-modal {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.draws-lottery-overlay-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+#draws-otp-verification-container {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#draws-otp-input {
+    padding: 8px;
+    width: 100px;
+    text-align: center;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+#draws-resend-otp {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#draws-resend-otp:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#draws-resend-otp:enabled {
+    background-color: #007bff;
+}
+
+#draws-otp-status {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* Lottery Cards Container - Row layout */
+#draw-lottery-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.lottery-content-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.lottery-cards-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    align-items: stretch;
+    margin-bottom: 20px;
+}
+
+/* Pagination Wrapper */
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 8px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    clear: both;
+}
+
+/* Pagination Button Base Styles */
+.pagination-btn {
+    min-width: 40px;
+    height: 40px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #333;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.pagination-btn.page-btn {
+    width: 40px;
+    height: 40px;
+}
+
+.pagination-btn.prev-btn,
+.pagination-btn.next-btn {
+    padding: 0 16px;
+    min-width: 60px;
+    font-weight: 600;
+}
+
+.pagination-btn.active {
+    background-color: #ff6633;
+    color: white;
+    border-color: #ff6633;
+    box-shadow: 0 2px 8px rgba(255, 102, 51, 0.3);
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.pagination-btn:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.pagination-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.pagination-ellipsis {
+    color: #6c757d;
+    font-weight: bold;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.pagination-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #ff6633;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design for Row Layout */
+@media (max-width: 1200px) {
+    .draws-lottery-card {
+        flex: 1 1 calc(50% - 20px); /* 2 cards per row on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .draws-lottery-card {
+        flex: 1 1 100%; /* 1 card per row on mobile */
+        max-width: none;
+        min-width: 280px;
+    }
+    
+    .lottery-cards-container {
+        gap: 15px;
+    }
+    
+    .pagination-wrapper {
+        gap: 6px;
+        padding: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination-btn {
+        min-width: 35px;
+        height: 35px;
+        font-size: 13px;
+    }
+    
+    .pagination-btn.page-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .pagination-btn.prev-btn,
+    .pagination-btn.next-btn {
+        min-width: 50px;
+        padding: 0 12px;
+    }
+    
+    .pagination-ellipsis {
+        padding: 0 6px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .draws-lottery-card {
+        min-width: 260px;
+        padding: 15px;
+    }
+    
+    .admin_lottery_draw_date {
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+    
+    .draws-lottery-card > p:first-child {
+        font-size: 12px;
+    }
+    
+    .pagination-wrapper {
+        gap: 4px;
+        padding: 10px;
+        justify-content: center;
+    }
+    
+    .pagination-btn {
+        min-width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .pagination-btn.page-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .pagination-btn.prev-btn,
+    .pagination-btn.next-btn {
+        min-width: 45px;
+        padding: 0 10px;
+    }
+}
+
+/* Focus States for Accessibility */
+.pagination-btn:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.pagination-btn.active:focus {
+    outline-color: #ff6633;
+}
+
+/* Animation for page transitions */
+.draws-lottery-card {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fix for pagination positioning issues */
+.pagination-wrapper * {
+    position: relative !important;
+}
+
+.pagination-wrapper {
+    margin-top: auto;
+}
+/* .draws-lottery-container {
 display: flex;
 flex-wrap: wrap;
 gap: 20px;
@@ -6875,7 +7348,7 @@ margin-top: 10px;
 font-size: 14px;
 }
 
-/* Updated styles for status and date positioning */
+
 .draws-lottery-card>p:first-child {
 position: absolute;
 top: 15px;
@@ -6901,7 +7374,7 @@ text-align: center;
 
 .draws-lottery-card img {
 margin-top: 30px;
-}
+} */
 
 /* **********End of Draw Lottery Page Code Starts*********** */
 
@@ -7758,8 +8231,7 @@ color: #ddd;
 
 /* Winners Wall Testimonial Popup Container */
 .winners_wall_testimonial_popup_container {
-width: 100%;
-max-width: 900px;
+width: 97%;
 margin: 0 auto;
 padding: 20px;
 background-color: #fff;
@@ -8367,17 +8839,18 @@ height: 180px;
 
 .winners_wall_winners_list_edit_btn,
 .winners_wall_winners_list_toggle_btn {
-width: 28px;
+width: 38px;
 height: 28px;
 font-size: 12px;
 padding: 0;
 }
 
 .winners_wall_winners_list_toggle_btn {
-top: 40px;
+top: 50px;
 right: 8px;
 padding: 4px 8px;
 font-size: 10px;
+margin-top: 10px;
 }
 
 .winners_wall_winners_list_details th,
@@ -8390,6 +8863,9 @@ font-size: 14px;
 .winners_wall_winners_list_error {
 font-size: 14px;
 padding: 15px;
+}
+.winners_wall_Winners_edit_add_close{
+    margin-left: 95%;
 }
 }
 /* Pagination CSS */
@@ -8544,7 +9020,7 @@ text-decoration: underline;
 .winners_wall_Winners_edit_add_close {
 background: none;
 border: none;
-font-size: 20px;
+font-size: 35px;
 cursor: pointer;
 color: #666;
 }
@@ -8935,7 +9411,6 @@ box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
 border-color: #FF6600;
 }
 }
-
 /* Transcation page css End */
 /* ***********Mobile view code for admindashboard*********** */
 
@@ -9245,6 +9720,7 @@ border-color: #FF6600;
             .custom_admin_dashboard_main {
                 width: 90%;
                 padding: 1px;
+             
             }
 
             /* Overview dashboard */
@@ -9386,6 +9862,7 @@ border-color: #FF6600;
                 font-size: 14px !important;
                 padding: 14px !important;
             }
+           
         }
 
         /* Need to Alter in Original style.css  */
@@ -9574,11 +10051,10 @@ border-color: #FF6600;
             word-wrap: break-word;
             white-space: normal;
             overflow-wrap: break-word;
-            /* Ensures long words break */
+    
             word-break: break-word;
-            /* Alternative for compatibility */
+    
             display: table-cell;
-            /* Ensures cells behave correctly */
         }
 
         .custom_admin_dashboard_transactions_management_table tbody {
@@ -9608,6 +10084,7 @@ border-color: #FF6600;
             white-space: normal;
             overflow-wrap: break-word;
             word-break: break-word;
+            
         }
 
         /* Move the last column slightly to the right */
@@ -9664,58 +10141,53 @@ border-color: #FF6600;
                 top: 0;
                 left: 0;
                 background-color: white;
-                /* z-index: 1000; */
                 white-space: nowrap;
             }
 
             .custom_admin_dashboard_transaction_manage_refunded {
                 overflow: hidden;
-                /* Prevents page from moving */
                 position: relative;
                 width: 100%;
                 overflow-x: auto;
 
 
             }
+            #custom_admin_dashboard_transactions_management_table_body_all_transactions{
+                overflow: hidden;
+                position: relative;
+                width: 100%;
+                overflow-x: auto;
+            }
 
             .custom_admin_dashboard_transaction_manage_refunded {
                 overflow-x: auto;
-                /* Enables scrolling only on table */
                 width: 100%;
             }
 
             .custom_admin_dashboard_transaction_manage {
                 overflow: hidden;
-                /* Prevents page from moving */
                 position: relative;
                 width: 100%;
             }
 
             .custom_admin_dashboard_transactions_management_table {
                 width: 900px;
-                /* Ensures the table is wider than the container */
                 min-width: 900px;
-
                 display: table;
-                /* Keeps table structure intact */
                 white-space: nowrap;
                 overflow-x: auto;
-                /* Allows horizontal scrolling */
                 max-width: 100%;
             }
 
             /* Ensure the table scrolls properly */
             .custom_admin_dashboard_transaction_manage {
                 overflow-x: auto;
-                /* Enables scrolling only on table */
                 width: 100%;
             }
 
-            /* Remove display block to fix scrolling */
             .custom_admin_dashboard_transactions_management_table thead,
             .custom_admin_dashboard_transactions_management_table tbody {
                 display: table;
-                /* Keeps table structure */
                 width: 100%;
             }
 
@@ -9752,8 +10224,10 @@ border-color: #FF6600;
                 word-break: break-word;
                 overflow: hidden;
             }
-
-
+            #custom_admin_dashboard_all_transactions_management {
+                overflow-x: auto;
+                width: 100%;
+            }
         }
 
            /* Action Buttons */
@@ -9817,6 +10291,7 @@ border-color: #FF6600;
             padding: 5px;
             border-radius: 4px;
             font-weight: bold;
+            text-transform: capitalize;
         }
 
 
@@ -9826,7 +10301,9 @@ border-color: #FF6600;
             border-radius: 4px;
             font-weight: bold;
             background-color: #38B95C;
+            text-transform: capitalize;
         }
+
 
         /* Transactions Management refund style  */
         .refund-popup-content ul {
@@ -9933,13 +10410,6 @@ border-color: #FF6600;
   /* Transactions Management page all code end */
 
 
- /* users_management_user_details_page all code staring*/
-        /*           .users_management_user_details_page_user_details_card {
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-}*/
 
         .users_management_user_details_page_profile_section img {
             width: 100px;
@@ -9969,12 +10439,12 @@ border-color: #FF6600;
         }
 
 
-        .users_management_user_details_page_gotousermanagement span {
+        .user_management_span {
             cursor: pointer;
             color: #797a7a;
         }
 
-        .users_management_user_details_page_gotousermanagement span:hover {
+        .user_management_span:hover {
             text-decoration: underline;
         }
 
@@ -10247,8 +10717,9 @@ border-color: #FF6600;
             top: 5px;
             right: 10px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 40px;
             font-weight: bold;
+            color:#FF6600;
         }
 
 
@@ -10356,6 +10827,9 @@ border-color: #FF6600;
                 padding: 10px;
                 /* Reduce padding */
             }
+            .prize_management_comments{
+                width: 50%;
+            }
 
 
 
@@ -10381,7 +10855,7 @@ border-color: #FF6600;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            min-width: 250px;
+            min-width: 160px;
             width: 100%;
             max-width: 300px;
         }
@@ -10415,25 +10889,10 @@ border-color: #FF6600;
 
 
 
-        /* @media (min-width: 768px) {
-            .prize_management_container {
-                justify-content: space-between;
-            }
-
-            .prize_management_card {
-                width: 30%;
-            }
-        }
-
-        .prize_management_pagination {
-            width: 100%;
-            margin-top: 20px;
-        } */
-
         /* prize_management_header 3 container code end */
         /* prize_management_pagination code start */
         .prize_management_pagination ul {
-            width: 100%;
+            width: 98%;
             display: flex;
             flex-wrap: wrap;
             background: #fff;
@@ -10443,7 +10902,7 @@ border-color: #FF6600;
         }
 
         .prize_management_pagination ul li {
-            color: #20B2AA;
+            color:#FF6600 ;
             list-style: none;
             line-height: 45px;
             text-align: center;
@@ -10486,7 +10945,7 @@ border-color: #FF6600;
         .prize_management_pagination ul li:first-child:hover,
         .prize_management_pagination ul li:last-child:hover {
             color: #fff;
-            background: #20B2AA;
+            background: #FF6600;
         }
 
         .prize_management_hidden {
@@ -10585,6 +11044,12 @@ p.user_welcome_page_p {
     .user_welcome_page_kyc-modal-content {
         width: 85%;
         max-width: 450px;
+    }
+    .prize_management_comments{
+        width: 70%;
+    }
+    .prize_management_table_wrapper{
+        width: 100%;
     }
 }
 
@@ -10808,6 +11273,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     position: relative;
     padding: 20px;
     overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .user_kyc_waiting_list-modal-header {
@@ -10835,6 +11301,8 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 
@@ -15631,8 +16099,12 @@ background-color: rgba(255, 102, 0, 0.05);
     }
 
     .view-more-button {
-        width: 25%;
+        width: 25% !important;
         padding: 12px 50px;
+    }
+    .view-less-button {
+        width: 25% !important;
+    ;
     }
 }
 
@@ -15673,32 +16145,36 @@ background-color: rgba(255, 102, 0, 0.05);
         padding: 10px 15px;
     }
     .view-more-button {
-        width: 60%;
+        width: 28% !important;
         padding: 12px 40px;
+    }
+    .view-less-button {
+        width: 28% !important;
+        
     }
 }
 /* Mobile View: Single Row Scroll */
 @media (max-width: 480px) {
     .category_lottery_events_container {
         display: flex;
-        flex-wrap: nowrap; /* Prevents wrapping */
-        overflow-x: auto; /* Enables horizontal scrolling */
+        flex-wrap: nowrap; 
+        overflow-x: auto; 
         scroll-snap-type: x mandatory;
         padding: 10px 0;
         padding-left: 10px;
         gap: 10px;
-        justify-content: flex-start; /* Aligns cards in a row */
+        justify-content: flex-start; 
     }
 
     .category_lottery_events_container::-webkit-scrollbar {
-        display: none; /* Hides scrollbar */
+        display: none; 
     }
 
     .category_lottery_event {
-        flex: 0 0 auto; /* Prevents resizing */
-        width: 80%; /* Adjust width as needed */
-        max-width: 300px; /* Limit width */
-        scroll-snap-align: center; /* Snaps cards into view */
+        flex: 0 0 auto; 
+        width: 80%; 
+        max-width: 300px; 
+        scroll-snap-align: center; 
     }
 }
 
@@ -16843,9 +17319,9 @@ color: #23262F;
     color: white;
 }
 
-.myorder-pending {
-    background-color: #ffc107;
-    color: black;
+.myorder-refund {
+    background-color: #4C6FFF;
+    color: white;
 }
 
 /* Order Table */
@@ -18057,3 +18533,4 @@ color: #23262F;
 .logout-form {
     display: inline-block;
 }
+

@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <script>
+        const userIsAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
         const add_csrftoken="{{ csrf_token}}"; 
         const add_to_carturl = "{% url 'add_to_cart' %}";  
         const cartUrl = "{% url 'cart' %}";  

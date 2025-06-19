@@ -44,18 +44,6 @@ def user_signup(request):
 def user_login(request):
     return render(request, 'login.html')
 
-
-
-
-# def user_welcome_page(request):
-#     email = request.session.get("google_user_email", None)
-    
-#     if not request.user.is_authenticated or not User.objects.filter(id=request.user.id).exists():
-#         return redirect('/login/')  
-    
-#     return render(request, 'user_welcome_page.html',{'email':email})
-
-
 def user_logout(request):
     logout(request)  # Logs out the user
     return redirect('/login/')  # Redirects to the login page after logout
