@@ -8374,8 +8374,8 @@ function displayCartItems(cart) {
     
     if (Object.keys(cart).length === 0) {
         container.innerHTML = '<p id="empty-cart-page">Your cart is empty</p>';
-        totalElement.textContent = '£0.00';
-        subtotalElement.textContent = '£0.00';
+        totalElement.textContent = '£00.00';
+        subtotalElement.textContent = '£00.00';
         return;
     }
 

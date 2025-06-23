@@ -16,9 +16,9 @@
         <li class="{% if request.resolver_match.url_name == 'user_chats' %}active{% endif %}">
             <a href="{% url 'user_chats' %}"><img src="/media/icons/noti.png" alt="icon"> My Chat</a>
         </li>
-        <li class="{% if request.resolver_match.url_name == 'subscription_page' %}active{% endif %}">
+        <!--<li class="{% if request.resolver_match.url_name == 'subscription_page' %}active{% endif %}">
             <a href="{% url 'subscription_page' %}"><img src="/media/icons/msg.png" alt="icon"> Subscription Plan</a>
-        </li>
+        </li> -->
     </ul>
     <button class="scroll-right">▶</button>
 </aside>
