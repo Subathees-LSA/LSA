@@ -1025,13 +1025,35 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from calendar import month_abbr
 from datetime import datetime
+from datetime import datetime, timedelta
+from calendar import monthrange
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from django.db.models import Sum, Q
+from django.db.models.functions import ExtractMonth, ExtractYear, ExtractWeek, ExtractDay
+from calendar import month_abbr
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function report_and_analytics_sales_chart_fetchSalesData function)
 class lottery_sales_bar_chart_View(APIView):
     permission_classes = [IsAdminUser] 
+    
     def get(self, request):
         year = int(request.query_params.get('year', datetime.now().year))
-        queryset = (
+        month = request.query_params.get('month')
+        
+        if month:
+            month = int(month)
+            queryset = self.get_weekly_sales(year, month)
+            response = self.format_weekly_response(queryset, year, month)
+        else:
+            queryset = self.get_monthly_sales(year)
+            response = self.format_monthly_response(queryset)
+            
+        return Response(response)
+    
+    def get_monthly_sales(self, year):
+        return (
             PaymentLottery.objects
             .filter(payment_status='completed', payment_at__year=year)
             .annotate(month=ExtractMonth('payment_at'))
@@ -1039,18 +1061,59 @@ class lottery_sales_bar_chart_View(APIView):
             .annotate(sales_amount=Sum('amount'))
             .order_by('month')
         )
-
-        response = [
+    
+    def format_monthly_response(self, queryset):
+        return [
             {
                 'month': month_abbr[item['month']],  
+                'sales_amount': item['sales_amount'],
+                'month_number': item['month']
+            } for item in queryset
+        ]
+    
+    def get_weekly_sales(self, year, month):
+        _, num_days = monthrange(year, month)
+        
+        week_ranges = [
+            (1, 7),
+            (8, 14),
+            (15, 21),
+            (22, num_days)
+        ]
+        
+        queries = []
+        for start_day, end_day in week_ranges:
+            week_query = (
+                PaymentLottery.objects
+                .filter(
+                    payment_status='completed',
+                    payment_at__year=year,
+                    payment_at__month=month,
+                    payment_at__day__gte=start_day,
+                    payment_at__day__lte=end_day
+                )
+                .aggregate(sales_amount=Sum('amount'))
+            )
+            queries.append({
+                'week_range': f"{start_day}-{end_day}",
+                'sales_amount': week_query['sales_amount'] or 0
+            })
+        
+        return queries
+    
+    def format_weekly_response(self, queryset, year, month):
+        month_name = month_abbr[month]
+        return [
+            {
+                'week': f"{month_name} {item['week_range']}",
                 'sales_amount': item['sales_amount']
             } for item in queryset
         ]
-        return Response(response)
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function report_and_analytics_sales_chart_populateYearDropdown function)        
 class lottery_sales_availableYearsView(APIView):
     permission_classes = [IsAdminUser]
+    
     def get(self, request):
         years = (
             PaymentLottery.objects
@@ -1061,6 +1124,25 @@ class lottery_sales_availableYearsView(APIView):
             .order_by('year')
         )
         return Response({'years': list(years)})
+
+class lottery_sales_availableMonthsView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        year = int(request.query_params.get('year', datetime.now().year))
+        
+        months = (
+            PaymentLottery.objects
+            .filter(payment_status='completed', payment_at__year=year)
+            .annotate(month=ExtractMonth('payment_at'))
+            .values_list('month', flat=True)
+            .distinct()
+            .order_by('month')
+        )
+        
+        return Response({
+            'months': [{'number': m, 'name': month_abbr[m]} for m in months]
+        })
 
 class SimilarLotteryEvents(APIView):
     def get(self, request, slug, format=None):

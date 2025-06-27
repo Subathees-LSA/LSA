@@ -79,16 +79,24 @@ from rest_framework import serializers
 from .models import UserProfile, UserPrivacy
 from django.contrib.auth.models import User
 class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
-    user = UserList()  # Nest the UserSerializer to include user details
+    user = UserList()
     kyc_image_url = serializers.SerializerMethodField()
-    profile_photo_url = serializers.SerializerMethodField()  # Updated field for profile photo
+    profile_photo_url = serializers.SerializerMethodField()
+    phone_number = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+
     class Meta:
         model = UserProfile
-        fields = ['user', 'newsletter', 'kyc_status', 'kyc_image_url', 'ip_address', 'is_blocked', 'profile_photo_url']
+        fields = [
+            'user', 'newsletter', 'kyc_status', 'kyc_image_url', 'ip_address',
+            'is_blocked', 'profile_photo_url', 'phone_number', 'address'
+        ]
+
     def get_kyc_image_url(self, obj):
         if obj.kyc_image:
             return f"/view_kyc_image/{obj.id}/"
         return None
+
     def get_profile_photo_url(self, obj):
         try:
             user_privacy = UserPrivacy.objects.get(user=obj.user)
@@ -96,7 +104,22 @@ class UserKycwaitingDetailsSerializer(serializers.ModelSerializer):
                 return user_privacy.profile_photo.url
         except UserPrivacy.DoesNotExist:
             return None
-        return None 
+        return None
+
+    def get_phone_number(self, obj):
+        try:
+            user_privacy = UserPrivacy.objects.get(user=obj.user)
+            return user_privacy.phone_number
+        except UserPrivacy.DoesNotExist:
+            return None
+
+    def get_address(self, obj):
+        try:
+            user_privacy = UserPrivacy.objects.get(user=obj.user)
+            return user_privacy.address
+        except UserPrivacy.DoesNotExist:
+            return None
+
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
     def validate_email(self, value):

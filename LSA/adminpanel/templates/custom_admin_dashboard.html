@@ -33,7 +33,57 @@
             admin_lottery_add_additional_images();
         };
     </script>
-   
+   <style>
+    /* winners_wall_testimonial_error_message validation */
+
+    .winners_wall_testimonial_error_message {
+    color: red;
+    font-size: 13px;
+    margin-top: 4px;
+    display: none;
+}
+
+    /* monthly sales chart css */
+    .filter-controls {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    color: #555;
+}
+
+.filter-group select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    min-width: 150px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: fit-content;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+   </style>
 
 </head>
 
@@ -210,16 +260,22 @@
                             </div>
 
                             <div id="admin_contact_reply_form_container" style="display: none;">
-                                <h2 class="admin_contact_reply_sub_heading">Reply to User</h2>
+                                
                                 <form id="admin_contact_reply_form" class="admin_reply_form">
-                                    <textarea id="admin_contact_reply_message" name="message"
-                                        placeholder="Your reply..."></textarea>
-                                        <label for="admin_contact_reply_file" class="custom-file-upload">
-                                            <i class="fa fa-paperclip"></i>
-                                          </label>
-                                          <input type="file" id="admin_contact_reply_file" name="file" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx">
-                                          <p id="file-name"></p>     
-                                    <button type="submit"  id="send-reply-btn">Send Reply</button>
+
+                                    <div class="textarea-wrapper">
+
+                                        <textarea id="admin_contact_reply_message" name="message"
+                                            placeholder="Your reply..."></textarea>
+                                    </div>
+                                    <label for="admin_contact_reply_file" class="custom-file-upload">
+                                        <i class="fa fa-paperclip" id="Choosefile"></i>
+                                    </label>
+                                    <button type="submit" id="send-reply-btn">➤</button>
+                                    <input type="file" id="admin_contact_reply_file" style="display: none;" name="file"
+                                        accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx ">
+                                    <p id="file-name"></p>
+
                                 </form>
                                 <p id="admin_contact_reply_response_message"></p>
                             </div>

@@ -143,6 +143,12 @@ function admin_chat_view() {
                 <span class="delete-icon" title="Delete Email">🗑️</span>
                 <span class="starred_chat">${starred ? "⭐" : ""}</span>
             `;
+                const customer_support_page_users_email_span = emailItem.querySelector(".email-text");
+                const customer_support_page_users_email_span_value = `${email}`;
+                customer_support_page_users_email_span.innerText = `${email}`;
+                if (customer_support_page_users_email_span_value.length > 13) {
+                customer_support_page_users_email_span.innerText = `${email.substring(0, 13)}...`;
+                }
                 const lastMessageElement = emailItem.querySelector(".last-message");
                  //    custom_admin_dashboard.html (adminpanel template)
                 //    AdminReply,Contact table (models.py)
@@ -2648,17 +2654,20 @@ function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonia
     const fieldsSection = document.createElement('div');
     fieldsSection.className = 'winners_wall_testimonial_fields_section';
     fieldsSection.innerHTML = `
-        <div class="winners_wall_testimonial_field">
-            <label for="winners_wall_testimonial_name_input" class="winners_wall_testimonial_field_label">Winner Name</label>
-            <input type="text" id="winners_wall_testimonial_name_input" class="winners_wall_testimonial_text_input" 
-                   placeholder="Enter winner name">
-        </div>
-        <div class="winners_wall_testimonial_field">
-            <label for="winners_wall_testimonial_quote_input" class="winners_wall_testimonial_field_label">Winner Quote/Content</label>
-            <textarea id="winners_wall_testimonial_quote_input" class="winners_wall_testimonial_textarea_input" 
-                      placeholder="Enter testimonial content"></textarea>
-        </div>
-    `;
+    <div class="winners_wall_testimonial_field">
+        <label for="winners_wall_testimonial_name_input" class="winners_wall_testimonial_field_label">Winner Name</label>
+        <input type="text" id="winners_wall_testimonial_name_input" class="winners_wall_testimonial_text_input" 
+               placeholder="Enter winner name">
+        <div class="winners_wall_testimonial_error_message" id="winners_wall_testimonial_winner_name_error" style="color:red; font-size: 12px; display:none;"></div>
+    </div>
+    <div class="winners_wall_testimonial_field">
+        <label for="winners_wall_testimonial_quote_input" class="winners_wall_testimonial_field_label">Winner Quote/Content</label>
+        <textarea id="winners_wall_testimonial_quote_input" class="winners_wall_testimonial_textarea_input" 
+                  placeholder="Enter testimonial content"></textarea>
+        <div class="winners_wall_testimonial_error_message" id="winners_wall_testimonial_winner_quote_error" style="color:red; font-size: 12px; display:none;"></div>
+    </div>
+`;
+
     form.appendChild(fieldsSection);
     
     const buttonsSection = document.createElement('div');
@@ -2718,15 +2727,36 @@ function winners_wall_testimonial_load_testimonial_data(testimonialId) {
 //    Testimonial table (models.py)
 //    custom_admin_dashboard_winners_wall_testimonial_detail function (views.py)
 function winners_wall_testimonial_handle_submit(isEditMode, testimonialId = null) {
-    const name = document.getElementById('winners_wall_testimonial_name_input').value.trim();
-    const quote = document.getElementById('winners_wall_testimonial_quote_input').value.trim();
+    const nameInput = document.getElementById('winners_wall_testimonial_name_input');
+    const quoteInput = document.getElementById('winners_wall_testimonial_quote_input');
     const imageInput = document.getElementById('winners_wall_testimonial_image_input');
-    
-    if (!name || !quote ) {
-        alert('Please fill in all required fields');
-        return;
+
+    const name = nameInput.value.trim();
+    const quote = quoteInput.value.trim();
+
+    const nameError = document.getElementById('winners_wall_testimonial_winner_name_error');
+    const quoteError = document.getElementById('winners_wall_testimonial_winner_quote_error');
+
+    // Clear previous error messages
+    nameError.style.display = 'none';
+    quoteError.style.display = 'none';
+
+    let hasError = false;
+
+    if (!name) {
+        nameError.innerText = 'Winner name is required';
+        nameError.style.display = 'block';
+        hasError = true;
     }
-    
+
+    if (!quote) {
+        quoteError.innerText = 'Testimonial content is required';
+        quoteError.style.display = 'block';
+        hasError = true;
+    }
+
+    if (hasError) return;
+
     const formData = new FormData();
     formData.append('name', name);
     formData.append('quote', quote);
@@ -2810,88 +2840,175 @@ function showSpecificDiv(id) {
 }
 var salesChart;
 async function report_and_analytics_monthly_sales_bar_chart_exportToExcel() {
-    if (!salesChart) {
-        alert("No data available to export.");
-        return;
-    }
-
-    const labels = salesChart.data.labels;
-    const data = salesChart.data.datasets[0].data;
-    const selectedYear = document.getElementById('yearSelect')?.value || new Date().getFullYear();
-
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Monthly Sales");
-
-    sheet.mergeCells('A1:B1');
-    const titleRow = sheet.getRow(1);
-    titleRow.getCell(1).value = `Monthly Sales Chart – ${selectedYear}`;
-    titleRow.getCell(1).font = { bold: true, size: 14 };
-    titleRow.getCell(1).alignment = { horizontal: 'center' };
-    titleRow.height = 20;
-
-    sheet.addRow([]);
-
-    const headerRow = sheet.addRow(['Month', 'Sales Amount']);
-    headerRow.font = { bold: true };
-    headerRow.alignment = { horizontal: 'center' };
-    headerRow.eachCell(cell => {
-        cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' },
-        };
-        cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFE0E0E0' },
-        };
-    });
-
-    for (let i = 0; i < labels.length; i++) {
-        const row = sheet.addRow([labels[i], data[i]]);
-        row.eachCell(cell => {
+    try {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js');
+        
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+        const monthName = month ? document.getElementById('monthSelect').options[document.getElementById('monthSelect').selectedIndex].text : null;
+        
+        const response = await fetch(`/api/lottery_sales_bar_chart/?year=${year}${month ? `&month=${month}` : ''}`);
+        const data = await response.json();
+        
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet("Sales Report");
+        
+        sheet.mergeCells('A1:B1');
+        const titleRow = sheet.getRow(1);
+        titleRow.getCell(1).value = month 
+            ? `Weekly Sales Report - ${monthName} ${year}`
+            : `Monthly Sales Report - ${year}`;
+        titleRow.getCell(1).font = { bold: true, size: 13 };
+        titleRow.getCell(1).alignment = { horizontal: 'center' };
+        titleRow.height = 25;
+        
+        sheet.mergeCells('A2:B2');
+        const filterRow = sheet.getRow(2);
+        filterRow.getCell(1).value = `Filters: Year - ${year}${month ? ` | Month - ${monthName}` : ''}`;
+        filterRow.getCell(1).font = { italic: true };
+        filterRow.getCell(1).alignment = { horizontal: 'center' };
+        
+        sheet.addRow([]); 
+        
+        const headerRow = sheet.getRow(4);
+        headerRow.values = [
+            month ? 'Week Range' : 'Month',
+            'Sales Amount (£)'
+        ];
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: 'center' };
+        headerRow.eachCell(cell => {
             cell.border = {
                 top: { style: 'thin' },
                 left: { style: 'thin' },
                 bottom: { style: 'thin' },
-                right: { style: 'thin' },
+                right: { style: 'thin' }
             };
-            cell.alignment = { horizontal: 'center' };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD3D3D3' }
+            };
         });
+        
+        data.forEach(item => {
+            const row = sheet.addRow([
+                item.month || item.week,
+                item.sales_amount
+            ]);
+            
+            row.eachCell(cell => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+            
+            row.getCell(2).numFmt = '£#,##0.00';
+        });
+        
+        sheet.columns = [
+            { key: 'period', width: month ? 25 : 15 },
+            { key: 'amount', width: 18 }
+        ];
+        
+        const totalAmount = data.reduce((sum, item) => sum + item.sales_amount, 0);
+        const totalRow = sheet.addRow([
+            'TOTAL',
+            totalAmount
+        ]);
+        totalRow.font = { bold: true };
+        totalRow.getCell(2).numFmt = '£#,##0.00';
+        totalRow.eachCell(cell => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: 'double',
+                right: { style: 'thin' }
+            };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFF0F0F0' }
+            };
+        });
+        
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = month 
+            ? `Weekly_Sales_${monthName}_${year}.xlsx`
+            : `Monthly_Sales_${year}.xlsx`;
+        link.click();
+    } catch (error) {
+        console.error("Error exporting sales report:", error);
+        alert("Error exporting sales report. Please try again.");
     }
+}
 
-    sheet.columns = [
-        { width: 20 },
-        { width: 20 }
-    ];
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+            resolve();
+            return;
+        }
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
     });
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `lottery_sales_${selectedYear}.xlsx`;
-    link.click();
+}
+// report_and_analytics_monthly_sales_bar_chart_function 
+function report_and_analytics_monthly_sales_bar_chart_function() {
+    const custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container = document.getElementById("report_and_analytics_monthly_sales_bar_chart");
+    custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container.innerHTML = `
+     <div id="custom_admin_dashboard_bar_chart_filter">
+        <h1>Monthly/Weekly Sales Chart</h1>
+        <div class="filter-controls">
+            <div class="filter-group">
+                <label for="yearSelect">Select Year:</label>
+                <select id="yearSelect"></select>
+            </div>
+            <div class="filter-group">
+                <label for="monthSelect">Select Month:</label>
+                <select id="monthSelect">
+                    <option value="">All Months</option>
+                </select>
+            </div>
+            <button onclick="report_and_analytics_monthly_sales_bar_chart_exportToExcel()">Export</button>
+        </div>
+    </div>
+    <div class="admin-dashboard-report-container" style="width: 50%;height: 50%;">
+        <canvas class="admin-dashboard-report" id="salesChart" width="800" height="400"></canvas>
+    </div>
+     `;
 }
 
 //    custom_admin_dashboard.html (adminpanel template)
 //    PaymentLottery table (models.py)
 //    lottery_sales_bar_chart_View function (views.py)
-function report_and_analytics_sales_chart_fetchSalesData(year) {
+function report_and_analytics_sales_chart_fetchSalesData(year, month = null) {
     $.ajax({
         url: `/api/lottery_sales_bar_chart/`,
         method: 'GET',
-        data: { year: year },
+        data: { year: year, month: month },
         success: function (data) {
-            const labels = data.map(item => item.month);
+            const labels = data.map(item => item.month || item.week);
             const salesamount = data.map(item => item.sales_amount);
 
             if (salesChart) {
                 salesChart.data.labels = labels;
                 salesChart.data.datasets[0].data = salesamount;
+                salesChart.data.datasets[0].label = month ? 'Weekly Sales' : 'Monthly Sales';
+                salesChart.options.scales.x.title.text = month ? 'Weeks' : 'Months';
                 salesChart.update();
             } else {
                 const ctx = document.getElementById('salesChart').getContext('2d');
@@ -2900,7 +3017,7 @@ function report_and_analytics_sales_chart_fetchSalesData(year) {
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Sales',
+                            label: month ? 'Weekly Sales' : 'Monthly Sales',
                             data: salesamount,
                             backgroundColor: 'rgba(255, 87, 34, 0.8)', 
                             borderColor: 'rgba(255, 87, 34, 1)',
@@ -2912,23 +3029,14 @@ function report_and_analytics_sales_chart_fetchSalesData(year) {
                     },
                     options: {
                         responsive: true,
-                       
-
-            interaction: {
-
-                mode: 'index',
-
-                intersect: false
-
-            },
-
-            hover: {
-
-                mode: 'index',
-
-                intersect: false
-
-            },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        hover: {
+                            mode: 'index',
+                            intersect: false
+                        },
                         plugins: {
                             legend: {
                                 display: false 
@@ -2938,14 +3046,19 @@ function report_and_analytics_sales_chart_fetchSalesData(year) {
                                 titleColor: '#fff',
                                 bodyColor: '#fff',
                                 padding: 10,
-                                cornerRadius: 4
+                                cornerRadius: 4,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: £${context.raw.toFixed(2)}`;
+                                    }
+                                }
                             }
                         },
                         scales: {
                             x: {
                                 title: {
                                     display: true,
-                                    text: 'Months', 
+                                    text: month ? 'Weeks' : 'Months', 
                                     color: '#555',
                                     font: {
                                         size: 14,
@@ -2966,7 +3079,7 @@ function report_and_analytics_sales_chart_fetchSalesData(year) {
                             y: {
                                 title: {
                                     display: true,
-                                    text: 'lottery Sales', 
+                                    text: 'Lottery Sales (£)', 
                                     color: '#555',
                                     font: {
                                         size: 14,
@@ -2981,6 +3094,9 @@ function report_and_analytics_sales_chart_fetchSalesData(year) {
                                     color: '#888',
                                     font: {
                                         size: 12
+                                    },
+                                    callback: function(value) {
+                                        return '£' + value;
                                     }
                                 }
                             }
@@ -3016,6 +3132,8 @@ function report_and_analytics_sales_chart_populateYearDropdown() {
             const defaultYear = years.includes(currentYear) ? currentYear : years[0];
             yearSelect.val(defaultYear);
 
+            report_and_analytics_sales_chart_populateMonthDropdown(defaultYear);
+            
             report_and_analytics_sales_chart_fetchSalesData(defaultYear);
         },
         error: function (error) {
@@ -3024,12 +3142,41 @@ function report_and_analytics_sales_chart_populateYearDropdown() {
         }
     });
 }
+
+function report_and_analytics_sales_chart_populateMonthDropdown(year) {
+    $.ajax({
+        url: `/api/lottery_sales_available_months/`,
+        method: 'GET',
+        data: { year: year },
+        success: function (data) {
+            const monthSelect = $("#monthSelect");
+            monthSelect.empty();
+            monthSelect.append('<option value="">All Months</option>');
+            
+            data.months.forEach(month => {
+                monthSelect.append(new Option(month.name, month.number));
+            });
+        },
+        error: function (error) {
+            console.error('Error fetching available months:', error);
+            alert('Failed to fetch months.');
+        }
+    });
+}
+
 function dynamic_lottery_sales_bar_chart() {
     report_and_analytics_sales_chart_populateYearDropdown();
 
     $("#yearSelect").on("change", function () {
         const selectedYear = $(this).val();
+        report_and_analytics_sales_chart_populateMonthDropdown(selectedYear);
         report_and_analytics_sales_chart_fetchSalesData(selectedYear);
+    });
+
+    $("#monthSelect").on("change", function () {
+        const selectedYear = $("#yearSelect").val();
+        const selectedMonth = $(this).val();
+        report_and_analytics_sales_chart_fetchSalesData(selectedYear, selectedMonth || null);
     });
 }
 
@@ -3767,21 +3914,6 @@ function loadScript(src) {
     });
 }
 
-// report_and_analytics_monthly_sales_bar_chart_function 
-function report_and_analytics_monthly_sales_bar_chart_function() {
-	const custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container = document.getElementById("report_and_analytics_monthly_sales_bar_chart");
-	custom_admin_dashboard_report_and_analytics_monthly_sales_bar_chart_container.innerHTML = `
-	 <div id="custom_admin_dashboard_bar_chart_filter">
-        <h1>Monthly Sales Chart</h1>
-        <label for="yearSelect">Select Year:</label>
-        <select id="yearSelect"></select>
-        <button onclick="report_and_analytics_monthly_sales_bar_chart_exportToExcel()">Export</button>
-    </div>
-    <div class="admin-dashboard-report-container" style="width: 50%;height: 50%;">
-        <canvas class="admin-dashboard-report" id="salesChart" width="800" height="400"></canvas>
-    </div>
-	 `;
- }
 
 
 // report_and_analytics_marginal_chart_function 
@@ -3809,7 +3941,7 @@ function renderMarginalChart(data) {
     let html = `
         <div class="report_and_analytics_marginal_chart_header_class">
             <h3 class="report_and_analytics_marginal_chart_heading_class">Margin Chart</h3>
-            <button class="btn btn-sm btn-primary report_and_analytics_marginal_chart_export_button_class" 
+            <button class="admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_export_button_class" 
                     onclick="report_and_analytics_marginal_chart_export_function()">
                 Export
             </button>
@@ -4444,7 +4576,7 @@ function initializeDashboard() {
                                                     ${user.kyc_image_url ? `<a href="#" class="view-kyc-image" data-imageurl="${user.kyc_image_url}" data-username="${user.user?.username || 'N/A'}" data-email="${user.user?.email || 'N/A'}" data-kycstatus="${user.kyc_status || 'N/A'}">View KYC Image</a>` : 'KYC not submitted'}
                                                 </div>
                                             </div>
-                                            <div>user statistics</div>
+                                            <div class="user_statistics_title">user statistics</div>
                                             <div class="users_management_user_details_page_user_statistics">
                                            
                                         <div class="users_management_user_details_page_statistic_container">
@@ -4457,15 +4589,15 @@ function initializeDashboard() {
                                         <div class="users_management_user_details_page_statistic_container">
                                             <img src="/media/dashboard_preview_image/solar_money-bag-bold.png">
                                             <div>
-                                                <h3>Total Amount Earned</h3>
-                                                <p>5.2M</p>
+                                                <h3>Phone Number</h3>
+                                                <p>${user.phone_number || 'N/A'}</p>
                                             </div>
                                         </div>
                                         <div class="users_management_user_details_page_statistic_container">
                                             <img src="/media/dashboard_preview_image/solar_wallet-bold.png">
                                             <div>
-                                                <h3>Total Amount in Wallet</h3>
-                                                <p>£ 50000</p>
+                                                <h3>Address</h3>
+                                                <p>${user.address || 'N/A'}</p>
                                             </div>
                                         </div>
                                         `;
@@ -9037,7 +9169,7 @@ function displayFavorites() {
 
 
     if (favoritesToShow.length === 0) {
-        container.innerHTML = '<p style="text-align: center;font-weight:bold; font-size: 44px;">No favorites added yet</p>';
+        container.innerHTML = '<p style="text-align: center;font-weight:500; font-size: 27px;">You haven’t added any favorites yet.</p>';
         loadMoreBtn.style.display = 'none'; 
         container.style.minHeight = "70vh";
         return;
@@ -9120,8 +9252,14 @@ function toggleFavorite(eventSlug) {
 }
 
 /*Userdashboard*/
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("chatbotPopup").style.display = "block";
+document.addEventListener("DOMContentLoaded", function () { 
+    let chatbot = document.getElementById("chatbotPopup");
+    chatbot.style.display = "block";
+
+    // Automatically close it after 3 seconds (3000 milliseconds)
+    setTimeout(function () {
+        chatbot.style.display = "none";
+    }, 3000);
 });
 function toggleChatbot() {
     let chatbot = document.getElementById("chatbotPopup");
@@ -9285,7 +9423,10 @@ if (typeof my_orders_csrfToken !== 'undefined' && $("#myorders-container").lengt
                 container.empty();
 
                 if (Object.keys(data).length === 0) {
-                    container.html("<p>No orders yet.</p>");
+container.html(`<div class="empty-state">
+  <p>Your order list is empty. <a href='/lottery-events/' class='btn-link'>Browse items</a> to get started!</p>
+</div>`);
+
                     return;
                 }
 
@@ -9750,7 +9891,7 @@ function custom_admin_dashboard_lottery_draw_winners_management_function() {
                             <input type="text" id="ticket-start-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
                             <input type="text" id="ticket-end-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
                             ${event.winner_chosen 
-                                ? `<button class="draws-draw-btn" style="background-color: #28a745; color: white;" disabled>Winner Chosen</button>` 
+                                ? `<button class="draws-draw-btn" style="background-color: #28a745; font-weight:bold; color: white;" disabled>Winner Chosen</button>` 
                                 : `<button class="draws-draw-btn" data-id="${event.id}">Draw Winner</button>`
                             }
                         </div>
@@ -9986,11 +10127,7 @@ function piValidateForm() {
     
     document.querySelectorAll('.pi-error-message').forEach(el => el.textContent = '');
 
-    let username = document.getElementById("pi-username").value.trim();
-    if (username === "") {
-        document.getElementById("pi-username-error").textContent = "Username is required.";
-        isValid = false;
-    }
+   
 
     let phone = document.getElementById("pi-phone-number").value.trim();
     let phoneRegex = /^\+44\d{10}$/; 
@@ -10044,7 +10181,7 @@ return;
 }
 
 let formData = new FormData();
-formData.append("username", document.getElementById("pi-username").value);
+
 formData.append("phone_number", document.getElementById("pi-phone-number").value);
 
 let profilePhotoInput = document.getElementById("pi-profile-photo");
