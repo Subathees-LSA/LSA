@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1">
     <script>
+        const userIsAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
         const add_csrftoken="{{ csrf_token}}"; 
         const add_to_carturl = "{% url 'add_to_cart' %}";  
         const cartUrl = "{% url 'cart' %}";  
@@ -89,7 +90,7 @@
         
     </div>
     
- <h1 class="previous-winners-title">Meet our Previous Winners</h1>
+ <h1 id="previous-winners"class="previous-winners-title">Meet our Previous Winners</h1>
  <div class="testimonial-section">
     {% if testimonials %}
         <div class="testimonial-container">
@@ -126,7 +127,7 @@
     
     <button id="view_all_button_previous_winner_mainpage" class="view-all-button-previous-winner-mainpage" onclick="toggleWinners_mainpage()">View All Winners</button> 
     
-    <div class="db-container"id="db_Subscription">
+    <!-- <div class="db-container"id="db_Subscription">
             
     <img src="/media/star/star (1).png" class="db-star star-top-left" alt="Star">
     <img src="/media/star/star (2).png" class="db-star star-top-right" alt="Star">
@@ -156,7 +157,7 @@
             </div>
         </div>
     </div>
-
+ -->
 
 
 
@@ -169,7 +170,7 @@
     <div class="chatbot-popup" id="chatbotPopup">
         <button class="chatbot-close-btn" onclick="closeChatbot()">✖</button>
         <button class="db-chatbot-btn"onclick="scrollToHowToPlay()">How to play</button>
-        <button class="db-chatbot-btn"onclick="scrollToSubscription()">Subscribe us!</button>
+        <!-- <button class="db-chatbot-btn"onclick="scrollToSubscription()">Subscribe us!</button> -->
     </div>
     <div class="chatbot-icon" onclick="toggleChatbot()">
         <img src="/media/lottery_images/chatbot.png" alt="Chatbot" class="chatbot-img">

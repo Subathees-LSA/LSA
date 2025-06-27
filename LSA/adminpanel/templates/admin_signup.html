@@ -81,7 +81,8 @@
     <p id="admin_password_length" class="invalid" class="admin-password-show">❌ Password must be at least 8 characters long</p>
 </div>
             <button type=" submit" class="admin-signup-submit-button">Register Admin</button>
-            <p>Already have an account? <a href="{% url 'custom_admin_login' %}">Login here</a></p>
+            <p class="admin-login-here">Already have an account? <a href="{% url 'custom_admin_login' %}">Login here</a>
+            </p>
             <div id="admin_signup_form_error_message" class="admin-signup-error-message"></div>
         </form>
     </div>

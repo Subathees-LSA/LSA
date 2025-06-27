@@ -40,6 +40,7 @@ urlpatterns = [
     path('custom/admin/dashboard/', custom_admin_dashboard, name='custom_admin_dashboard'),
     path('lottery-events/', lottery_events, name='lottery_events'),
     path('api/get_lottery_events/', api_get_lottery_events.as_view(), name='api_get_lottery_events'),
+    path('api/get_lottery_events/admin', api_get_lottery_events_admin.as_view(), name='api_get_lottery_events_admin'),
     path('api/edit-delete-lottery-events/<int:pk>/', api_edit_delete_lottery_events.as_view(), name='api_edit_delete_lottery_events'),
     path('api/lottery-events/add/', api_lottery_events_add.as_view(), name='api_lottery_events_add'),
     path('cart/', cart, name='cart'),
@@ -78,13 +79,13 @@ urlpatterns = [
     path('api/admin/reply/<int:reply_id>/edit_delete/', EditdeleteAdminReplyView.as_view(), name='edit_delete-admin-reply'),
     path('api/banner/', BannerView.as_view(), name='api_banner'),
     path('api/previous-winners/', PreviousWinnersimgAPIView.as_view(), name='api_get_previous_winners'),
-    #Monthly Sales Chart
+    #Monthly/Weekly Sales Chart
     path('api/lottery_sales_bar_chart/', lottery_sales_bar_chart_View.as_view(), name='api_lottery_sales_bar_chart'),
     path('api/lottery_sales_available_years/', lottery_sales_availableYearsView.as_view(), name='api_lottery_sales_available_years'),
+    path('api/lottery_sales_available_months/', lottery_sales_availableMonthsView.as_view(), name='api_lottery_sales_available_months'),
     path('block-user/', block_user, name='block-user'), 
     path('social-links/', footer_view, name='social_links'),
     path('locations/', locations_view, name='locations'),
-    path("lottery-draw-page/", staff_member_required(admin_lottery_draw_page), name="admin-lottery-draw-page"),
     path('api/admin/lottery-draw/', AdminLotteryDrawView.as_view(), name='admin-lottery-draw'),
     path('api/admin/send-otp/', AdminSendOTPView.as_view(), name='Admin-send-otp'),
     path('api/admin/verify-otp/', AdminVerifyOTPView.as_view(), name='Admin-verify-otp'),

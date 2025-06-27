@@ -181,6 +181,8 @@ class KYCStatusView(APIView):
     
     def get(self, request):
         try:
+            if not request.user.is_authenticated:
+               return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
             profile = UserProfile.objects.get(user=request.user)
             kyc_status = profile.kyc_status
            

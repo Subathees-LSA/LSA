@@ -12,7 +12,7 @@ from django.shortcuts import render,get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from .models import LotteryCategory
-
+from django.utils import timezone
 
 def admin_signup(request):
     try:
@@ -103,7 +103,10 @@ def custom_404(request, exception):
 
 
 def get_lottery_categories(request):
-    categories = LotteryCategory.objects.all()
+    categories = LotteryCategory.objects.filter(
+        lottery_events__is_active=True,
+        lottery_events__draw_date__gt=timezone.now()
+    ).distinct().order_by('id')
     category_data = [{"id": category.id, "name": category.name} for category in categories]    
     return JsonResponse(category_data, safe=False)
 
@@ -119,9 +122,6 @@ def category_lottery_events_view(request, category_name):
 from django.urls import path
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
-
-def admin_lottery_draw_page(request):
-    return render(request, "admin_lottery_draw.html")
 
 def winners_page(request):
     return render(request, 'winners.html')

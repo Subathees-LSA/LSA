@@ -24,15 +24,7 @@
         <h2>Personal Info</h2>
         <form id="pi-profile-form" enctype="multipart/form-data">
           <div class="pi-form-section">
-            <label>Username <span class="pi-required">*</span></label>
-            <input
-              type="text"
-              id="pi-username"
-              class="fixed-username"
-              value="{{ user.username }}"
-              placeholder="Enter your name"
-              required
-            />
+           <input type="text" value="{{ user.username }}" disabled />
             <small class="pi-error-message" id="pi-username-error"></small>
           </div>
           <!-- Profile Picture Upload -->

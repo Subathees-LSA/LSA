@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap"
@@ -19,7 +19,7 @@
         const adminupdaetkycapprovalUrl = "{% url 'user-kyc-status-update' %}";
         const csrfToken = "{{ csrf_token }}";
         const lottery_events_add_csrftoken = "{{ csrf_token}}";
-        const api_get_lottery_events_url = "{% url 'api_get_lottery_events' %}";
+        const api_get_lottery_events_url_admin = "{% url 'api_get_lottery_events_admin' %}";
         const api_lottery_events_add_url = "{% url 'api_lottery_events_add' %}";
         const apiEditDeleteLotteryEventsUrl = "{% url 'api_edit_delete_lottery_events' 0 %}";
         const get_lottery_categories_url = "{% url 'get-lottery-categories' %}";
@@ -29,9 +29,61 @@
             initializeDashboard();
             admin_chat_view()
             filterCategories();
+            lottery_events_add_budget_calculation();
+            admin_lottery_add_additional_images();
         };
     </script>
-   
+   <style>
+    /* winners_wall_testimonial_error_message validation */
+
+    .winners_wall_testimonial_error_message {
+    color: red;
+    font-size: 13px;
+    margin-top: 4px;
+    display: none;
+}
+
+    /* monthly sales chart css */
+    .filter-controls {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    color: #555;
+}
+
+.filter-group select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    min-width: 150px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: fit-content;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+   </style>
 
 </head>
 
@@ -44,7 +96,12 @@
             <nav>
                 <ul>
                 </ul>
-                <a class="custom_admin_dashboard_logout" href="{% url 'admin_logout_view' %}">Logout</a>
+                <a class="custom_admin_dashboard_logout" href="{% url 'admin_logout_view' %}">
+                    <img src="/media/admin_files/logout.png" alt="Logout"
+                        style="height: 20px; vertical-align: middle; margin-right: 6px;">
+                    Logout
+                </a>
+
             </nav>
         </aside>
         <main class="custom_admin_dashboard_main">
@@ -153,10 +210,9 @@
                                 alt="Button Icon">
                         </button>
 
-                        <span id="filter-icon" style="cursor: pointer;"><img src="/media/admin_files/Frame1.png"
-                                alt="Button_Icon" class="admin_dashbord_filter_icon"></span>
+                       
                         <select id="category-filter" class="admin-dashboard-category-filter"
-                            onchange="fetchLotteryEvents('', this.value)" style="display: none;">
+                            onchange="fetchLotteryEvents('', this.value)" style="display:inline-block;">
                             <option value="">All Categories</option>
                         </select>
                         <input type="text" id="lottery-search-input" placeholder="Search by title..."
@@ -204,16 +260,22 @@
                             </div>
 
                             <div id="admin_contact_reply_form_container" style="display: none;">
-                                <h2 class="admin_contact_reply_sub_heading">Reply to User</h2>
+                                
                                 <form id="admin_contact_reply_form" class="admin_reply_form">
-                                    <textarea id="admin_contact_reply_message" name="message"
-                                        placeholder="Your reply..."></textarea>
-                                        <label for="admin_contact_reply_file" class="custom-file-upload">
-                                            <i class="fa fa-paperclip"></i>
-                                          </label>
-                                          <input type="file" id="admin_contact_reply_file" name="file" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx">
-                                          <p id="file-name"></p>     
-                                    <button type="submit"  id="send-reply-btn">Send Reply</button>
+
+                                    <div class="textarea-wrapper">
+
+                                        <textarea id="admin_contact_reply_message" name="message"
+                                            placeholder="Your reply..."></textarea>
+                                    </div>
+                                    <label for="admin_contact_reply_file" class="custom-file-upload">
+                                        <i class="fa fa-paperclip" id="Choosefile"></i>
+                                    </label>
+                                    <button type="submit" id="send-reply-btn">➤</button>
+                                    <input type="file" id="admin_contact_reply_file" style="display: none;" name="file"
+                                        accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx ">
+                                    <p id="file-name"></p>
+
                                 </form>
                                 <p id="admin_contact_reply_response_message"></p>
                             </div>

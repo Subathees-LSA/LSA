@@ -21,41 +21,40 @@
 </script>
  </head>
  <body class="nav-body">
-     <nav class="navbar">
-        <a href="{% url 'lottery_events' %}">
-            <div class="navbar-logo">
-                <img src="/media/images/logo.png" alt="Logo">
+    <nav class="navbar">
+    <a href="{% url 'lottery_events' %}">
+        <div class="navbar-logo">
+            <img src="/media/images/logo.png" alt="Logo">
+        </div>
+    </a>        
+    <div class="navbar-center">
+    <ul class="navbar-links">
+        <li class="dropdown_competitions">
+            <span class="dropbtn_competitions">Competitions <i class="fas fa-chevron-down"></i></span>
+            <div class="dropdown-content_competitions" id="categories_dropdown_competitions">
+                <!-- Categories will be dynamically added here -->
             </div>
-        </a>        
-         <ul class="navbar-links">
-             <!-- <li><a href="#">Latest Competitions</a></li> -->
-             <li class="dropdown_competitions">
-                   <span class="dropbtn_competitions">Competitions <i class="fas fa-chevron-down"></i></span>
-                   <div class="dropdown-content_competitions" id="categories_dropdown_competitions">
-                    <!-- Categories will be dynamically added here -->
-                </div>
-            </li>
-             <li><a href="#">Entry Lists</a></li>
-             <li><a href="{% url 'winners_page' %}">Winners</a></li>
-             <li><a href="#">Result</a></li>
-             <li><a href="#">How it Works</a></li>
-        
-             <div class="navbar-auth">
-                {% if user.is_authenticated %}
-                    <div class="navbar-user-profile">
-                        <a href="{% url 'personal-info-web' %}">
-                            <img src="{{ user.userprivacy.profile_photo.url }}" alt="Profile Picture" class="profile-pic">
-                        </a>
-                    </div>
-                    <button type="button" class="logout-btn" onclick="logoutDevice('{{ request.session.session_key }}', this)">Logout</button>
+        </li>
+        <li><a href="{% url 'winners_page' %}">Winners</a></li>
+         <li><a href="{% url 'lottery_events' %}#previous-winners">Result</a></li>
+        <li><a href="{% url 'lottery_events' %}#how-to-play">How it Works</a></li>
+    <li>
+    <div class="navbar-auth mobile-auth">
+        {% if user.is_authenticated %}
+            <div class="navbar-user-profile">
+                <a href="{% url 'personal-info-web' %}">
+                    <img src="{{ user.userprivacy.profile_photo.url }}" alt="Profile Picture" class="profile-pic">
+                </a>
+            </div>
+            <button type="button" class="logout-btn" onclick="logoutDevice('{{ request.session.session_key }}', this)">Logout</button>
+        {% else %}
+            <a href="{% url 'user_login' %}" class="login">Login</a>
+            <a href="{% url 'user_signup' %}" class="register">Register</a>
+        {% endif %}
+    </div>
+</li>
+</ul>
 
-                {% else %}
-                    <a href="{% url 'user_login' %}" class="login">Login</a>
-                    <a href="{% url 'user_signup' %}" class="register">Register</a>
-                {% endif %}
-            </div>
-             
-    </ul>
     <div class="navbar-icons">
       <div class="navbar-favorites">
             <a href="/favorites/" class="favorites-link">
@@ -66,16 +65,31 @@
         <div class="navbar-cart">
             <a href="{% url 'cart' %}" class="cart-icon">
                 <i class="fas fa-shopping-cart"></i>
-                <span class="header-cart-item-count"  id="cart-item-count">0</span> <!-- Cart count display -->
+                <span class="header-cart-item-count" id="cart-item-count">0</span>
             </a>  
-        </div>   
-    <div></div>    
-         <div class="hamburger" onclick="toggleMenu()">
-             <span></span>
-             <span></span>
-             <span></span>
-         </div>
-     </nav>
+        </div>
+        <div class="navbar-auth desktop-auth">
+        {% if user.is_authenticated %}
+            <div class="navbar-user-profile">
+                <a href="{% url 'personal-info-web' %}">
+                    <img src="{{ user.userprivacy.profile_photo.url }}" alt="Profile Picture" class="profile-pic">
+                </a>
+            </div>
+            <button type="button" class="logout-btn" onclick="logoutDevice('{{ request.session.session_key }}', this)">Logout</button>
+        {% else %}
+            <a href="{% url 'user_login' %}" class="login">Login</a>
+            <a href="{% url 'user_signup' %}" class="register">Register</a>
+        {% endif %}
+    </div>
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    
+ </div>
+</nav>
    
  </body>
  </html>

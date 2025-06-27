@@ -14,31 +14,19 @@
             <h4>About Us</h4>
             <ul>
                 <li><a href="{% url 'about_us' %}">About us</a></li>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#">Careers</a></li>
-                <li><a href="#">Jobs</a></li>
-                <li><a href="#">In Press</a></li>
             </ul>
         </div>
         <div class="footer-section">
             <h4>Support</h4>
             <ul>
                 <li><a href="{% url 'contact-page' %}">Contact us</a></li>
-                <li><a href="#">Online Chat</a></li>
-                <li><a href="#">Whatsapp</a></li>
-                <li><a href="#">Telegram</a></li>
-                <li><a href="#">Ticketing</a></li>
+                <li><a href="{% url 'user_chats' %}">Online Chat</a></li>
             </ul>
         </div>
         <div class="footer-section">
             <h4>FAQ</h4>
             <ul>
                 <li><a href="{% url 'faq_page' %}">Faq</a></li>
-                <li><a href="#">Account</a></li>
-                <li><a href="#">Manage Deliveries</a></li>
-                <li><a href="#">Orders</a></li>
-                <li><a href="#">Payments</a></li>
-                <li><a href="#">Returns</a></li>
             </ul>
         </div>
         <div class="footer-section">
@@ -47,12 +35,6 @@
                 <li><a href="{% url 'terms_page' %}">THEBETZONES UK</a></li>
                 <li><a href="mailto:support@win4all.com">support@thebetzones.com</a></li>
             </ul>
-            {% comment %} <div class="social-icons">
-                <h4>Find Us On Social</h4>
-                <a href="#"><img src="/media/images/facebook.png" alt="Facebook"></a>
-                <a href="#"><img src="/media/images/Vector.png" alt="Vector"></a>
-                <a href="#"><img src="/media/images/instagram.png" alt="Instagram"></a>
-                 </div> {% endcomment %}
                  <h4>{{ social_links.first.title }}</h4> 
          
                  <div class="social-icons">
@@ -71,11 +53,6 @@
  
         </div>
         <div class="footer-section">
-            {% comment %} <h4>Our Locations</h4>
-            <ul>
-                <li><a href="#">UK, FR, AS</a></li>
-                <li><a href="#">USA</a></li>
-            </ul> {% endcomment %}
             <h4>{{ locations.first.title }}</h4> 
             <ul>
                 
@@ -87,15 +64,15 @@
         </div>
     </div>
     <div class="footer-bar">
-        <div class="footer-logo">THEBETZONES</div>
-        <div class="footer-links">
+        <div class="footer-logo">© THE BETZONES | All Rights Reserved</div>
+        <!-- <div class="footer-links">
             <span>Latest Competitions</span>
             <span>Entry Lists</span>
             <span>Live Draws</span>
             <span>Winners</span>
             <span>Gift Cards</span>
             <span>How it Works</span>
-        </div>
+        </div> -->
     </div>
 </footer>
 </body>
