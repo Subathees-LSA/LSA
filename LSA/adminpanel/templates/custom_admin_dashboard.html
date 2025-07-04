@@ -27,7 +27,7 @@
         const custom_admin_dashboard_csrfToken = "{{ csrf_token }}";
         window.onload = function () {
             initializeDashboard();
-            admin_chat_view()
+           
             filterCategories();
             lottery_events_add_budget_calculation();
             admin_lottery_add_additional_images();
@@ -43,20 +43,11 @@
     display: none;
 }
 
-    /* monthly sales chart css */
-    .filter-controls {
-    display: flex;
-    gap: 20px;
-    align-items: flex-end;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
 
 .filter-group label {
     font-weight: bold;
@@ -167,8 +158,8 @@ button:hover {
                 </div>
                 
 
-               
-                <div style=" display: none;opacity: 0;position: absolute;"
+
+                <div style=" display: none;opacity: 0;position: absolute; width: 98%;"
                     id="custom_admin_dashboard_dynamic_lottery_sales_count_and_bar_chart">
                     <h2 class="Report_Analytics">Report & Analytics</h2>
                     <div class="custom_admin_dashboard_overview_statistics_count" id="custom_admin_dashboard_report_and_analytics_statistics_count">

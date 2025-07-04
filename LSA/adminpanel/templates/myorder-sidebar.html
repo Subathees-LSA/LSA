@@ -13,9 +13,9 @@
          <li class="{% if request.resolver_match.url_name == 'my_won_lottery_page' %}active{% endif %}">
             <a href="{% url 'my_won_lottery_page' %}"><img src="/media/icons/Frame.png" alt="icon"> My Won Lotteries</a>
         </li>
-        <li class="{% if request.resolver_match.url_name == 'user_chats' %}active{% endif %}">
+        {% comment %} <li class="{% if request.resolver_match.url_name == 'user_chats' %}active{% endif %}">
             <a href="{% url 'user_chats' %}"><img src="/media/icons/noti.png" alt="icon"> My Chat</a>
-        </li>
+        </li> {% endcomment %}
         <!--<li class="{% if request.resolver_match.url_name == 'subscription_page' %}active{% endif %}">
             <a href="{% url 'subscription_page' %}"><img src="/media/icons/msg.png" alt="icon"> Subscription Plan</a>
         </li> -->

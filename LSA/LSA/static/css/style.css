@@ -1373,6 +1373,8 @@ margin-top: 10px;
 
 .password-reset-message {
     margin-bottom: 16px;
+    color: red;
+    font-weight: 600;
 }
 
 .reset-label {
@@ -1451,7 +1453,7 @@ margin-top: 10px;
 .password-reset-welcome-section {
     width: 458.20px;
     height: 211px;
-    left: 90.50px;
+    left: 66.5px;
     top: 226px;
     position: absolute;
 }
@@ -1480,7 +1482,7 @@ margin-top: 10px;
 .password-reset-lottery-image-one {
     width: 478px;
     height: 173px;
-    left: 80px;
+    left: 66px;
     top: 567px;
     position: absolute;
 }
@@ -2327,7 +2329,7 @@ top: 20px;
         }
 
         .inner-container {
-            width: 1440px;
+            width: calc(100%);
             height: 913px;
             left: 0px;
             top: 0px;
@@ -2335,7 +2337,7 @@ top: 20px;
         }
 
         .background-light {
-            width: 1500px;
+            width: calc(100%); 
             height: 913px;
             left: 0px;
             top: 0px;
@@ -2344,7 +2346,7 @@ top: 20px;
         }
 
         .background-orange {
-            width: 638.10px;
+            width: calc(100%); 
             height: 913px;
             left: 0px;
             top: 0px;
@@ -2353,7 +2355,7 @@ top: 20px;
         }
 
         .background-dark {
-            width: 638.10px;
+            width: calc(100%); 
             height: 913px;
             left: 0px;
             top: 0px;
@@ -2374,20 +2376,25 @@ top: 20px;
             border: 7px white solid;
         }
         .title {
-        font-size: 36px; 
-        line-height: 44px; 
-        margin-left: 20px; 
-        margin-right: 20px; 
-    }
+            max-width:calc(100% / 2);
+            font-size: 36px;
+            line-height: 44px;
+            display: flex;
+            justify-content: center;
+            left: 31%;
+        }
+        
 
         .confirm-containers {
             position: absolute;
-            left: 720px;
-            top: 342px;
+    left: 58%;
+    top: 342px;
+    width: calc(40%);
+
         }
 
         .form-container {
-            width: 526px;
+            width: calc(100%); 
             height: auto;
             padding-bottom: 20px;
         }
@@ -2400,7 +2407,7 @@ top: 20px;
 
         .confirm-input-group {
             position: relative;
-            width: 100%;
+            width: 89%;
             height: 60px;
         }
 
@@ -2417,7 +2424,7 @@ top: 20px;
         }
 
         .confirm-button {
-            width: 100%;
+            width: 89%;
             height: 60px;
             background: #FF6600;
             color: white;
@@ -2431,9 +2438,9 @@ top: 20px;
         }
 
         .welcome-container {
-            width: 458.20px;
+            width: calc(50%);
+			left:60px;
             height: 211px;
-            left: 90px;
             top: 266px;
             position: absolute;
         }
@@ -2465,9 +2472,9 @@ top: 20px;
         }
 
         .lottery-image {
-            width: 478px;
+            width: 36%;
             height: 173px;
-            left: 80px;
+            left: 6%;
             top: 567px;
             position: absolute;
         }
@@ -2560,7 +2567,8 @@ top: 20px;
 .Successful4 {
     width: 360px;
     text-align: center;
-    color: #989898;
+   color: #047805;
+    font-weight: 600;
     font-size: 16px;
     font-family: Rajdhani;
     font-weight: 600;
@@ -2604,7 +2612,7 @@ top: 20px;
 @media  (min-width: 769px)  and (max-width: 1024px) {
 
     .container {
-        width: 98%; 
+        width: calc(100% - 12px);
         height: auto;
         background: white;
         padding: 10px;
@@ -2630,6 +2638,8 @@ top: 20px;
 
     /* Title styling */
     .title {
+        max-width: 100% !important;
+margin: 0px;
         font-size: 36px;
         line-height: 42px;
         color: #090914;
@@ -2795,7 +2805,7 @@ top: 20px;
 .Successful4 {
     width: 100%;
     text-align: left;
-    color: #989898;
+    color: #28a745;
     font-size: 16px;
     font-family: Rajdhani, sans-serif;
     font-weight: 600;
@@ -2847,7 +2857,7 @@ top: 20px;
 @media screen and (max-width: 768px) {
     /* Container for the page */
     .container {
-        width: 100%; 
+        width: calc(100% - 12px);
         height: auto;
         background: white;
         padding: 10px;
@@ -2873,11 +2883,13 @@ top: 20px;
 
     /* Title styling */
     .title {
+        left: 0px;
+max-width: 100% !important;
+margin: 0px;
         font-size: 36px;
         line-height: 42px;
         color: #090914;
         position: relative;
-        left: -10px; 
         top: 20px;
         text-align: center; 
     }
@@ -3035,7 +3047,7 @@ top: 20px;
 .Successful4 {
     width: 100%;
     text-align: left;
-    color: #989898;
+    color: #28a745;
     font-size: 16px;
     font-family: Rajdhani, sans-serif;
     font-weight: 600;
@@ -3134,28 +3146,19 @@ top: 20px;
 /* ADMIN SIGNUP_CONTAINER START */
 
 .admin-signup-first-container {
-    width: 100%;
-    height: 100%;
+   max-width: 100%;
     position: relative;
     background: white;
 }
 
 .admin-signup-wrapper {
-    width: 1440px;
     height: 913px;
     left: 0px;
     top: 0px;
     position: absolute;
 }
 
-.admin-signup-background {
-    width: 1500px;
-    height: 913px;
-    left: 0px;
-    top: 0px;
-    position: absolute;
-    background: #F8FAFC;
-}
+
 
 .admin-signup-left {
     width: 638.10px;
@@ -3682,22 +3685,6 @@ top: 20px;
             box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
         }
 
-        .admin_login_background-wrapper {
-            width: 1440px;
-            height: 913px;
-            left: 0px;
-            top: 0px;
-            position: absolute;
-        }
-
-        .admin_login_background-inner {
-            width: 1500px;
-            height: 913px;
-            left: 0px;
-            top: 0px;
-            position: absolute;
-            background: #F8FAFC;
-        }
 
         .admin_login_orange-background {
             width: 638.10px;
@@ -3758,9 +3745,9 @@ top: 20px;
         }
 
         .custom_admin_login_container {
-            width: 507.20px;
+            width: 460px;
             height: 518px;
-            left: 729.40px;
+            left: 700px;
             top: 250px;
                         position: absolute;
         }
@@ -3831,15 +3818,13 @@ top: 20px;
 .toggle-eye-icon {
     width: 20px;
     height: 20px;
-    margin-top: 15px;
+    margin-top: 7px;
 }
 
 
         .admin-forget-password {
             color: #FF6600;
-          
-        
-            margin-left: 320px;
+            margin-left: 270px;
             width: 70%;
             overflow-x: none;
             font-family: Rajdhani;
@@ -3903,7 +3888,7 @@ top: 20px;
     font-family: Rajdhani;
     font-weight: 600;
     line-height: 62px;
-    margin-left: -40px;
+    margin-left: -72px;
     word-wrap: break-word;
     text-align: center;
         }
@@ -3916,6 +3901,7 @@ top: 20px;
             line-height: 30px;
             margin-top: -20px;
             color: #52525B;
+            margin-left: -27px;
         }
         .admin_password-message{
             margin-left: -160px;
@@ -4124,6 +4110,7 @@ top: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-left: 0;
 }
 
 .admin_login_container,
@@ -5409,7 +5396,7 @@ top: 20px;
 
 .admin_contact_reply_modal_content {
     background-color: #fff;
-    height: 100%;
+    height: 92%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -5437,7 +5424,7 @@ top: 20px;
 
 /* Modal form elements */
 #admin_contact_reply_editMessageInput {
-    width: 100%;
+    width: 92%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ddd;
@@ -5449,8 +5436,9 @@ top: 20px;
 }
 
 .admin_contact_reply_modal_content button {
-    background-color: #007bff;
+    background-color: #FF6600;
     color: #fff;
+    font-weight: bold;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
@@ -5458,7 +5446,7 @@ top: 20px;
 }
 
 .admin_contact_reply_modal_content button:hover {
-    background-color: #0056b3;
+    background-color: #FF6600;
 }
 
 /* Fade-in animation for modal */
@@ -5628,7 +5616,9 @@ top: 20px;
             font-weight: bold;
             font-size: 16px;
         }
-
+        .view-less-button:hover{
+            background-color: #FF6600;
+        }
         .user_management_button_class {
             color: white;
             background-color: #202224;
@@ -6058,6 +6048,7 @@ margin-left: 2%;
     margin-right: 8px;
 }
 
+
 #lottery_sales_dynamic_count_filter select,
 #custom_admin_dashboard_bar_chart_filter select {
     padding: 4px;
@@ -6070,6 +6061,7 @@ margin-left: 2%;
     border-radius: 4px;
     cursor: pointer;
     appearance: none;
+    text-align:center;
 }
 
 #lottery_sales_dynamic_count_filter select option,
@@ -6286,7 +6278,6 @@ margin-left: 2%;
         margin-bottom: 0;
         padding-right: 10px;
     }
-
 }
 
 #new_users_this_month,
@@ -6972,7 +6963,19 @@ margin-left: 2%;
     border-radius: 5px;
     
 }
+.ticket-range-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin: 10px 0;
+}
 
+.ticket-range-container .draws-ticket-range {
+    margin: 0;
+    flex: 1;
+    max-width: 100px;
+}
 .draws-draw-btn {
     display: block;
     width: 80%;
@@ -7350,159 +7353,7 @@ margin-left: 2%;
 .pagination-wrapper {
     margin-top: auto;
 }
-/* .draws-lottery-container {
-display: flex;
-flex-wrap: wrap;
-gap: 20px;
-}
 
-.draws-lottery-card {
-border: 1px solid #ccc;
-padding: 10px;
-width: 300px;
-text-align: center;
-position: relative;
-margin: auto;
-}
-
-.draws-lottery-card img {
-width: 100%;
-height: 150px;
-object-fit: cover;
-}
-
-.draws-lottery-card input[type="radio"] {
-margin-right: 8px;
-}
-
-.draws-ticket-range {
-width: 100px;
-padding: 5px;
-margin: 5px;
-text-align: center;
-border: 1px solid #ccc;
-border-radius: 5px;
-}
-
-.draws-draw-btn {
-display: block;
-width: 80%;
-margin: 10px auto;
-padding: 10px;
-background-color: #ff6600;
-color: white;
-border: none;
-border-radius: 5px;
-cursor: pointer;
-font-size: 16px;
-}
-
-.draws-draw-btn:hover {
-background-color: #ff6600;
-}
-
-.draws-lottery-modal {
-display: none;
-position: fixed;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-background: white;
-padding: 20px;
-border-radius: 8px;
-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-z-index: 1000;
-width: 300px;
-text-align: center;
-}
-
-.draws-lottery-close-modal {
-background-color: #007bff;
-color: white;
-border: none;
-padding: 10px;
-border-radius: 5px;
-cursor: pointer;
-}
-
-.draws-lottery-overlay-modal {
-display: none;
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0, 0, 0, 0.5);
-z-index: 999;
-}
-
-#draws-otp-verification-container {
-margin-top: 15px;
-padding: 10px;
-border: 1px solid #ddd;
-border-radius: 5px;
-}
-
-#draws-otp-input {
-padding: 8px;
-width: 100px;
-text-align: center;
-font-size: 16px;
-margin-right: 10px;
-}
-
-
-#draws-resend-otp {
-background-color: #6c757d;
-color: white;
-border: none;
-padding: 8px 12px;
-border-radius: 4px;
-cursor: pointer;
-transition: background-color 0.3s;
-}
-
-#draws-resend-otp:disabled {
-background-color: #cccccc;
-cursor: not-allowed;
-}
-
-#draws-resend-otp:enabled {
-background-color: #007bff;
-}
-
-#draws-otp-status {
-margin-top: 10px;
-font-size: 14px;
-}
-
-
-.draws-lottery-card>p:first-child {
-position: absolute;
-top: 15px;
-left: 10px;
-margin: 0;
-font-weight: bold;
-text-align: left;
-font-size: 14px;
-}
-
-.admin_lottery_draw_date {
-position: absolute;
-top: 10px;
-right: 10px;
-background-color: #ff6600;
-color: #fff;
-padding: 6px 6px;
-font-size: 14px;
-border-radius: 20px;
-text-align: center;
-}
-
-
-.draws-lottery-card img {
-margin-top: 30px;
-} */
 
 /* **********End of Draw Lottery Page Code Starts*********** */
 
@@ -8104,7 +7955,11 @@ padding-bottom: 15px;
 border-bottom: 1px solid #e0e0e0;
 }
 
-
+.winners_wall_testimonial_nav_title {
+font-size: 24px;
+font-weight:bold;
+color: #333;
+}
 
 .winners_wall_testimonial_nav_clickable {
 color: #0066cc;
@@ -8136,7 +7991,7 @@ padding: 8px 12px;
 width: 200px;
 border: 1px solid #ddd;
 border-radius: 15px;
-margin-left: 25%;
+margin-left: 43%;
 }
 
 .winners_wall_testimonial_add_btn {
@@ -8380,11 +8235,7 @@ border-bottom: 1px solid #e0e0e0;
 margin-bottom: 20px;
 }
 
-.winners_wall_testimonial_nav_title {
-font-size: 16px;
-color: #333;
-font-weight: 600;
-}
+
 
 .winners_wall_testimonial_nav_clickable {
 color: #000000;
@@ -8646,8 +8497,8 @@ gap: 10px;
 .winners_wall_testimonial_search,
 .winners_wall_testimonial_select,
 .winners_wall_testimonial_add_btn {
-width: 97%;
-margin-left: 0;
+width: 97% !important;
+margin-left: 0 !important;
 font-size: 14px;
 text-align:center;
 }
@@ -9842,6 +9693,14 @@ border-color: #FF6600;
             .admin-dashboard-category-filter {
                 margin-right: 0em;
             }
+            .filter-controls{
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+
+
+}
         }
 
         /*Applies to medium devices (All tablets, less than 1024px)*/
@@ -10017,13 +9876,31 @@ border-color: #FF6600;
                 font-size: 14px !important;
                 padding: 14px !important;
             }
+            .filter-controls {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+position: relative;
+top: 50%;
+left: 27%;
+}
            
         }
 
         /* Need to Alter in Original style.css  */
 
 
-
+        .filter-controls {
+            display: flex;
+            flex-direction: row;
+            width: 50%;
+            gap: 20px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
         .custom_admin_dashboard_custom_table {
             table-layout: auto !important;
         }
@@ -10269,8 +10146,20 @@ border-color: #FF6600;
         .custom_admin_dashboard_transactions_management_status_refund {
             color: #4C6FFF;
         }
+        .custom_admin_dashboard_transactions_management_view_less_button:hover,
+        .custom_admin_dashboard_transactions_management_view_more_button:hover{
+background-color: #ff6600;
+        }
 
         @media screen and (max-width: 768px) {
+            .transactions_management_pagination_wrapper {
+                position: sticky;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                padding: 10px 0;
+            }
             .custom_admin_dashboard_transactions_management_view_more_button {
                 position: sticky;
                 bottom: 10px;
@@ -10288,7 +10177,23 @@ border-color: #FF6600;
                 z-index: 1000;
                 white-space: nowrap;
             }
-
+.custom_admin_dashboard_transactions_management_view_less_button {
+                position: sticky;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                margin: 10px auto;
+                padding: 8px 12px;
+                cursor: pointer;
+                border-radius: 5px;
+                border: none;
+                font-size: 14px;
+                color: white;
+                background-color: #ff6600;
+                font-weight: bold;
+                z-index: 1000;
+                white-space: nowrap;
+            }
             .custom_admin_dashboard_transactions_management_header {
                 font-size: 16px;
                 font-weight: bold;
@@ -10428,6 +10333,18 @@ border-color: #FF6600;
 
         /* View More / View Less Button */
         .custom_admin_dashboard_transactions_management_view_more_button {
+            display: block;
+            margin: 10px auto;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+            color: white;
+            background-color: #ff6600;
+            font-weight: bold;
+        }
+        .custom_admin_dashboard_transactions_management_view_less_button {
             display: block;
             margin: 10px auto;
             padding: 8px 12px;
@@ -11480,6 +11397,7 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     object-fit: contain;
     border-radius: 20px;
     border: 1px solid rgba(0, 0, 0, 0.3);
+    height: 400px;
 }
 
 
@@ -11594,14 +11512,13 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     background-color: #0056b3;
 }
 
+/* **********START of lottery_events.html  Styling Starts*********** */
 
-/* lottery_events.html  Styling */
 .lotterybody{ margin: 0;
     padding: 0;
     background-color: #ffffff;}
 .category_section {
     position: relative; 
-    /* margin-bottom: -20px;  */
 }
 
 .category_header {
@@ -11790,11 +11707,6 @@ button[type="submit"].user_welcome_page_submit-button:hover {
     transition: transform 0.3s ease;
 }
 
-/* .lottery_events_enter_button:hover img {
-    transform: translateX(5px);
-} */
-
-/* View all button */
 .view_all_button {
     position: absolute;
     top: 0;
@@ -12170,7 +12082,6 @@ input[type="db-email"] {
 
     .db-container {
         margin-right: 11px;
-    /* left: 5px; */
     padding-right: 7px;
     padding-left: 4px;
     margin-left: 10px;
@@ -12277,7 +12188,6 @@ input[type="db-email"] {
 
 .banner-footer-item p {
     margin: 0;
-    /* font-weight: bold; */
     color: white;
 }
 
@@ -12310,11 +12220,7 @@ input[type="db-email"] {
     word-wrap: break-word;
     transition: background-color 0.3s ease;
 }
-/* .trustpilot-image {
-    height: 100%; 
-    width: 100%;
-    vertical-align: middle;
-} */
+
 @media screen and (max-width: 768px) {
     .custom-banner {
         width: 100%;
@@ -12677,8 +12583,9 @@ input[type="db-email"] {
         padding: 20px;
     }
 }
+/* **********END of lottery_events.html  Styling *********** */
 
-/* cart.html*/
+/* **********START of CART.html  Styling *********** */
 .cartbody-container{
     font-family: 'Rajdhani', sans-serif;
     background-color: white;
@@ -13250,10 +13157,6 @@ input[type="db-email"] {
         height: 35px;
     }
 
-    /* #checkout_button {
-        width: 80%;
-        margin-left: 0;
-    } */
     .item-details h3 {
         max-width: 100%;
     }
@@ -13358,8 +13261,7 @@ align-items: center;
         text-align: center;
         position: relative !important;
         transform: translateY(0) !important;
-        /* margin-top: 20px !important; */
-        /* margin-left: 140px; */
+       
     }
 
     .subtotal, .cartdiscount, .total {
@@ -13894,8 +13796,7 @@ align-items: center;
         margin-left: 10px;
     }    
 }  */
-
-/*-------------------lottery details-------------------*/
+/* **********#ID:LP-I93-START of LOTTERYDETAILS.html  Styling *********** */
 .lottery-detail-page {
     font-family: Rajdhani;
     margin: 0;
@@ -14276,7 +14177,6 @@ background-color: rgba(255, 102, 0, 0.05);
     border: 1.19px solid #D9DADB;
     background-color: transparent; /* If you want to remove the background */
     cursor: pointer;
-    /* margin-left:5%; */
     font-family: Rajdhani;
 }
 .buy-now-button {
@@ -14425,7 +14325,6 @@ background-color: rgba(255, 102, 0, 0.05);
     #additional-images-containerpopup img {
         width: 142px;
         height: 100px; 
-        /* max-width: 100%;  */
         margin: 12.5px; 
         cursor: pointer; /* Indicate clickable images */
         object-fit: cover; /* Ensure consistent scaling */
@@ -14729,9 +14628,7 @@ background-color: rgba(255, 102, 0, 0.05);
     height: 22px;
     transition: transform 0.3s ease;
 }
-/* .similar_category_lottery_enter_button:hover img {
-    transform: translateX(5px); 
-} */
+
 .similar-events-wrapper {
     display: flex;
     align-items: center;
@@ -14921,7 +14818,7 @@ background-color: rgba(255, 102, 0, 0.05);
     background-color: #FF6600;
 }
 
-/* faq.html page */
+/* **********START of FAQ.html  Styling *********** */
 .faq-page {
     font-family: 'Rajdhani', sans-serif;
     background-color: white;
@@ -15121,7 +15018,7 @@ background-color: rgba(255, 102, 0, 0.05);
         line-height: 1.5;
     }
 }
-/*--------navbar.html---------------*/
+/* **********#ID:LP-I118-START of NAVBAR.html  Styling *********** */
 .nav-body {
     margin: 0;
     padding: 0;
@@ -15457,7 +15354,7 @@ background-color: rgba(255, 102, 0, 0.05);
     }
 }
 
-/* footer.hmtl page  */
+/* **********START of FOOTER.html  Styling *********** */
 .footer-body {
     margin: 0;
     font-family:Rajdhani;
@@ -15684,7 +15581,7 @@ background-color: rgba(255, 102, 0, 0.05);
         margin-top: 10px;
     }
 }
-/*-----------terms.html------*/
+/* **********LP-I84-START of TERMS.html  Styling *********** */
 .terms-body {
     font-family: Rajdhani;
     margin: 0;
@@ -15772,7 +15669,7 @@ background-color: rgba(255, 102, 0, 0.05);
         text-align: center; 
       }
     }
-/*-------------------contactus.html page____________*/
+/* **********LP-I84-START of CONTACT.html  Styling *********** */
  .contact-page {
       font-family: 'Rajdhani', sans-serif;
       background-color: white;
@@ -15877,12 +15774,7 @@ background-color: rgba(255, 102, 0, 0.05);
             }
         }
         
-
-/*-------------aboutus---*/
-
-
-
-
+/* **********LP-I84-START of ABOUT.html  Styling *********** */
 .about-page {
     background: white;
     margin: 0;
@@ -15982,7 +15874,7 @@ background-color: rgba(255, 102, 0, 0.05);
         width: 90%; /* Full width on smaller screens */
     }
 }
-/*------------404-error page ---*/
+/* **********LP-I84-START of 404ERROR.html  Styling *********** */
 .error-page-body {
     font-family: 'Rajdhani', 'Open Sans', sans-serif;
     text-align: center;
@@ -16062,7 +15954,7 @@ background-color: rgba(255, 102, 0, 0.05);
         font-size: 0.85rem;
     }
 }
-/*___________category_lottery_events.html___________*/
+/*___________#ID:LP-I111-START OF category_lottery_events.html___________*/
 .category_body {
     font-family: Rajdhani;
     margin: 0;
@@ -16394,7 +16286,7 @@ background-color: rgba(255, 102, 0, 0.05);
     }
 }
 
-/*user-dashboard navbar for category*/
+/*START OF user-dashboard navbar for categoryIN LOTTERY-EVENTS PAGE*/
 .dropdown_competitions {
     position: relative;
     display: inline-block;
@@ -16707,7 +16599,7 @@ background-color: rgba(255, 102, 0, 0.05);
         transform: scale(1);
     }
 }
-/*-----------------2-FA-------------*/
+/* **********START of 2FA.html  Styling *********** */
 .otp-verification-popup {
     position: fixed;
     top: 0;
@@ -16733,7 +16625,7 @@ background-color: rgba(255, 102, 0, 0.05);
     display: none;
 }
 
-
+/* **********START of PRIVACY.html  Styling *********** */
 .privacy-container {
     width: 100%;
     max-width: 750px;
@@ -16904,7 +16796,7 @@ background-color: rgba(255, 102, 0, 0.05);
     }
 }
 
-/*loader*/
+/* **********START of LOADER.html  Styling *********** */
 .ep-preloader {
     -webkit-box-align: center;
     -ms-flex-align: center;
@@ -17061,8 +16953,6 @@ background-color: rgba(255, 102, 0, 0.05);
   #password-message {
     display: none;
     background:white;
-    /* padding: 10px;
-    margin-top: 5px; */
     border-radius: 5px;
     font-size: 14px;
     color: red;
@@ -17082,7 +16972,7 @@ background-color: rgba(255, 102, 0, 0.05);
 }
 
 
-/* favourtie .html page*/
+/* **********#ID:LP-I120-START of favorite.html  Styling *********** */
 #favorites_container {
     font-family: Rajdhani;
     display: flex;
@@ -17325,14 +17215,6 @@ background-color: rgba(255, 102, 0, 0.05);
     }
 }
 
-
-/* .toggle-eye-icon{
-    width: 20px;
-    height: 20px;
-} */
-
-/* 
-
 /* blocked user modal comes with manual login */
 .modal {
     display: none; /* Initially hidden */
@@ -17435,7 +17317,7 @@ background-color: rgba(255, 102, 0, 0.05);
         padding: 16px;
     }
 }
-/*order page.html*/
+/* **********#ID:LP-I169-START of order.html  Styling  *********** */
 .myorderpage {
     font-family: 'Rajdhani', sans-serif;
     margin: 0;
@@ -17799,7 +17681,7 @@ color: #23262F;
 
 
 /* TABLET VIEW (768px - 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1024px) {
     .myorder-header {
         flex-direction: row;
         justify-content: space-between;
@@ -18013,7 +17895,7 @@ color: #23262F;
 }
 
 
-/* Personal info page.html */
+/* #ID:LP-I135-start of Personal info page.html */
 .pi-container {
     display: flex;
     min-height: 100vh;
@@ -18246,7 +18128,7 @@ color: #23262F;
     }
 }
 
-/*subscription.html*/
+/*#ID:LP-I14-start of subscription.html*/
 .subscription-body {
     overflow-x: hidden;
 }
@@ -18517,7 +18399,7 @@ color: #23262F;
 }
 }
 
-/* Login&security.html */
+/* start of Login&security.html */
 .unique-body {
     font-family: Rajdhani;
     margin: 0;

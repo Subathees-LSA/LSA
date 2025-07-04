@@ -12,12 +12,14 @@ from django.conf.urls import handler404
 
 
 urlpatterns = [
+    path('api/get-users/', get_users_table_data, name='get_users_table_data'),
+    
 	path('api/marginal-chart-data/', MarginalChartDataView.as_view(), name='marginal_chart_data'),
     path('api/marginal-chart-export/', MarginalChartExportView.as_view(), name='marginal_chart_export'),
     path('api/overall_won_and_lost_lotteries_report_LotteryReportAPI/', 
          overall_won_and_lost_lotteries_report_LotteryReportAPI.as_view(), 
          name='overall_won_and_lost_lotteries_report_LotteryReportAPI'),
-          path('api/overall_won_and_lost_lotteries_report_LotteryReportExportAPI/', overall_won_and_lost_lotteries_report_LotteryReportExportAPI.as_view(), name='overall_won_and_lost_lotteries_report_LotteryReportExportAPI'),
+    path('api/overall_won_and_lost_lotteries_report_LotteryReportExportAPI/', overall_won_and_lost_lotteries_report_LotteryReportExportAPI.as_view(), name='overall_won_and_lost_lotteries_report_LotteryReportExportAPI'),
     # Overall Transaction Report
     path('api/report_and_analytics/overall_transaction_report/', 
          OverallTransactionReportView.as_view(), 

@@ -36,7 +36,7 @@ from django.http import JsonResponse
 from user_agents import parse
 from user_registration.models import UserDeviceHistory
 from django.utils import timezone  
-
+  #ID:LP-I1-start
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     def create(self, request, *args, **kwargs):
@@ -82,7 +82,7 @@ class RegisterView(generics.CreateAPIView):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
-#login.html js-5577    
+#login.html js-5577   #ID:LP-I1-end 
 from django.utils.timezone import now
 from user_agents import parse
 from django.contrib.auth import login
@@ -98,7 +98,7 @@ from django.contrib.sessions.models import Session
 from rest_framework.response import Response
 from .models import User, UserDeviceHistory, UserPrivacy, UserProfile
 from .serializers import LoginSerializer
-
+  #ID:LP-I2-start
 class LoginView(APIView):
     def post(self, request):
         user_agent_string = request.headers.get('User-Agent', '')
@@ -175,7 +175,8 @@ class LoginView(APIView):
         """Retrieve the client's IP address from the request."""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
-#!-----lottery_events.html-custom.js- function checkKYCStatus();-----!
+#ID:LP-I2-end   
+#!-----lottery_events.html-custom.js- function checkKYCStatus(); #ID:LP-I7-start-----!
 class KYCStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -217,9 +218,9 @@ class KYCStatusView(APIView):
 
         except UserProfile.DoesNotExist:
             return Response({'error': 'UserProfile does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+#!-----lottery_events.html-custom.js- function checkKYCStatus(); #ID:LP-I7-end-----!
 
-
-#!-----lottery_events.html-custom.js- function handleKYCForm()-----!
+#!-----lottery_events.html-custom.js- function handleKYCForm()  #ID:LP-I7-start-----!
 class KYCUploadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -268,7 +269,7 @@ class KYCUploadView(APIView):
                     return Response({'error': f'Failed to update KYC status: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'No status provided'}, status=status.HTTP_400_BAD_REQUEST)
-
+#!-----lottery_events.html-custom.js- function handleKYCForm()  #ID:LP-I7-end-----!
        
 class UserListView(generics.ListAPIView):
     serializer_class = UserDetailsSerializer
@@ -314,7 +315,7 @@ class UpdateKYCStatusView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
- #!------------- password rest.html ------------!
+ #!------------- password rest.html #ID:LP-I2-start------------!
 class ApiPasswordResetRequestView(APIView):
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -385,7 +386,8 @@ class ApiPasswordResetConfirmView(APIView):
 
 
         return Response({"error": "Token expired or invalid"}, status=status.HTTP_400_BAD_REQUEST)
-#privacy.html
+ #ID:LP-I2-end
+#privacy.html 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
