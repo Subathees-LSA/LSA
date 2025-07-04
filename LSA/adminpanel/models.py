@@ -123,7 +123,7 @@ class admin_dashboard_preview(models.Model):
     identifier = models.CharField(max_length=150, unique=True, help_text="Unique identifier for this container (used in frontend)")
     type = models.CharField(
         max_length=100,
-        choices=[(' ', 'Select type'),('charts', 'charts'),('Statistics_count', 'Statistics_count'), ('table', 'Table'), ('transactions', 'transactions'), ('lotterys', 'lotterys'), ('overview_counts', 'overview_counts'),('overview_notification_bell', 'overview_notification_bell'),],
+        choices=[(' ', 'Select type'),('charts', 'charts'),('Statistics_count', 'Statistics_count'), ('user_management_table', 'user_management_table'), ('lotterys', 'lotterys'), ('overview_counts', 'overview_counts'),('user_chats_and_notification_bell_icon', 'user_chats_and_notification_bell_icon'),],
         default='',
         help_text="Type of content"
     )
@@ -143,8 +143,6 @@ class admin_dashboard_preview(models.Model):
             "verified_users",
             "pending_kyc",
             "users_table",
-            "custom_admin_dashboard_transactions_management_refunded",
-            "custom_admin_dashboard_all_transactions_management",
             "lotterys",
             "report_and_analytics_marginal_chart",
             "admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart",
@@ -152,7 +150,7 @@ class admin_dashboard_preview(models.Model):
             "overview_active_users_count",
             "overview_active_lotteries_count",
             "overview_sales_amount",
-            "notification-bell-container",
+            "user_chats_and_notification_bell_icon",
             "report_and_analytics_monthly_sales_bar_chart",
             "report_and_analytics_Pending_vs_completed_draws_pie_chart",
             "report_and_analytics_winners_vs_losers_chart",
@@ -216,7 +214,7 @@ class adminProfile(models.Model):
 class Testimonial(models.Model):
     name = models.CharField(max_length=255)
     quote = models.TextField()
-    image = models.ImageField(upload_to='testimonials/')
+    image = models.ImageField(upload_to='testimonials/', blank=True, null=True,default='default-profile.jpg')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -307,7 +305,7 @@ class WinnersWallWinnersList(models.Model):
     ticket_number = models.CharField(max_length=6)
     lottery_name = models.CharField(max_length=255)
     draw_date = models.DateTimeField(default=timezone.now)
-    image = models.ImageField(upload_to='winners_wall_photos/', blank=True, null=True)
+    image = models.ImageField(upload_to='winners_wall_photos/', blank=True, null=True,default='default-profile.jpg')
     flag = models.BooleanField(default=True, help_text="Toggle to show/hide winner on the wall")
     updated_at = models.DateTimeField(auto_now=True)  
     

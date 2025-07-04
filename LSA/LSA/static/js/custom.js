@@ -1,6 +1,7 @@
 //    custom_admin_dashboard.html (adminpanel template)
 //    AdminReply,Contact table (models.py)
 //    UserChatView function (views.py)
+//ID:LP-I81-start
 function user_chat_view() {
     const user_chats_message_list = document.getElementById("user_chats_message_list");
     const messageInput = document.getElementById("user_chats_message_input");
@@ -89,9 +90,11 @@ function user_chat_view() {
   
     fetchChats();
 }
+//ID:LP-I81-End
 //    custom_admin_dashboard.html (adminpanel template)
 //    Contact table (models.py)
 //    ContactListView function (views.py)
+//ID:LP-I81-start
 function admin_chat_view() {
     const userChat_Icons = document.getElementById("userChat_Icons");
     const specfic_user_chats = document.getElementById("specfic_user_chats");
@@ -634,6 +637,10 @@ function admin_chat_view() {
                             document.getElementById("user_email").innerText = "";
                             showEmailList();
                         }
+                        const admin_customer_support_page_searchInput = document.getElementById("searchEmail");
+                        if (admin_customer_support_page_searchInput) {
+                            admin_customer_support_page_searchInput.value = "";
+                        }
                     } else {
                         alert("Error deleting contact.");
                     }
@@ -688,6 +695,10 @@ function admin_chat_view() {
                     else {
                         fetchMessagesByEmail(current_Email);
                         showEmailList(); 
+                    }
+                    const selectedEmails_admin_customer_support_page_searchInput = document.getElementById("searchEmail");
+                    if (selectedEmails_admin_customer_support_page_searchInput) {
+                        selectedEmails_admin_customer_support_page_searchInput.value = "";
                     }
                 })
                 .catch((error) => {
@@ -837,8 +848,10 @@ function filterEmails() {
     let visibleCount = 0;
 
     emailItems.forEach((item) => {
-        const emailText = item.querySelector(".email-text").innerText.toLowerCase();
-        if (emailText.includes(searchInput)) {
+        const admin_customer_support_page_checkbox = item.querySelector(".email-checkbox");
+        const admin_customer_support_page_emailData = admin_customer_support_page_checkbox.getAttribute("data-email").toLowerCase();
+
+        if (admin_customer_support_page_emailData.includes(searchInput)) {
             item.style.display = "block";
             visibleCount++;
         } else {
@@ -852,10 +865,9 @@ function filterEmails() {
         noUsersMsg.style.display = "none";
     }
 }
+//ID:LP-I81-End
 
-
-
-
+//ID:LP-I27-start
 function handleReceiptClick(receiptUrl) {
     if (!receiptUrl || !isValidUrl(receiptUrl)) {
         alert("Receipt not available");
@@ -1099,17 +1111,23 @@ function openRefundSuccessPopup(paymentIntent, refundedAmount, lotteryDetails) {
 }
 
 
-
+let admin_page_transactions_list_all_data = [];
 function updatePaymentStatus(paymentIntent) {
     const statusCells = document.querySelectorAll(`td[data-payment-intent="${paymentIntent}"]`);
 
     statusCells.forEach(statusCell => {
-        statusCell.innerHTML = `<span class="custom_admin_dashboard_transactions_management_status_refunded">refunded</span>`;
+        statusCell.innerHTML = `<span class="custom_admin_dashboard_transactions_management_status_refunded">Refunded</span>`;
+    });
+    // 2. Update the matching object in admin_page_transactions_list_all_data
+    admin_page_transactions_list_all_data = admin_page_transactions_list_all_data.map(entry => {
+        if (entry.payment_intent === paymentIntent) {
+            return { ...entry, payment_status: "refunded" };
+        }
+        return entry;
     });
 
     
 }
-
 
 function getFriendlyErrorMessage(errorMessage) {
     if (errorMessage.includes("already been refunded")) {
@@ -1126,348 +1144,287 @@ function getFriendlyErrorMessage(errorMessage) {
     }
     return "Something went wrong. Please try again."; 
 }
-
-
-
 function custom_admin_dashboard_transactions_management_function(email = null, status = null) {
+    let containerId;
 
-let custom_admin_dashboard_transactions_management_filteredData = null;
-let custom_admin_dashboard_transactions_management_isSearching = false;
-let custom_admin_dashboard_transactions_management_isFiltering = false;
-  let containerId;
-
-if (status === "all_transactions") {
-  containerId = "custom_admin_dashboard_all_transactions_management";
-} else if (status === "refunded") {
-  containerId = "custom_admin_dashboard_transactions_management_refunded";
-}  else {
-  containerId = "custom_admin_dashboard_transactions_management";
-}
-
-
-    const custom_admin_dashboard_transactions_management_container = document.getElementById(containerId);
-    if (!custom_admin_dashboard_transactions_management_container) return;
-
-    custom_admin_dashboard_transactions_management_container.innerHTML = ""; 
-
-    let custom_admin_dashboard_transactions_management_page = 1;
-    const custom_admin_dashboard_transactions_management_rowsPerPage = 10; 
-    let custom_admin_dashboard_transactions_management_allData = [];
-
-    function custom_admin_dashboard_transactions_management_createHeader() {
-        const custom_admin_dashboard_transactions_management_header = document.createElement("div");
-        custom_admin_dashboard_transactions_management_header.classList.add("custom_admin_dashboard_transactions_management_header");
-
-        if (email) {
-            custom_admin_dashboard_transactions_management_header.textContent = "";
-        } else if (status === "refunded") {
-            custom_admin_dashboard_transactions_management_header.textContent = "Refund Management";
-        } else if (status === "all_transactions") {
-            custom_admin_dashboard_transactions_management_header.textContent = "Transactions Management > Transaction Details";
-        }
-const searchContainer = document.createElement("div");
-searchContainer.classList.add("transactions_management_search_container");
-
-const searchInput = document.createElement("input");
-searchInput.id = "transactions_management_search_input";
-searchInput.classList.add("transactions_management_search_input");
-searchInput.placeholder = "Search by Payment ID, Lottery, or Email, or Quantity";
-searchInput.addEventListener("input", (e) => {
-    custom_admin_dashboard_transactions_management_handleSearch(e.target.value);
-});
-
-searchContainer.appendChild(searchInput);
-custom_admin_dashboard_transactions_management_header.appendChild(searchContainer);
-const filterContainer = document.createElement("div");
-filterContainer.classList.add("transactions_management_filter_container");
-
-const filterSelect = document.createElement("select");
-filterSelect.id = "transactions_management_filter_select";
-filterSelect.classList.add("transactions_management_filter_select");
-
-const options = [
-    { value: "all", text: "All Transactions" },
-    { value: "completed", text: "Completed" },
-    { value: "refunded", text: "Refunded" }
-];
-
-options.forEach(option => {
-    const optElement = document.createElement("option");
-    optElement.value = option.value;
-    optElement.textContent = option.text;
-    filterSelect.appendChild(optElement);
-});
-
-filterSelect.addEventListener("change", (e) => {
-    custom_admin_dashboard_transactions_management_handleFilter(e.target.value);
-});
-if (status !== "refunded") {
-    filterContainer.appendChild(filterSelect);
-}
-
-custom_admin_dashboard_transactions_management_header.appendChild(filterContainer);
-
-        return custom_admin_dashboard_transactions_management_header;
+    if (status === "all_transactions") {
+        containerId = "custom_admin_dashboard_all_transactions_management";
+    } else if (status === "refunded") {
+        containerId = "custom_admin_dashboard_transactions_management_refunded";
+    } else {
+        containerId = "custom_admin_dashboard_transactions_management";
     }
 
-    function custom_admin_dashboard_transactions_management_createTable() {
-        const custom_admin_dashboard_transactions_management_table = document.createElement("table");
-        custom_admin_dashboard_transactions_management_table.classList.add("custom_admin_dashboard_transactions_management_table");
+    const admin_page_transactions_container = document.getElementById(containerId);
+    if (!admin_page_transactions_container) return;
 
-        const custom_admin_dashboard_transactions_management_thead = document.createElement("thead");
-        const custom_admin_dashboard_transactions_management_headerRow = document.createElement("tr");
-        ["Payment ID", "Lottery", "Amount", "Date", "Status", "Email", "Quantity", "Action"].forEach(text => {
-            const th = document.createElement("th");
-            th.textContent = text;
-            custom_admin_dashboard_transactions_management_headerRow.appendChild(th);
+    admin_page_transactions_container.innerHTML = ""; 
+
+    const searchInputId = `transactions_management_search_input_${status || 'default'}`;
+    const filterSelectId = `transactions_management_filter_select_${status || 'default'}`;
+
+  
+    let currentPage = 1;
+    let totalTransactions = 0;
+    let perPage = 10;
+    let loadedPages = []; 
+
+
+
+    function admin_page_transactions_createHeader() {
+        const header = document.createElement("div");
+        header.classList.add("custom_admin_dashboard_transactions_management_header");
+
+        let headerText = "";
+        if (email) {
+            headerText = "";
+        } else if (status === "refunded") {
+            headerText = "Refund Management";
+        } else if (status === "all_transactions") {
+            headerText = "Transactions Management > Transaction Details";
+        }
+
+        header.innerHTML = `
+            <div>${headerText}</div>
+            <div class="transactions_management_search_container">
+                <input id="${searchInputId}" class="transactions_management_search_input" 
+                       placeholder="Search by Payment ID, Lottery, or Email, or Quantity" />
+            </div>
+            ${status !== "refunded" ? `
+                <div class="transactions_management_filter_container">
+                    <select id="${filterSelectId}" class="transactions_management_filter_select">
+                        <option value="all">All Transactions</option>
+                        <option value="completed">Completed</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>` : ``}
+        `;
+
+        header.querySelector(`#${searchInputId}`).addEventListener("keyup", () => {
+            admin_page_transactions_fetchData(true);
         });
 
-        custom_admin_dashboard_transactions_management_thead.appendChild(custom_admin_dashboard_transactions_management_headerRow);
-        custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_thead);
-
-        const custom_admin_dashboard_transactions_management_tbody = document.createElement("tbody");
-        if (status === "all_transactions") {
-            custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body_all_transactions";
-        } else if (status === "refunded") {
-            custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body_refunded";
-        }else {
-            custom_admin_dashboard_transactions_management_tbody.id = "custom_admin_dashboard_transactions_management_table_body";
+        if (status !== "refunded") {
+            header.querySelector(`#${filterSelectId}`).addEventListener("change", () => {
+                admin_page_transactions_fetchData(true);
+            });
         }
-        custom_admin_dashboard_transactions_management_table.appendChild(custom_admin_dashboard_transactions_management_tbody);
-
-        return { custom_admin_dashboard_transactions_management_table, custom_admin_dashboard_transactions_management_tbody };
+        
+        return header;
     }
-    //    custom_admin_dashboard.html (adminpanel template)
-    //    PaymentLottery table (models.py)
-    //    api_admin_dashboard_payment_lottery_list_view_transactions_and_refund function (views.py)
-    function custom_admin_dashboard_transactions_management_fetchData() {
+
+    const tbodyId = status === "all_transactions" 
+            ? "custom_admin_dashboard_transactions_management_table_body_all_transactions"
+            : status === "refunded" 
+                ? "custom_admin_dashboard_transactions_management_table_body_refunded"
+                : "custom_admin_dashboard_transactions_management_table_body";
+    function admin_page_transactions_createTable() {
+        const table = document.createElement("table");
+        table.classList.add("custom_admin_dashboard_transactions_management_table");
+
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Lottery</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Email</th>
+                    <th>Quantity</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="${tbodyId}"></tbody>
+        `;
+
+        return table;
+    }
+    const viewMoreId = status === "all_transactions"
+            ? "custom_admin_dashboard_transactions_management_view_more_button_all_transactions"
+            : status === "refunded"
+                ? "custom_admin_dashboard_transactions_management_view_more_button_refunded"
+                : "custom_admin_dashboard_transactions_management_view_more_button";
+
+    const viewLessId = status === "all_transactions"
+            ? "custom_admin_dashboard_transactions_management_view_less_button_all_transactions"
+            : status === "refunded"
+                ? "custom_admin_dashboard_transactions_management_view_less_button_refunded"
+                : "custom_admin_dashboard_transactions_management_view_less_button";
+    function admin_page_transactions_createPaginationButtons() {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("transactions_management_pagination_wrapper");
+
+        wrapper.innerHTML = `
+            <button id="${viewMoreId}" class="custom_admin_dashboard_transactions_management_view_more_button" style="display: none;">
+                View More
+            </button>
+            <button id="${viewLessId}" class="custom_admin_dashboard_transactions_management_view_less_button" style="display: none;">
+                View Less
+            </button>
+           
+        `;
+
+        return wrapper;
+    }
+    const header = admin_page_transactions_createHeader();
+    const table = admin_page_transactions_createTable();
+    const pagination = admin_page_transactions_createPaginationButtons();
+    
+    admin_page_transactions_container.appendChild(header);
+    admin_page_transactions_container.appendChild(table);
+    admin_page_transactions_container.appendChild(pagination);
+    const tbody = document.getElementById(tbodyId);
+    
+        
+
+   function admin_page_transactions_fetchData(reset = false) {
         let apiUrl = "/api_admin_dashboard_payment_lottery_list_view_transactions_and_refund/";
-        if (email) {
-            apiUrl += `?email=${email}`;
+        const params = new URLSearchParams();
+        
+        const searchInput = document.getElementById(searchInputId);
+        const searchValue = searchInput ? searchInput.value.trim() : '';
+        
+        let filterValue = '';
+        if (status !== "refunded") {
+            const filterSelect = document.getElementById(filterSelectId);
+            filterValue = filterSelect ? filterSelect.value : '';
         }
+
+        if (email) params.append("email", email);
+        if (status) params.append("status", status);
+        if (searchValue) params.append("search", searchValue);
+        if (filterValue && filterValue !== "all") {
+            params.append("status", filterValue);
+        }
+        
+        params.append("page", currentPage);
+        params.append("per_page", perPage);
+
+        apiUrl += `?${params.toString()}`;
 
         fetch(apiUrl)
             .then(response => response.json())
             .then(data => {
-                if (status === "refunded") {
-                    custom_admin_dashboard_transactions_management_allData = data.filter(transaction => transaction.payment_status === "refunded");
-                } else {
-                    custom_admin_dashboard_transactions_management_allData = data;
+                if (reset) {
+                    admin_page_transactions_list_all_data = [];
+                    loadedPages = []; 
+                    perPage = 10;
+                    currentPage = 1;
+                    tbody.innerHTML = "";
                 }
-                const custom_admin_dashboard_transactions_management_viewMoreButton = custom_admin_dashboard_transactions_management_createViewMoreButton();
-                custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_viewMoreButton);
-
-                custom_admin_dashboard_transactions_management_displayData();
-                custom_admin_dashboard_transactions_management_displayTransactionCount();
+                
+                admin_page_transactions_list_all_data = [...admin_page_transactions_list_all_data, ...data.transactions];
+                totalTransactions = data.total_transactions;
+                
+                
+                admin_page_transactions_displayData(data.transactions);
+                admin_page_transactions_updatePaginationButtons(data.has_next);
+                
+                
+                if (email) custom_admin_dashboard_transactions_management_displayTransactionCount();
             })
             .catch(error => console.error("Error fetching transactions:", error));
     }
     function custom_admin_dashboard_transactions_management_displayTransactionCount() {
+       
         const total_number_of_transactions_count_user_details_management_element_id = document.getElementById("total_number_of_transactions_count_user_details_management");
 
         if (total_number_of_transactions_count_user_details_management_element_id) {
-            total_number_of_transactions_count_user_details_management_element_id.textContent = `${custom_admin_dashboard_transactions_management_allData.length}`;
+            total_number_of_transactions_count_user_details_management_element_id.textContent = `${totalTransactions}`;
         } 
     }
 
-    function custom_admin_dashboard_transactions_management_displayData() {
-        if (status === "all_transactions") {
-            var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions");
-        } else if (status === "refunded") {
-            var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded");
-        } else {
-            var custom_admin_dashboard_transactions_management_tbody = document.getElementById("custom_admin_dashboard_transactions_management_table_body");
-        }
-    
-        let dataToDisplay = [...custom_admin_dashboard_transactions_management_allData];
-        
-        if (custom_admin_dashboard_transactions_management_isSearching && custom_admin_dashboard_transactions_management_filteredData) {
-            dataToDisplay = custom_admin_dashboard_transactions_management_filteredData;
-        }
-        
-        if (custom_admin_dashboard_transactions_management_isFiltering && custom_admin_dashboard_transactions_management_filteredData) {
-            dataToDisplay = custom_admin_dashboard_transactions_management_filteredData;
-        }
-    
-        
-        if (!dataToDisplay || dataToDisplay.length === 0) {
+    function admin_page_transactions_displayData(transaction_objects) {
+        if (admin_page_transactions_list_all_data.length === 0) {
+            tbody.innerHTML = "";
             const noTransactionsRow = document.createElement("tr");
-            const noTransactionsCell = document.createElement("td");
-            noTransactionsCell.setAttribute("colspan", "8");
-            noTransactionsCell.textContent = "No transactions.";
-            noTransactionsCell.classList.add("custom_admin_dashboard_transactions_management_no_transactions");
-            noTransactionsRow.appendChild(noTransactionsCell);
-            custom_admin_dashboard_transactions_management_tbody.appendChild(noTransactionsRow);
-            custom_admin_dashboard_transactions_management_updateViewMoreButton();
+            noTransactionsRow.innerHTML = `
+                <td colspan="8" class="custom_admin_dashboard_transactions_management_no_transactions">
+                    No transactions found.
+                </td>
+            `;
+            tbody.appendChild(noTransactionsRow);
             return;
         }
-    
-        const start = (custom_admin_dashboard_transactions_management_page - 1) * custom_admin_dashboard_transactions_management_rowsPerPage;
-        const end = start + custom_admin_dashboard_transactions_management_rowsPerPage;
-        const custom_admin_dashboard_transactions_management_paginatedData = dataToDisplay.slice(start, end);
-    
-        custom_admin_dashboard_transactions_management_paginatedData.forEach(event => {
-            const row = document.createElement("tr");
 
+        transaction_objects.forEach(transaction => {
+            const row = document.createElement("tr");
             row.innerHTML = `
-                <td>${event.payment_intent}</td>
-                <td>${event.lottery_event_title}</td>
-                <td>£${event.amount}</td>
-                <td>${new Date(event.payment_at).toLocaleDateString()}</td>
-                <td data-payment-intent="${event.payment_intent}">
-                    <span class="custom_admin_dashboard_transactions_management_status_${ event.payment_status.toLowerCase()}">
-                    ${event.payment_status}
+                <td>${transaction.payment_intent}</td>
+                <td>${transaction.lottery_event_title}</td>
+                <td>£${transaction.amount}</td>
+                <td>${new Date(transaction.payment_at).toLocaleDateString()}</td>
+                <td data-payment-intent="${transaction.payment_intent}">
+                    <span class="custom_admin_dashboard_transactions_management_status_${transaction.payment_status.toLowerCase()}">
+                        ${transaction.payment_status}
                     </span>
                 </td>
-                <td>${event.user_email}</td>
-                <td>${event.quantity}</td>
+                <td>${transaction.user_email}</td>
+                <td>${transaction.quantity}</td>
                 <td>
                     <div class="custom_admin_dashboard_transactions_management_action_img_container">
-                        <div class="custom_admin_dashboard_transactions_management_action_img" onclick="handleReceiptClick('${event.receipt_url}')">
-                            <img class ="view_Reciept" src="/media/admin_files/custom_admin_dashboard_transactions_management_receipt_icon.jpg" alt="Receipt">
+                        <div class="custom_admin_dashboard_transactions_management_action_img" onclick="handleReceiptClick('${transaction.receipt_url}')">
+                            <img class="view_Reciept" src="/media/admin_files/custom_admin_dashboard_transactions_management_receipt_icon.jpg" alt="Receipt">
                             <span class="custom_admin_dashboard_transactions_management_tooltip">View Receipt</span>
                         </div>
                         <div class="custom_admin_dashboard_transactions_management_action_img" 
-                            data-refund-intent="${event.payment_intent}"
-                            onclick="handleRefundClick('${event.payment_intent}')">
-                            <img class ="view_Refund" src="/media/admin_files/custom_admin_dashboard_transactions_management_refund_icon.jpg" alt="Refund">
+                            data-refund-intent="${transaction.payment_intent}"
+                            onclick="handleRefundClick('${transaction.payment_intent}')">
+                            <img class="view_Refund" src="/media/admin_files/custom_admin_dashboard_transactions_management_refund_icon.jpg" alt="Refund">
                             <span class="custom_admin_dashboard_transactions_management_tooltip">Initiate Refund</span>
                         </div>
                     </div>
                 </td>
             `;
-
-            custom_admin_dashboard_transactions_management_tbody.appendChild(row);
-           
+            tbody.appendChild(row);
         });
 
-        custom_admin_dashboard_transactions_management_updateViewMoreButton();
+       
     }
-
-    function custom_admin_dashboard_transactions_management_createViewMoreButton() {
-        const custom_admin_dashboard_transactions_management_viewMoreButton = document.createElement("button");
-         if (status === "all_transactions") {
-            custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button_all_transactions";
-        } else if (status === "refunded") {
-            custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button_refunded";
-        } else {
-            custom_admin_dashboard_transactions_management_viewMoreButton.id = "custom_admin_dashboard_transactions_management_view_more_button";
+    function loadMoreTransactions() {
+        currentPage++;
+        if (!loadedPages.includes(currentPage)) {
+            loadedPages.push(currentPage);
         }
-        custom_admin_dashboard_transactions_management_viewMoreButton.classList.add("custom_admin_dashboard_transactions_management_view_more_button");
-        custom_admin_dashboard_transactions_management_viewMoreButton.textContent = "View More";
-
-        custom_admin_dashboard_transactions_management_viewMoreButton.addEventListener("click", function () {
-            custom_admin_dashboard_transactions_management_page++;
-            custom_admin_dashboard_transactions_management_displayData();
-        });
-
-        return custom_admin_dashboard_transactions_management_viewMoreButton;
+        admin_page_transactions_fetchData();
     }
 
-function custom_admin_dashboard_transactions_management_updateViewMoreButton() {
-     if (status === "all_transactions") {
-        var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button_all_transactions");
-    } else if (status === "refunded") {
-        var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button_refunded");
-    } else {
-        var custom_admin_dashboard_transactions_management_viewMoreButton = document.getElementById("custom_admin_dashboard_transactions_management_view_more_button");
-    }
-    if (!custom_admin_dashboard_transactions_management_viewMoreButton) return;
-
-    let dataToCheck = [...custom_admin_dashboard_transactions_management_allData];
-    
-    if (custom_admin_dashboard_transactions_management_isSearching || custom_admin_dashboard_transactions_management_isFiltering) {
-        dataToCheck = custom_admin_dashboard_transactions_management_filteredData || [];
+    function loadLessTransactions() {
+        if (currentPage > 1) {
+            loadedPages = loadedPages.filter(page => page !== currentPage);
+            currentPage--;
+            
+            admin_page_transactions_list_all_data = admin_page_transactions_list_all_data.slice(0, currentPage * perPage);
+            tbody.innerHTML = "";
+            
+            admin_page_transactions_displayData(admin_page_transactions_list_all_data);
+            admin_page_transactions_updatePaginationButtons(true); 
+        }
     }
 
-    const totalRows = dataToCheck ? dataToCheck.length : 0;
-    const rowsDisplayed = custom_admin_dashboard_transactions_management_page * custom_admin_dashboard_transactions_management_rowsPerPage;
+    function admin_page_transactions_updatePaginationButtons(hasNext) {
+       
+        const viewMoreBtn = document.getElementById(viewMoreId);
+        const viewLessBtn = document.getElementById(viewLessId);
 
-    if (totalRows <= rowsDisplayed || totalRows === 0) {
-        custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "none";
-    } else {
-        custom_admin_dashboard_transactions_management_viewMoreButton.style.display = "block";
+        viewMoreBtn.style.display = hasNext ? "block" : "none";
+        
+        viewLessBtn.style.display = (currentPage > 1) ? "block" : "none";
     }
+
    
+
+    document.getElementById(viewMoreId)?.addEventListener("click", loadMoreTransactions);
+    document.getElementById(viewLessId)?.addEventListener("click", loadLessTransactions);
+
+    admin_page_transactions_fetchData(true);
 }
 
-    const custom_admin_dashboard_transactions_management_header = custom_admin_dashboard_transactions_management_createHeader();
-    const { custom_admin_dashboard_transactions_management_table } = custom_admin_dashboard_transactions_management_createTable();
-
-    custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_header);
-    custom_admin_dashboard_transactions_management_container.appendChild(custom_admin_dashboard_transactions_management_table);
-
-    custom_admin_dashboard_transactions_management_fetchData();
-function custom_admin_dashboard_transactions_management_handleSearch(searchTerm) {
-    searchTerm = searchTerm.toLowerCase().trim();
-    custom_admin_dashboard_transactions_management_page = 1; 
-    
-    if (!searchTerm) {
-        custom_admin_dashboard_transactions_management_filteredData = null;
-    custom_admin_dashboard_transactions_management_isSearching = false;
-        if (status === "all_transactions") {
-            document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions").innerHTML = "";
-        } else if (status === "refunded") {
-            document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
-        } else {
-            document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
-        }
-        custom_admin_dashboard_transactions_management_displayData();
-        return;
-    }
-
-    custom_admin_dashboard_transactions_management_filteredData = custom_admin_dashboard_transactions_management_allData.filter(transaction => {
-        const paymentId = transaction.payment_intent ? transaction.payment_intent.toLowerCase() : '';
-        const paymentquantity = transaction.quantity ? transaction.quantity.toString().toLowerCase() : '';
-        return (
-            paymentId.includes(searchTerm) ||
-            transaction.lottery_event_title.toLowerCase().includes(searchTerm) ||
-            transaction.user_email.toLowerCase().includes(searchTerm) ||
-            paymentquantity.includes(searchTerm)
-        );
-    });
-
-  custom_admin_dashboard_transactions_management_isSearching = true;
-    
-     if (status === "all_transactions") {
-        document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions").innerHTML = "";
-    }  else if (status === "refunded") {
-        document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
-    } else {
-        document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
-    }
-    
-    custom_admin_dashboard_transactions_management_displayData();
-}
-function custom_admin_dashboard_transactions_management_handleFilter(filterValue) {
-    custom_admin_dashboard_transactions_management_page = 1;
-    
-    if (filterValue === "all") {
-        custom_admin_dashboard_transactions_management_filteredData = null;
-        custom_admin_dashboard_transactions_management_isFiltering = false;
-    } else {
-        custom_admin_dashboard_transactions_management_filteredData = custom_admin_dashboard_transactions_management_allData.filter(
-            transaction => transaction.payment_status.toLowerCase() === filterValue
-        );
-        custom_admin_dashboard_transactions_management_isFiltering = true;
-    }
-    
-    if (status === "all_transactions") {
-        document.getElementById("custom_admin_dashboard_transactions_management_table_body_all_transactions").innerHTML = "";
-    }else if (status === "refunded") {
-        document.getElementById("custom_admin_dashboard_transactions_management_table_body_refunded").innerHTML = "";
-    } else {
-        document.getElementById("custom_admin_dashboard_transactions_management_table_body").innerHTML = "";
-    }
-    
-    custom_admin_dashboard_transactions_management_displayData();
-}
-
-}
-
+//ID:LP-I27-End
 // admin dash board prize management_page js code.
 
-
+//ID:LP-I28-start
 function renderPrizeManagementHTML() {
     let container = document.getElementById("custom_admin_dashboard_prize_management_id");
     container.innerHTML = `
@@ -1593,10 +1550,13 @@ function createPrizeManagementPagination(totalPages, currentPage) {
 //    custom_admin_dashboard.html (adminpanel template)
 //    Winner table (models.py)
 //    api_admin_dashboard_prize_management_winner_list_api_view function (views.py)
+let allWinnersData = []; // Store all winners data globally
 function fetchWinners(page = 1) {
     fetch("/api_admin_dashboard_prize_management_winner_list_api_view/")
         .then(response => response.json())
         .then(data => {
+            allWinnersData = data; // Store the full dataset
+            prize_management_page_delivered_and_canceled_updateglobalcounts	(); // Update counts based on all data
             const itemsPerPage = 10;
             const totalPages = Math.ceil(data.length / itemsPerPage);
             const paginationElement = document.getElementById("prize_management_pagination");
@@ -1609,7 +1569,7 @@ function fetchWinners(page = 1) {
 
             const paginatedData = paginateData(data, page, itemsPerPage);
             
-            let totalWinners = 0, deliveredWinners = 0, cancelledWinners = 0;
+           
             let tableBody = document.querySelector(".prize_management_table tbody");
             tableBody.innerHTML = ""; 
 
@@ -1622,9 +1582,8 @@ function fetchWinners(page = 1) {
             }
 
             paginatedData.forEach(winner => {
-                totalWinners++;
-                if (winner.prize_status === "delivered") deliveredWinners++;
-                if (winner.prize_status === "cancelled") cancelledWinners++;
+              
+                
 
                 let row = document.createElement("tr");
                 row.innerHTML = `
@@ -1649,10 +1608,10 @@ function fetchWinners(page = 1) {
                 `;
                 tableBody.appendChild(row);
             });
+            
 
             document.getElementById("prize_management_total_winners").innerText = data.length;
-            document.getElementById("prize_management_delivered_winners").innerText = deliveredWinners;
-            document.getElementById("prize_management_cancelled_winners").innerText = cancelledWinners;
+          
 
             if (data.length > itemsPerPage) {
                 createPrizeManagementPagination(totalPages, page);
@@ -1685,25 +1644,22 @@ function prize_management_closeImagePopup() {
     document.getElementById("prize_management_image_popup").classList.add("prize_management_hidden");
 }
 
-function updateSummaryCounts() {
-    let delivered = 0, cancelled = 0;
-    document.querySelectorAll(".prize_management_status").forEach(select => {
-        if (select.value === "delivered") delivered++;
-        if (select.value === "cancelled") cancelled++;
-    });
-
-    document.getElementById("prize_management_delivered_winners").innerText = delivered;
-    document.getElementById("prize_management_cancelled_winners").innerText = cancelled;
+function prize_management_page_delivered_and_canceled_updateglobalcounts	() {
+    const deliveredWinners = allWinnersData.filter(w => w.prize_status === "delivered").length;
+    const cancelledWinners = allWinnersData.filter(w => w.prize_status === "cancelled").length;
+    
+    document.getElementById("prize_management_delivered_winners").innerText = deliveredWinners;
+    document.getElementById("prize_management_cancelled_winners").innerText = cancelledWinners;
 }
 //    custom_admin_dashboard.html (adminpanel template)
 //    Winner table (models.py)
 //    api_admin_dashboard_prize_management_update_winner_status function (views.py)
 function updateWinnerStatus(event) {
-    let winnerId = event.target.dataset.id;
-    const winner_row = event.target.closest("tr");
-    let prizeStatus = winner_row.querySelector(".prize_management_status").value;
-    let prizeComments = winner_row.querySelector(".prize_management_comments").value;
-
+    const winnerId = parseInt(event.target.dataset.id);
+    const winnerRow = event.target.closest("tr");
+    const prizeStatus = winnerRow.querySelector(".prize_management_status").value;
+    const prizeComments = winnerRow.querySelector(".prize_management_comments").value;
+    // Send the update to the server
     fetch(`/api_admin_dashboard_prize_management/${winnerId}/update_winner_status/`, {
         method: "PATCH",
         headers: {
@@ -1716,16 +1672,21 @@ function updateWinnerStatus(event) {
         }),
     })
     .then(response => {
-        if (response.ok) {
-            updateSummaryCounts(); 
+       if (response.ok) {
+            const winnerIndex = allWinnersData.findIndex(w => w.id === winnerId);
+            if (winnerIndex !== -1) {
+            allWinnersData[winnerIndex].prize_status = prizeStatus;
+            prize_management_page_delivered_and_canceled_updateglobalcounts	(); // Update the global counts immediately
+        }
         } else {
             alert("Failed to update status.");
         }
     });
 }
-
+//ID:LP-I28-End
 
 // custom_admin_dashboard_winners_wall_winners page winners list js code.
+//ID:LP-I149-start
 function winners_wall_Winners_section_setupPagination(totalItems, itemsPerPage = 6, currentPage = 1, containerSelector = '#winners_wall_winners_list_items') {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     
@@ -2796,7 +2757,7 @@ function winners_wall_testimonial_handle_submit(isEditMode, testimonialId = null
         submitBtn.disabled = false;
     });
 }
-
+//ID:LP-I149-End
 
 
 function showSpecificDiv(id) {
@@ -2822,7 +2783,12 @@ function showSpecificDiv(id) {
     } else {
         console.error(`Element with id "${id}" not found.`);
     }
-    if (id === "custom_admin_dashboard_prize_management_id") {
+ 
+    if (id === "custom_admin_dashboard_all_transactions_management") {
+        custom_admin_dashboard_transactions_management_function(null, "all_transactions");
+    } else if (id === "custom_admin_dashboard_transactions_management_refunded") {
+        custom_admin_dashboard_transactions_management_function(null, "refunded");
+    }else if (id === "custom_admin_dashboard_prize_management_id") {
         renderPrizeManagementHTML(); 
         fetchWinners(1);
     }else if (id === "draw-lottery-container") {
@@ -2838,6 +2804,7 @@ function showSpecificDiv(id) {
     }
 
 }
+//ID:LP-I167-start
 var salesChart;
 async function report_and_analytics_monthly_sales_bar_chart_exportToExcel() {
     try {
@@ -3179,7 +3146,7 @@ function dynamic_lottery_sales_bar_chart() {
         report_and_analytics_sales_chart_fetchSalesData(selectedYear, selectedMonth || null);
     });
 }
-
+//ID:LP-I167-End
 function toggleSidebar() {
     const sidebar = document.querySelector(".custom_admin_dashboard_sidebar");
     const hamburger = document.getElementById("custom_admin_dashboard_hamburger_menu_id");
@@ -3205,7 +3172,7 @@ function hidetoggleSidebar() {
     }
 }
 
-
+//ID:LP-I167-start
 function report_and_analytics_Pending_vs_completed_draws_pie_chart_function() {
     fetch('/api/report_and_analytics_Pending_vs_completed_draws_pie_chart/')  
         .then(response => response.json())
@@ -4263,9 +4230,11 @@ function admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_ex
     link.click();
     document.body.removeChild(link);
 }
+//ID:LP-I167-End
 //    custom_admin_dashboard.html (adminpanel template)
 //    adminProfile,UserProfile,LotteryEvent,PaymentLottery table (models.py)
 //    api_dashboard_preview_admin_view,api_navbar_access_tabsView function (views.py)
+//ID:LP-I66-start
 function initializeDashboard() {
     try {
 
@@ -4313,7 +4282,7 @@ function initializeDashboard() {
 
             fetch(api_dashboard_preview_admin_view_url)
                 .then(response => response.json())
-                .then(({ data, tabs, table_data }) => {
+                .then(({ data, tabs }) => {
                     try {
 
                         tabs.forEach(tab => {
@@ -4349,171 +4318,168 @@ function initializeDashboard() {
                                         report_and_analytics_overall_transaction_report_chart_function();
                                     } 
                 
-                                } else if (tab.type === 'overview_notification_bell') {
-                                    document.getElementById("notification-bell-container").hidden = false;
-                                } else if (tab.type === 'table') {
+                                } else if (tab.type === 'user_management_table') {
                                     let rows = []; 
-                                    let currentIndex = 10;  
-                                    const rowsPerPage = 10;
-                                    let selectedFilter = "All Users"; 
+                                    let currentPage = 1;
+                                    let totalUsers = 0;
+                                    let allLoadedUsers = [];
+                                    let isInitialLoad = true;
                                     const container = document.querySelector(".custom_admin_dashboard_user_table");
-
                                     function user_management_table() {
-
-                                       
-                                        const searchContainer = document.createElement("div");
-                                        searchContainer.style.display = "flex";
-                                        searchContainer.style.alignItems = "center";
-                                        searchContainer.style.gap = "10px";
-
-                                       
-                                        const searchInput = document.createElement('input');
-                                        searchInput.type = "text";
-                                        searchInput.id = "searchUserInput";
-                                        searchInput.placeholder = "Search by username, email, ip, kyc status...";
-                                        searchInput.onkeyup = searchUsers;
-                                        searchContainer.appendChild(searchInput);
-
-                                      
-                                        const filterDropdown = document.createElement('select');
-                                        filterDropdown.id = "filterDropdown";
-                                        filterDropdown.style.padding = "5px";
-                                        filterDropdown.style.borderRadius = "4px";
-                                        filterDropdown.style.border = "1px solid #ccc";
-
-                                      
-                                        const options = ["All Users", "Blocked Users"];
-                                        options.forEach(option => {
-                                            const optionElement = document.createElement('option');
-                                            optionElement.value = option;
-                                            optionElement.textContent = option;
-                                            filterDropdown.appendChild(optionElement);
-                                        });
-
-                                       
-                                        filterDropdown.value = selectedFilter;
-
-                                       
-                                        filterDropdown.addEventListener('change', (event) => {
-                                            selectedFilter = event.target.value;
-                                            searchUsers();
-                                        });
-
-                                        searchContainer.appendChild(filterDropdown);
-
-                                        const user_management_title_textElement = document.createElement("span"); 
-                                        user_management_title_textElement.textContent = "User Management"; 
-
-                                       
-                                        user_management_title_textElement.style.fontSize = "24px"; 
-                                        user_management_title_textElement.style.display = "block"; 
-                                        user_management_title_textElement.style.marginBottom = "20px"; 
-
-                                        container.appendChild(user_management_title_textElement); 
-                                        container.appendChild(searchContainer);
-
-                                       
-                                        const table = document.createElement('table');
-                                        table.className = "custom_admin_dashboard_custom_table";
-                                        table.innerHTML = `
-                                            <thead>
-                                                <tr>
-                                                    <th>Account Status</th>
-                                                    <th>Name</th>
-                                                    <th>Email</th>
-                                                    <th>KYC Image</th>
-                                                    <th>IP Address</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="userTableBody"></tbody>
+                                        container.innerHTML = `
+                                            <span style="font-size: 24px; display: block; margin-bottom: 20px;">
+                                                User Management
+                                            </span>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <input 
+                                                    type="text" 
+                                                    id="searchUserInput" 
+                                                    placeholder="Search by username, email, ip, kyc status..." 
+                                                />
+                                                <select id="filterDropdown" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;" >
+                                                    <option value="All Users">All Users</option>
+                                                    <option value="Blocked Users">Blocked Users</option>
+                                                </select>
+                                            </div>
+                                            <table class="custom_admin_dashboard_custom_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Account Status</th>
+                                                        <th>Name</th>
+                                                        <th>Email</th>
+                                                        <th>KYC Image</th>
+                                                        <th>IP Address</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="userTableBody"></tbody>
+                                            </table>
+                                            <h3 id="noUserMessage" class="noUserMessage_class">user not found</h3>
+                                            <div id="userCountContainer" style="margin-top: 10px;"></div>
+                                            <button 
+                                                id="user_management_button_id" 
+                                                class="user_management_button_class" 
+                                            > user management
+                                            </button>
+                                            <button 
+                                                id="viewMoreButton" 
+                                                class="view-more-button" 
+                                                style="display: none;" 
+                                            >
+                                                View More
+                                            </button>
+                                            <button 
+                                                id="viewLessButton" 
+                                                class="view-less-button" 
+                                                style="display: none;"              
+                                            >
+                                                View Less
+                                            </button>
                                         `;
-                                        container.appendChild(table);
-
-                                        const noUserMessage = document.createElement('h3');
-                                        noUserMessage.id = "noUserMessage";
-                                        noUserMessage.className = "noUserMessage_class";
-                                        noUserMessage.textContent = "user not found";
-                                        container.appendChild(noUserMessage);
-
-                                        const userCountContainer = document.createElement('div');
-                                        userCountContainer.id = "userCountContainer";
-                                        userCountContainer.style.marginTop = "10px";
-                                        container.appendChild(userCountContainer);
-
-                                        const user_management_button = document.createElement('button');
-                                        user_management_button.id = "user_management_button_id";
-                                        user_management_button.className = "user_management_button_class";
-                                        user_management_button.textContent = "user management";
-                                        user_management_button.onclick = user_management_button_function;
-                                        container.appendChild(user_management_button);
-
-                                        createViewMoreLessButtons(container);
-                                        fetchAndRenderUsers(true);
-                                        setupMenuEventListeners();
+                                        fetchUsers(true);
+                                        document.getElementById("user_management_button_id")
+                                            .addEventListener("click", user_management_button_function);
+                                        document.getElementById("viewMoreButton").addEventListener("click", loadMoreUsers);
+                                        document.getElementById("viewLessButton").addEventListener("click", loadLessUsers);
+                                        document.getElementById("filterDropdown").addEventListener("change", () => fetchUsers(true));
+                                        document.getElementById("searchUserInput").addEventListener("keyup", () => fetchUsers(true));
                                     }
-
                                     function user_management_button_function() {
                                         showSpecificDiv('custom_admin_dashboard_user_list_table');
                                         $(".sidebars").removeClass('active');
                                         $("#custom_admin_dashboard_user_list_table_navbar").addClass('active');
-                                        hidetoggleSidebar();
-                                        
+                                        hidetoggleSidebar();  
                                     }
 
-                                    function createViewMoreLessButtons(container) {
-                                        const viewMoreButton = document.createElement('button');
-                                        viewMoreButton.id = "viewMoreButton";
-                                        viewMoreButton.className = "view-more-button";
-                                        viewMoreButton.textContent = "View More";
-                                        viewMoreButton.style.display = "none";
-                                        viewMoreButton.onclick = viewMoreRows;
-                                        container.appendChild(viewMoreButton);
+                                function fetchUsers(resetPagination = false) {
+                                    const searchQuery = document.getElementById("searchUserInput").value.trim();
+                                    const filterValue = document.getElementById("filterDropdown").value;
 
-                                        const viewLessButton = document.createElement('button');
-                                        viewLessButton.id = "viewLessButton";
-                                        viewLessButton.className = "view-less-button";
-                                        viewLessButton.textContent = "View Less";
-                                        viewLessButton.style.display = "none";
-                                        viewLessButton.onclick = viewLessRows;
-                                        container.appendChild(viewLessButton);
+                                    if (resetPagination) {
+                                        currentPage = 1;
+                                        allLoadedUsers = [];
                                     }
 
-                                    function fetchAndRenderUsers(renderInitialuser = false) {
+                                    const params = new URLSearchParams();
+                                    if (searchQuery) params.append("search", searchQuery);
+                                    if (filterValue && filterValue !== "All Users") params.append("filter", filterValue);
+                                    params.append("page", currentPage);
+                                    params.append("per_page", 10); // Fetch 10 users at a time
+
+                                    fetch(`/api/get-users/?${params.toString()}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const tbody = document.getElementById('userTableBody');
+                                            
+                                            if (resetPagination) {
+                                                tbody.innerHTML = ''; // Clear table on new searches/filters
+                                            }
+
+                                            totalUsers = data.total_users;
+                                            allLoadedUsers = [...allLoadedUsers, ...data.users];
+                                            
+                                            if (data.users.length === 0 && isInitialLoad) {
+                                                document.getElementById("noUserMessage").style.display = "block";
+                                            } else {
+                                                document.getElementById("noUserMessage").style.display = "none";
+                                                data.users.forEach(row => renderUsers(row));
+                                                rows = allLoadedUsers;
+                                            }
+
+                                            // Update user count display
+                                            document.getElementById("userCountContainer").textContent = 
+                                                `Showing ${Math.min(allLoadedUsers.length, totalUsers)} of ${totalUsers} users`;
+
+                                            // Show/hide pagination buttons
+                                            updatePaginationButtons(data.has_next);
+
+                                            isInitialLoad = false;
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching user data:', error);
+                                        });
+                                }
+
+                                function updatePaginationButtons(hasMore) {
+                                    const viewMoreBtn = document.getElementById("viewMoreButton");
+                                    const viewLessBtn = document.getElementById("viewLessButton");
                                     
-                                                rows = table_data[tab.identifier];
-                                                currentIndex = 10;
-                                                if (renderInitialuser) {
-        
-                                                    renderInitialRows(); 
-                                                }
-                                               
-                                                updateUserCount();
-                                                toggleViewMoreLessButtons(rows.filter(row => selectedFilter === "Blocked Users" ? row.is_blocked : true));
-                                          
+                                    // Show View More if there are more users to load
+                                    viewMoreBtn.style.display = hasMore ? "block" : "none";
+                                    
+                                    // Show View Less if we've loaded more than the initial page
+                                    viewLessBtn.style.display = (allLoadedUsers.length > 10) ? "block" : "none";
+                                }
+
+                                function loadMoreUsers() {
+                                    currentPage++;
+                                    fetchUsers();
+                                }
+
+                                function loadLessUsers() {
+                                    const tbody = document.getElementById('userTableBody');
+                                    // Remove last 10 users (or remaining if less than 10)
+                                    const usersToRemove = Math.min(10, allLoadedUsers.length - 10);
+                                    
+                                    // Update the displayed users
+                                    allLoadedUsers = allLoadedUsers.slice(0, -usersToRemove);
+                                    tbody.innerHTML = '';
+                                    allLoadedUsers.forEach(row => renderUsers(row));
+                                    
+                                    // Update counters and buttons
+                                    document.getElementById("userCountContainer").textContent = 
+                                        `Showing ${allLoadedUsers.length} of ${totalUsers} users`;
+                                    
+                                    currentPage = Math.max(1, currentPage - 1);
+                                    updatePaginationButtons(true); // Assume there might be more to load
+                                    
+                                    // If we're back to initial state, hide View Less
+                                    if (allLoadedUsers.length <= 10) {
+                                        document.getElementById("viewLessButton").style.display = "none";
                                     }
+                                }
 
-                                    function renderInitialRows() {
-                                        const tbody = document.getElementById('userTableBody');
-                                        tbody.innerHTML = '';
-                                        currentIndex = 10;
-
-                                        let filteredRows = rows;
-
-                                        if (selectedFilter === "Blocked Users") {
-                                            filteredRows = rows.filter(row => row.is_blocked);
-                                        }
-
-                                        filteredRows.slice(0, 10).forEach(row => appendRow(row));
-                                        updateUserCount();
-                                    }
-
-                                    function renderRows(startIndex, endIndex, filteredRows) {
-                                        const tbody = document.getElementById('userTableBody');
-                                        filteredRows.slice(startIndex, endIndex).forEach(row => appendRow(row));
-                                    }
-
-                                    function appendRow(row) {
+                                    function renderUsers(row) {
                                         const tbody = document.getElementById('userTableBody');
                                         const tr = document.createElement('tr');
                                         tr.innerHTML = `
@@ -4544,12 +4510,14 @@ function initializeDashboard() {
                                         tbody.appendChild(tr);
                                     }
                                     window.goToUserManagement = function() {
-                                        fetchAndRenderUsers(true);
                                         showSpecificDiv("custom_admin_dashboard_user_list_table");
                                         hidetoggleSidebar();
                                     };
                                     
+                                    let currentUserDetails = null; // Add this at the top of your code
+
                                     function displayUserDetails(user) {
+                                        currentUserDetails = user; 
                                     
                                         const custom_admin_dashboard_user_detail_page_container = document.getElementById("custom_admin_dashboard_user_detail_page");
                                         custom_admin_dashboard_user_detail_page_container.innerHTML = `
@@ -4580,21 +4548,21 @@ function initializeDashboard() {
                                             <div class="users_management_user_details_page_user_statistics">
                                            
                                         <div class="users_management_user_details_page_statistic_container">
-                                            <img src="/media/dashboard_preview_image/icon-park-solid_ticket.png">
+                                            <img src="/media/dashboard_preview_image/trans.png">
                                             <div>
                                                 <h3>Total Number Of Transactions</h3>
                                                 <p id="total_number_of_transactions_count_user_details_management">0</p>
                                             </div>
                                         </div>
                                         <div class="users_management_user_details_page_statistic_container">
-                                            <img src="/media/dashboard_preview_image/solar_money-bag-bold.png">
+                                            <img src="/media/dashboard_preview_image/phone.png">
                                             <div>
                                                 <h3>Phone Number</h3>
                                                 <p>${user.phone_number || 'N/A'}</p>
                                             </div>
                                         </div>
                                         <div class="users_management_user_details_page_statistic_container">
-                                            <img src="/media/dashboard_preview_image/solar_wallet-bold.png">
+                                            <img src="/media/dashboard_preview_image/add.png">
                                             <div>
                                                 <h3>Address</h3>
                                                 <p>${user.address || 'N/A'}</p>
@@ -4606,10 +4574,8 @@ function initializeDashboard() {
                                         try {
                                             const userId = $(this).data('user-id'); 
                                             const newStatus = $(this).val();
-                                    
-                                         
                                             updateSelectColor($(this), newStatus);
-                                    
+                                            
                                             $.ajax({
                                                 url: adminupdaetkycapprovalUrl, 
                                                 type: 'POST',
@@ -4617,12 +4583,23 @@ function initializeDashboard() {
                                                 contentType: 'application/json',
                                                 headers: { 'X-CSRFToken': custom_admin_dashboard_csrfToken }, 
                                                 success: function (response) {
-                                                  
+                                                    // Update in rows array
                                                     const userIndex = rows.findIndex(row => row.user?.id === userId);
                                                     if (userIndex !== -1) {
                                                         rows[userIndex].kyc_status = newStatus;
                                                     }
-                                    
+                                                    
+                                                    // Update in current user details if this is the same user
+                                                    if (currentUserDetails && currentUserDetails.user?.id === userId) {
+                                                        currentUserDetails.kyc_status = newStatus;
+                                                    }
+                                                    
+                                                    // Update the table UI
+                                                    $(`.user_kyc_waiting_list-kyc-statusselect[data-user-id="${userId}"]`)
+                                                        .val(newStatus)
+                                                        .data('status', newStatus);
+                                                    updateSelectColor($(`.user_kyc_waiting_list-kyc-statusselect[data-user-id="${userId}"]`), newStatus);
+
                                                     alert(`KYC status updated to ${newStatus}`);
                                                 },
                                                 error: function (xhr, status, error) {
@@ -4634,9 +4611,11 @@ function initializeDashboard() {
                                             alert('An error occurred while updating the KYC status.');
                                         }
                                     });
+                                    
                                     $(document).on('click', '.view_specfic_user_details', function () {
                                         let userId = $(this).data('user-id');
                                         let user = rows.find(row => row.user?.id === userId);
+                                        
                                         if (user) {
                                             user_management_button_function();
                                             custom_admin_dashboard_transactions_management_function(user.user.email) 
@@ -4654,16 +4633,6 @@ function initializeDashboard() {
                                             console.error("User not found");
                                         }
                                     });
-                                    
-                                   
-                                    function updateUserCount() {
-                                        document.getElementById('userCountContainer').textContent = `Total Users: ${rows.length}`;
-                                    }
-                                 
-                                   
-                                //    custom_admin_dashboard.html (adminpanel template)
-                                //    userprofile table (models.py)
-                                //    block_user function (views.py)
                                     $(document).on('click', '.block-user-btn', function () {
                                         let button = $(this);
                                         let userId = button.data('user-id');
@@ -4673,116 +4642,34 @@ function initializeDashboard() {
                                             { user_id: userId, action: action },
                                             { headers: { 'X-CSRFToken': admin_chats_csrfToken } }  
                                         )
-                                            .then(response => {
-                                                alert(response.data.message);
-                                                button.text(action === "block" ? "Unblock User" : "Block User");
-                                    
-                                                const userIndex = rows.findIndex(row => row.user?.id === userId);
-                                                if (userIndex !== -1) {
-                                                    rows[userIndex].is_blocked = action === "block";
-                                                }
-                                    
-                                                if (selectedFilter === "Blocked Users") {
-                                                    renderInitialRows();
-                                                    toggleViewMoreLessButtons(rows.filter(row => row.is_blocked)); 
-                                                }
-                                            })
-                                            .catch(error => {
-                                                alert('Error: ' + (error.response?.data?.detail || 'Something went wrong'));
-                                            });
-                                    });
-
-
-                                 
-
-                                    function viewMoreRows() {
-                                        const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
-                                        let filteredRows = rows;
-
-                                        if (selectedFilter === "Blocked Users") {
-                                            filteredRows = rows.filter(row => row.is_blocked);
-                                        }
-
-                                        const matchingRows = filteredRows.filter(row =>
-                                        (row.user?.username?.toLowerCase().includes(searchValue) ||
-                                            row.user?.email?.toLowerCase().includes(searchValue) ||
-                                            row.kyc_status?.toLowerCase().includes(searchValue) ||
-                                            row.ip_address?.toLowerCase().includes(searchValue))
-                                        );
-
-                                        const endIndex = Math.min(currentIndex + rowsPerPage, matchingRows.length);
-                                        renderRows(currentIndex, endIndex, matchingRows); 
-                                        currentIndex = endIndex; 
-                                      
-                                        toggleViewMoreLessButtons(matchingRows); 
-                                    }
-
-                                    function viewLessRows() {
-                                        const tbody = document.getElementById('userTableBody');
-                                        const rowsToRemove = Math.min(rowsPerPage, currentIndex - 10);
-                                        for (let i = 0; i < rowsToRemove; i++) {
-                                            if (tbody.lastChild) {
-                                                tbody.removeChild(tbody.lastChild);
+                                        .then(response => {
+                                            alert(response.data.message);
+                                            
+                                            // Update button text in both places
+                                            button.text(action === "block" ? "Unblock User" : "Block User");
+                                            $(`.block-user-btn[data-user-id="${userId}"]`)
+                                                .text(action === "block" ? "Unblock User" : "Block User");
+                                            
+                                            // Update in rows array
+                                            const userIndex = rows.findIndex(row => row.user?.id === userId);
+                                            if (userIndex !== -1) {
+                                                rows[userIndex].is_blocked = action === "block";
                                             }
-                                        }
-                                        currentIndex -= rowsToRemove;
-                                        toggleViewMoreLessButtons();
-                                    }
-
-                                    function toggleViewMoreLessButtons(filteredRows) {
-                                        const viewMoreButton = document.getElementById('viewMoreButton');
-                                        const viewLessButton = document.getElementById('viewLessButton');
-
-                                        if (filteredRows) {
-                                            viewMoreButton.style.display = currentIndex < filteredRows.length ? 'block' : 'none';
-                                            viewLessButton.style.display = currentIndex > 10 ? 'block' : 'none';
-                                        } else {
-                                            viewMoreButton.style.display = currentIndex < rows.length ? 'block' : 'none';
-                                            viewLessButton.style.display = currentIndex > 10 ? 'block' : 'none';
-                                        }
-                                    }
-
-                                    function searchUsers() {
-                                        const searchValue = document.getElementById('searchUserInput').value.toLowerCase();
-                                        const tbody = document.getElementById('userTableBody');
-                                        const noUserMessage = document.getElementById('noUserMessage'); 
-
-                                        currentIndex = 10; 
-
-                                        let filteredRows = rows;
-
-                                        if (selectedFilter === "Blocked Users") {
-                                            filteredRows = rows.filter(row => row.is_blocked);
-                                        }
-
-                                        const matchingRows = filteredRows.filter(row =>
-                                            (row.user?.username?.toLowerCase().includes(searchValue) ||
-                                            row.user?.email?.toLowerCase().includes(searchValue) ||
-                                            row.kyc_status?.toLowerCase().includes(searchValue) ||
-                                            row.ip_address?.toLowerCase().includes(searchValue))
-                                        );
-
-                                        tbody.innerHTML = ''; 
-
-                                        if (matchingRows.length === 0) {
-                                            noUserMessage.style.display = 'block'; 
-                                        } else {
-                                            noUserMessage.style.display = 'none'; 
-                                            matchingRows.slice(0, 10).forEach(row => appendRow(row)); 
-                                            toggleViewMoreLessButtons(matchingRows); 
-                                        }
-                                    }
-                                    function setupMenuEventListeners() {
-                                        document.addEventListener('click', function (event) {
-
-                                            if (event.target.classList.contains('view-user')) {
-                                                alert("View functionality will be implemented soon.");
+                                            
+                                            // Update in current user details if this is the same user
+                                            if (currentUserDetails && currentUserDetails.user?.id === userId) {
+                                                currentUserDetails.is_blocked = action === "block";
                                             }
-                                            if (event.target.classList.contains('block-user')) {
-                                                alert("Block User functionality will be implemented soon.");
+                                            
+                                            const filterValue_refetch = document.getElementById("filterDropdown").value;
+                                            if (filterValue_refetch === "Blocked Users") {
+                                                fetchUsers(true);
                                             }
+                                        })
+                                        .catch(error => {
+                                            alert('Error: ' + (error.response?.data?.detail || 'Something went wrong'));
                                         });
-                                    }
+                                    });
                                     user_management_table();
 
                                 } else if (tab.type === 'lotterys') {
@@ -4826,13 +4713,10 @@ function initializeDashboard() {
                                         }
                                     }
                                     add_lottery_draw_date_past_date_validation()
-                                } else if (tab.type === 'transactions') {
-                                    if (tab.identifier === "custom_admin_dashboard_all_transactions_management") {
-                                        custom_admin_dashboard_transactions_management_function(null, "all_transactions");
-                                    } else if (tab.identifier === "custom_admin_dashboard_transactions_management_refunded") {
-                                        custom_admin_dashboard_transactions_management_function(null, "refunded");
-                                    } 
-                                }  else if (tab.type === 'Statistics_count') {
+                                } else if (tab.type === 'user_chats_and_notification_bell_icon') {
+                                    document.getElementById("notification-bell-container").hidden = false;
+                                    admin_chat_view();
+                                } else if (tab.type === 'Statistics_count') {
                                     const custom_admin_dashboard_report_and_analytics_statistics_count_container = document.createElement('div');
                                     custom_admin_dashboard_report_and_analytics_statistics_count_container.className = 'custom_admin_dashboard_card';
                                     const custom_admin_dashboard_report_and_analytics_statistics_count = document.getElementById("custom_admin_dashboard_report_and_analytics_statistics_count");
@@ -4861,7 +4745,7 @@ function initializeDashboard() {
         console.error("Error setting up DOMContentLoaded listener:", error);
     }
 }
-
+//ID:LP-I66-End
 
 try {
     $(document).on('click', '.view-kyc-image', function (event) {
@@ -5712,7 +5596,7 @@ if (typeof googleEmail !== "undefined" && googleEmail) {
         sessionStorage.setItem("google_merge_alert_shown", "true");
     }
 }
-//lottery_events.html--user_registrartion module--views.py function class KYCStatusView(APIView):
+//lottery_events.html--user_registrartion module--views.py function class KYCStatusView(APIView): --#ID:LP-I7-start
 function checkKYCStatus() {
     if (typeof kycStatusUrl === "undefined") {
         
@@ -5772,8 +5656,8 @@ function kycimage_validateFileSize() {
         errorMessageElement.textContent = "";
     }
 }
-
-//lottery_events.html--user_registrartion module--views.py function class KYCUploadView(APIView):
+//lottery_events.html--user_registrartion module--views.py function class KYCStatusView(APIView): --#ID:LP-I7-end
+//lottery_events.html--user_registrartion module--views.py function class KYCUploadView(APIView): --#ID:LP-I7-start
 function handleKYCForm() {
     const kycUploadForm = document.getElementById("kycUploadForm");
     if (kycUploadForm) {
@@ -5814,7 +5698,7 @@ function handleKYCForm() {
         };
     }
 }
-
+//lottery_events.html--user_registrartion module--views.py function class KYCUploadView(APIView): --#ID:LP-I7-end
 
 
 //admin -user_list_details.html
@@ -7710,7 +7594,7 @@ function validate_lottery_events_add_inputs(errors) {
 }
 
 
-//lottery_events.html--adminpanel module--views.py function class api_get_lottery_events(APIView):  
+//lottery_events.html--adminpanel module--views.py function class api_get_lottery_events(APIView):  -- --#ID:LP-I7-start
 function lottery_events_fetch() {
     try {
 
@@ -7757,8 +7641,8 @@ function lottery_events_formatDrawDate(drawDate) {
 
     return `Draw on ${drawDay.toLocaleDateString()} at ${drawDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 }
-
-//favorite.html--adminpanel module--views.py function def get_favorites
+//lottery_events.html--adminpanel module--views.py function class api_get_lottery_events(APIView):  -- --#ID:LP-I7-end
+//favorites.html--adminpanel module--views.py function def get_favorites --#ID:LP-I17-start
 function updateFavoritesCount() {
     fetch('/api/get_favorites/')
         .then(response => response.json())
@@ -7769,7 +7653,8 @@ function updateFavoritesCount() {
         })
         .catch(error => console.error('Error fetching favorites count:', error));
 }
-//cart.html--adminpanel module--views.py function def get_cart(request):
+//favorites.html--adminpanel module--views.py function def get_favorites --#ID:LP-I17-end
+//cart.html--adminpanel module--views.py function def get_cart(request): --#ID:LP-I63-start
 function updateCartCount() {
     fetch('/api/get-cart/') 
         .then(response => response.json())
@@ -7779,7 +7664,8 @@ function updateCartCount() {
         })
         .catch(error => console.error('Error fetching cart count:', error));
 }
-//cart.html--adminpanel module--views.py function def get_cart(request):
+//cart.html--adminpanel module--views.py function def get_cart(request): --#ID:LP-I63-end
+//cart.html--adminpanel module--views.py function def get_cart(request): --#ID:LP-I63-start
 function updateCartCount_cartpage() {
     fetch('/api/get-cart/') 
         .then(response => response.json())
@@ -7789,6 +7675,7 @@ function updateCartCount_cartpage() {
         })
         .catch(error => console.error('Error fetching cart count:', error));
 }
+//cart.html--adminpanel module--views.py function def get_cart(request): --#ID:LP-I63-end
 function header_navbar_fetchCategories() {
     if (typeof api_get_categories_url === "undefined") {
         return;
@@ -8102,7 +7989,7 @@ View all
     attachAddToCartListeners(); 
 }
 
-//lottery_events.html--adminpanel module--views.py function class BannerView(APIView):
+//lottery_events.html--adminpanel module--views.py function class BannerView(APIView):--#ID:LP-I7-start
 async function fetchBanner() {
     try {
         const response = await fetch(bannerUrl, {
@@ -8180,8 +8067,8 @@ async function fetchBanner() {
         bannerContainer.innerHTML = `<p class="error-message">Unable to load banner at this time.</p>`;
     }
 }
-
-//lottery_events.html--adminpanel module--views.py function class PreviousWinnersimgAPIView(APIView):
+//lottery_events.html--adminpanel module--views.py function class BannerView(APIView):--#ID:LP-I7-end
+//lottery_events.html--adminpanel module--views.py function class PreviousWinnersimgAPIView(APIView):--#ID:LP-I7-start
 async function fetchWinners_mainpage() {
     try {
         const response = await fetch(winnersUrl_mainpage);
@@ -8231,7 +8118,8 @@ function renderWinners_mainpage(winners, append, rowLimit) {
         count++;
     });
 }
-//category_lottery_events.html--adminpanel module--views.py class BannerView(APIView):
+//lottery_events.html--adminpanel module--views.py function class PreviousWinnersimgAPIView(APIView):--#ID:LP-I7-end
+//category_lottery_events.html--adminpanel module--views.py class BannerView(APIView): --#ID:LP-I82 -start
 async function category_fetchBanner() {
     try {
         const response = await fetch(bannerUrl, {
@@ -8270,7 +8158,8 @@ async function category_fetchBanner() {
         bannerContainer.innerHTML = `<p class="error-message">Unable to load banner at this time.</p>`;
     }
 }
-//category_lottery_events.html--adminpanel module--views.py function class APIGetCategoryLotteryEvents(APIView):
+//category_lottery_events.html--adminpanel module--views.py class BannerView(APIView): --#ID:LP-I82 -end
+//category_lottery_events.html--adminpanel module--views.py function class APIGetCategoryLotteryEvents(APIView): --#ID:LP-I82 -start
 function fetchCategoryLotteryEvents() {
     fetch(api_get_category_lottery_events_url, {
         method: 'GET',
@@ -8362,10 +8251,10 @@ function displayCategoryLotteryEvents(events) {
 
     window.addEventListener('resize', renderEvents);
 }
+//category_lottery_events.html--adminpanel module--views.py function class APIGetCategoryLotteryEvents(APIView): --#ID:LP-I82 -end
 
 
-
-//lottery_detail.html--adminpanel module--views.py function def add_to_cart(request):
+//lottery_detail.html--adminpanel module--views.py function def add_to_cart(request): --#ID:LP-I63-start-----!
 function addToCart(event, redirectToCart = false) {
     event.preventDefault();
     const eventSlug = event.target.getAttribute('data-event-slug');
@@ -8449,7 +8338,7 @@ function closeModal(modal) {
     modal.style.display = 'none';
 }
 
-
+//lottery_detail.html--adminpanel module--views.py function def add_to_cart(request): --#ID:LP-I63-end-----!
 function getCSRFToken() {
     return document.cookie.split('; ')
         .find(row => row.startsWith('csrftoken='))
@@ -8478,7 +8367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     attachAddToCartListeners(); 
 });
 
-//cart.html--adminpanel module--views.py function def get_cart(request):
+//cart.html--adminpanel module--views.py function def get_cart(request):--#ID:LP-I63-start
 function fetchCartItems() {
     fetch(api_get_cart_url)
         .then(response => response.json())
@@ -8650,8 +8539,8 @@ totalInputs.forEach(input => {
         if (calculatedQuantity >= 1) {
             quantityInputs.value = calculatedQuantity;
             cart[eventSlug].quantity = calculatedQuantity;
-
-//cart.html--adminpanel module--views.py function def update_cart(request):            
+//cart.html--adminpanel module--views.py function def get_cart(request):--#ID:LP-I63-end
+//cart.html--adminpanel module--views.py function def update_cart(request):   --#ID:LP-I63-start        
             fetch('/api/update-cart/', {
                 method: 'POST',
                 headers: {
@@ -8705,7 +8594,8 @@ function attachCartEventListeners(cart) {
         button.addEventListener('click', event => updateCartQuantity(event, cart, -1));
     });
 }
-//cart.html--adminpanel module--views.py function def update_cart(request):
+//cart.html--adminpanel module--views.py function def update_cart(request):   --#ID:LP-I63-end
+//cart.html--adminpanel module--views.py function def update_cart(request): --#ID:LP-I63-start
 function updateCartQuantity(event, cart, delta) {
     const eventSlug = event.target.getAttribute('data-event-slug');
     const currentQuantity = parseInt(cart[eventSlug].quantity);
@@ -8730,7 +8620,7 @@ function updateCartQuantity(event, cart, delta) {
 
     if (newQuantity >= 1) {
         cart[eventSlug].quantity = newQuantity;
-//cart.html--adminpanel module--views.py function def update_cart(request):
+//cart.html--adminpanel module--views.py function def update_cart(request): --#ID:LP-I63-start
         fetch('/api/update-cart/', {
             method: 'POST',
             headers: {
@@ -8741,7 +8631,7 @@ function updateCartQuantity(event, cart, delta) {
         }).then(() => fetchCartItems());
     }
 }
-//cart.html--adminpanel module--views.py function def remove_from_cart(request):
+
 function removeFromCart(event) {
     const eventSlug = event.target.getAttribute('data-event-slug');
 
@@ -8768,7 +8658,7 @@ function removeFromCart(event) {
             console.error('Error removing item:', error);
         });
 }
-
+//cart.html--adminpanel module--views.py function def remove_from_cart(request): --#ID:LP-I63-end
 function getCartData() {
     let cart = {};
     document.querySelectorAll('.quantity-input').forEach(input => {
@@ -8780,7 +8670,7 @@ function getCartData() {
     });
     return cart;
 }
-//cart.html--Payment Service module--views.py function def create_checkout_session,def create_checkout_session
+//cart.html--Payment Service module--views.py function def create_checkout_session,def create_checkout_session --#ID:LP-I106 -start
 function proceedToCheckout() {
     const cartData = getCartData();
     if (Object.keys(cartData).length === 0) {
@@ -8827,7 +8717,7 @@ function proceedToCheckout() {
     })
     .catch(error => console.error('Error:', error));
 }
-
+//cart.html--Payment Service module--views.py function def create_checkout_session,def create_checkout_session --#ID:LP-I106 -end
 
 
 //lottery_detail.html
@@ -9147,7 +9037,7 @@ window.addEventListener('resize', function () {
 
 
 
-//favorite.html--adminpanel module--views.py function def get_favorites
+//favorites.html--adminpanel module--views.py function def get_favorites --#ID:LP-I17-start
 function fetchFavorites() {
     fetch('/api/get_favorites/')
         .then(response => response.json())
@@ -9226,7 +9116,8 @@ function loadMoreFavorites() {
 }
 
 window.addEventListener('resize', displayFavorites);
-//favorite.html--adminpanel module--views.py function def add_to_favorites
+//favorites.html--adminpanel module--views.py function def get_favorites --#ID:LP-I17-end
+//favorites.html--adminpanel module--views.py function def add_to_favorites--#ID:LP-I17-start
 function toggleFavorite(eventSlug) {
     const favoriteIcon = document.querySelector(`#favorite-icon-${eventSlug}`);
     fetch('/api/add_to_favorites/', {
@@ -9250,7 +9141,7 @@ function toggleFavorite(eventSlug) {
         })
         .catch(error => console.error('Error toggling favorite:', error));
 }
-
+//favorites.html--adminpanel module--views.py function def add_to_favorites--#ID:LP-I17-end
 /*Userdashboard*/
 document.addEventListener("DOMContentLoaded", function () { 
     let chatbot = document.getElementById("chatbotPopup");
@@ -9409,7 +9300,7 @@ $(window).on('load', function () {
     }, 1000); 
 });
 
-//my-orders.html--Payment Service module--views.py function def my_order_api
+//my-order.html--Payment Service module--views.py function def my_order_api --#ID:LP-I121 -start
 $(document).ready(function () {
 if (typeof my_orders_csrfToken !== 'undefined' && $("#myorders-container").length > 0) {
     function fetchOrders(filter) {
@@ -9646,7 +9537,7 @@ function initializeMenuScroll() {
         window.addEventListener("resize", checkScrollVisibility);
     }
 }
-
+//my-order.html--Payment Service module--views.py function def my_order_api --#ID:LP-I121 -end
 document.addEventListener("DOMContentLoaded", initializeMenuScroll);
 
 //Block user popup for mannual login
@@ -9888,8 +9779,10 @@ function custom_admin_dashboard_lottery_draw_winners_management_function() {
                                 <input type="radio" name="draw-method-${event.id}" value="method3">
                                 Random by Range
                             </label><br>
+                            <div class="ticket-range-container">
                             <input type="text" id="ticket-start-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
                             <input type="text" id="ticket-end-${event.id}" class="draws-ticket-range" maxlength="6" placeholder="6 digit number" disabled>
+                            </div>
                             ${event.winner_chosen 
                                 ? `<button class="draws-draw-btn" style="background-color: #28a745; font-weight:bold; color: white;" disabled>Winner Chosen</button>` 
                                 : `<button class="draws-draw-btn" data-id="${event.id}">Draw Winner</button>`
@@ -10363,7 +10256,7 @@ function updatePassword() {
     });
 }
 
-//winner.html--adminpanel module--views.py function def WinnersWallListView
+//winner.html--adminpanel module--views.py function def WinnersWallListView--#ID:LP-I159-start
 $(document).ready(function () {
     let winnersData = [];
     let drawDates = [];
@@ -10462,7 +10355,8 @@ $(document).ready(function () {
 
     fetchWinnersusersdraw();
 });
-//my_won_lottery_page.html--adminpanel module--views.py function def my_won_lottery
+//winner.html--adminpanel module--views.py function def WinnersWallListView--#ID:LP-I159-end
+//my_won_lottery_page.html--adminpanel module--views.py function def my_won_lottery--#ID:LP-I171-start
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof mywon_lottery === 'undefined') {
         return;  
@@ -10505,8 +10399,8 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(error => console.error("Error fetching won lotteries:", error));
 });
-
-//favorite.html--adminpanel module--views.py function def add_to_favorites
+//my_won_lottery_page.html--adminpanel module--views.py function def my_won_lottery--#ID:LP-I171-end
+//favorites.html--adminpanel module--views.py function def add_to_favorites--#ID:LP-I17-start
 function toggleFavoriteSimilar(targetSlug) {
     fetch('/api/add_to_favorites/', {
         method: 'POST',
@@ -10527,7 +10421,7 @@ function toggleFavoriteSimilar(targetSlug) {
     })
     .catch(error => console.error('Error toggling favorite:', error));
 }
-
+//favorites.html--adminpanel module--views.py function def add_to_favorites--#ID:LP-I17-end
 
 
 

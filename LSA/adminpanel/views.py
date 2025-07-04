@@ -89,6 +89,7 @@ def block_user(request):
  
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the fetchMessagesByEmail function)
+#ID:LP-I81-start
 @api_view(['POST'])
 def mark_messages_as_read(request, email):
     try:
@@ -96,9 +97,11 @@ def mark_messages_as_read(request, email):
         return Response({"status": "success", "message": "Messages marked as read"})
     except Exception as e:
         return Response({"status": "error", "message": str(e)}, status=500)
+#ID:LP-I81-End    
 #custom admin dashboard overview section notification bell view function
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the user_notifications function)
+#ID:LP-I81-start
 def latest_unread_notifications(request):
   
     latest_message_subquery = (
@@ -122,9 +125,11 @@ def latest_unread_notifications(request):
         for message in latest_messages
     ]
     return JsonResponse(notifications, safe=False)
+#ID:LP-I81-End
 #custom admin dashboard customer support section all chats view function    
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the admin_chat_view,showEmailList function)
+#ID:LP-I81-start
 class ChatMessagesView(APIView):
     def get(self, request, email):
         contact_messages = Contact.objects.filter(email=email).order_by('created_at')
@@ -149,9 +154,11 @@ class ChatMessagesView(APIView):
        
         chat_data = sorted(chat_data, key=lambda x: x['created_at'])
         return Response(chat_data, status=status.HTTP_200_OK)
+#ID:LP-I81-End    
 #custom admin dashboard customer support section message sent into mail view function 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the admin_contact_reply_form submit event)
+#ID:LP-I81-start
 class AdminReplyView(APIView):
     authentication_classes = [TokenAuthentication]
     def post(self, request):
@@ -204,9 +211,11 @@ class AdminReplyView(APIView):
                 {'error': f"Failed to send reply: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+#ID:LP-I81-End        
 #custom admin dashboard customer support section message list and Starred status  view function 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the admin_chat_view function)
+#ID:LP-I81-start
 class ContactListView(APIView):
     def get(self, request):
         from collections import defaultdict
@@ -229,9 +238,11 @@ class ContactListView(APIView):
             contacts.update(starred=starred) 
             return Response({"success": True, "message": "Starred status updated for all records."})
         return Response({"success": False, "message": "No records found for this email."}, status=404)
+#ID:LP-I81-End    
 #user page UserChat message view function 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the user_chat_view function)
+#ID:LP-I81-start
 class UserChatView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -275,10 +286,11 @@ class UserChatView(APIView):
             created_at=now()
         )
         return Response({'message': 'Message sent successfully!'}, status=status.HTTP_201_CREATED)
-
+#ID:LP-I81-End
 #custom admin dashboard customer support section user chat  delete view function 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the deleteSelectedContacts,deleteContact function)
+#ID:LP-I81-start
 class DeleteContactView(APIView):
     authentication_classes = [TokenAuthentication]
     def delete(self, request, email):
@@ -305,9 +317,11 @@ class DeleteContactView(APIView):
                 {'error': f"Failed to delete contact: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+#ID:LP-I81-End        
 #custom admin dashboard customer support section message edit and delete view function 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the deleteAdminMessage,editAdminMessage function)
+#ID:LP-I81-start
 class EditdeleteAdminReplyView(APIView):
     def put(self, request, reply_id):
         try:
@@ -329,9 +343,11 @@ class EditdeleteAdminReplyView(APIView):
 
         admin_reply.delete()
         return Response({'message': 'Reply deleted successfully.'}, status=status.HTTP_200_OK) 
+#ID:LP-I81-End    
 #custom admin dashboard preview and manage all the section content view functions 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function initializeDashboard function)
+#ID:LP-I66-start
 class api_dashboard_preview_admin_view(APIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -342,11 +358,7 @@ class api_dashboard_preview_admin_view(APIView):
         total_users = UserProfile.objects.count()
         verified_users = UserProfile.objects.filter(kyc_status='verified').count()
         pending_kyc = UserProfile.objects.filter(kyc_status='pending').count()
-        user_profiles = UserProfile.objects.all().order_by('is_blocked', '-user__date_joined')
-        users_table = []
-        for profile in user_profiles:
-            serializer = UserKycwaitingDetailsSerializer(profile)
-            users_table.append(serializer.data)
+      
         year = datetime.now().year  
         active_users = UserProfile.objects.filter(
             user__last_login__year=year
@@ -382,17 +394,69 @@ class api_dashboard_preview_admin_view(APIView):
         for tab in admin_dashboard_preview:
             if tab["image_url"]:
                 tab["image_url"] = request.build_absolute_uri(settings.MEDIA_URL + tab["image_url"])
-        table_data = {
-            "users_table": users_table,
-        }
+       
         return Response({
             "data": data,
             "tabs": list(admin_dashboard_preview),
-            "table_data": table_data
+            
         })
+
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.db.models import Q
+
+
+@api_view(['GET'])
+def get_users_table_data(request):
+    search = request.GET.get('search', '').strip()
+    filter_value = request.GET.get('filter', '')
+    page = int(request.GET.get('page', 1))
+    per_page = int(request.GET.get('per_page', 10))  
+
+    user_profiles = UserProfile.objects.all()
+
+    # Filter by block status
+    if filter_value == "Blocked Users":
+        user_profiles = user_profiles.filter(is_blocked=True)
+
+    # Search by username, email, IP, or kyc_status
+    if search:
+        user_profiles = user_profiles.filter(
+            Q(user__username__icontains=search) |
+            Q(user__email__icontains=search) |
+            Q(ip_address__icontains=search) |
+            Q(kyc_status__icontains=search)
+        )
+
+    # Get total count before pagination
+    total_users = user_profiles.count()
+    
+    # Pagination
+    user_profiles = user_profiles.order_by('-user__date_joined')
+    paginator = Paginator(user_profiles, per_page)
+    
+    try:
+        current_page = paginator.page(page)
+    except EmptyPage:
+        current_page = paginator.page(paginator.num_pages)
+
+    serializer = UserKycwaitingDetailsSerializer(current_page, many=True)
+    
+    return Response({
+        'users': serializer.data,
+        'total_users': total_users,
+        'current_page': page,
+        'per_page': per_page,
+        'has_next': current_page.has_next(),
+        'has_previous': current_page.has_previous()
+    })
+#ID:LP-I66-End    
 #custom admin dashboard nav bar and manage all the section view functions 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function initializeDashboard function)
+#ID:LP-I66-start
 class api_navbar_access_tabsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -406,10 +470,11 @@ class api_navbar_access_tabsView(APIView):
             return Response(serializer.data)
         except adminProfile.DoesNotExist:
             return Response({"error": "Profile not found"}, status=404)
- 
+#ID:LP-I66-End
 #custom admin signup view functions  
 # admin_signup.html (adminpanel template)
-# custom.js (JavaScript handling the function admin_signup_form submit event)        
+# custom.js (JavaScript handling the function admin_signup_form submit event)  
+#ID:LP-I20-start      
 class api_admin_signup(generics.CreateAPIView):
     serializer_class = api_admin_signup_Serializer
     def create(self, request, *args, **kwargs):
@@ -425,10 +490,11 @@ class api_admin_signup(generics.CreateAPIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+#ID:LP-I20-End
 #custom admin login view functions    
 #  custom_admin_login.html (adminpanel template)
-# custom.js (JavaScript handling the function custom_admin_login_form submit event)        
+# custom.js (JavaScript handling the function custom_admin_login_form submit event) 
+#ID:LP-I20-start       
 class api_admin_login(APIView):
     serializer_class = api_admin_signup_Serializer
     @csrf_exempt
@@ -481,8 +547,8 @@ class api_admin_login(APIView):
         
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-       
-#!-----lottery_events.html-custom.js- function lottery_events_fetch()----!
+#ID:LP-I20-End            
+#!-----lottery_events.html-custom.js- function lottery_events_fetch() #ID:LP-I7-start----!
 class api_get_lottery_events(APIView):  
     def get(self, request):
         try:
@@ -512,9 +578,11 @@ class api_get_lottery_events(APIView):
             return Response(events_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#!-----lottery_events.html-custom.js- function lottery_events_fetch() #ID:LP-I7-end----!
 #custom admin dashboard lottery section fetch lottery view functions 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function fetchLotteryEvents function)
+#ID:LP-I21-start
 class api_get_lottery_events_admin(APIView):  
     def get(self, request):
         try:
@@ -540,7 +608,7 @@ class api_get_lottery_events_admin(APIView):
             return Response(events_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+#ID:LP-I21-End
 #!-----category_lottery_events.html-custom.js-function fetchCategoryLotteryEvents()-----!
 class APIGetCategoryLotteryEvents(APIView):
     def get(self, request, category_id):
@@ -564,9 +632,10 @@ class APIGetCategoryLotteryEvents(APIView):
             return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+#!-----category_lottery_events.html-custom.js-function fetchCategoryLotteryEvents() #ID:LP-I82 -end-----!
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function submitAddLotteryEvent function)
+#ID:LP-I21-start
 class api_lottery_events_add(APIView):
     permission_classes = [IsAdminUser]
     serializer_class = LotteryEventSerializer
@@ -587,9 +656,10 @@ class api_lottery_events_add(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+#ID:LP-I21-End
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function lottery_events_edit_saveChanges,deleteLotteryEvent function)
+#ID:LP-I21-start
 class api_edit_delete_lottery_events(APIView):
     serializer_class = LotteryEventSerializeradd_get
     permission_classes = [IsAdminUser]
@@ -641,7 +711,7 @@ class api_edit_delete_lottery_events(APIView):
             return Response({"message": "Lottery event deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-  
+#ID:LP-I21-End  
 class DeleteLotteryEventImageView(APIView):
     def delete(self, request, event_id, image_id):
         lottery_event = get_object_or_404(LotteryEvent, id=event_id)
@@ -662,7 +732,7 @@ class DeleteLotteryEventImageView(APIView):
             )
 
 
-#!-----lottery_detail.html-custom.js- function addToCart(event, redirectToCart = false)-----!
+#!-----lottery_detail.html-custom.js- function addToCart(event, redirectToCart = false) #ID:LP-I63-start-----!
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def add_to_cart(request):
@@ -738,8 +808,8 @@ def add_to_cart(request):
 
     except LotteryEvent.DoesNotExist:
         return Response({"success": False, "message": "Event not found."}, status=404)
-
-#!-----cart.html-custom.js-function fetchCartItems(),function updateCartCount(),function updateCartCount_cartpage()-----!
+#!-----lottery_detail.html-custom.js- function addToCart(event, redirectToCart = false) #ID:LP-I63-end-----!
+#!-----cart.html-custom.js-function fetchCartItems(),function updateCartCount(),function updateCartCount_cartpage() #ID:LP-I63-start-----!
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_cart(request):
@@ -775,8 +845,8 @@ def get_cart(request):
     response = Response(updated_cart)
     response.set_cookie('cart', json.dumps(updated_cart), max_age=7 * 24 * 60 * 60, httponly=True, secure=False)
     return response
-
-#!-----cart.html-custom.js-function removeFromCart(event)-----!
+#!-----cart.html-custom.js-function fetchCartItems(),function updateCartCount(),function updateCartCount_cartpage() #ID:LP-I63-end-----!
+#!-----cart.html-custom.js-function removeFromCart(event) #ID:LP-I63-start-----!
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def remove_from_cart(request):
@@ -796,8 +866,8 @@ def remove_from_cart(request):
         return response
 
     return Response({"success": False, "message": "Item not found in cart."}, status=404)
-
-#!-----cart.html-custom.js-function updateCartQuantity(event, cart, delta),fetch('/api/update-cart/'-----!
+#!-----cart.html-custom.js-function removeFromCart(event) #ID:LP-I63-end-----!
+#!-----cart.html-custom.js-function updateCartQuantity(event, cart, delta),fetch('/api/update-cart/' #ID:LP-I63-start-----!
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def update_cart(request):
@@ -864,8 +934,7 @@ def update_cart(request):
 
     except LotteryEvent.DoesNotExist:
         return Response({"success": False, "message": "Event not found."}, status=404)    
-
-
+#!-----cart.html-custom.js-function updateCartQuantity(event, cart, delta),fetch('/api/update-cart/' #ID:LP-I63-end-----!
 
 class LotteryDetail(APIView):
     serializer_class = LotteryEventSerializer   
@@ -874,7 +943,7 @@ class LotteryDetail(APIView):
         serializer = LotteryEventSerializer(event)
         return Response(serializer.data)
         
-#!-----favorites.html-custom.js-function fetchFavorites(),function updateFavoritesCount(),-----!
+#!-----favorites.html-custom.js-function fetchFavorites(),function updateFavoritesCount(),  #ID:LP-I17-start-----!
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_favorites(request):
@@ -909,8 +978,8 @@ def get_favorites(request):
         secure=False, )
     
     return response
-
-#!-----favorites.html-custom.js-function toggleFavorite(eventSlug),toggleFavoriteSimilar(targetSlug)-----!  
+#!-----favorites.html-custom.js-function fetchFavorites(),function updateFavoritesCount(),  #ID:LP-I17-end-----!
+#!-----favorites.html-custom.js-function toggleFavorite(eventSlug),toggleFavoriteSimilar(targetSlug) #ID:LP-I17-start-----!  
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def add_to_favorites(request):
@@ -933,7 +1002,7 @@ def add_to_favorites(request):
     response = JsonResponse({"success": True, "message": message})
     response.set_cookie('favorites', json.dumps(favorites), max_age=60 * 60 * 24 * 30) 
     return response
-
+#!-----favorites.html-custom.js-function toggleFavorite(eventSlug),toggleFavoriteSimilar(targetSlug) #ID:LP-I17-end-----!  
 
 class ContactCreateView(APIView):
     def post(self, request, *args, **kwargs):
@@ -986,7 +1055,7 @@ class GetLotteryCategories(APIView):
         serializer = LotteryCategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-#!-----lottery_events.html-custom.js- function fetchBanner(),function category_fetchBanner()-----!
+#!-----lottery_events.html-custom.js- function fetchBanner(),function category_fetchBanner() #ID:LP-I82,#ID:LP-I7-start-----!
 class BannerView(APIView):
     def get(self, request):
         try:
@@ -1001,8 +1070,8 @@ class BannerView(APIView):
             return Response({"error": "Serialization error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({"error": "An unexpected error occurred", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#!-----lottery_events.html-custom.js- function fetchWinners_mainpage()-----!
+#!-----lottery_events.html-custom.js- function fetchBanner(),function category_fetchBanner() #ID:LP-I82,#ID:LP-I7-end-----!
+#!-----lottery_events.html-custom.js- function fetchWinners_mainpage() #ID:LP-I7-start-----!
 class PreviousWinnersimgAPIView(APIView):
     def get(self, request):
         try:
@@ -1016,7 +1085,7 @@ class PreviousWinnersimgAPIView(APIView):
             return Response({'winners': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': 'An unexpected error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+#!-----lottery_events.html-custom.js- function fetchWinners_mainpage() #ID:LP-I7-end-----!
 
 
 from django.db.models.functions import ExtractMonth, ExtractYear
@@ -1035,6 +1104,7 @@ from django.db.models.functions import ExtractMonth, ExtractYear, ExtractWeek, E
 from calendar import month_abbr
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function report_and_analytics_sales_chart_fetchSalesData function)
+#ID:LP-I167-start
 class lottery_sales_bar_chart_View(APIView):
     permission_classes = [IsAdminUser] 
     
@@ -1109,8 +1179,10 @@ class lottery_sales_bar_chart_View(APIView):
                 'sales_amount': item['sales_amount']
             } for item in queryset
         ]
+#ID:LP-I167-End    
 # custom_admin_dashboard.html (adminpanel template)
-# custom.js (JavaScript handling the function report_and_analytics_sales_chart_populateYearDropdown function)        
+# custom.js (JavaScript handling the function report_and_analytics_sales_chart_populateYearDropdown function)
+#ID:LP-I167-start        
 class lottery_sales_availableYearsView(APIView):
     permission_classes = [IsAdminUser]
     
@@ -1143,7 +1215,7 @@ class lottery_sales_availableMonthsView(APIView):
         return Response({
             'months': [{'number': m, 'name': month_abbr[m]} for m in months]
         })
-
+#ID:LP-I167-End
 class SimilarLotteryEvents(APIView):
     def get(self, request, slug, format=None):
         event = get_object_or_404(LotteryEvent, slug=slug)
@@ -1222,6 +1294,7 @@ import logging
 stripe.api_key = settings.STRIPE_API_KEY
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function handleRefundClick function)
+#ID:LP-I27-start
 class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetch_paid_amount_view(APIView):
     permission_classes = [IsAdminUser]
     def get(self, request, payment_intent):
@@ -1262,9 +1335,10 @@ class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_fetc
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+#ID:LP-I27-End
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function confirmRefundButton click event)
+#ID:LP-I27-start
 class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refund_payment_view(APIView):
     permission_classes = [IsAdminUser]
     def post(self, request, payment_intent):
@@ -1306,24 +1380,59 @@ class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund_refu
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#ID:LP-I27-End
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function custom_admin_dashboard_transactions_management_fetchData function)
+#ID:LP-I27-start
 class api_admin_dashboard_payment_lottery_list_view_transactions_and_refund(APIView):
     permission_classes = [IsAdminUser]
     def get(self, request):
-        email = request.query_params.get('email', None)
+        email = request.query_params.get('email')
+        status_param = request.query_params.get('status')
+        search = request.query_params.get('search', '')
+        page = int(request.query_params.get('page', 1))
+        per_page = int(request.query_params.get('per_page', 10))
         
-        if email:
-            payment_lotteries = PaymentLottery.objects.filter(user__email=email).order_by('-payment_at')
-        else:
-            payment_lotteries = PaymentLottery.objects.all().order_by('-payment_at')
-        
-        serializer = AdminrefundPaymentLotterySerializer(payment_lotteries, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK) 
+        queryset = PaymentLottery.objects.all()
 
+        if email:
+            queryset = queryset.filter(user__email=email)
+
+        if status_param == "refunded":
+            queryset = queryset.filter(payment_status="refunded")
+        elif status_param == "completed":
+            queryset = queryset.filter(payment_status="completed")
+
+        if search:
+            queryset = queryset.filter(
+                Q(payment_intent__icontains=search) |
+                Q(user__email__icontains=search) |
+                Q(lottery_event__title__icontains=search) |
+                Q(quantity__icontains=search)
+            )
+
+        queryset = queryset.order_by("-payment_at")
+        
+        paginator = Paginator(queryset, per_page)
+        try:
+            current_page = paginator.page(page)
+        except EmptyPage:
+            current_page = paginator.page(paginator.num_pages)
+
+        serializer = AdminrefundPaymentLotterySerializer(current_page, many=True)
+        
+        return Response({
+            'transactions': serializer.data,
+            'total_transactions': paginator.count,
+            'current_page': page,
+            'per_page': per_page,
+            'has_next': current_page.has_next(),
+        }, status=status.HTTP_200_OK)
+
+#ID:LP-I27-End
 
 import random
 from django.utils import timezone
@@ -1572,12 +1681,15 @@ class AdminLotteryDrawView(APIView):
 
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function fetchWinners function)	
+#ID:LP-I28-start
 class api_admin_dashboard_prize_management_winner_list_api_view(generics.ListAPIView):
     permission_classes = [IsAdminUser]
     queryset =  Winner.objects.order_by('-created_at')
     serializer_class = prize_management_WinnerSerializer
+#ID:LP-I28-End
 # custom_admin_dashboard.html (adminpanel template)
-# custom.js (JavaScript handling the function updateWinnerStatus function)    
+# custom.js (JavaScript handling the function updateWinnerStatus function)  
+#ID:LP-I28-start 
 @api_view(['PATCH'])
 @permission_classes([IsAdminUser])
 def api_admin_dashboard_prize_management_update_winner_status(request, pk):
@@ -1586,8 +1698,7 @@ def api_admin_dashboard_prize_management_update_winner_status(request, pk):
     winner.prize_comments = request.data.get('prize_comments', winner.prize_comments)
     winner.save()
     return Response({"message": "Prize status updated successfully", "prize_comments": winner.prize_comments})
-
-
+#ID:LP-I28-End
 
 
 class PublishWinnerView(APIView):
@@ -1676,6 +1787,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function custom_admin_dashboard_winners_wall_fetchWinners,winners_wall_Winners_edit_add_show_popup function)
+#ID:LP-I149-start
 class custom_admin_dashboard_winner_wall_winners_list(APIView):
 
     def get(self, request, format=None):
@@ -1702,8 +1814,10 @@ class custom_admin_dashboard_winner_wall_winners_list(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#ID:LP-I149-End    
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function custom_admin_dashboard_winners_wall_add_winners_function function)
+#ID:LP-I149-start
 class custom_admin_dashboard_winner_wall_winner_detail(APIView):
     def get_object(self, pk):
         try:
@@ -1771,7 +1885,7 @@ class custom_admin_dashboard_winner_wall_winner_detail(APIView):
         
         winner.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
+#ID:LP-I149-End
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -1780,6 +1894,7 @@ from .models import Testimonial
 from .serializers import custom_admin_dashboard_winners_wall_testimonials_serializer
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function winners_wall_testimonial_load_testimonials function)
+#ID:LP-I149-start
 class custom_admin_dashboard_winners_wall_testimonials_list(APIView):
     def get(self, request, format=None):
         search_query = request.query_params.get('search', None)
@@ -1801,8 +1916,10 @@ class custom_admin_dashboard_winners_wall_testimonials_list(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#ID:LP-I149-End    
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function winners_wall_testimonial_handle_submit function)
+#ID:LP-I149-start
 class custom_admin_dashboard_winners_wall_testimonial_detail(APIView):
     def get_object(self, pk):
         return get_object_or_404(Testimonial, pk=pk)
@@ -1824,7 +1941,7 @@ class custom_admin_dashboard_winners_wall_testimonial_detail(APIView):
         testimonial = self.get_object(pk)
         testimonial.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
+#ID:LP-I149-End
 
 
 from rest_framework.views import APIView
@@ -1832,6 +1949,7 @@ from rest_framework.response import Response
 from .models import LotteryEvent, Winner
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function report_and_analytics_Pending_vs_completed_draws_pie_chart_export_function function)
+#ID:LP-I167-start
 class api_report_and_analytics_Pending_vs_completed_draws_pie_chart(APIView):
     def get(self, request):
         total_draws = LotteryEvent.objects.count()
@@ -1852,7 +1970,7 @@ class api_report_and_analytics_Pending_vs_completed_draws_pie_chart(APIView):
             'completed_draws_percentage': round(completed_percentage, 2),
             'pending_draws_percentage': round(pending_percentage, 2)
         })
-
+#ID:LP-I167-End
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Count
@@ -1860,6 +1978,7 @@ from django.utils import timezone
 from datetime import timedelta
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function report_and_analytics_winners_vs_losers_chart_function,report_and_analytics_winners_vs_losers_chart_export_function function)
+#ID:LP-I167-start
 class WinnersVsLosersChartAPI(APIView):
     def get(self, request):
         today = timezone.now().date()
@@ -1911,7 +2030,7 @@ class WinnersVsLosersChartAPI(APIView):
             'total_winners': total_winners,
             'total_losers': total_losers
         })
-
+#ID:LP-I167-End
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from rest_framework.views import APIView
@@ -1919,6 +2038,7 @@ from datetime import datetime
 from rest_framework.response import Response
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the function report_and_analytics_overall_transaction_report_chart_export_function,report_and_analytics_overall_transaction_report_chart_function function)
+#ID:LP-I167-start
 class OverallTransactionReportView(APIView):
     def get(self, request):
         current_year = datetime.now().year
@@ -1954,6 +2074,7 @@ class OverallTransactionReportView(APIView):
             'current_month': current_month,
             'current_amount': f'£{current_amount:,.2f}'
         })
+#ID:LP-I167-End    
 from django.db.models.functions import TruncMonth
 from rest_framework.views import APIView
 from datetime import datetime
@@ -1964,7 +2085,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import WinnersWallWinnersList
 from datetime import datetime
-#!-----winner.html-custom.js-function fetchWinnersusersdraw()-----!
+#!-----winner.html-custom.js-function fetchWinnersusersdraw() #ID:LP-I159-start -----!
 class WinnersWallListView(APIView):
     def get(self, request, *args, **kwargs):
 
@@ -1982,7 +2103,7 @@ class WinnersWallListView(APIView):
             })
             
         return Response(grouped_winners)
-
+#!-----winner.html-custom.js-function fetchWinnersusersdraw() #ID:LP-I159-end -----!
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -1995,6 +2116,7 @@ import pandas as pd
 from io import BytesIO
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the  report_and_analytics_marginal_chart_function function)
+#ID:LP-I167-start
 class MarginalChartDataView(APIView):
     def get(self, request):
         year = request.GET.get('year')
@@ -2183,6 +2305,7 @@ from rest_framework.response import Response
 from django.db.models import Count, Sum
 from datetime import datetime, timedelta
 from .models import Winner, LotteryEvent
+from django.db.models import Sum, Count
 # custom_admin_dashboard.html (adminpanel template)
 # custom.js (JavaScript handling the admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart_function function)
 class overall_won_and_lost_lotteries_report_LotteryReportAPI(APIView):
@@ -2195,13 +2318,16 @@ class overall_won_and_lost_lotteries_report_LotteryReportAPI(APIView):
         total_lost = 0
         
         for year in years:
-            winners = Winner.objects.filter(created_at__year=year)
-            won = winners.count()
-            lost = 0
+            # Get count of winners for the year
+            won = Winner.objects.filter(created_at__year=year).count()
             
-            for winner in winners:
-                if winner.lottery_event:
-                    lost += winner.lottery_event.sold_tickets - 1
+            # Calculate lost tickets using database aggregation
+            lost = Winner.objects.filter(
+                created_at__year=year,
+                lottery_event__isnull=False
+            ).aggregate(
+                total_lost=Sum('lottery_event__sold_tickets') - Count('id')
+            )['total_lost'] or 0
             
             data.append({
                 'year': year,
@@ -2218,6 +2344,7 @@ class overall_won_and_lost_lotteries_report_LotteryReportAPI(APIView):
             'total_lost': total_lost,
             'status': 'success'
         })
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -2274,13 +2401,16 @@ class overall_won_and_lost_lotteries_report_LotteryReportExportAPI(APIView):
         total_lost = 0
         
         for year in years:
-            winners = Winner.objects.filter(created_at__year=year)
-            won = winners.count()
-            lost = 0
+            # Get count of winners for the year
+            won = Winner.objects.filter(created_at__year=year).count()
             
-            for winner in winners:
-                if winner.lottery_event:
-                    lost += winner.lottery_event.sold_tickets - 1
+            # Calculate lost tickets using database aggregation
+            lost = Winner.objects.filter(
+                created_at__year=year,
+                lottery_event__isnull=False
+            ).aggregate(
+                total_lost=Sum('lottery_event__sold_tickets') - Count('id')
+            )['total_lost'] or 0
             
             data.append({
                 'year': year,
@@ -2327,16 +2457,17 @@ class overall_won_and_lost_lotteries_report_LotteryReportExportAPI(APIView):
         response['Content-Disposition'] = 'attachment; filename=Lottery_Report.xlsx'
         
         return response    
-
+#ID:LP-I167-End    
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Winner
 from .serializers import WonLotteryWinnerSerializer
-#!-----my_won_lottery_page.html-custom.js-function fetch("/api/my-won-lottery/",-----!
+#!-----my_won_lottery_page.html-custom.js-function fetch("/api/my-won-lottery/", #ID:LP-I171-start-----!
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_won_lottery(request):
     winners = Winner.objects.filter(user=request.user).order_by('-created_at')
     serializer = WonLotteryWinnerSerializer(winners, many=True)
     return Response(serializer.data)
+#!-----my_won_lottery_page.html-custom.js-function fetch("/api/my-won-lottery/", #ID:LP-I171-end-----!

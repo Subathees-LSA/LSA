@@ -33,7 +33,7 @@ from django.shortcuts import render
 from adminpanel.models import Winner
 def custom_404(request, exception):
     return render(request, '404.html', status=404)
-#!-----cart.html-custom.js-function proceedToCheckout()-----!
+#!-----cart.html-custom.js-function proceedToCheckout()  #ID:LP-I106 -start-----!
 def check_user_authentication(request):
     
     if not request.user.is_authenticated:
@@ -46,10 +46,10 @@ def check_user_authentication(request):
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found", "redirect_url": "/login/"}, status=404)
     
-
+#!-----cart.html-custom.js-function proceedToCheckout()  #ID:LP-I106 -end-----!
 stripe.api_key = settings.STRIPE_API_KEY
 
-#!-----cart.html---custom.js-function proceedToCheckout()-----!
+#!-----cart.html-custom.js-function proceedToCheckout()  #ID:LP-I106 -start-----!
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
@@ -168,7 +168,8 @@ def stripe_webhook(request):
         return JsonResponse({"message": "Payment processed successfully"}, status=200)
 
     return JsonResponse({"message": "Unhandled event"}, status=400)
-#!-----myorder.html-custom.js-function fetchOrders()-----!
+#!-----cart.html-custom.js-function proceedToCheckout()  #ID:LP-I106 -end-----!
+#!-----myorder.html-custom.js-function fetchOrders() #ID:LP-I121 -start-----!
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_order_api(request):
@@ -223,3 +224,4 @@ def my_order_api(request):
 
     return Response(grouped_payments, status=status.HTTP_200_OK)
 
+#!-----myorder.html-custom.js-function fetchOrders() #ID:LP-I121 -end-----!
