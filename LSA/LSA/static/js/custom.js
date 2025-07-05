@@ -2605,7 +2605,7 @@ function custom_admin_dashboard_winners_wall_add_testimonial_function(testimonia
 
         <div class="winners_wall_testimonial_image_preview_container">
             <img id="winners_wall_testimonial_image_preview" class="winners_wall_testimonial_image_preview" 
-                 src="${isEditMode ? '/media/admin_files/No_image_available.png' : '/media/admin_files/no_image.png'}" 
+                 src="/media/default-profile.jpg" 
                  alt="Preview">
         </div>
     `;
@@ -10099,6 +10099,8 @@ console.log("Status Code:", status);
 console.log("Response:", body);
 
 if (status === 200) {
+     // Disable button again after successful update
+    document.getElementById("pi-update-button").disabled = true;
     alert("Profile updated successfully!");
 
     // Get the image element
@@ -10123,6 +10125,44 @@ if (status === 200) {
 console.error("Fetch Error:", error);
 });
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const updateBtn = document.getElementById("pi-update-button");
+    const form = document.getElementById("pi-profile-form");
+
+    const initialData = {
+        phone: document.getElementById("pi-phone-number").value,
+        address: document.getElementById("pi-address").value,
+        website: document.getElementById("pi-website").value,
+        twitter: document.getElementById("pi-twitter").value,
+    };
+
+    function hasFormChanged() {
+        return (
+            document.getElementById("pi-phone-number").value !== initialData.phone ||
+            document.getElementById("pi-address").value !== initialData.address ||
+            document.getElementById("pi-website").value !== initialData.website ||
+            document.getElementById("pi-twitter").value !== initialData.twitter ||
+            document.getElementById("pi-profile-photo").files.length > 0
+        );
+    }
+
+    function handleFormChange() {
+        const isValid = piValidateForm();
+        updateBtn.disabled = !(hasFormChanged() && isValid);
+    }
+
+    // Attach listeners
+    form.querySelectorAll("input, textarea").forEach(input => {
+        input.addEventListener("input", handleFormChange);
+        input.addEventListener("change", handleFormChange);
+    });
+
+    document.getElementById("pi-profile-photo").addEventListener("change", handleFormChange);
+
+    // Trigger once on load
+    handleFormChange();
+});
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -10183,7 +10223,7 @@ function showToast(messages, isSuccess = false) {
     }
 
     toast.classList.remove("hidden");
-      setTimeout(hideToast, 5000);
+      
 }
 function hideToast() {
     const toast = document.getElementById("unique-toast");

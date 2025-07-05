@@ -7991,7 +7991,7 @@ padding: 8px 12px;
 width: 200px;
 border: 1px solid #ddd;
 border-radius: 15px;
-margin-left: 43%;
+margin-left: 35%;
 }
 
 .winners_wall_testimonial_add_btn {
@@ -8047,7 +8047,7 @@ color: #333;
 }
 
 .winners_wall_testimonial_table td {
-padding: 12px 15px;
+padding: 12px 10px;
 border-bottom: 1px solid #eee;
 vertical-align: top;
 }
@@ -11359,15 +11359,22 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 
 .user_kyc_waiting_list-modal-content {
     background-color: #fff;
-    
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    position: relative;
+    position: fixed; 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     padding: 20px;
-    overflow-y: auto;
+    max-width: 90vw;
+    max-height: 90vh;
+
+
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    z-index: 1000;
 }
 
 .user_kyc_waiting_list-modal-header {
@@ -11392,12 +11399,14 @@ button[type="submit"].user_welcome_page_submit-button:hover {
 }
 
 .user_kyc_waiting_list-modal-image {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
     object-fit: contain;
     border-radius: 20px;
     border: 1px solid rgba(0, 0, 0, 0.3);
-    height: 400px;
+    display: block;
+    margin: 0 auto;
 }
 
 
@@ -12861,7 +12870,15 @@ input[type="db-email"] {
       font-weight: bold;
       gap:5px;
   }
-  
+/* Hide spinner arrows for webkit browsers (Chrome, Safari, Edge) */
+.total-input::-webkit-outer-spin-button,
+.total-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+
    /* Quantity controls */
   .quantity-controls {
     display: flex;
@@ -12877,6 +12894,13 @@ input[type="db-email"] {
       border-radius: 8px;
       text-align: center;
   }
+  /* Hide spinner arrows for webkit browsers (Chrome, Safari, Edge) */
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
   .quantity-decrease{
       margin: 0 10px;
       border-radius: 100px;
@@ -13967,7 +13991,12 @@ align-items: center;
     text-align: left;
     background: transparent;
 }
-
+/* Hide spinner arrows for webkit browsers (Chrome, Safari, Edge) */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 .currency-container {
     display: flex;
     align-items: center;
@@ -13995,6 +14024,13 @@ align-items: center;
     width: 60px; 
     height:30px;
 }
+/* Hide spinner arrows for webkit browsers (Chrome, Safari, Edge) */
+#lot-detail-ticket-count::-webkit-outer-spin-button,
+#lot-detail-ticket-count::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .ticket-count-label {
     margin: 0 10px;
     font-size: 16px;
@@ -14168,7 +14204,7 @@ background-color: rgba(255, 102, 0, 0.05);
     background-image: url("/media/lottery_images/share (3).png");
 }
 .add-to-cart-button:hover {
-    background-color: grey;
+    background-color:  #e0e0e0;
 }
 .add-to-cart-button {
     width: 30%;
@@ -14178,6 +14214,8 @@ background-color: rgba(255, 102, 0, 0.05);
     background-color: transparent; /* If you want to remove the background */
     cursor: pointer;
     font-family: Rajdhani;
+      font-size: 18px;
+    font-weight: bold;
 }
 .buy-now-button {
      width: 35%; 
@@ -14187,6 +14225,8 @@ background-color: rgba(255, 102, 0, 0.05);
       color: white; padding: 10px; font-size: 16px;
        border: none; cursor: pointer; margin-top: 10px;
        font-family: Rajdhani;
+         font-size: 18px;
+    font-weight: bold;
     }
     .cart-icon {
         width: 30px; /* Adjust size as needed */
