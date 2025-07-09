@@ -2346,7 +2346,7 @@ top: 20px;
         }
 
         .background-orange {
-            width: calc(100%); 
+            width: calc(50% + 30px);
             height: 913px;
             left: 0px;
             top: 0px;
@@ -2381,7 +2381,7 @@ top: 20px;
             line-height: 44px;
             display: flex;
             justify-content: center;
-            left: 31%;
+            left: 56%;
         }
         
 
@@ -17748,9 +17748,9 @@ color: #23262F;
 
     /* Keep two columns */
     .myorder-container {
-        grid-template-columns: repeat(2, minmax(250px, 1fr));
+        /* grid-template-columns: repeat(2, minmax(250px, 1fr)); */
         min-height: 51vh;
-        justify-items:right;
+        justify-items:center;
     }
 
     /* Keep buttons side-by-side */

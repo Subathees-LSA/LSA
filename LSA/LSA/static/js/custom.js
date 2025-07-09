@@ -1235,7 +1235,13 @@ function custom_admin_dashboard_transactions_management_function(email = null, s
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="${tbodyId}"></tbody>
+             <tbody id="${tbodyId}">
+            <tr>
+            <td >
+                <div class="pagination-loading"><div class="spinner"></div>Loading transactions...</div>
+            </td>
+            </tr>
+            </tbody>
         `;
 
         return table;
@@ -1473,7 +1479,13 @@ function renderPrizeManagementHTML() {
                     <th>Comments</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+             <tbody>
+                <tr>
+    <td >
+        Loading  Winners...
+    </td>
+    </tr>
+            </tbody>
         </table>
 </div>
         <div id="prize_management_no_winners" class="prize_management_hidden">No winners.</div>
@@ -6561,7 +6573,7 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
        <p>
            Per Ticket Price: <span class="lottery_events_add_per_ticket_price">${event.per_ticket_price}</span>
            <input type="number" class="lottery_events_add_edit_per_ticket_price" value="${event.per_ticket_price}" data-original-value="${event.per_ticket_price}" required>
-       <div class="lottery_events_add_error_message lottery_edit_per_ticket_price_error">Per Ticket Price is required</div>
+       <div class="lottery_events_add_error_message lottery_edit_per_ticket_price_error">Per Ticket Price must be greater than or equal to £0.37 GBP.</div>
        </p>
         <!-- Mini Limit -->
         <p style="display: none;">
@@ -7106,7 +7118,7 @@ function lottery_events_edit_validateFields(card) {
         card.querySelector(`.lottery_edit_revenue_error`).style.display = 'none';
     }
 
-    if (!perTicketPrice || isNaN(perTicketPrice) || perTicketPrice <= 0) {
+    if (!perTicketPrice || isNaN(perTicketPrice) || parseFloat(perTicketPrice) <= 0.36) {
         card.querySelector('.lottery_edit_per_ticket_price_error').style.display = 'block';
         isValid = false;
         card.querySelector('.lottery_edit_per_ticket_price_error').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -7503,8 +7515,8 @@ function submitAddLotteryEvent() {
     }
 
     // Validate Per Ticket Price
-    if (perTicketPrice === '' || perTicketPrice <= 0) {
-        showValidationError('lottery_events_add_per_ticket_validation', 'Per Ticket Price must be greater than zero.');
+    if (!perTicketPrice || isNaN(perTicketPrice) || parseFloat(perTicketPrice) <= 0.36) {
+    showValidationError('lottery_events_add_per_ticket_validation', 'Per Ticket Price must be greater than or equal to £0.37 GBP.');
     } else {
         clearValidationError('lottery_events_add_per_ticket_validation');
     }
