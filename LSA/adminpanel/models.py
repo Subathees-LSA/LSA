@@ -146,7 +146,6 @@ class admin_dashboard_preview(models.Model):
             "lotterys",
             "report_and_analytics_marginal_chart",
             "admin_dashboard_overview_overall_won_and_lost_lotteries_report_chart",
-            "total_lottery_won_lost_count",
             "overview_active_users_count",
             "overview_active_lotteries_count",
             "overview_sales_amount",
@@ -192,7 +191,7 @@ class adminProfile(models.Model):
     role_CHOICES = [
                 ('', 'Select Role'),
                 ('admin', 'Admin'),
-                ('sales', 'Sales'), 
+                # ('sales', 'Sales'), 
                 ]
     role = models.CharField(max_length=12, choices=role_CHOICES, blank=True, default='')
     navbar_access = models.ManyToManyField(admin_navbar_access, blank=True)
