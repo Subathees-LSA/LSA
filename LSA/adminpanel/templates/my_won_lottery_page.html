@@ -23,8 +23,8 @@ body > .mywon-main-container {
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 2rem;
-    
+   
+padding-top: 0px;    
 }
 
 .my-won-lottery-card-grid {
@@ -111,15 +111,29 @@ body > .mywon-main-container {
         flex-direction: column;
         padding: 1rem;
         gap: 1rem;
+        align-items: center; /* Center align all content */
+    }
+
+    .mywon-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center the content */
     }
 
     .mywon-header {
         font-size: 29px;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 1.5rem;
+        margin-top: 0;
+        order: -1; /* Ensure header appears first */
     }
 
     .my-won-lottery-card-grid {
         justify-content: center;
         gap: 1rem;
+        width: 100%;
     }
 
     .my-won-lottery-card {
@@ -131,6 +145,7 @@ body > .mywon-main-container {
     .mywon-sidebar {
         width: 100%;
         text-align: center;
+        order: 1; /* Place sidebar after header */
     }
 }
 
@@ -140,16 +155,29 @@ body > .mywon-main-container {
         flex-direction: column;
         padding: 1.5rem;
         gap: 1.5rem;
-      
+        align-items: center; /* Center align all content */
+    }
+
+    .mywon-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center the content */
     }
 
     .mywon-header {
         font-size: 40px;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 2rem;
+        margin-top: 0;
+        order: -1; /* Ensure header appears first */
     }
 
     .my-won-lottery-card-grid {
         justify-content: center;
         gap: 3.2rem;
+        width: 100%;
     }
 
     .my-won-lottery-card {
@@ -161,9 +189,9 @@ body > .mywon-main-container {
     .mywon-sidebar {
         width: 100%;
         text-align: center;
+        order: 1; /* Place sidebar after header */
     }
 }
-
 </style>
 
 </head>
