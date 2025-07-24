@@ -14,7 +14,7 @@ class LotteryCategory(models.Model):
                             
 class LotteryEvent(models.Model):
     title = models.CharField(max_length=255,unique=True)
-    slug = models.SlugField(unique=True, blank=True)  
+    slug = models.SlugField(max_length=255,unique=True, blank=True)  
     category = models.ForeignKey(LotteryCategory, related_name='lottery_events', on_delete=models.CASCADE, null=True, blank=True,default=1)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)

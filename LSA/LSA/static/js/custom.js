@@ -6441,7 +6441,15 @@ function lottery_draw_date_input_formatDateForInput(dateString) {
     
     return date.toISOString().slice(0, 16);
 }
+function escapeHtml(str) {
 
+
+return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;') // escape double quotes
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
  //    custom_admin_dashboard.html (adminpanel template)
 //    LotteryEvent table (models.py)
 //    api_get_lottery_events_admin function (views.py)
@@ -6502,7 +6510,7 @@ function fetchLotteryEvents(searchTerm = null, categoryId = null, page = 1) {
                eventDiv.innerHTML = `
            <h3>
                <span class="lottery_events_add_title">${event.title}</span>
-               <input type="text" class="lottery_events_add_edit_title" value="${event.title}" data-original-value="${event.title}" required>
+               <input type="text" class="lottery_events_add_edit_title" value="${escapeHtml(event.title)}" data-original-value="${escapeHtml(event.title)}" required>
                <div class="lottery_events_add_error_message lottery_edit_title_error"></div>
            </h3>
 
